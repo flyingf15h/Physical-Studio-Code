@@ -460,8 +460,9 @@ def connector_cutout(p, conn, m, spec, cavity_lo, cavity_hi, outer_lo, outer_hi,
     # Opening size in local axes, then mapped to design axes through the rotation.
     u, v = FACE_PLANE_AXES[face[1]]
     half_local = np.zeros(3)
-    half_local[u] = conn["size"][0] / 2 + spec.cutout_clearance
-    half_local[v] = conn["size"][1] / 2 + spec.cutout_clearance
+    clearance = float(conn.get("clearance", spec.cutout_clearance))
+    half_local[u] = conn["size"][0] / 2 + clearance
+    half_local[v] = conn["size"][1] / 2 + clearance
     half = np.abs(m[:3, :3]) @ half_local
     lo, hi = center - half, center + half
     # A little inside the connector face, or inside the wall if the face is already past it

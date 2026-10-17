@@ -13,7 +13,7 @@
     "max": [
       73.6,
       58.4,
-      33.1
+      35.1
     ]
   },
   "placements": [
@@ -38,7 +38,7 @@
       "id": "uno",
       "kind": "part",
       "part": "arduino-uno",
-      "name": "Arduino Uno",
+      "name": "Arduino Uno Rev3",
       "position": [
         0.0,
         0.0,
@@ -59,7 +59,7 @@
       "position": [
         6.0,
         30.0,
-        23.8
+        24.0
       ],
       "rotation": [
         0.0,
@@ -76,7 +76,7 @@
       "position": [
         20.0,
         33.1,
-        22.5
+        26.5
       ],
       "rotation": [
         0.0,
@@ -93,7 +93,7 @@
       "position": [
         40.0,
         30.0,
-        23.8
+        24.0
       ],
       "rotation": [
         0.0,
@@ -110,7 +110,7 @@
       "position": [
         54.0,
         33.1,
-        22.5
+        26.5
       ],
       "rotation": [
         0.0,
@@ -127,7 +127,7 @@
       "position": [
         6.0,
         6.0,
-        23.8
+        24.0
       ],
       "rotation": [
         0.0,
@@ -144,7 +144,7 @@
       "position": [
         20.0,
         9.1,
-        22.5
+        26.5
       ],
       "rotation": [
         0.0,
@@ -161,7 +161,7 @@
       "position": [
         40.0,
         6.0,
-        23.8
+        24.0
       ],
       "rotation": [
         0.0,
@@ -178,7 +178,7 @@
       "position": [
         54.0,
         9.1,
-        22.5
+        26.5
       ],
       "rotation": [
         0.0,
@@ -195,7 +195,7 @@
       "position": [
         26.5,
         19.0,
-        21.6
+        16.0
       ],
       "rotation": [
         0.0,
@@ -276,7 +276,7 @@
       "id": "wire-btn-red",
       "kind": "wire",
       "part": null,
-      "name": "Wire Red button a to Arduino Uno d2",
+      "name": "Wire Red button a to Arduino Uno Rev3 d2",
       "position": [
         0.0,
         0.0,
@@ -296,13 +296,13 @@
         "placement": "uno",
         "pin": "d2"
       },
-      "length_mm": 63.7
+      "length_mm": 63.8
     },
     {
       "id": "wire-led-red",
       "kind": "wire",
       "part": null,
-      "name": "Wire Red LED anode to Arduino Uno d8",
+      "name": "Wire Red LED anode to Arduino Uno Rev3 d8",
       "position": [
         0.0,
         0.0,
@@ -322,14 +322,14 @@
         "placement": "uno",
         "pin": "d8"
       },
-      "length_mm": 26.2,
+      "length_mm": 26.6,
       "inline": "220 ohm resistor"
     },
     {
       "id": "wire-btn-green",
       "kind": "wire",
       "part": null,
-      "name": "Wire Green button a to Arduino Uno d3",
+      "name": "Wire Green button a to Arduino Uno Rev3 d3",
       "position": [
         0.0,
         0.0,
@@ -349,13 +349,13 @@
         "placement": "uno",
         "pin": "d3"
       },
-      "length_mm": 28.4
+      "length_mm": 28.5
     },
     {
       "id": "wire-led-green",
       "kind": "wire",
       "part": null,
-      "name": "Wire Green LED anode to Arduino Uno d9",
+      "name": "Wire Green LED anode to Arduino Uno Rev3 d9",
       "position": [
         0.0,
         0.0,
@@ -375,14 +375,14 @@
         "placement": "uno",
         "pin": "d9"
       },
-      "length_mm": 27.6,
+      "length_mm": 28.0,
       "inline": "220 ohm resistor"
     },
     {
       "id": "wire-btn-blue",
       "kind": "wire",
       "part": null,
-      "name": "Wire Blue button a to Arduino Uno d4",
+      "name": "Wire Blue button a to Arduino Uno Rev3 d4",
       "position": [
         0.0,
         0.0,
@@ -408,7 +408,7 @@
       "id": "wire-led-blue",
       "kind": "wire",
       "part": null,
-      "name": "Wire Blue LED anode to Arduino Uno d10",
+      "name": "Wire Blue LED anode to Arduino Uno Rev3 d10",
       "position": [
         0.0,
         0.0,
@@ -428,14 +428,14 @@
         "placement": "uno",
         "pin": "d10"
       },
-      "length_mm": 46.7,
+      "length_mm": 46.8,
       "inline": "220 ohm resistor"
     },
     {
       "id": "wire-btn-yellow",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow button a to Arduino Uno d5",
+      "name": "Wire Yellow button a to Arduino Uno Rev3 d5",
       "position": [
         0.0,
         0.0,
@@ -455,13 +455,13 @@
         "placement": "uno",
         "pin": "d5"
       },
-      "length_mm": 49.4
+      "length_mm": 49.5
     },
     {
       "id": "wire-led-yellow",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow LED anode to Arduino Uno d11",
+      "name": "Wire Yellow LED anode to Arduino Uno Rev3 d11",
       "position": [
         0.0,
         0.0,
@@ -488,7 +488,7 @@
       "id": "wire-piezo",
       "kind": "wire",
       "part": null,
-      "name": "Wire Piezo buzzer pos to Arduino Uno d12",
+      "name": "Wire Piezo buzzer pos to Arduino Uno Rev3 d12",
       "position": [
         0.0,
         0.0,
@@ -508,7 +508,7 @@
         "placement": "uno",
         "pin": "d12"
       },
-      "length_mm": 30.2
+      "length_mm": 30.3
     },
     {
       "id": "gnd-btn-red-green",
@@ -670,7 +670,7 @@
       "id": "gnd-btn-uno",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow button b to Arduino Uno gnd1",
+      "name": "Wire Yellow button b to Arduino Uno Rev3 gnd1",
       "position": [
         0.0,
         0.0,
@@ -690,13 +690,13 @@
         "placement": "uno",
         "pin": "gnd1"
       },
-      "length_mm": 17.6
+      "length_mm": 17.7
     },
     {
       "id": "gnd-led-uno",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow LED cathode to Arduino Uno gnd2",
+      "name": "Wire Yellow LED cathode to Arduino Uno Rev3 gnd2",
       "position": [
         0.0,
         0.0,
@@ -716,13 +716,13 @@
         "placement": "uno",
         "pin": "gnd2"
       },
-      "length_mm": 19.4
+      "length_mm": 19.7
     },
     {
       "id": "gnd-piezo-uno",
       "kind": "wire",
       "part": null,
-      "name": "Wire Piezo buzzer neg to Arduino Uno gnd3",
+      "name": "Wire Piezo buzzer neg to Arduino Uno Rev3 gnd3",
       "position": [
         0.0,
         0.0,
@@ -742,7 +742,7 @@
         "placement": "uno",
         "pin": "gnd3"
       },
-      "length_mm": 29.8
+      "length_mm": 29.9
     }
   ],
   "steps": [
@@ -1050,5 +1050,34 @@
       "check": "Lid sits flush, with the four LEDs and buttons showing through their holes."
     }
   ],
-  "prompt": "Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side."
+  "prompt": "Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side.",
+  "print": {
+    "size_mm": [
+      84.8,
+      63.4,
+      36.5
+    ],
+    "material": "PLA",
+    "pieces": [
+      {
+        "id": "base",
+        "name": "Case base",
+        "file": "design-base.stl",
+        "volume_mm3": 29417,
+        "grams": 36.5,
+        "minutes": 182
+      },
+      {
+        "id": "lid",
+        "name": "Case lid",
+        "file": "design-lid.stl",
+        "volume_mm3": 10633,
+        "grams": 13.2,
+        "minutes": 66
+      }
+    ],
+    "total_grams": 49.7,
+    "total_minutes": 248,
+    "step_file": "design.step"
+  }
 }

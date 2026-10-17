@@ -200,3 +200,18 @@ def test_lid_mounted_parts_poke_through_the_lid(studio):
     assert not lid.is_inside(plunger_in_lid)  # the opening is cut
     assert lid.is_inside(Vector(20.5, 20.5, 24.5))  # the housing's corner stays under solid lid
     assert built.cavity[1][2] + 2.0 < 20 + 7.3 + 0.01  # plunger top (27.3) reaches above the lid top (25.5)
+
+
+def test_connector_clearance_overrides_the_cutout_clearance(studio):
+    tight = json.loads(json.dumps(BUTTON))
+    tight["id"] = "test-button-tight"
+    tight["connectors"][0]["clearance"] = 0.1
+    (studio.parts_dir / "test-button.json").write_text(json.dumps(BUTTON))
+    (studio.parts_dir / "test-button-tight.json").write_text(json.dumps(tight))
+    studio.place_part("test-button", (20, 20, 20), id="btn")
+    studio.place_part("test-button-tight", (50, 20, 20), id="btn-tight")
+    studio.create_enclosure()
+    lid = studio.build().pieces["lid"].shape
+    # Plungers are 7 mm wide: the default 0.5 mm per side opens to 8 mm, 0.1 mm to 7.2 mm.
+    assert not lid.is_inside(Vector(26 + 3.8, 26, 24.5))
+    assert lid.is_inside(Vector(56 + 3.8, 26, 24.5))

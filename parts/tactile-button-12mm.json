@@ -18,6 +18,7 @@
     { "id": "a", "label": "A", "position": [-0.25, 3.5, -3.5], "direction": [0, 0, -1] },
     { "id": "b", "label": "B", "position": [-0.25, 8.5, -3.5], "direction": [0, 0, -1] }
   ],
+  "lid_mount": { "z": 3.5 },
   "notes": "Legs 12.5 mm apart (across the body) are always connected; the two legs on the same side, 5 mm apart, are the switch. Pins a and b are that normally-open pair. If the button has a snap-on colored cap, the cap adds height and needs a bigger lid hole; measure it.",
   "verified": false,
   "verified_by": null,

@@ -12,12 +12,13 @@
     "max": [5.8, 5.8, 8.6]
   },
   "connectors": [
-    { "id": "lens", "type": "led-lens", "face": "+z", "center": [2.9, 2.9, 8.6], "size": [5.0, 5.0], "protrusion": 0.0 }
+    { "id": "lens", "type": "led-lens", "face": "+z", "center": [2.9, 2.9, 8.6], "size": [5.0, 5.0], "protrusion": 0.0, "clearance": 0.2 }
   ],
   "pins": [
     { "id": "anode", "label": "+ (long leg)", "position": [4.17, 2.9, -10.0], "direction": [0, 0, -1] },
     { "id": "cathode", "label": "- (flat side)", "position": [1.63, 2.9, -10.0], "direction": [0, 0, -1] }
   ],
+  "lid_mount": { "z": 1.0 },
   "notes": "Anode is the longer leg; the cathode is on the flat side of the flange. A 5 mm lid hole holds the lens and the 5.8 mm flange stops it from pushing through. Needs a 220 ohm series resistor on the anode.",
   "verified": false,
   "verified_by": null,
