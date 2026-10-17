@@ -1,6 +1,6 @@
 # Physical Studio
 
-IKEA-style instructions for any hardware project, generated from a prompt. Built for Hack the Valley 11.
+IKEA-style instructions for any hardware project, generated from a prompt. Built for Hack the Valley 11!
 
 Describe a hardware project. Claude designs it out of real parts with real dimensions (through an MCP server), and the app turns the design into an animated step-by-step assembly guide. While you build, Gemini watches the workbench through the camera and tells you when a step is wrong.
 
