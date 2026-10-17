@@ -375,7 +375,14 @@ class DesignJob:
             calls = msg.tool_calls or []
             if calls:
                 turn["tool_calls"] = [
-                    {"id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}} for c in calls
+                    {
+                        "id": c.id,
+                        "type": "function",
+                        "function": {"name": c.function.name, "arguments": c.function.arguments},
+                        # Gemini puts a thought signature here and rejects the next turn without it.
+                        **({"extra_content": extra} if (extra := getattr(c, "extra_content", None)) else {}),
+                    }
+                    for c in calls
                 ]
             messages.append(turn)
             if choice.finish_reason == "length":

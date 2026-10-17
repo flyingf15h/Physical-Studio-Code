@@ -83,7 +83,9 @@ def test_gemini_keys_take_turns_and_a_rate_limited_key_hands_over(tmp_path, monk
     assert jobs.provider_keys("gemini", rotate=True) == ["g2", "g1"]
     limited = openai.RateLimitError("RESOURCE_EXHAUSTED", response=httpx2.Response(429, request=httpx2.Request("POST", "http://x")), body=None)
     used = []
-    place = NS(id="c0", function=NS(name="place_part", arguments='{"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}'))
+    place = NS(id="c0", function=NS(name="place_part", arguments='{"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}'),
+               extra_content={"google": {"thought_signature": "sig"}})
+    sent = []
     script = [
         NS(choices=[NS(finish_reason="tool_calls", message=NS(content=None, tool_calls=[place]))]),
         NS(choices=[NS(finish_reason="stop", message=NS(content="Done.", tool_calls=None))]),
@@ -95,6 +97,7 @@ def test_gemini_keys_take_turns_and_a_rate_limited_key_hands_over(tmp_path, monk
                 used.append((api_key, base_url, kw["model"]))
                 if api_key == "g1":
                     raise limited
+                sent.append(list(kw["messages"]))
                 return script.pop(0)
 
             self.chat = NS(completions=NS(create=create))
@@ -107,6 +110,8 @@ def test_gemini_keys_take_turns_and_a_rate_limited_key_hands_over(tmp_path, monk
     assert snap["designer"] == "Gemini"
     assert [u[0] for u in used] == ["g1", "g2", "g2"]
     assert used[0][1].startswith("https://generativelanguage.googleapis.com/") and used[0][2] == "gemini-3.8-flash"
+    echoed = next(m for m in sent[1] if m.get("tool_calls"))["tool_calls"][0]
+    assert echoed["extra_content"] == {"google": {"thought_signature": "sig"}}  # Gemini needs it back
     assert any("Gemini carries on with another key" in e["text"] for e in snap["events"] if e["kind"] == "note")
 
 
