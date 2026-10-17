@@ -5,7 +5,8 @@
 //
 // Env: PORT (8080), GEMINI_API_KEY, GEMINI_LIVE_MODEL, DEMO_CODE (if set, the token endpoint
 // needs the page opened with ?code=<DEMO_CODE>), OUT_DIR (exports, default ../mcp-server/out),
-// TOKENS_PER_MINUTE (per client IP, default 6), GEMINI_CHECK_MODEL, CHECKS_PER_MINUTE (default 30).
+// TOKENS_PER_MINUTE (per client IP, default 6), GEMINI_CHECK_MODEL, CHECKS_PER_MINUTE (default 30),
+// DEEPSEEK_API_KEY + DEEPSEEK_CHECK_MODEL (deepseek-flash): the step checker's fallback when Gemini is rate limited.
 
 import fs from 'node:fs'
 import http from 'node:http'
@@ -73,6 +74,7 @@ const server = http.createServer(async (req, res) => {
     return handleCheckRequest(req, res, {
       apiKey: process.env.GEMINI_API_KEY,
       model: process.env.GEMINI_CHECK_MODEL,
+      fallback: { apiKey: process.env.DEEPSEEK_API_KEY, model: process.env.DEEPSEEK_CHECK_MODEL },
       passcode: process.env.DEMO_CODE,
       missingKeyHint: 'The server has no GEMINI_API_KEY; set it in deploy/.env and restart.',
     })

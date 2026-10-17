@@ -43,6 +43,7 @@ function geminiToken(env: Record<string, string>): Plugin {
         handleCheckRequest(req, res, {
           apiKey: env.GEMINI_API_KEY,
           model: env.GEMINI_CHECK_MODEL,
+          fallback: { apiKey: env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_CHECK_MODEL },
           passcode: env.DEMO_CODE,
           missingKeyHint: 'Set GEMINI_API_KEY in viewer/.env.local and restart npm run dev.',
         }),

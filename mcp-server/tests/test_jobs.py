@@ -1,8 +1,13 @@
+import json
 from pathlib import Path
+from types import SimpleNamespace as NS
 
+import httpx2
+import openai
 from starlette.testclient import TestClient
 
-from physical_studio.jobs import DesignJob
+from physical_studio import jobs
+from physical_studio.jobs import DesignJob, JobManager
 from physical_studio.server import Studio, mcp
 
 REPO = Path(__file__).resolve().parents[2]
@@ -19,11 +24,12 @@ def test_parts_endpoint_lists_the_library():
 
 
 def test_design_needs_a_key_and_a_prompt(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    for key in ("OPENAI_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(key, raising=False)
     c = client()
     assert c.post("/api/design", json={"prompt": "x"}).status_code == 400
     r = c.post("/api/design", json={"prompt": "Simon game for an Arduino Uno"})
-    assert r.status_code == 503 and "ANTHROPIC_API_KEY" in r.json()["error"]
+    assert r.status_code == 503 and "OPENAI_API_KEY" in r.json()["error"]
     assert c.get("/api/design/nope").status_code == 404
 
 
@@ -43,3 +49,86 @@ def test_tool_calls_become_progress_events(tmp_path):
     assert image[0]["type"] == "image" and snap["preview"] == "/out/job1/preview-1.png"
     assert (tmp_path / "job1" / "preview-1.png").exists() and (tmp_path / "job1" / "design.steps.json").exists()
     assert snap["design"] == "out/job1"
+
+
+def test_providers_follow_the_order_and_skip_missing_keys(monkeypatch):
+    monkeypatch.setenv("DESIGN_PROVIDERS", "deepseek,openai,anthropic")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert JobManager.providers() == ["deepseek", "openai"]
+
+
+def fn_call(id, name, args):
+    return NS(type="function_call", call_id=id, name=name, arguments=json.dumps(args))
+
+
+def test_openai_designs_then_deepseek_carries_on_when_quota_runs_out(tmp_path, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
+    quota = openai.RateLimitError("insufficient_quota", response=httpx2.Response(429, request=httpx2.Request("POST", "http://x")), body=None)
+    openai_script = [
+        NS(id="r1", output_text="Placing the Uno first.", output=[
+            fn_call("c1", "get_part", {"part_id": "arduino-uno"}),
+            fn_call("c2", "place_part", {"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}),
+            fn_call("c3", "create_enclosure", {}),
+            fn_call("c4", "render_preview", {"view": "top"}),
+        ]),
+        quota,
+    ]
+    deepseek_script = [NS(choices=[NS(finish_reason="stop", message=NS(content="Built a case for the Uno.", tool_calls=None))])]
+    seen = []
+
+    def step(script, record):
+        seen.append(record)
+        nxt = script.pop(0)
+        if isinstance(nxt, Exception):
+            raise nxt
+        return nxt
+
+    class FakeClient:
+        def __init__(self, api_key, base_url):
+            self.responses = NS(create=lambda **kw: step(openai_script, ("OpenAI", kw["model"], kw["input"], kw["previous_response_id"])))
+            self.chat = NS(completions=NS(create=lambda **kw: step(deepseek_script, ("DeepSeek", kw["model"], kw["messages"], None))))
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
+    job = DesignJob("job2", "Uno case", tmp_path / "job2", lambda: Studio(REPO / "parts", tmp_path))
+    tools = [{"name": "get_part", "description": "", "input_schema": {"type": "object"}}]
+    job.run(tools, ["openai", "deepseek"])
+    snap = job.snapshot()
+    assert snap["status"] == "done", snap["error"]
+    assert snap["designer"] == "DeepSeek" and snap["design"] == "out/job2"
+    assert [r[:2] for r in seen] == [("OpenAI", "gpt-6.1-sol"), ("OpenAI", "gpt-6.1-sol"), ("DeepSeek", "deepseek-flash")]
+    outputs = seen[1][2]  # OpenAI's second turn: the four tool results, chained to the first response
+    assert seen[1][3] == "r1" and [o["call_id"] for o in outputs] == ["c1", "c2", "c3", "c4"]
+    assert outputs[3]["output"][0]["image_url"].startswith("data:image/png;base64,")
+    opening = seen[2][2][1]["content"]  # DeepSeek starts from the design's current state
+    assert "Carry on from there" in opening and '"uno"' in opening
+    notes = [e["text"] for e in snap["events"] if e["kind"] == "note"]
+    assert any("OpenAI stopped" in n and "DeepSeek carries on" in n for n in notes)
+    assert (tmp_path / "job2" / "design.steps.json").exists()
+
+
+def test_deepseek_gets_previews_as_a_user_image(tmp_path, monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
+    calls = [
+        NS(id="c0", function=NS(name="place_part", arguments='{"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}')),
+        NS(id="c1", function=NS(name="render_preview", arguments='{"view": "top"}')),
+    ]
+    script = [
+        NS(choices=[NS(finish_reason="tool_calls", message=NS(content=None, tool_calls=calls, reasoning_content="r"))]),
+        NS(choices=[NS(finish_reason="stop", message=NS(content="Done.", tool_calls=None))]),
+    ]
+    seen = []
+
+    class FakeClient:
+        def __init__(self, api_key, base_url):
+            self.chat = NS(completions=NS(create=lambda **kw: (seen.append(json.loads(json.dumps(kw["messages"]))), script.pop(0))[1]))
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
+    job = DesignJob("job3", "Uno case", tmp_path / "job3", lambda: Studio(REPO / "parts", tmp_path))
+    job.run([], ["deepseek"])
+    assert job.snapshot()["status"] == "done", job.snapshot()["error"]
+    history = seen[1]
+    assert history[2]["reasoning_content"] == "r" and [m["role"] for m in history[3:5]] == ["tool", "tool"]
+    assert history[5]["role"] == "user" and history[5]["content"][1]["image_url"]["url"].startswith("data:image/png;base64,")

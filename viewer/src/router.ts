@@ -1,6 +1,6 @@
 // Tiny history-API router; the app has five screens, not worth a dependency.
 //   /                         1 Describe
-//   /design/<job id>          2 Claude designs it
+//   /design/<job id>          2 the AI designs it
 //   /guide?design=out/<id>    3 Guide + 4 Build (the tracker panel); /?design=... still works
 //   /print?design=out/<id>    5 Print and share
 

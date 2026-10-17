@@ -38,6 +38,7 @@ export interface DesignJob {
   design: string | null // "out/<id>", for /guide?design= and /print?design=
   checks: JobChecks
   error: string | null
+  designer: string | null // which model is designing: OpenAI, DeepSeek or Claude
 }
 
 function headers(json = false): Record<string, string> {

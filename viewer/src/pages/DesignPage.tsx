@@ -1,4 +1,4 @@
-// Screen 2 · Claude designs it. Polls the design job and shows its progress, previews and checks.
+// Screen 2 · the AI designs it. Polls the design job and shows its progress, previews and checks.
 import { useEffect, useState } from 'react'
 import { getDesign, type DesignJob, type JobEvent, type JobEventKind } from '../api'
 import { ProgressHeader } from '../components/ProgressHeader'
@@ -50,6 +50,7 @@ export function DesignPage({ jobId }: { jobId: string }) {
 
   const events = job?.events ?? []
   const finished = job?.status === 'done'
+  const designer = job?.designer ?? 'The AI'
   // The phase in progress is the one after the furthest phase reached so far.
   const reached = PHASES.map((p) => !!lastOf(events, p.kind))
   const furthest = reached.lastIndexOf(true)
@@ -81,7 +82,7 @@ export function DesignPage({ jobId }: { jobId: string }) {
           <div className="ds-card">
             <div className="row">
               <h2>
-                {finished ? 'Claude designed it' : job?.status === 'error' ? 'Design stopped' : 'Claude is designing'}
+                {finished ? `${designer} designed it` : job?.status === 'error' ? 'Design stopped' : `${designer} is designing`}
               </h2>
               <span className={`badge ${job?.status ?? 'queued'}`}>
                 {job?.status === 'running' ? 'working' : (job?.status ?? 'loading')}
@@ -117,7 +118,7 @@ export function DesignPage({ jobId }: { jobId: string }) {
 
           {notes.length > 0 && (
             <div className="ds-card notes">
-              <div className="eyebrow">Claude's notes</div>
+              <div className="eyebrow">{designer}'s notes</div>
               {notes.map((n, i) => (
                 <p key={i}>{n.text}</p>
               ))}
@@ -141,7 +142,7 @@ export function DesignPage({ jobId }: { jobId: string }) {
               {image ? (
                 <img src={image} alt="Preview of the design" />
               ) : (
-                <p className="muted">The 3D preview appears here as Claude works.</p>
+                <p className="muted">The 3D preview appears here as {designer} works.</p>
               )}
             </div>
             {previews.length > 1 && (

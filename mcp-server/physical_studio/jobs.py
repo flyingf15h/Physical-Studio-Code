@@ -1,12 +1,18 @@
-"""Design jobs: Claude designs a project from a prompt, using the same tools as the MCP server.
+"""Design jobs: a model designs a project from a prompt, using the same tools as the MCP server.
 
 The web app's screen 2 starts a job with POST /api/design and polls GET /api/design/<id>. Each job
 runs in a thread with its own Studio (so it never touches the MCP clients' design) and writes to
 OUT_DIR/<id>, which the viewer serves as /out/<id>/. Tool calls become progress events: parts found,
 parts placed, case built, wires, fit checks, fixes, previews, steps.
 
-Env: ANTHROPIC_API_KEY, DESIGN_MODEL (claude-opus-5-5), DEMO_CODE (required in x-demo-code when
-set), DESIGNS_PER_HOUR (per client IP, 4), DESIGN_MAX_RUNNING (1).
+Models: OpenAI (Responses API), DeepSeek (Chat Completions), both through the OpenAI SDK, or Claude.
+DESIGN_PROVIDERS (default "openai,deepseek,anthropic") is the order to try; providers without a key are
+skipped. If OpenAI or DeepSeek runs out of quota or goes down mid-design, the next one carries on from
+the design's current state. Claude only runs when it comes first.
+
+Env: OPENAI_API_KEY, OPENAI_DESIGN_MODEL (gpt-6.1-sol), DEEPSEEK_API_KEY, DEEPSEEK_DESIGN_MODEL
+(deepseek-flash, which reads images), ANTHROPIC_API_KEY, DESIGN_MODEL (claude-opus-5-5), DEMO_CODE
+(required in x-demo-code when set), DESIGNS_PER_HOUR (per client IP, 4), DESIGN_MAX_RUNNING (1).
 """
 
 from __future__ import annotations
@@ -22,12 +28,26 @@ from collections import defaultdict
 from pathlib import Path
 
 import anthropic
+import openai
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from . import checks, library
 
 MODEL = os.environ.get("DESIGN_MODEL", "claude-opus-5-5")
+# OpenAI-compatible providers: (label shown on the page, key env, base URL, model env, default model)
+COMPATIBLE = {
+    "openai": ("OpenAI", "OPENAI_API_KEY", None, "OPENAI_DESIGN_MODEL", "gpt-6.1-sol"),
+    "deepseek": ("DeepSeek", "DEEPSEEK_API_KEY", "https://api.deepseek.com", "DEEPSEEK_DESIGN_MODEL", "deepseek-flash"),
+}
+# Errors worth handing the design to the next provider for: quota, bad key, outages.
+SWITCH_ERRORS = (
+    openai.RateLimitError,
+    openai.AuthenticationError,
+    openai.PermissionDeniedError,
+    openai.APIConnectionError,
+    openai.InternalServerError,
+)
 MAX_TURNS = 80
 DESIGNS_PER_HOUR = int(os.environ.get("DESIGNS_PER_HOUR", "4"))
 MAX_RUNNING = int(os.environ.get("DESIGN_MAX_RUNNING", "1"))
@@ -83,6 +103,7 @@ class DesignJob:
         self.parts_seen: dict[str, str] = {}
         self.previews = 0
         self.exported = False
+        self.designer: str | None = None
         self.lock = threading.Lock()
 
     # --- state for the web page -----------------------------------------------------------
@@ -111,6 +132,7 @@ class DesignJob:
                     "printer": self.printer,
                 },
                 "error": self.error,
+                "designer": self.designer,
             }
 
     # --- tools --------------------------------------------------------------------------------
@@ -175,11 +197,123 @@ class DesignJob:
 
     # --- the loop ----------------------------------------------------------------------------
 
-    def run(self, tools: list[dict]):
+    def run(self, tools: list[dict], providers: list[str]):
         self.status = "running"
         title = re.sub(r"\s+", " ", self.prompt).strip()[:60]
         self.studio.new_design(title, self.prompt)
         self.title = title
+        if providers[0] == "anthropic":
+            return self.run_claude(tools)
+        queue = [p for p in providers if p in COMPATIBLE]
+        resume = False
+        try:
+            while True:
+                name = queue.pop(0)
+                label, key_env, base_url, model_env, default_model = COMPATIBLE[name]
+                self.designer = label
+                client = openai.OpenAI(api_key=os.environ[key_env], base_url=base_url)
+                model = os.environ.get(model_env, default_model)
+                loop = self.run_openai if name == "openai" else self.run_chat
+                try:
+                    loop(client, model, tools, self.opening(resume))
+                    break
+                except SWITCH_ERRORS as e:
+                    if not queue:
+                        raise
+                    self.event("note", f"{label} stopped ({type(e).__name__}); {COMPATIBLE[queue[0]][0]} carries on with the design.")
+                    resume = True
+            if not self.exported:
+                self.run_tool("export", {})
+            self.status = "done"
+        except openai.APIStatusError as e:
+            self.fail(f"{self.designer} API error {e.status_code}: {e.message}")
+        except openai.APIConnectionError:
+            self.fail(f"Couldn't reach the {self.designer} API")
+        except Exception as e:
+            self.fail(str(e))
+
+    def opening(self, resume: bool) -> str:
+        text = f"Design this project: {self.prompt}"
+        if resume:
+            state = json.dumps(self.studio.describe_design(), default=str)
+            text += (
+                "\n\nAnother model started this design and stopped partway. Its current state "
+                f"(describe_design):\n{state}\nCarry on from there; don't start over."
+            )
+        return text
+
+    def tool_output(self, name: str, raw_args: str):
+        """Runs a tool call from an OpenAI-style model: a string, or render_preview's PNG as base64."""
+        try:
+            content = self.run_tool(name, json.loads(raw_args or "{}"))
+        except Exception as e:  # tool errors go back to the model so it can correct course
+            return f"Error: {e}"
+        if isinstance(content, list):
+            return next(b["source"]["data"] for b in content if b.get("type") == "image"), True
+        return content
+
+    def run_openai(self, client, model: str, tools: list[dict], opening: str):
+        """OpenAI's Responses API: the only way its reasoning models take function tools."""
+        defs = [{"type": "function", "name": t["name"], "description": t["description"], "parameters": t["input_schema"]} for t in tools]
+        previous = None
+        pending: list[dict] | str = opening
+        for _ in range(MAX_TURNS):
+            response = client.responses.create(
+                model=model, instructions=SYSTEM, tools=defs, input=pending, previous_response_id=previous, reasoning={"effort": "medium"}
+            )
+            previous = response.id
+            if response.output_text and response.output_text.strip():
+                self.event("note", response.output_text.strip())
+            calls = [o for o in response.output if o.type == "function_call"]
+            if not calls:
+                return
+            pending = []
+            for call in calls:
+                out = self.tool_output(call.name, call.arguments)
+                if isinstance(out, tuple):
+                    out = [{"type": "input_image", "image_url": f"data:image/png;base64,{out[0]}"}]
+                pending.append({"type": "function_call_output", "call_id": call.call_id, "output": out})
+
+    def run_chat(self, client, model: str, tools: list[dict], opening: str):
+        """Chat Completions (DeepSeek). Tool messages carry text only, so previews follow as a user message."""
+        defs = [{"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t["input_schema"]}} for t in tools]
+        messages: list[dict] = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": opening}]
+        for _ in range(MAX_TURNS):
+            choice = client.chat.completions.create(model=model, messages=messages, tools=defs).choices[0]
+            msg = choice.message
+            if msg.content and msg.content.strip():
+                self.event("note", msg.content.strip())
+            if choice.finish_reason == "content_filter":
+                raise JobError(f"{self.designer} declined this request")
+            turn: dict = {"role": "assistant", "content": msg.content or ""}
+            if getattr(msg, "reasoning_content", None):
+                turn["reasoning_content"] = msg.reasoning_content  # DeepSeek wants it back during tool calls
+            calls = msg.tool_calls or []
+            if calls:
+                turn["tool_calls"] = [
+                    {"id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}} for c in calls
+                ]
+            messages.append(turn)
+            if choice.finish_reason == "length":
+                messages.append({"role": "user", "content": "Continue."})
+                continue
+            if not calls:
+                return
+            images = []
+            for call in calls:
+                out = self.tool_output(call.function.name, call.function.arguments)
+                if isinstance(out, tuple):
+                    images.append(out[0])
+                    out = "Rendered; the image is in the next message."
+                messages.append({"role": "tool", "tool_call_id": call.id, "content": out})
+            if images:
+                messages.append({"role": "user", "content": [
+                    {"type": "text", "text": "The preview you rendered:"},
+                    *({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{data}"}} for data in images),
+                ]})
+
+    def run_claude(self, tools: list[dict]):
+        self.designer = "Claude"
         client = anthropic.Anthropic()
         messages: list[dict] = [{"role": "user", "content": f"Design this project: {self.prompt}"}]
         try:
@@ -253,24 +387,32 @@ class JobManager:
             ]
         return self.tools
 
+    @staticmethod
+    def providers() -> list[str]:
+        """Providers to try, in order, that have a key set."""
+        keys = {"openai": "OPENAI_API_KEY", "deepseek": "DEEPSEEK_API_KEY", "anthropic": "ANTHROPIC_API_KEY"}
+        order = [p.strip() for p in os.environ.get("DESIGN_PROVIDERS", "openai,deepseek,anthropic").split(",")]
+        return [p for p in order if p in keys and os.environ.get(keys[p])]
+
     def running(self) -> int:
         return sum(1 for j in self.jobs.values() if j.status in ("queued", "running"))
 
     async def start(self, prompt: str, ip: str) -> DesignJob:
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            raise JobError("The server has no ANTHROPIC_API_KEY; set it to let Claude design.")
+        providers = self.providers()
+        if not providers:
+            raise JobError("The server has no OPENAI_API_KEY or DEEPSEEK_API_KEY (or ANTHROPIC_API_KEY); set one to design.")
         now = time.time()
         self.recent[ip] = [t for t in self.recent[ip] if now - t < 3600]
         if len(self.recent[ip]) >= DESIGNS_PER_HOUR:
             raise JobError("You've started a lot of designs; try again in a while.")
         if self.running() >= MAX_RUNNING:
-            raise JobError("Claude is busy with another design; try again in a minute.")
+            raise JobError("Another design is running; try again in a minute.")
         self.recent[ip].append(now)
         job_id = uuid.uuid4().hex[:10]
         job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory)
         self.jobs[job_id] = job
         tools = await self.tool_defs()
-        threading.Thread(target=job.run, args=(tools,), daemon=True).start()
+        threading.Thread(target=job.run, args=(tools, providers), daemon=True).start()
         return job
 
 
