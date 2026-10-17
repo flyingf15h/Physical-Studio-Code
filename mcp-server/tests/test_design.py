@@ -167,3 +167,36 @@ def test_wires_route_between_pins_and_export(studio, tmp_path):
     assert wire["inline"] == "220 ohm resistor"
     assert any(s["title"] == "Wire the Test LED" for s in steps["steps"])
     assert studio.render_preview("iso", hide=["lid"])[:4] == b"\x89PNG"
+
+
+BUTTON = {
+    "id": "test-button",
+    "name": "Test button",
+    "category": "input",
+    "source": "test fixture (12x12 tactile, 3.5 mm housing + plunger to 7.3 mm)",
+    "step_file": None,
+    "body": {"size": [12.0, 12.0, 7.3]},
+    "envelope": {"min": [-0.5, 0.0, -3.5], "max": [12.5, 12.0, 7.3]},
+    "lid_mount": {"z": 3.5},
+    "connectors": [{"id": "plunger", "face": "+z", "center": [6.0, 6.0, 7.3], "size": [7.0, 7.0], "protrusion": 0.0}],
+    "verified": False,
+}
+
+
+def test_lid_mounted_parts_poke_through_the_lid(studio):
+    (studio.parts_dir / "test-button.json").write_text(json.dumps(BUTTON))
+    studio.place_part("test-button", (20, 20, 20), id="btn-hi")
+    studio.place_part("test-button", (40, 20, 18), id="btn-lo")  # 2 mm too low
+    info = studio.create_enclosure()
+    assert info["cavity"]["max"][2] == 23.5  # lid underside at btn-hi's housing top (20 + 3.5)
+    assert any(w.startswith("btn-lo") and "z + 2.00" in w for w in info["warnings"])
+    studio.place_part("test-button", (40, 20, 20), id="btn-ok")
+    studio.design.placements.pop("btn-lo")
+    assert studio.check_interference()["ok"]
+    assert studio.check_clearance()["ok"]
+    built = studio.build()
+    lid = built.pieces["lid"].shape
+    plunger_in_lid = Vector(26, 26, 24.5)  # inside the 2 mm lid, over btn-hi's plunger
+    assert not lid.is_inside(plunger_in_lid)  # the opening is cut
+    assert lid.is_inside(Vector(20.5, 20.5, 24.5))  # the housing's corner stays under solid lid
+    assert built.cavity[1][2] + 2.0 < 20 + 7.3 + 0.01  # plunger top (27.3) reaches above the lid top (25.5)

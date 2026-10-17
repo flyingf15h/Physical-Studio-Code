@@ -23,6 +23,7 @@ One JSON file per part (`<id>.json`), plus an optional STEP model (`<id>.step`) 
 | `mounting_holes` | `{id, position, diameter}`. Position is the hole centre on the bottom face. |
 | `connectors` | Things the enclosure has to leave reachable: `{id, type, face, center, size, protrusion}`. `face` is the side it is reached from (`-x`, `+x`, `-y`, `+y`, `+z`), `center` is the middle of the opening on that face, `size` is `[width, height]` of the opening, `protrusion` is how far it sticks out past the body. |
 | `pins` | Electrical connection points for wiring: `{id, label, position, direction}`. `position` is where a wire attaches (top of a header socket, end of a leg), `direction` the way the wire leaves it (default `[0, 0, 1]`). |
+| `lid_mount` | Parts that mount under the lid and poke through it (buttons, LEDs): `{ "z": ... }`, the height in the part frame where the lid's underside sits, e.g. the top of a tactile switch's square housing or an LED's flange. The enclosure puts its lid there, and only the part's `+z` connectors continue through the lid. Leave it out for parts that live inside the case. |
 | `keep_out` | Boxes (`min`, `max`) nothing else may occupy, e.g. tall components or header pins. |
 | `notes` | Anything an assembler or the design tools should know. |
 | `verified`, `verified_by`, `verified_on` | Caliper check status. |

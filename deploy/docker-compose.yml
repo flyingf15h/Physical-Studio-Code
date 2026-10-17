@@ -29,6 +29,8 @@ services:
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_LIVE_MODEL: ${GEMINI_LIVE_MODEL:-gemini-3.8-live}
+      GEMINI_CHECK_MODEL: ${GEMINI_CHECK_MODEL:-gemini-3.8-flash}
+      CHECKS_PER_MINUTE: ${CHECKS_PER_MINUTE:-30}
       DEMO_CODE: ${DEMO_CODE:-}
       TOKENS_PER_MINUTE: ${TOKENS_PER_MINUTE:-6}
     volumes:

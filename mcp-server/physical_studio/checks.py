@@ -53,6 +53,8 @@ def expected_contact(design: Design, a: str, b: str, touching_only: bool = False
             return "screw threads into its standoff"
         if touching_only and p.kind == "fastener" and y == p.attached_to:
             return "screw head clamps the board"
+        if touching_only and p.kind == "part" and y == "lid":
+            return "part touches the lid (lid-mounted or seated against it)"
     return None
 
 

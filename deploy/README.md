@@ -5,7 +5,7 @@ One server runs everything with Docker Compose:
 | Service | What it does |
 |---|---|
 | `caddy` | HTTPS on 443 (Let's Encrypt certificate for `$DOMAIN`, renewed automatically). Required: browsers only allow camera/mic access on secure pages. `/mcp*` goes to the MCP server, everything else to the viewer. |
-| `viewer` | The built React viewer, `POST /api/gemini-token` (single-use Gemini Live tokens; the key never reaches the browser; rate limited per IP; optional `DEMO_CODE`), and `/out/<design>/` from the shared `designs` volume. |
+| `viewer` | The built React viewer, `POST /api/gemini-token` (single-use Gemini Live tokens for the voice; the key never reaches the browser), `POST /api/check-step` (the step checker: a camera frame against the step's check line, judged by `GEMINI_CHECK_MODEL`), both rate limited per IP with optional `DEMO_CODE`, and `/out/<design>/` from the shared `designs` volume. |
 | `mcp` | The MCP server over streamable HTTP at `https://$DOMAIN/mcp`, behind `Authorization: Bearer $MCP_TOKEN`. Its exports go to the `designs` volume, so `https://$DOMAIN/?design=out/<title>` shows them right away. |
 
 ## First deploy
@@ -14,7 +14,7 @@ One server runs everything with Docker Compose:
 2. **DNS.** At GoDaddy, add an `A` record for the domain (or a subdomain) pointing at the instance's IPv4 address. Wait until `ping <domain>` shows that IP: Caddy needs it to get the certificate.
 3. **Code and settings** (on the server, over SSH):
    ```sh
-   git clone https://github.com/flyingf15h/Physical-Studio-Code.git
+   git clone https://github.com/notkelly1/Physical-Studio-Code.git
    cd Physical-Studio-Code/deploy
    cp .env.example .env
    nano .env          # DOMAIN, GEMINI_API_KEY, MCP_TOKEN (openssl rand -hex 24), optional DEMO_CODE
