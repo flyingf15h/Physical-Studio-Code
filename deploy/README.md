@@ -18,7 +18,7 @@ One server runs everything with Docker Compose:
    git clone https://github.com/notkelly1/Physical-Studio-Code.git
    cd Physical-Studio-Code/deploy
    cp .env.example .env
-   nano .env          # DOMAIN, GEMINI_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, MCP_TOKEN (openssl rand -hex 24), optional DEMO_CODE
+   nano .env          # DOMAIN (one name or a comma-separated list), GEMINI_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, MCP_TOKEN (openssl rand -hex 24), optional DEMO_CODE
    chmod 600 .env
    docker compose up -d --build
    ```
@@ -56,3 +56,19 @@ curl -k https://localhost/healthz
 - Everyone shares one Gemini key and its quota. `TOKENS_PER_MINUTE` (default 6 per IP) and `DEMO_CODE` keep strangers from using it up.
 - The MCP server keeps a single design in memory, so it serves one designer at a time (fine for a demo).
 - `.env` is gitignored. Never commit it or paste it into chat or huddle.
+
+## Updating the server
+
+On the box (SSH, or Vultr's web console), as root:
+
+```sh
+sh /opt/Physical-Studio-Code/deploy/update.sh
+```
+
+It pulls, rebuilds and restarts everything. Give it a domain list to change `DOMAIN` at the same time:
+
+```sh
+sh /opt/Physical-Studio-Code/deploy/update.sh "physicalstudio.work, www.physicalstudio.work, 155-138-154-8.sslip.io"
+```
+
+For a new domain, first add DNS records at the registrar (GoDaddy: My Products → the domain → DNS): an `A` record for `@` pointing at the server's IP (155.138.154.8) and a `CNAME` for `www` pointing at `@`, and delete GoDaddy's default "Parked" `A` record.
