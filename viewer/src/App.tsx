@@ -5,6 +5,7 @@ import { Assembly } from './Assembly'
 import { loadSteps, type StepsDoc } from './steps'
 import { TrackerPanel } from './tracker/TrackerPanel'
 import type { Problem } from './tracker/session'
+import { ProgressHeader } from './components/ProgressHeader'
 import './App.css'
 
 const PLAY_INTERVAL_MS = 3500
@@ -91,119 +92,135 @@ export default function App() {
     ref ? `${byId.get(ref.placement)?.name ?? ref.placement} ${ref.pin.toUpperCase()}` : '?'
 
   return (
-    <div className="app" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
-      <aside className="sidebar">
-        <header>
-          <div className="eyebrow">Physical Studio</div>
-          <h1>{source?.doc.title ?? 'Loading…'}</h1>
-          {source?.doc.prompt && <p className="prompt">“{source.doc.prompt}”</p>}
-        </header>
-        <ol className="steps">
-          {source?.doc.steps.map((s, i) => (
-            <li key={s.index}>
-              <button className={i === step ? 'active' : i < step ? 'done' : ''} onClick={() => go(i)}>
-                <span className="num">{i + 1}</span>
-                {s.title}
-              </button>
-            </li>
-          ))}
-        </ol>
-        <footer className="hint">Drop a .glb and .steps.json here to open another design.</footer>
-      </aside>
+    <div className="page">
+      <ProgressHeader active={3} />
+      <div className="app" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
+        <aside className="sidebar">
+          <header>
+            <div className="eyebrow">Physical Studio</div>
+            <h1>{source?.doc.title ?? 'Loading…'}</h1>
+            {source?.doc.prompt && <p className="prompt">“{source.doc.prompt}”</p>}
+          </header>
+          <ol className="steps">
+            {source?.doc.steps.map((s, i) => (
+              <li key={s.index}>
+                <button className={i === step ? 'active' : i < step ? 'done' : ''} onClick={() => go(i)}>
+                  <span className="num">{i + 1}</span>
+                  {s.title}
+                </button>
+              </li>
+            ))}
+          </ol>
+          <footer className="hint">Drop a .glb and .steps.json here to open another design.</footer>
+        </aside>
 
-      <main className="stage">
-        {error && <div className="error">{error}</div>}
-        {source && (
-          <Canvas
-            camera={{ fov: 35, near: 0.001, far: 50, position: [0.15, 0.15, 0.2] }}
-            dpr={[1, 2]}
-            gl={{ preserveDrawingBuffer: true }} // the step tracker captures the expected render
-          >
-            <color attach="background" args={['#ebe8e4']} />
-            <hemisphereLight args={['#ffffff', '#b9b4ae', 1.6]} />
-            <directionalLight position={[1, 2, 1.5]} intensity={2.2} />
-            <directionalLight position={[-1.5, 1, -1]} intensity={0.8} />
-            <Suspense fallback={null}>
-              <Bounds fit clip margin={1.3}>
-                <Assembly key={source.glbUrl} glbUrl={source.glbUrl} doc={source.doc} step={step} exploded={exploded} />
-              </Bounds>
-            </Suspense>
-            <OrbitControls makeDefault />
-          </Canvas>
-        )}
+        <main className="stage">
+          {error && <div className="error">{error}</div>}
+          {source && (
+            <Canvas
+              camera={{
+                fov: 35,
+                near: 0.001,
+                far: 50,
+                position: [0.15, 0.15, 0.2],
+              }}
+              dpr={[1, 2]}
+              gl={{ preserveDrawingBuffer: true }} // the step tracker captures the expected render
+            >
+              <color attach="background" args={['#ebe8e4']} />
+              <hemisphereLight args={['#ffffff', '#b9b4ae', 1.6]} />
+              <directionalLight position={[1, 2, 1.5]} intensity={2.2} />
+              <directionalLight position={[-1.5, 1, -1]} intensity={0.8} />
+              <Suspense fallback={null}>
+                <Bounds fit clip margin={1.3}>
+                  <Assembly
+                    key={source.glbUrl}
+                    glbUrl={source.glbUrl}
+                    doc={source.doc}
+                    step={step}
+                    exploded={exploded}
+                  />
+                </Bounds>
+              </Suspense>
+              <OrbitControls makeDefault />
+            </Canvas>
+          )}
 
-        {current && (
-          <section className="card">
-            <div className="eyebrow">
-              Step {step + 1} of {count}
-            </div>
-            <h2>{current.title}</h2>
-            <p>{current.text}</p>
-            {current.tools?.length ? (
-              <ul className="tools">
-                {current.tools.map((t, i) => (
-                  <li key={i}>
-                    <strong>{t.name}</strong>
-                    {t.for && <span> for {t.for}</span>}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {wires.length > 0 && (
-              <ul className="wires">
-                {wires.map((w) => (
-                  <li key={w!.id}>
-                    <span className="swatch" style={{ background: w!.color }} />
-                    <span>
-                      {end(w!.from)} → {end(w!.to)}
-                      {w!.inline && <em> · {w!.inline} inline</em>}
-                      {w!.length_mm && <small> · {Math.ceil(w!.length_mm / 10) * 10 + 20} mm wire</small>}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {current.check && (
-              <p className="check">
-                <span>Camera check</span> {current.check}
-              </p>
-            )}
-            {problem && (
-              <div className="problem" role="alert">
-                <strong>{problem.problem}</strong>
-                <span>{problem.fix}</span>
+          {current && (
+            <section className="card">
+              <div className="eyebrow">
+                Step {step + 1} of {count}
               </div>
-            )}
-          </section>
-        )}
+              <h2>{current.title}</h2>
+              <p>{current.text}</p>
+              {current.tools?.length ? (
+                <ul className="tools">
+                  {current.tools.map((t, i) => (
+                    <li key={i}>
+                      <strong>{t.name}</strong>
+                      {t.for && <span> for {t.for}</span>}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {wires.length > 0 && (
+                <ul className="wires">
+                  {wires.map((w) => (
+                    <li key={w!.id}>
+                      <span className="swatch" style={{ background: w!.color }} />
+                      <span>
+                        {end(w!.from)} → {end(w!.to)}
+                        {w!.inline && <em> · {w!.inline} inline</em>}
+                        {w!.length_mm && <small> · {Math.ceil(w!.length_mm / 10) * 10 + 20} mm wire</small>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {current.check && (
+                <p className="check">
+                  <span>Camera check</span> {current.check}
+                </p>
+              )}
+              {problem && (
+                <div className="problem" role="alert">
+                  <strong>{problem.problem}</strong>
+                  <span>{problem.fix}</span>
+                </div>
+              )}
+            </section>
+          )}
 
-        {source && <TrackerPanel key={source.glbUrl} doc={source.doc} step={step} setStep={go} onProblem={setProblem} />}
+          {source && (
+            <TrackerPanel key={source.glbUrl} doc={source.doc} step={step} setStep={go} onProblem={setProblem} />
+          )}
 
-        {source && (
-          <nav className="timeline">
-            <button onClick={() => go(step - 1)} disabled={step === 0} aria-label="Previous step">
-              ‹
-            </button>
-            <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play'}>
-              {playing ? '❚❚' : '▶'}
-            </button>
-            <button onClick={() => go(step + 1)} disabled={step >= count - 1} aria-label="Next step">
-              ›
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={Math.max(count - 1, 0)}
-              value={step}
-              onChange={(e) => go(Number(e.target.value))}
-              aria-label="Step"
-            />
-            <button className={exploded ? 'active' : ''} onClick={() => setExploded((x) => !x)}>
-              Exploded
-            </button>
-          </nav>
-        )}
-      </main>
+          {source && (
+            <nav className="timeline">
+              <button onClick={() => go(step - 1)} disabled={step === 0} aria-label="Previous step">
+                ‹
+              </button>
+              <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play'}>
+                {playing ? '❚❚' : '▶'}
+              </button>
+              <button onClick={() => go(step + 1)} disabled={step >= count - 1} aria-label="Next step">
+                ›
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={Math.max(count - 1, 0)}
+                value={step}
+                onChange={(e) => go(Number(e.target.value))}
+                aria-label="Step"
+              />
+              <button className={exploded ? 'active' : ''} onClick={() => setExploded((x) => !x)}>
+                Exploded
+              </button>
+            </nav>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

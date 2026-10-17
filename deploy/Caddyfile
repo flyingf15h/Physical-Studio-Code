@@ -4,6 +4,14 @@
 {$DOMAIN} {
 	encode zstd gzip
 
+	# Web app backend in the MCP server: parts list and Claude design jobs (screens 1 and 2).
+	handle /api/parts {
+		reverse_proxy mcp:8000
+	}
+	handle /api/design* {
+		reverse_proxy mcp:8000
+	}
+
 	handle /mcp* {
 		reverse_proxy mcp:8000 {
 			flush_interval -1 # MCP streams responses

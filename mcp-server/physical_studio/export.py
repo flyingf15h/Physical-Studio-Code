@@ -114,12 +114,48 @@ def default_steps(design: Design, built: BuiltDesign) -> list[Step]:
     return steps
 
 
+PLA_DENSITY = 1.24  # g/cm3
+GRAMS_PER_HOUR = 12.0  # rough rate for a 0.4 mm nozzle at default speeds; shown as an estimate
+
+
+def print_info(built: BuiltDesign, name: str, formats: list[str]) -> dict | None:
+    """Size, filament and time estimates for the printed pieces, for the Print screen."""
+    if built.outer is None:
+        return None
+    pieces = []
+    for pid in ("base", "lid"):
+        piece = built.pieces.get(pid)
+        if piece is None:
+            continue
+        volume = float(piece.shape.volume)  # mm3; thin walls print close to solid
+        grams = volume / 1000 * PLA_DENSITY
+        pieces.append(
+            {
+                "id": pid,
+                "name": piece.name,
+                "file": f"{name}-{pid}.stl" if "stl" in formats else None,
+                "volume_mm3": round(volume),
+                "grams": round(grams, 1),
+                "minutes": round(grams / GRAMS_PER_HOUR * 60),
+            }
+        )
+    size = (built.outer[1] - built.outer[0]).round(1).tolist()
+    return {
+        "size_mm": size,
+        "material": "PLA",
+        "pieces": pieces,
+        "total_grams": round(sum(p["grams"] for p in pieces), 1),
+        "total_minutes": sum(p["minutes"] for p in pieces),
+        "step_file": f"{name}.step" if "step" in formats else None,
+    }
+
+
 def parts_category(built: BuiltDesign, pid: str) -> str | None:
     piece = built.pieces.get(pid)
     return piece.category if piece else None
 
 
-def steps_document(design: Design, built: BuiltDesign, model_name: str) -> dict:
+def steps_document(design: Design, built: BuiltDesign, model_name: str, printing: dict | None = None) -> dict:
     steps = design.steps or default_steps(design, built)
     added = [pid for s in steps for pid in s.add]
     missing = [pid for pid in built.pieces if pid not in added]
@@ -162,6 +198,8 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str) -> dict:
     }
     if design.prompt:
         doc["prompt"] = design.prompt
+    if printing:
+        doc["print"] = printing
     return doc
 
 
@@ -172,7 +210,8 @@ def export_design(design: Design, built: BuiltDesign, out_dir: Path, formats: li
         glb = out_dir / f"{name}.glb"
         write_glb(built, glb)
         steps_path = out_dir / f"{name}.steps.json"
-        steps_path.write_text(json.dumps(steps_document(design, built, glb.name), indent=2) + "\n")
+        printing = print_info(built, name, formats)
+        steps_path.write_text(json.dumps(steps_document(design, built, glb.name, printing), indent=2) + "\n")
         written += [str(glb), str(steps_path)]
     if "stl" in formats:
         # Only the printed pieces; library parts are bought, not printed.

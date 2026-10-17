@@ -428,6 +428,13 @@ def export(formats: list[Literal["glb", "stl", "step"]] = ["glb", "stl", "step"]
     return studio.export(list(formats), out_dir)
 
 
+# Web app backend (screen 1 parts list, screen 2 design jobs); only reachable over HTTP.
+from .jobs import JobManager, register_routes  # noqa: E402
+
+jobs = JobManager(OUT_DIR, Studio, mcp.list_tools)
+register_routes(mcp, jobs, PARTS_DIR)
+
+
 def main() -> None:
     if not HTTP:
         mcp.run(show_banner=False)

@@ -159,5 +159,34 @@
       "check": "Lid sits flush all the way round."
     }
   ],
-  "prompt": "A case for an Arduino Uno with the USB port reachable on the side."
+  "prompt": "A case for an Arduino Uno with the USB port reachable on the side.",
+  "print": {
+    "size_mm": [
+      84.8,
+      63.4,
+      23.5
+    ],
+    "material": "PLA",
+    "pieces": [
+      {
+        "id": "base",
+        "name": "Case base",
+        "file": "design-base.stl",
+        "volume_mm3": 21918,
+        "grams": 27.2,
+        "minutes": 136
+      },
+      {
+        "id": "lid",
+        "name": "Case lid",
+        "file": "design-lid.stl",
+        "volume_mm3": 11410,
+        "grams": 14.1,
+        "minutes": 71
+      }
+    ],
+    "total_grams": 41.3,
+    "total_minutes": 207,
+    "step_file": null
+  }
 }

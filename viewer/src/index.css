@@ -14,3 +14,6 @@
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; }
 button { font: inherit; color: inherit; }
+
+.page { display: flex; flex-direction: column; height: 100%; }
+.page-body { flex: 1; min-height: 0; overflow-y: auto; padding: 32px 24px; }

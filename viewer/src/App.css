@@ -1,4 +1,4 @@
-.app { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+.app { display: grid; grid-template-columns: 300px 1fr; flex: 1; min-height: 0; }
 
 .sidebar { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
 .sidebar header { padding: 20px 20px 12px; }

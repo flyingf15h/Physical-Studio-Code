@@ -44,6 +44,10 @@ services:
     environment:
       MCP_TOKEN: ${MCP_TOKEN:?set MCP_TOKEN in deploy/.env}
       MCP_ALLOWED_HOSTS: ${DOMAIN}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DESIGN_MODEL: ${DESIGN_MODEL:-claude-opus-5-5}
+      DESIGNS_PER_HOUR: ${DESIGNS_PER_HOUR:-4}
+      DEMO_CODE: ${DEMO_CODE:-}
     volumes:
       - designs:/data/out
 

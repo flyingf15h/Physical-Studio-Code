@@ -55,5 +55,13 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '') // '' prefix: server-side only, never sent to the page
   return {
     plugins: [react(), serveExports(), geminiToken(env)],
+    // Design jobs and the parts list live in the MCP server's HTTP app:
+    //   cd mcp-server && MCP_TRANSPORT=http MCP_TOKEN=dev ANTHROPIC_API_KEY=... uv run physical-studio-mcp
+    server: {
+      proxy: {
+        '/api/parts': env.MCP_HTTP_URL || 'http://localhost:8000',
+        '/api/design': env.MCP_HTTP_URL || 'http://localhost:8000',
+      },
+    },
   }
 })

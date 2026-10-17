@@ -64,6 +64,69 @@
       "items": {
         "$ref": "#/$defs/step"
       }
+    },
+    "print": {
+      "description": "Printed pieces with filament and time estimates (PLA, rough rate), for the Print screen.",
+      "type": "object",
+      "required": [
+        "size_mm",
+        "pieces"
+      ],
+      "properties": {
+        "size_mm": {
+          "$ref": "#/$defs/vec3"
+        },
+        "material": {
+          "type": "string"
+        },
+        "pieces": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "grams",
+              "minutes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "file": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "volume_mm3": {
+                "type": "number"
+              },
+              "grams": {
+                "type": "number"
+              },
+              "minutes": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "total_grams": {
+          "type": "number"
+        },
+        "total_minutes": {
+          "type": "number"
+        },
+        "step_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     }
   },
   "$defs": {

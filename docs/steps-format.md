@@ -33,3 +33,7 @@ To show step *n*, the viewer:
 For an exploded view of the whole design, offset each placement by the `from_offset` of the step that added it.
 
 `check` is a one-line description of what a correct result looks like on camera, for example "LED long leg (anode) in the hole marked +". Gemini compares the workbench against it.
+
+## Print info
+
+`print` (when the design has a case) lists the printed pieces: `size_mm` of the closed case, and per piece its `file` (`design-base.stl`, `design-lid.stl`), `grams` of PLA and estimated `minutes` (a rough 12 g/h, shown as an estimate), plus totals and `step_file`. The Print screen reads it.
