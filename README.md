@@ -1,4 +1,4 @@
-# Physical Studio
+# Physical Studio Code
 
 IKEA-style instructions for any hardware project, generated from a prompt. Built for Hack the Valley 11!
 
