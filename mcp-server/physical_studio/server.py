@@ -40,6 +40,7 @@ PARTS_DIR = Path(os.environ.get("PHYSICAL_STUDIO_PARTS", REPO_ROOT / "parts"))
 OUT_DIR = Path(os.environ.get("PHYSICAL_STUDIO_OUT", REPO_ROOT / "mcp-server" / "out"))
 
 Vec3 = tuple[float, float, float]
+MIN_PHOTO_PX = 200  # find_part_looks drops photos whose short side is smaller than this
 WIRE_COLORS = {
     "red": "#d03a3a", "black": "#2b2b2b", "white": "#f0f0f0", "yellow": "#e8c52e", "green": "#3a9d4f",
     "blue": "#3a6fd0", "orange": "#e8862e", "purple": "#8a4fc0", "brown": "#7a5233", "grey": "#8a8f98",
@@ -117,10 +118,13 @@ class Studio:
         if source:
             appearance["source"] = source[:300]
         image = look.get("image")
+        sx, sy = part["body"]["size"][:2]
         if top_image_url:
             image = fetch_image(top_image_url)
+            ratio, want = image.size[0] / image.size[1], sx / sy
+            if abs(1 / ratio - want) < abs(ratio - want):  # a photo of the part turned sideways
+                image = image.rotate(90, expand=True)
         self.looks[part_id] = {"appearance": appearance, "image": image}
-        sx, sy = part["body"]["size"][:2]
         out = {"part_id": part_id, "appearance": appearance, "top_image": None}
         if image is not None:
             ratio, want = image.size[0] / image.size[1], sx / sy
@@ -145,10 +149,16 @@ class Studio:
                 return {"part_id": pid, "error": str(e)}
             fields = {k: look.get(k) for k in ("color", "metallic", "roughness", "source")}
             try:
-                return self.set_part_look(pid, top_image_url=look.get("top_image_url"), **fields)
+                out = self.set_part_look(pid, top_image_url=look.get("top_image_url"), **fields)
             except LookError as e:  # the photo didn't download; keep the colour and finish
-                out = self.set_part_look(pid, **fields)
-                return {**out, "photo_error": str(e)}
+                return {**self.set_part_look(pid, **fields), "photo_error": str(e)}
+            top = out.get("top_image")
+            if top and ("warning" in out or min(top["pixels"]) < MIN_PHOTO_PX):
+                # A thumbnail or the wrong shape looks worse than the plain (or drawn) top: drop it.
+                self.looks[pid]["image"] = None
+                out = {**out, "top_image": None, "photo_error": "photo too small or the wrong shape; kept the colour"}
+                out.pop("warning", None)
+            return out
 
         with ThreadPoolExecutor(max_workers=6) as pool:
             return {"looks": list(pool.map(one, ids))}

@@ -104,3 +104,17 @@ def test_find_part_looks_keeps_the_colour_when_the_photo_fails(studio, monkeypat
 def test_parse_look_drops_bad_fields():
     look = looks.parse_look('Here: {"color": "green", "metallic": "2", "roughness": "x", "top_image_url": null, "source": "https://a.b"}')
     assert look == {"metallic": 1.0, "source": "https://a.b"}
+
+
+def test_a_sideways_photo_is_turned_to_match_the_part(studio, monkeypatch):
+    monkeypatch.setattr("physical_studio.server.fetch_image", lambda url: Image.new("RGB", (534, 686)))
+    out = studio.set_part_look("arduino-uno", top_image_url="https://example.com/a.jpg")
+    assert out["top_image"]["pixels"] == [686, 534] and "warning" not in out
+
+
+def test_find_part_looks_drops_a_thumbnail(studio, monkeypatch):
+    monkeypatch.setattr("physical_studio.server.find_look", lambda part: {"color": "#11aa55", "top_image_url": "https://example.com/x.jpg"})
+    monkeypatch.setattr("physical_studio.server.fetch_image", lambda url: Image.new("RGB", (124, 96)))
+    out = studio.find_part_looks(["arduino-uno"])["looks"][0]
+    assert out["top_image"] is None and out["appearance"]["color"] == "#11aa55"
+    assert studio.looks["arduino-uno"]["image"] is None
