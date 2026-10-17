@@ -1,0 +1,18 @@
+{
+  "id": "encoder-mount",
+  "name": "Encoder mount",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": "encoder-mount.step",
+  "body": {
+    "size": [
+      30,
+      6.5,
+      30
+    ]
+  },
+  "notes": "Holds an AS5600 board 1 mm from the magnet on the shaft end (12 mm hole for the magnet).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,18 @@
+{
+  "id": "pinion-m1-26t",
+  "name": "Pinion gear M1 26T (8 mm bore)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": "pinion-m1-26t.step",
+  "body": {
+    "size": [
+      28,
+      28,
+      10
+    ]
+  },
+  "notes": "Module 1, 26 teeth: 26 mm pitch diameter, 28 mm outside, 10 mm face. 81.7 mm of cart travel per motor turn.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

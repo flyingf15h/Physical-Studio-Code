@@ -1,0 +1,158 @@
+{
+  "id": "drv8874-board",
+  "name": "DRV8874 motor driver board",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      20.3,
+      12.7,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      20.3,
+      12.7,
+      3
+    ]
+  },
+  "pins": [
+    {
+      "id": "in1",
+      "label": "IN1/EN",
+      "position": [
+        1.27,
+        1.27,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "in2",
+      "label": "IN2/PH",
+      "position": [
+        3.81,
+        1.27,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "pmode",
+      "label": "PMODE",
+      "position": [
+        6.35,
+        1.27,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "nsleep",
+      "label": "nSLEEP",
+      "position": [
+        8.89,
+        1.27,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        11.43,
+        1.27,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vm",
+      "label": "VM (12 V)",
+      "position": [
+        1.27,
+        11.43,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd_p",
+      "label": "GND",
+      "position": [
+        3.81,
+        11.43,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out1",
+      "label": "OUT1",
+      "position": [
+        6.35,
+        11.43,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out2",
+      "label": "OUT2",
+      "position": [
+        8.89,
+        11.43,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "H-bridge, up to 37 V / 2.1 A. PMODE high = IN/IN (PWM) mode; nSLEEP high to run.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,18 @@
+{
+  "id": "arm-lower-210",
+  "name": "Lower pendulum arm",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": "arm-lower-210.step",
+  "body": {
+    "size": [
+      30,
+      8,
+      210
+    ]
+  },
+  "notes": "Clamped to the cart shaft at the bottom (10 mm hole); a flanged bearing in the 19 mm hole at the top.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

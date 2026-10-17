@@ -1,0 +1,18 @@
+{
+  "id": "bearing-f6800zz",
+  "name": "Flanged bearing 10 mm ID (F6800ZZ)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": "bearing-f6800zz.step",
+  "body": {
+    "size": [
+      21,
+      21,
+      6
+    ]
+  },
+  "notes": "10 mm bore, 19 mm outside, 5 mm wide, 21 mm flange 1 mm thick. Presses into a 19 mm pocket with the flange on the outside.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

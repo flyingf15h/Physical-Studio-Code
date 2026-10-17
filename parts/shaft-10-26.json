@@ -1,0 +1,18 @@
+{
+  "id": "shaft-10-26",
+  "name": "Steel shaft 10 mm x 26 mm",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": "shaft-10-26.step",
+  "body": {
+    "size": [
+      10,
+      10,
+      26
+    ]
+  },
+  "notes": "Cut from 10 mm rod. Elbow joint: through the lower arm's bearing into the upper arm.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

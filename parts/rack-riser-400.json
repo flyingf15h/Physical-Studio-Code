@@ -1,0 +1,18 @@
+{
+  "id": "rack-riser-400",
+  "name": "Rack riser, 400 mm",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": null,
+  "body": {
+    "size": [
+      400,
+      10,
+      19
+    ]
+  },
+  "notes": "Printed or aluminium spacer that lifts the rack so the pinion meshes just under the cart plate.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

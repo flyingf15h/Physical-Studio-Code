@@ -1,0 +1,76 @@
+{
+  "id": "buck-12v-3v3",
+  "name": "12 V to 3.3 V regulator",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      22,
+      17,
+      5
+    ]
+  },
+  "pins": [
+    {
+      "id": "in_p",
+      "label": "IN+",
+      "position": [
+        2,
+        2,
+        5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "in_n",
+      "label": "IN-",
+      "position": [
+        2,
+        15,
+        5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out_p",
+      "label": "OUT+ 3.3 V",
+      "position": [
+        20,
+        2,
+        5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out_n",
+      "label": "OUT-",
+      "position": [
+        20,
+        15,
+        5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "Small step-down module. Powers the four sensors from the 12 V supply.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

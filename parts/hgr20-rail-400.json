@@ -1,0 +1,18 @@
+{
+  "id": "hgr20-rail-400",
+  "name": "HGR20 linear rail, 400 mm",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      400,
+      20,
+      17.5
+    ]
+  },
+  "notes": "HIWIN-style HGR20 profile: 20 mm wide, 17.5 mm tall. M5 screws every 60 mm into the base plate.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,48 @@
+{
+  "id": "psu-12v-2a",
+  "name": "12 V 2 A power adapter",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      85,
+      50,
+      32
+    ]
+  },
+  "pins": [
+    {
+      "id": "v12",
+      "label": "+12 V",
+      "position": [
+        85,
+        20,
+        16
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        85,
+        30,
+        16
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Wall adapter. Feeds the motor driver (VM) and the 3.3 V regulator.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

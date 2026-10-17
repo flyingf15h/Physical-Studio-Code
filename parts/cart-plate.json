@@ -1,0 +1,18 @@
+{
+  "id": "cart-plate",
+  "name": "Cart plate 120 x 90 mm",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": "cart-plate.step",
+  "body": {
+    "size": [
+      120,
+      90,
+      6
+    ]
+  },
+  "notes": "Bolts onto the carriage block. The motor shaft drops through the 9 mm hole to the pinion underneath.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

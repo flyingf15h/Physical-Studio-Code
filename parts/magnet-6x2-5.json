@@ -1,0 +1,18 @@
+{
+  "id": "magnet-6x2-5",
+  "name": "Diametric magnet 6 x 2.5 mm",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": "magnet-6x2-5.step",
+  "body": {
+    "size": [
+      6,
+      6,
+      2.5
+    ]
+  },
+  "notes": "Comes with the AS5600 board. Glue it centred on the shaft end.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,90 @@
+{
+  "id": "as5600-board",
+  "name": "AS5600 magnetic encoder board",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      23,
+      23,
+      1.6
+    ]
+  },
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        3.0,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        5.54,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dir",
+      "label": "DIR",
+      "position": [
+        8.08,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        10.620000000000001,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        13.16,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "12-bit angle sensor, I2C address 0x36 (fixed), so each one needs its own I2C bus. Chip side faces the magnet, 0.5 to 3 mm away.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

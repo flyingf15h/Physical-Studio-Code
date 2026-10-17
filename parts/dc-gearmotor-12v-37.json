@@ -1,0 +1,48 @@
+{
+  "id": "dc-gearmotor-12v-37",
+  "name": "12 V DC gearmotor (37 mm)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": "dc-gearmotor-12v-37.step",
+  "body": {
+    "size": [
+      37,
+      37,
+      72
+    ]
+  },
+  "pins": [
+    {
+      "id": "m_pos",
+      "label": "Motor +",
+      "position": [
+        12,
+        18.5,
+        72
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "m_neg",
+      "label": "Motor -",
+      "position": [
+        25,
+        18.5,
+        72
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "37 mm gearmotor: 55 mm body, 6 mm output shaft 17 mm long, pointing down (-z). If the pinion's bore is 8 mm, use a 6-to-8 mm sleeve or a 6 mm-bore pinion.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

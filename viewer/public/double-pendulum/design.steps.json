@@ -1,0 +1,2366 @@
+{
+  "format": "physical-studio-steps",
+  "version": 1,
+  "title": "Double inverted pendulum",
+  "model": "design.glb",
+  "units": "mm",
+  "bounds": {
+    "min": [
+      -100.0,
+      -12.0,
+      0.0
+    ],
+    "max": [
+      500.0,
+      130.0,
+      436.0
+    ]
+  },
+  "placements": [
+    {
+      "id": "base-plate",
+      "kind": "part",
+      "part": "base-plate-500",
+      "name": "Base plate",
+      "position": [
+        0.0,
+        15.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#6a9955"
+    },
+    {
+      "id": "rail",
+      "kind": "part",
+      "part": "hgr20-rail-400",
+      "name": "Linear rail",
+      "position": [
+        50.0,
+        50.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#6a9955"
+    },
+    {
+      "id": "block",
+      "kind": "part",
+      "part": "hgh20ca-block",
+      "name": "Carriage block",
+      "position": [
+        200.0,
+        38.0,
+        14.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#6a9955"
+    },
+    {
+      "id": "riser",
+      "kind": "part",
+      "part": "rack-riser-400",
+      "name": "Rack riser",
+      "position": [
+        50.0,
+        112.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a8f98"
+    },
+    {
+      "id": "rack",
+      "kind": "part",
+      "part": "gear-rack-m1-400",
+      "name": "Gear rack",
+      "position": [
+        50.0,
+        112.0,
+        29.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#c0c4c8"
+    },
+    {
+      "id": "cart",
+      "kind": "part",
+      "part": "cart-plate",
+      "name": "Cart plate",
+      "position": [
+        170.7,
+        25.0,
+        40.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#4a7fb5"
+    },
+    {
+      "id": "pinion",
+      "kind": "part",
+      "part": "pinion-m1-26t",
+      "name": "Pinion gear",
+      "position": [
+        216.7,
+        86.0,
+        29.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#c0c4c8"
+    },
+    {
+      "id": "motor",
+      "kind": "part",
+      "part": "dc-gearmotor-12v-37",
+      "name": "Drive motor",
+      "position": [
+        212.2,
+        81.5,
+        29.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a8f98",
+      "pins": [
+        {
+          "id": "m_pos",
+          "position": [
+            12.0,
+            18.5,
+            72.0
+          ]
+        },
+        {
+          "id": "m_neg",
+          "position": [
+            25.0,
+            18.5,
+            72.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pivot",
+      "kind": "part",
+      "part": "pivot-block",
+      "name": "Pivot block",
+      "position": [
+        215.7,
+        25.0,
+        46.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e"
+    },
+    {
+      "id": "bearing-front",
+      "kind": "part",
+      "part": "bearing-f6800zz",
+      "name": "Front cart bearing",
+      "position": [
+        220.2,
+        24.0,
+        71.5
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#c0c4c8"
+    },
+    {
+      "id": "bearing-back",
+      "kind": "part",
+      "part": "bearing-f6800zz",
+      "name": "Back cart bearing",
+      "position": [
+        220.2,
+        46.0,
+        50.5
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#c0c4c8"
+    },
+    {
+      "id": "shaft-cart",
+      "kind": "part",
+      "part": "shaft-10-48",
+      "name": "Cart shaft",
+      "position": [
+        225.7,
+        1.0,
+        66.0
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d9d9d9"
+    },
+    {
+      "id": "arm-lower",
+      "kind": "part",
+      "part": "arm-lower-210",
+      "name": "Lower arm",
+      "position": [
+        215.7,
+        3.0,
+        46.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a"
+    },
+    {
+      "id": "magnet-cart",
+      "kind": "part",
+      "part": "magnet-6x2-5",
+      "name": "Cart joint magnet",
+      "position": [
+        227.7,
+        49.0,
+        64.0
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#555555"
+    },
+    {
+      "id": "mount-cart",
+      "kind": "part",
+      "part": "encoder-mount",
+      "name": "Cart encoder mount",
+      "position": [
+        215.7,
+        46.0,
+        46.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e"
+    },
+    {
+      "id": "enc-cart",
+      "kind": "part",
+      "part": "as5600-board",
+      "name": "Cart joint encoder",
+      "position": [
+        219.2,
+        54.1,
+        49.5
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a4fc0",
+      "pins": [
+        {
+          "id": "vcc",
+          "position": [
+            3.0,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            5.54,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "dir",
+          "position": [
+            8.08,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "scl",
+          "position": [
+            10.620000000000001,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "sda",
+          "position": [
+            13.16,
+            1.27,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bearing-elbow",
+      "kind": "part",
+      "part": "bearing-f6800zz",
+      "name": "Elbow bearing",
+      "position": [
+        220.2,
+        2.0,
+        251.5
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#c0c4c8"
+    },
+    {
+      "id": "shaft-elbow",
+      "kind": "part",
+      "part": "shaft-10-26",
+      "name": "Elbow shaft",
+      "position": [
+        225.7,
+        -12.0,
+        246.0
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d9d9d9"
+    },
+    {
+      "id": "arm-upper",
+      "kind": "part",
+      "part": "arm-upper-210",
+      "name": "Upper arm",
+      "position": [
+        215.7,
+        -10.0,
+        226.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e"
+    },
+    {
+      "id": "magnet-elbow",
+      "kind": "part",
+      "part": "magnet-6x2-5",
+      "name": "Elbow magnet",
+      "position": [
+        227.7,
+        14.0,
+        244.0
+      ],
+      "rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#555555"
+    },
+    {
+      "id": "mount-elbow",
+      "kind": "part",
+      "part": "encoder-mount",
+      "name": "Elbow encoder mount",
+      "position": [
+        215.7,
+        11.0,
+        226.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e"
+    },
+    {
+      "id": "enc-elbow",
+      "kind": "part",
+      "part": "as5600-board",
+      "name": "Elbow encoder",
+      "position": [
+        219.2,
+        19.1,
+        229.5
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a4fc0",
+      "pins": [
+        {
+          "id": "vcc",
+          "position": [
+            3.0,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            5.54,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "dir",
+          "position": [
+            8.08,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "scl",
+          "position": [
+            10.620000000000001,
+            1.27,
+            0.0
+          ]
+        },
+        {
+          "id": "sda",
+          "position": [
+            13.16,
+            1.27,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tof-bracket-left",
+      "kind": "part",
+      "part": "tof-bracket",
+      "name": "Left sensor bracket",
+      "position": [
+        30.0,
+        45.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e"
+    },
+    {
+      "id": "tof-left",
+      "kind": "part",
+      "part": "vl53l0x-board",
+      "name": "Left distance sensor",
+      "position": [
+        40.0,
+        47.5,
+        38.4
+      ],
+      "rotation": [
+        0.0,
+        90.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "pins": [
+        {
+          "id": "vin",
+          "position": [
+            1.27,
+            2.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            1.27,
+            5.04,
+            0.0
+          ]
+        },
+        {
+          "id": "scl",
+          "position": [
+            1.27,
+            7.58,
+            0.0
+          ]
+        },
+        {
+          "id": "sda",
+          "position": [
+            1.27,
+            10.120000000000001,
+            0.0
+          ]
+        },
+        {
+          "id": "xshut",
+          "position": [
+            1.27,
+            12.66,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tof-bracket-right",
+      "kind": "part",
+      "part": "tof-bracket",
+      "name": "Right sensor bracket",
+      "position": [
+        460.0,
+        45.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e"
+    },
+    {
+      "id": "tof-right",
+      "kind": "part",
+      "part": "vl53l0x-board",
+      "name": "Right distance sensor",
+      "position": [
+        460.0,
+        47.5,
+        27.7
+      ],
+      "rotation": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "pins": [
+        {
+          "id": "vin",
+          "position": [
+            1.27,
+            2.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            1.27,
+            5.04,
+            0.0
+          ]
+        },
+        {
+          "id": "scl",
+          "position": [
+            1.27,
+            7.58,
+            0.0
+          ]
+        },
+        {
+          "id": "sda",
+          "position": [
+            1.27,
+            10.120000000000001,
+            0.0
+          ]
+        },
+        {
+          "id": "xshut",
+          "position": [
+            1.27,
+            12.66,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teensy",
+      "kind": "part",
+      "part": "teensy-41",
+      "name": "Teensy 4.1",
+      "position": [
+        60.0,
+        17.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#1f6fb2",
+      "pins": [
+        {
+          "id": "vin",
+          "position": [
+            3.17,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "gnd2",
+          "position": [
+            5.71,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "3v3",
+          "position": [
+            8.25,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "d19",
+          "position": [
+            20.950000000000003,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "d18",
+          "position": [
+            23.490000000000002,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "d17",
+          "position": [
+            26.03,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "d16",
+          "position": [
+            28.57,
+            16.62,
+            1.6
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            3.17,
+            1.38,
+            1.6
+          ]
+        },
+        {
+          "id": "d2",
+          "position": [
+            10.79,
+            1.38,
+            1.6
+          ]
+        },
+        {
+          "id": "d3",
+          "position": [
+            13.33,
+            1.38,
+            1.6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "driver",
+      "kind": "part",
+      "part": "drv8874-board",
+      "name": "Motor driver",
+      "position": [
+        128.0,
+        17.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#b03030",
+      "pins": [
+        {
+          "id": "in1",
+          "position": [
+            1.27,
+            1.27,
+            1.6
+          ]
+        },
+        {
+          "id": "in2",
+          "position": [
+            3.81,
+            1.27,
+            1.6
+          ]
+        },
+        {
+          "id": "pmode",
+          "position": [
+            6.35,
+            1.27,
+            1.6
+          ]
+        },
+        {
+          "id": "nsleep",
+          "position": [
+            8.89,
+            1.27,
+            1.6
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            11.43,
+            1.27,
+            1.6
+          ]
+        },
+        {
+          "id": "vm",
+          "position": [
+            1.27,
+            11.43,
+            1.6
+          ]
+        },
+        {
+          "id": "gnd_p",
+          "position": [
+            3.81,
+            11.43,
+            1.6
+          ]
+        },
+        {
+          "id": "out1",
+          "position": [
+            6.35,
+            11.43,
+            1.6
+          ]
+        },
+        {
+          "id": "out2",
+          "position": [
+            8.89,
+            11.43,
+            1.6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "regulator",
+      "kind": "part",
+      "part": "buck-12v-3v3",
+      "name": "3.3 V regulator",
+      "position": [
+        155.0,
+        17.0,
+        10.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2a7a4a",
+      "pins": [
+        {
+          "id": "in_p",
+          "position": [
+            2.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "id": "in_n",
+          "position": [
+            2.0,
+            15.0,
+            5.0
+          ]
+        },
+        {
+          "id": "out_p",
+          "position": [
+            20.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "id": "out_n",
+          "position": [
+            20.0,
+            15.0,
+            5.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psu",
+      "kind": "part",
+      "part": "psu-12v-2a",
+      "name": "12 V adapter",
+      "position": [
+        -100.0,
+        40.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "pins": [
+        {
+          "id": "v12",
+          "position": [
+            85.0,
+            20.0,
+            16.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            85.0,
+            30.0,
+            16.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "w-psu-vm",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 12 V adapter v12 to Motor driver vm",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "psu",
+        "pin": "v12"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "vm"
+      },
+      "length_mm": 158.8
+    },
+    {
+      "id": "w-psu-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 12 V adapter gnd to Motor driver gnd_p",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "psu",
+        "pin": "gnd"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "gnd_p"
+      },
+      "length_mm": 163.7
+    },
+    {
+      "id": "w-reg-in",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 12 V adapter v12 to 3.3 V regulator in_p",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "psu",
+        "pin": "v12"
+      },
+      "to": {
+        "placement": "regulator",
+        "pin": "in_p"
+      },
+      "length_mm": 187.0
+    },
+    {
+      "id": "w-reg-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 12 V adapter gnd to 3.3 V regulator in_n",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "psu",
+        "pin": "gnd"
+      },
+      "to": {
+        "placement": "regulator",
+        "pin": "in_n"
+      },
+      "length_mm": 186.3
+    },
+    {
+      "id": "w-motor-a",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Motor driver out1 to Drive motor m_pos",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8862e",
+      "from": {
+        "placement": "driver",
+        "pin": "out1"
+      },
+      "to": {
+        "placement": "motor",
+        "pin": "m_pos"
+      },
+      "length_mm": 166.9
+    },
+    {
+      "id": "w-motor-b",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Motor driver out2 to Drive motor m_neg",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#7a5233",
+      "from": {
+        "placement": "driver",
+        "pin": "out2"
+      },
+      "to": {
+        "placement": "motor",
+        "pin": "m_neg"
+      },
+      "length_mm": 173.3
+    },
+    {
+      "id": "w-in1",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d2 to Motor driver in1",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a6fd0",
+      "from": {
+        "placement": "teensy",
+        "pin": "d2"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "in1"
+      },
+      "length_mm": 72.4
+    },
+    {
+      "id": "w-in2",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d3 to Motor driver in2",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a4fc0",
+      "from": {
+        "placement": "teensy",
+        "pin": "d3"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "in2"
+      },
+      "length_mm": 72.4
+    },
+    {
+      "id": "w-pmode",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 3v3 to Motor driver pmode",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f0f0f0",
+      "from": {
+        "placement": "teensy",
+        "pin": "3v3"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "pmode"
+      },
+      "length_mm": 84.0
+    },
+    {
+      "id": "w-nsleep",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 3v3 to Motor driver nsleep",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f0f0f0",
+      "from": {
+        "placement": "teensy",
+        "pin": "3v3"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "nsleep"
+      },
+      "length_mm": 87.0
+    },
+    {
+      "id": "w-logic-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 gnd to Motor driver gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "teensy",
+        "pin": "gnd"
+      },
+      "to": {
+        "placement": "driver",
+        "pin": "gnd"
+      },
+      "length_mm": 94.4
+    },
+    {
+      "id": "w-common-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 gnd2 to 3.3 V regulator out_n",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "teensy",
+        "pin": "gnd2"
+      },
+      "to": {
+        "placement": "regulator",
+        "pin": "out_n"
+      },
+      "length_mm": 135.3
+    },
+    {
+      "id": "w-enc-cart-3v3",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_p to Cart joint encoder vcc",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_p"
+      },
+      "to": {
+        "placement": "enc-cart",
+        "pin": "vcc"
+      },
+      "length_mm": 80.8
+    },
+    {
+      "id": "w-enc-cart-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_n to Cart joint encoder gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_n"
+      },
+      "to": {
+        "placement": "enc-cart",
+        "pin": "gnd"
+      },
+      "length_mm": 76.1
+    },
+    {
+      "id": "w-enc-elbow-3v3",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_p to Elbow encoder vcc",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_p"
+      },
+      "to": {
+        "placement": "enc-elbow",
+        "pin": "vcc"
+      },
+      "length_mm": 229.8
+    },
+    {
+      "id": "w-enc-elbow-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_n to Elbow encoder gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_n"
+      },
+      "to": {
+        "placement": "enc-elbow",
+        "pin": "gnd"
+      },
+      "length_mm": 230.5
+    },
+    {
+      "id": "w-tof-left-3v3",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_p to Left distance sensor vin",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_p"
+      },
+      "to": {
+        "placement": "tof-left",
+        "pin": "vin"
+      },
+      "length_mm": 160.5
+    },
+    {
+      "id": "w-tof-left-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_n to Left distance sensor gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_n"
+      },
+      "to": {
+        "placement": "tof-left",
+        "pin": "gnd"
+      },
+      "length_mm": 158.5
+    },
+    {
+      "id": "w-tof-right-3v3",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_p to Right distance sensor vin",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_p"
+      },
+      "to": {
+        "placement": "tof-right",
+        "pin": "vin"
+      },
+      "length_mm": 300.3
+    },
+    {
+      "id": "w-tof-right-gnd",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire 3.3 V regulator out_n to Right distance sensor gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "regulator",
+        "pin": "out_n"
+      },
+      "to": {
+        "placement": "tof-right",
+        "pin": "gnd"
+      },
+      "length_mm": 299.3
+    },
+    {
+      "id": "w-enc-cart-dir",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Cart joint encoder dir to Cart joint encoder gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "enc-cart",
+        "pin": "dir"
+      },
+      "to": {
+        "placement": "enc-cart",
+        "pin": "gnd"
+      },
+      "length_mm": 12.7
+    },
+    {
+      "id": "w-enc-elbow-dir",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Elbow encoder dir to Elbow encoder gnd",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "enc-elbow",
+        "pin": "dir"
+      },
+      "to": {
+        "placement": "enc-elbow",
+        "pin": "gnd"
+      },
+      "length_mm": 12.7
+    },
+    {
+      "id": "w-enc-cart-sda",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d18 to Cart joint encoder sda",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "from": {
+        "placement": "teensy",
+        "pin": "d18"
+      },
+      "to": {
+        "placement": "enc-cart",
+        "pin": "sda"
+      },
+      "length_mm": 173.7
+    },
+    {
+      "id": "w-enc-cart-scl",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d19 to Cart joint encoder scl",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "from": {
+        "placement": "teensy",
+        "pin": "d19"
+      },
+      "to": {
+        "placement": "enc-cart",
+        "pin": "scl"
+      },
+      "length_mm": 173.7
+    },
+    {
+      "id": "w-tof-left-sda",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d18 to Left distance sensor sda",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "from": {
+        "placement": "teensy",
+        "pin": "d18"
+      },
+      "to": {
+        "placement": "tof-left",
+        "pin": "sda"
+      },
+      "length_mm": 65.7
+    },
+    {
+      "id": "w-tof-left-scl",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d19 to Left distance sensor scl",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "from": {
+        "placement": "teensy",
+        "pin": "d19"
+      },
+      "to": {
+        "placement": "tof-left",
+        "pin": "scl"
+      },
+      "length_mm": 62.0
+    },
+    {
+      "id": "w-enc-elbow-sda",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d17 to Elbow encoder sda",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "from": {
+        "placement": "teensy",
+        "pin": "d17"
+      },
+      "to": {
+        "placement": "enc-elbow",
+        "pin": "sda"
+      },
+      "length_mm": 273.0
+    },
+    {
+      "id": "w-enc-elbow-scl",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d16 to Elbow encoder scl",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "from": {
+        "placement": "teensy",
+        "pin": "d16"
+      },
+      "to": {
+        "placement": "enc-elbow",
+        "pin": "scl"
+      },
+      "length_mm": 270.2
+    },
+    {
+      "id": "w-tof-right-sda",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d17 to Right distance sensor sda",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "from": {
+        "placement": "teensy",
+        "pin": "d17"
+      },
+      "to": {
+        "placement": "tof-right",
+        "pin": "sda"
+      },
+      "length_mm": 386.1
+    },
+    {
+      "id": "w-tof-right-scl",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Teensy 4.1 d16 to Right distance sensor scl",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "from": {
+        "placement": "teensy",
+        "pin": "d16"
+      },
+      "to": {
+        "placement": "tof-right",
+        "pin": "scl"
+      },
+      "length_mm": 383.5
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "title": "Lay out the base plate",
+      "text": "Put the base plate on the table with its long front edge right at the table edge.",
+      "add": [
+        "base-plate"
+      ],
+      "check": "The base plate lies flat with its front edge at the edge of the table."
+    },
+    {
+      "index": 2,
+      "title": "Screw down the linear rail",
+      "text": "Lay the rail along the base, 35 mm in from the back of the front strip, and screw it down with M5 screws.",
+      "add": [
+        "rail"
+      ],
+      "motion": [
+        {
+          "placement": "rail",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "4 mm hex key",
+          "for": "M5 rail screws"
+        }
+      ],
+      "check": "The rail runs straight along the base, 50 mm from each end."
+    },
+    {
+      "index": 3,
+      "title": "Slide on the carriage block",
+      "text": "Slide the carriage block onto the rail from one end. Keep it level so the balls stay in.",
+      "add": [
+        "block"
+      ],
+      "motion": [
+        {
+          "placement": "block",
+          "from_offset": [
+            -260,
+            0,
+            0
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Slide on from the end, don't lift it off again",
+          "target": "block"
+        }
+      ],
+      "check": "The block sits on the rail and slides end to end smoothly."
+    },
+    {
+      "index": 4,
+      "title": "Fit the rack riser",
+      "text": "Screw the rack riser along the back of the base, parallel to the rail.",
+      "add": [
+        "riser"
+      ],
+      "motion": [
+        {
+          "placement": "riser",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "The riser runs along the back edge, parallel to the rail."
+    },
+    {
+      "index": 5,
+      "title": "Fit the gear rack",
+      "text": "Screw the rack on top of the riser with its teeth facing the rail.",
+      "add": [
+        "rack"
+      ],
+      "motion": [
+        {
+          "placement": "rack",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Teeth face the rail",
+          "target": "rack"
+        }
+      ],
+      "check": "The rack sits on the riser with its teeth facing the rail."
+    },
+    {
+      "index": 6,
+      "title": "Bolt on the cart plate",
+      "text": "Put the cart plate on the carriage block, motor hole at the back over the rack, and bolt it down with 4 M5 screws.",
+      "add": [
+        "cart"
+      ],
+      "motion": [
+        {
+          "placement": "cart",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "4 mm hex key",
+          "for": "M5 cart screws"
+        }
+      ],
+      "check": "The cart plate sits flat on the block with its hole above the rack."
+    },
+    {
+      "index": 7,
+      "title": "Mount the drive motor",
+      "text": "Stand the motor on the cart plate and push its shaft down through the hole. Screw it to the plate.",
+      "add": [
+        "motor"
+      ],
+      "motion": [
+        {
+          "placement": "motor",
+          "from_offset": [
+            0,
+            0,
+            60
+          ]
+        }
+      ],
+      "check": "The motor stands upright on the cart with its shaft through the plate."
+    },
+    {
+      "index": 8,
+      "title": "Fit the pinion gear",
+      "text": "From underneath, push the pinion onto the motor shaft so it meshes with the rack, then tighten its set screw.",
+      "add": [
+        "pinion"
+      ],
+      "motion": [
+        {
+          "placement": "pinion",
+          "from_offset": [
+            0,
+            0,
+            -25
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "2 mm hex key",
+          "for": "pinion set screw"
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Teeth mesh with the rack, no gap",
+          "target": "pinion"
+        }
+      ],
+      "check": "The pinion is on the motor shaft under the cart and its teeth sit in the rack."
+    },
+    {
+      "index": 9,
+      "title": "Screw on the pivot block",
+      "text": "Screw the pivot block to the front of the cart plate, its big hole running front to back.",
+      "add": [
+        "pivot"
+      ],
+      "motion": [
+        {
+          "placement": "pivot",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "The pivot block sits at the front of the cart with its hole running front to back."
+    },
+    {
+      "index": 10,
+      "title": "Press in the front cart bearing",
+      "text": "Press a flanged bearing into the front of the pivot block, flange outside.",
+      "add": [
+        "bearing-front"
+      ],
+      "motion": [
+        {
+          "placement": "bearing-front",
+          "from_offset": [
+            0,
+            -40,
+            0
+          ]
+        }
+      ],
+      "check": "A bearing flange sits flat on the front face of the pivot block."
+    },
+    {
+      "index": 11,
+      "title": "Press in the back cart bearing",
+      "text": "Press the second bearing into the back of the pivot block, flange outside.",
+      "add": [
+        "bearing-back"
+      ],
+      "motion": [
+        {
+          "placement": "bearing-back",
+          "from_offset": [
+            0,
+            40,
+            0
+          ]
+        }
+      ],
+      "check": "A bearing flange sits flat on the back face of the pivot block."
+    },
+    {
+      "index": 12,
+      "title": "Fit the lower arm",
+      "text": "Hold the lower arm in front of the pivot block, its small hole lined up with the bearings.",
+      "add": [
+        "arm-lower"
+      ],
+      "motion": [
+        {
+          "placement": "arm-lower",
+          "from_offset": [
+            0,
+            -60,
+            0
+          ]
+        }
+      ],
+      "check": "The lower arm stands in front of the cart, small hole at the bottom by the bearings."
+    },
+    {
+      "index": 13,
+      "title": "Slide in the cart shaft",
+      "text": "Push the 48 mm shaft from the front through the arm and both bearings, then clamp the arm to it.",
+      "add": [
+        "shaft-cart"
+      ],
+      "motion": [
+        {
+          "placement": "shaft-cart",
+          "from_offset": [
+            0,
+            -50,
+            0
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "2 mm hex key",
+          "for": "arm clamp screw"
+        }
+      ],
+      "check": "The shaft passes through the arm and both bearings and pokes out of the back of the pivot block."
+    },
+    {
+      "index": 14,
+      "title": "Glue on the cart magnet",
+      "text": "Glue the round magnet centred on the back end of the cart shaft.",
+      "add": [
+        "magnet-cart"
+      ],
+      "callouts": [
+        {
+          "text": "Centred on the shaft end",
+          "target": "magnet-cart"
+        }
+      ],
+      "check": "A small round magnet sits in the middle of the shaft's back end."
+    },
+    {
+      "index": 15,
+      "title": "Fit the cart encoder mount",
+      "text": "Screw the encoder mount to the cart behind the pivot block, its hole around the magnet.",
+      "add": [
+        "mount-cart"
+      ],
+      "motion": [
+        {
+          "placement": "mount-cart",
+          "from_offset": [
+            0,
+            30,
+            0
+          ]
+        }
+      ],
+      "check": "The mount stands behind the pivot block and the magnet is inside its hole."
+    },
+    {
+      "index": 16,
+      "title": "Screw on the cart encoder",
+      "text": "Screw an AS5600 board to the back of the mount, chip facing the magnet.",
+      "add": [
+        "enc-cart"
+      ],
+      "motion": [
+        {
+          "placement": "enc-cart",
+          "from_offset": [
+            0,
+            30,
+            0
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Chip side faces the magnet",
+          "target": "enc-cart"
+        }
+      ],
+      "check": "The encoder board covers the mount's hole, pins at the bottom."
+    },
+    {
+      "index": 17,
+      "title": "Press in the elbow bearing",
+      "text": "Press a bearing into the big hole at the top of the lower arm, flange at the front.",
+      "add": [
+        "bearing-elbow"
+      ],
+      "motion": [
+        {
+          "placement": "bearing-elbow",
+          "from_offset": [
+            0,
+            -40,
+            0
+          ]
+        }
+      ],
+      "check": "A bearing flange sits on the front of the lower arm's top hole."
+    },
+    {
+      "index": 18,
+      "title": "Fit the upper arm",
+      "text": "Hold the upper arm in front of the lower arm, its hole lined up with the elbow bearing.",
+      "add": [
+        "arm-upper"
+      ],
+      "motion": [
+        {
+          "placement": "arm-upper",
+          "from_offset": [
+            0,
+            -60,
+            0
+          ]
+        }
+      ],
+      "check": "The upper arm overlaps the top of the lower arm, in front of it."
+    },
+    {
+      "index": 19,
+      "title": "Slide in the elbow shaft",
+      "text": "Push the 26 mm shaft from the front through the upper arm and the elbow bearing, then clamp the upper arm to it.",
+      "add": [
+        "shaft-elbow"
+      ],
+      "motion": [
+        {
+          "placement": "shaft-elbow",
+          "from_offset": [
+            0,
+            -50,
+            0
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "2 mm hex key",
+          "for": "arm clamp screw"
+        }
+      ],
+      "check": "The elbow shaft joins the two arms and the upper arm swings freely."
+    },
+    {
+      "index": 20,
+      "title": "Glue on the elbow magnet",
+      "text": "Glue the second magnet centred on the back end of the elbow shaft.",
+      "add": [
+        "magnet-elbow"
+      ],
+      "check": "A small round magnet sits in the middle of the elbow shaft's back end."
+    },
+    {
+      "index": 21,
+      "title": "Fit the elbow encoder mount",
+      "text": "Screw the second encoder mount to the back of the lower arm, its hole around the magnet.",
+      "add": [
+        "mount-elbow"
+      ],
+      "motion": [
+        {
+          "placement": "mount-elbow",
+          "from_offset": [
+            0,
+            30,
+            0
+          ]
+        }
+      ],
+      "check": "The mount sits on the back of the lower arm's top end."
+    },
+    {
+      "index": 22,
+      "title": "Screw on the elbow encoder",
+      "text": "Screw the second AS5600 board to the mount, chip facing the magnet.",
+      "add": [
+        "enc-elbow"
+      ],
+      "motion": [
+        {
+          "placement": "enc-elbow",
+          "from_offset": [
+            0,
+            30,
+            0
+          ]
+        }
+      ],
+      "check": "The second encoder board covers the elbow mount's hole."
+    },
+    {
+      "index": 23,
+      "title": "Fit the left distance sensor",
+      "text": "Screw a bracket to the left end of the base and a VL53L0X to it, sensor facing the cart.",
+      "add": [
+        "tof-bracket-left",
+        "tof-left"
+      ],
+      "motion": [
+        {
+          "placement": "tof-bracket-left",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        },
+        {
+          "placement": "tof-left",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "A distance sensor stands at the left end of the rail, facing the cart."
+    },
+    {
+      "index": 24,
+      "title": "Fit the right distance sensor",
+      "text": "Do the same at the right end of the rail.",
+      "add": [
+        "tof-bracket-right",
+        "tof-right"
+      ],
+      "motion": [
+        {
+          "placement": "tof-bracket-right",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        },
+        {
+          "placement": "tof-right",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "A distance sensor stands at the right end of the rail, facing the cart."
+    },
+    {
+      "index": 25,
+      "title": "Place the Teensy",
+      "text": "Stick the Teensy to the front strip of the base, USB port to the left.",
+      "add": [
+        "teensy"
+      ],
+      "motion": [
+        {
+          "placement": "teensy",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "The Teensy lies on the front strip with its USB port on the left."
+    },
+    {
+      "index": 26,
+      "title": "Place the motor driver",
+      "text": "Stick the DRV8874 board next to the Teensy.",
+      "add": [
+        "driver"
+      ],
+      "motion": [
+        {
+          "placement": "driver",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "The motor driver board sits to the right of the Teensy."
+    },
+    {
+      "index": 27,
+      "title": "Place the 3.3 V regulator",
+      "text": "Stick the regulator next to the motor driver.",
+      "add": [
+        "regulator"
+      ],
+      "motion": [
+        {
+          "placement": "regulator",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "check": "The regulator sits to the right of the motor driver."
+    },
+    {
+      "index": 28,
+      "title": "Wire the motor",
+      "text": "Connect the motor's two terminals to the driver's OUT1 and OUT2. Leave slack so the cart can travel.",
+      "add": [
+        "w-motor-a",
+        "w-motor-b"
+      ],
+      "callouts": [
+        {
+          "text": "Leave a loop of slack for the cart",
+          "target": "motor"
+        }
+      ],
+      "check": "Orange and brown wires run from the motor to OUT1 and OUT2."
+    },
+    {
+      "index": 29,
+      "title": "Wire the driver to the Teensy",
+      "text": "Connect pin 2 to IN1, pin 3 to IN2, 3.3 V to PMODE and nSLEEP, and GND to GND.",
+      "add": [
+        "w-in1",
+        "w-in2",
+        "w-pmode",
+        "w-nsleep",
+        "w-logic-gnd"
+      ],
+      "check": "Blue and purple wires go from pins 2 and 3 to IN1 and IN2, and two white wires to PMODE and nSLEEP."
+    },
+    {
+      "index": 30,
+      "title": "Wire the cart encoder",
+      "text": "Connect the cart encoder: VCC and GND to the regulator, SDA to pin 18, SCL to pin 19, and DIR to GND.",
+      "add": [
+        "w-enc-cart-3v3",
+        "w-enc-cart-gnd",
+        "w-enc-cart-sda",
+        "w-enc-cart-scl",
+        "w-enc-cart-dir"
+      ],
+      "check": "Four wires leave the cart encoder: red, black, green to pin 18 and yellow to pin 19."
+    },
+    {
+      "index": 31,
+      "title": "Wire the elbow encoder",
+      "text": "Run the elbow encoder's wires down the lower arm: VCC and GND to the regulator, SDA to pin 17, SCL to pin 16, DIR to GND.",
+      "add": [
+        "w-enc-elbow-3v3",
+        "w-enc-elbow-gnd",
+        "w-enc-elbow-sda",
+        "w-enc-elbow-scl",
+        "w-enc-elbow-dir"
+      ],
+      "callouts": [
+        {
+          "text": "Tie the wires along the arm, leave slack at the cart joint",
+          "target": "arm-lower"
+        }
+      ],
+      "check": "The elbow encoder's wires run down the lower arm, green to pin 17 and yellow to pin 16."
+    },
+    {
+      "index": 32,
+      "title": "Wire the distance sensors",
+      "text": "Left sensor: SDA to 18, SCL to 19. Right sensor: SDA to 17, SCL to 16. Both get 3.3 V and GND from the regulator.",
+      "add": [
+        "w-tof-left-3v3",
+        "w-tof-left-gnd",
+        "w-tof-left-sda",
+        "w-tof-left-scl",
+        "w-tof-right-3v3",
+        "w-tof-right-gnd",
+        "w-tof-right-sda",
+        "w-tof-right-scl"
+      ],
+      "check": "Each distance sensor has red, black, green and yellow wires."
+    },
+    {
+      "index": 33,
+      "title": "Wire the power",
+      "text": "Connect the 12 V adapter to the driver's VM and GND and to the regulator's IN+ and IN-, and join the Teensy's GND to the regulator's OUT-.",
+      "add": [
+        "psu",
+        "w-psu-vm",
+        "w-psu-gnd",
+        "w-reg-in",
+        "w-reg-gnd",
+        "w-common-gnd"
+      ],
+      "callouts": [
+        {
+          "text": "Plug the adapter in last",
+          "target": "psu"
+        }
+      ],
+      "check": "Red and black wires run from the adapter to the driver and the regulator; the adapter is still unplugged."
+    }
+  ],
+  "prompt": "i wanna make a double inverted pendulum using a rack and pinion motor on cart motion system. Items: 12V DC motor, M1 8mm 26T gear, HGR20 400mm linear rail + HGH20CA block, 10mm ID flanged bearings, 2x VL53L0X TOF sensor, M1 10x10 400mm rack, 2x AS5600 magnetic encoder, Teensy 4.1, DRV8874 H-bridge motor driver, 12V 2A power supply, 12V to 3V3 regulator."
+}

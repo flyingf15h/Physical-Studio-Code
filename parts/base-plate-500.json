@@ -1,0 +1,18 @@
+{
+  "id": "base-plate-500",
+  "name": "Base plate 500 x 115 mm",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": null,
+  "body": {
+    "size": [
+      500,
+      115,
+      10
+    ]
+  },
+  "notes": "10 mm plywood or aluminium plate. Its front edge goes at the edge of the table (or on legs) so the pendulum can hang down.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

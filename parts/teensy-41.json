@@ -1,0 +1,189 @@
+{
+  "id": "teensy-41",
+  "name": "Teensy 4.1",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      61,
+      18,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      61,
+      18,
+      4
+    ]
+  },
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "micro-usb",
+      "face": "-x",
+      "center": [
+        0,
+        9,
+        2.6
+      ],
+      "size": [
+        8,
+        3
+      ],
+      "protrusion": 1
+    }
+  ],
+  "pins": [
+    {
+      "id": "vin",
+      "label": "VIN",
+      "position": [
+        3.17,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd2",
+      "label": "GND",
+      "position": [
+        5.71,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3.3V",
+      "position": [
+        8.25,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d19",
+      "label": "19 / SCL",
+      "position": [
+        20.950000000000003,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d18",
+      "label": "18 / SDA",
+      "position": [
+        23.490000000000002,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d17",
+      "label": "17 / SDA1",
+      "position": [
+        26.03,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d16",
+      "label": "16 / SCL1",
+      "position": [
+        28.57,
+        16.62,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        3.17,
+        1.38,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d2",
+      "label": "2 (PWM)",
+      "position": [
+        10.79,
+        1.38,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d3",
+      "label": "3 (PWM)",
+      "position": [
+        13.33,
+        1.38,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "600 MHz Cortex-M7, 3 I2C buses (Wire 18/19, Wire1 17/16). Powered over USB here; its pins are 3.3 V only.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

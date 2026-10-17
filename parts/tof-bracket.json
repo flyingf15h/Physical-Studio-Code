@@ -1,0 +1,18 @@
+{
+  "id": "tof-bracket",
+  "name": "Distance sensor bracket",
+  "category": "misc",
+  "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
+  "step_file": null,
+  "body": {
+    "size": [
+      10,
+      30,
+      35
+    ]
+  },
+  "notes": "Holds a VL53L0X board at the end of the rail, facing the carriage.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}
