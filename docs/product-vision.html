@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physical Studio Product Vision</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body { margin: 0; background: #e8edf0; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; }
+a { color: #0a7f96; } a:hover { color: #075e70; }
+.intro { max-width: 1280px; margin: 0 auto; padding: 48px 16px 8px; }
+.intro h1 { margin: 0 0 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 40px; }
+.intro p { margin: 0; color: #4e5d69; max-width: 70ch; }
+.screen { max-width: 1280px; margin: 0 auto; padding: 40px 16px 0; }
+.screen:last-child { padding-bottom: 64px; }
+.screen-title { margin: 0 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69; }
+.frame { border: 1px solid #c9d4db; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(21, 32, 43, 0.08); }
+</style>
+</head>
+<body>
+<header class="intro">
+<h1>Physical Studio: product vision</h1>
+<p>Mockup of the finished product, screen by screen. Placeholder text is in [brackets] and nothing is functional yet.</p>
+</header>
+<section id="describe" class="screen">
+<h2 class="screen-title">1 · Describe the project</h2>
+<div class="frame">
+<div style="box-sizing: border-box; min-height: 800px; background: #f6f8f9; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5dde3">
+    <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Physical Studio</div>
+    <nav aria-label="Progress" style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+      <span style="padding: 6px 12px; border-radius: 999px; background: #0a7f96; color: #ffffff">1 Describe</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">2 Design</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">3 Guide</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">4 Build</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">5 Print</span>
+    </nav>
+  </header>
+
+  <div style="display: flex; flex-wrap: wrap; flex: 1; min-height: 0">
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: 56px 64px; max-width: 880px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69">New project</div>
+      <h1 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 800; font-size: 48px; line-height: 1.05; letter-spacing: -0.01em">What do you want to build?</h1>
+      <p style="margin: 0; font-size: 17px; color: #4e5d69; max-width: 60ch">[One line explaining that Claude designs it from real, measured parts, and you get a printable case plus step-by-step instructions.]</p>
+      <label for="prompt" style="font-weight: 600; font-size: 14px">Describe your project</label>
+      <textarea id="prompt" rows="4" placeholder="[e.g. a project idea in one or two sentences]" style="box-sizing: border-box; width: 100%; padding: 16px; font: inherit; font-size: 16px; border: 1px solid #b8c4cc; border-radius: 8px; background: #ffffff; color: #15202b; resize: vertical"></textarea>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+        <button type="button" style="min-height: 48px; padding: 0 24px; font: inherit; font-weight: 600; font-size: 16px; color: #ffffff; background: #0a7f96; border: 0; border-radius: 8px">Design it</button>
+        <span style="font-size: 14px; color: #4e5d69">[Estimated time]</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="font-size: 13px; font-weight: 600; color: #4e5d69">Try an example</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <button type="button" style="min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; color: #15202b; background: #ffffff; border: 1px solid #d5dde3; border-radius: 999px">[Example project 1]</button>
+          <button type="button" style="min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; color: #15202b; background: #ffffff; border: 1px solid #d5dde3; border-radius: 999px">[Example project 2]</button>
+          <button type="button" style="min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; color: #15202b; background: #ffffff; border: 1px solid #d5dde3; border-radius: 999px">[Example project 3]</button>
+        </div>
+      </div>
+    </main>
+
+    <aside aria-label="Parts library" style="flex: 1 1 320px; box-sizing: border-box; padding: 32px; background: #ffffff; border-left: 1px solid #d5dde3; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Parts library</h2>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4e5d69">[N] parts</span>
+      </div>
+      <label for="search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search parts</label>
+      <input id="search" type="search" placeholder="Search parts" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; font: inherit; font-size: 14px; border: 1px solid #b8c4cc; border-radius: 8px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid #d5dde3; border-radius: 8px">
+          <div style="width: 48px; height: 48px; border-radius: 6px; background: #e8edf0"></div>
+          <div><div style="font-weight: 600; font-size: 14px">[Part name]</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4e5d69">[W × D × H mm]</div></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #e3f2e8; color: #23603c">measured</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid #d5dde3; border-radius: 8px">
+          <div style="width: 48px; height: 48px; border-radius: 6px; background: #e8edf0"></div>
+          <div><div style="font-weight: 600; font-size: 14px">[Part name]</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4e5d69">[W × D × H mm]</div></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #e3f2e8; color: #23603c">measured</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid #d5dde3; border-radius: 8px">
+          <div style="width: 48px; height: 48px; border-radius: 6px; background: #e8edf0"></div>
+          <div><div style="font-weight: 600; font-size: 14px">[Part name]</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4e5d69">[W × D × H mm]</div></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">datasheet</span>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #4e5d69">[Note: every part has real dimensions; Claude can only use parts from this list.]</p>
+    </aside>
+  </div>
+</div>
+</div>
+</section>
+<section id="design" class="screen">
+<h2 class="screen-title">2 · Claude designs it</h2>
+<div class="frame">
+<div style="box-sizing: border-box; min-height: 800px; background: #f6f8f9; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5dde3">
+    <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Physical Studio</div>
+    <nav aria-label="Progress" style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">1 Describe ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #0a7f96; color: #ffffff">2 Design</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">3 Guide</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">4 Build</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">5 Print</span>
+    </nav>
+  </header>
+
+  <div style="display: flex; flex-wrap: wrap; flex: 1; min-height: 0">
+    <aside aria-label="Design log" style="flex: 1 1 360px; box-sizing: border-box; padding: 28px 28px; background: #ffffff; border-right: 1px solid #d5dde3; display: flex; flex-direction: column; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69">Your prompt</div>
+      <p style="margin: 0; font-size: 15px; padding: 12px 14px; background: #f6f8f9; border-radius: 8px">[The prompt the user typed]</p>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Claude is designing</h2>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #dff2f6; color: #075e70">working</span>
+      </div>
+      <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #23603c">✓</span><span>Found parts: [parts list]</span></li>
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #23603c">✓</span><span>Placed [N] parts</span></li>
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #23603c">✓</span><span>Built the case: [W × D × H mm]</span></li>
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #23603c">✓</span><span>Wired [N] connections</span></li>
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #0a7f96">◐</span><span>Checking that everything fits…</span></li>
+        <li style="display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; color: #4e5d69"><span style="font-family: 'IBM Plex Mono', monospace">○</span><span>Writing the assembly steps</span></li>
+      </ol>
+      <div style="margin-top: auto; padding: 14px; border: 1px solid #c2681f; background: #fbeadf; border-radius: 8px; font-size: 14px">
+        <div style="font-weight: 600; color: #8a4512">Fixed a problem</div>
+        <div>[e.g. a screw head hit a connector, so Claude moved it and checked again]</div>
+      </div>
+    </aside>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+        <h1 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 800; font-size: 28px">[Project name]</h1>
+        <div role="group" aria-label="Preview angle" style="display: flex; gap: 6px">
+          <button type="button" style="min-height: 44px; padding: 0 14px; font: inherit; font-size: 13px; background: #15202b; color: #ffffff; border: 0; border-radius: 8px">Angled</button>
+          <button type="button" style="min-height: 44px; padding: 0 14px; font: inherit; font-size: 13px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Top</button>
+          <button type="button" style="min-height: 44px; padding: 0 14px; font: inherit; font-size: 13px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Lid off</button>
+        </div>
+      </div>
+      <div style="flex: 1; min-height: 420px; border: 2px dashed #b8c4cc; border-radius: 10px; background: #ffffff; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #4e5d69">[3D preview of the design, updating as Claude works]</div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 8px"><div style="font-size: 13px; color: #4e5d69">Parts collide</div><div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px">[result]</div></div>
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 8px"><div style="font-size: 13px; color: #4e5d69">Ports reachable</div><div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px">[result]</div></div>
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 8px"><div style="font-size: 13px; color: #4e5d69">Fits the printer</div><div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px">[result]</div></div>
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+</section>
+<section id="guide" class="screen">
+<h2 class="screen-title">3 · Assembly guide</h2>
+<div class="frame">
+<div style="box-sizing: border-box; min-height: 800px; background: #f6f8f9; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5dde3">
+    <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Physical Studio</div>
+    <nav aria-label="Progress" style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">1 Describe ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">2 Design ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #0a7f96; color: #ffffff">3 Guide</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">4 Build</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">5 Print</span>
+    </nav>
+  </header>
+
+  <div style="display: flex; flex-wrap: wrap; flex: 1; min-height: 0">
+    <aside aria-label="Steps" style="flex: 1 1 300px; box-sizing: border-box; padding: 24px; background: #ffffff; border-right: 1px solid #d5dde3; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">[Project name]</h2>
+      <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px">
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px; color: #4e5d69"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">01</span><span>[Step title]</span></li>
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px; color: #4e5d69"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">02</span><span>[Step title]</span></li>
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px; background: #dff2f6; color: #15202b; font-weight: 600"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #075e70">03</span><span>[Current step title]</span></li>
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4e5d69">04</span><span>[Step title]</span></li>
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4e5d69">05</span><span>[Step title]</span></li>
+        <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px; border-radius: 8px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4e5d69">06</span><span>[Step title]</span></li>
+      </ol>
+      <a href="#bench" style="margin-top: auto; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 8px; background: #15202b; color: #ffffff; font-weight: 600; text-decoration: none">Watch my bench</a>
+    </aside>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px">
+      <div style="position: relative; flex: 1; min-height: 380px; border: 2px dashed #b8c4cc; border-radius: 10px; background: #ffffff; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #4e5d69">
+        [3D model: new parts fly in and glow cyan]
+        <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 6px">
+          <button type="button" style="min-height: 44px; padding: 0 14px; font: inherit; font-family: 'Public Sans', sans-serif; font-size: 13px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Exploded view</button>
+        </div>
+      </div>
+
+      <section aria-label="Current step" style="display: flex; flex-wrap: wrap; gap: 16px; padding: 18px 20px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px">
+        <div style="flex: 2 1 320px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69">Step 3 of [N]</div>
+          <h1 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 800; font-size: 24px">[Step title]</h1>
+          <p style="margin: 0; font-size: 15px">[What to do in this step, in one or two plain sentences.]</p>
+          <p style="margin: 0; font-size: 14px; color: #4e5d69">Looks right when: [what a correct result looks like]</p>
+        </div>
+        <div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 13px; font-weight: 600; color: #4e5d69">You'll need</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <span style="padding: 4px 10px; border-radius: 999px; background: #f6f8f9; border: 1px solid #d5dde3; font-size: 13px">[Tool]</span>
+            <span style="padding: 4px 10px; border-radius: 999px; background: #f6f8f9; border: 1px solid #d5dde3; font-size: 13px">[Part × qty]</span>
+          </div>
+          <div style="font-size: 13px; font-weight: 600; color: #4e5d69">Connections</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">[pin] → [pin]</div>
+        </div>
+      </section>
+
+      <div style="display: flex; align-items: center; gap: 12px">
+        <button type="button" aria-label="Previous step" style="min-width: 44px; min-height: 44px; font: inherit; font-size: 18px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">‹</button>
+        <button type="button" aria-label="Play" style="min-width: 44px; min-height: 44px; font: inherit; font-size: 16px; background: #0a7f96; color: #ffffff; border: 0; border-radius: 8px">▶</button>
+        <button type="button" aria-label="Next step" style="min-width: 44px; min-height: 44px; font: inherit; font-size: 18px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">›</button>
+        <label for="scrub" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Timeline</label>
+        <input id="scrub" type="range" min="1" max="10" value="3" style="flex: 1; min-width: 0; accent-color: #0a7f96">
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+</section>
+<section id="bench" class="screen">
+<h2 class="screen-title">4 · Build with Gemini watching</h2>
+<div class="frame">
+<div style="box-sizing: border-box; min-height: 800px; background: #f6f8f9; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5dde3">
+    <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Physical Studio</div>
+    <nav aria-label="Progress" style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">1 Describe ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">2 Design ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">3 Guide ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #0a7f96; color: #ffffff">4 Build</span>
+      <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid #d5dde3; color: #4e5d69">5 Print</span>
+    </nav>
+  </header>
+
+  <div role="alert" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 32px; background: #fbeadf; border-bottom: 1px solid #c2681f">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8a4512">Gemini spotted a problem</span>
+    <span style="font-weight: 600; font-size: 16px">[e.g. "That LED is in backwards: the long leg goes to the resistor."]</span>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; flex: 1; min-height: 0; gap: 20px; padding: 24px 32px; box-sizing: border-box">
+    <section aria-label="Your bench" style="flex: 3 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Your bench</h2>
+        <span style="display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #a3301f"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #a3301f"></span>Camera and mic on</span>
+      </div>
+      <div style="flex: 1; min-height: 400px; border-radius: 10px; background: #15202b; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #c9d4db">[Live camera feed of the workbench]</div>
+    </section>
+
+    <section aria-label="Expected result" style="flex: 2 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">What it should look like</h2>
+      <div style="min-height: 220px; border: 2px dashed #b8c4cc; border-radius: 10px; background: #ffffff; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #4e5d69">[3D view of this step]</div>
+      <div style="padding: 16px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69">Step [N] of [N]</div>
+        <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px">[Step title]</div>
+        <p style="margin: 0; font-size: 14px">[Step instructions]</p>
+      </div>
+      <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px; display: flex; flex-direction: column; gap: 6px">
+        <div style="font-size: 13px; font-weight: 600; color: #4e5d69">Gemini says</div>
+        <p style="margin: 0; font-size: 14px">[Running voice transcript, e.g. "Looks good, moving to the next step."]</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <button type="button" style="flex: 1 1 140px; min-height: 48px; font: inherit; font-weight: 600; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Skip this check</button>
+        <button type="button" style="flex: 1 1 140px; min-height: 48px; font: inherit; font-weight: 600; background: #15202b; color: #ffffff; border: 0; border-radius: 8px">Stop watching</button>
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+</section>
+<section id="print" class="screen">
+<h2 class="screen-title">5 · Print and share</h2>
+<div class="frame">
+<div style="box-sizing: border-box; min-height: 800px; background: #f6f8f9; color: #15202b; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5dde3">
+    <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Physical Studio</div>
+    <nav aria-label="Progress" style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">1 Describe ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">2 Design ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">3 Guide ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #e3f2e8; color: #23603c">4 Build ✓</span>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #0a7f96; color: #ffffff">5 Print</span>
+    </nav>
+  </header>
+
+  <div style="box-sizing: border-box; width: 100%; max-width: 1180px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #4e5d69">[Project name]</div>
+      <h1 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 800; font-size: 40px; line-height: 1.05">Print it, then share it</h1>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+      <section aria-label="Print files" style="padding: 20px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px; display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Case files</h2>
+        <div style="min-height: 140px; border: 2px dashed #b8c4cc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4e5d69">[Base and lid preview]</div>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+          <li style="display: flex; justify-content: space-between; gap: 8px"><span>Size</span><span style="font-family: 'IBM Plex Mono', monospace">[W × D × H mm]</span></li>
+          <li style="display: flex; justify-content: space-between; gap: 8px"><span>Print time</span><span style="font-family: 'IBM Plex Mono', monospace">[~Xh]</span></li>
+          <li style="display: flex; justify-content: space-between; gap: 8px"><span>Filament</span><span style="font-family: 'IBM Plex Mono', monospace">[X g]</span></li>
+        </ul>
+        <button type="button" style="min-height: 48px; font: inherit; font-weight: 600; background: #0a7f96; color: #ffffff; border: 0; border-radius: 8px">Download STL (base + lid)</button>
+        <button type="button" style="min-height: 44px; font: inherit; font-size: 14px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Download STEP</button>
+      </section>
+
+      <section aria-label="Parts list" style="padding: 20px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px; display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Parts list</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px">
+          <thead><tr style="text-align: left; color: #4e5d69; font-size: 12px"><th style="padding: 6px 0; font-weight: 600">Part</th><th style="padding: 6px 0; font-weight: 600; text-align: right">Qty</th></tr></thead>
+          <tbody>
+            <tr style="border-top: 1px solid #e8edf0"><td style="padding: 8px 0">[Part]</td><td style="padding: 8px 0; text-align: right; font-family: 'IBM Plex Mono', monospace">[n]</td></tr>
+            <tr style="border-top: 1px solid #e8edf0"><td style="padding: 8px 0">[Part]</td><td style="padding: 8px 0; text-align: right; font-family: 'IBM Plex Mono', monospace">[n]</td></tr>
+            <tr style="border-top: 1px solid #e8edf0"><td style="padding: 8px 0">[Part]</td><td style="padding: 8px 0; text-align: right; font-family: 'IBM Plex Mono', monospace">[n]</td></tr>
+            <tr style="border-top: 1px solid #e8edf0"><td style="padding: 8px 0">[Part]</td><td style="padding: 8px 0; text-align: right; font-family: 'IBM Plex Mono', monospace">[n]</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size: 13px; font-weight: 600; color: #4e5d69">Tools</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px">
+          <span style="padding: 4px 10px; border-radius: 999px; background: #f6f8f9; border: 1px solid #d5dde3; font-size: 13px">[Tool]</span>
+          <span style="padding: 4px 10px; border-radius: 999px; background: #f6f8f9; border: 1px solid #d5dde3; font-size: 13px">[Tool]</span>
+        </div>
+      </section>
+
+      <section aria-label="Share" style="padding: 20px; background: #ffffff; border: 1px solid #d5dde3; border-radius: 10px; display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Share the guide</h2>
+        <p style="margin: 0; font-size: 14px; color: #4e5d69">[Anyone with the link can follow the animated steps.]</p>
+        <label for="share" style="font-size: 13px; font-weight: 600">Guide link</label>
+        <input id="share" type="text" readonly value="[your-domain]/guide/[id]" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; border: 1px solid #b8c4cc; border-radius: 8px; background: #f6f8f9">
+        <button type="button" style="min-height: 44px; font: inherit; font-size: 14px; background: #ffffff; color: #15202b; border: 1px solid #d5dde3; border-radius: 8px">Copy link</button>
+        <div style="margin-top: auto; padding: 12px 14px; border-radius: 8px; background: #e3f2e8; font-size: 14px">
+          <div style="font-weight: 600; color: #23603c">Take-apart guide</div>
+          <div>[Same steps in reverse, for repair and recycling]</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+</body>
+</html>
