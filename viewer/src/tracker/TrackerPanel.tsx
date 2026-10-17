@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { StepsDoc } from '../steps'
-import { StepTracker, type Problem, type TrackerStatus } from './session'
+import { StepTracker, type Problem, type TrackerStatus, type Verdict } from './session'
 
 const RENDER_SETTLE_MS = 1600 // let the step's fly-in animation finish before capturing the render
 const CAPTURE_WIDTH = 768
@@ -31,9 +31,11 @@ export function TrackerPanel({ doc, step, setStep, onProblem }: Props) {
   const [you, setYou] = useState('')
   const [muted, setMuted] = useState(false)
   const [micMuted, setMicMuted] = useState(false)
+  const [verdict, setVerdict] = useState<Verdict | null>(null)
   const tracker = useRef<StepTracker | null>(null)
   const video = useRef<HTMLVideoElement>(null)
   const advancedByGemini = useRef(false)
+  const lastObservation = useRef('')
   const stepRef = useRef(step)
   stepRef.current = step
 
@@ -50,11 +52,12 @@ export function TrackerPanel({ doc, step, setStep, onProblem }: Props) {
         if (n !== current) return { advanced: false, reason: `the builder is on step ${current}, not ${n}` }
         if (current >= doc.steps.length) return { advanced: false, reason: 'that was the last step: the build is done' }
         advancedByGemini.current = true
+        lastObservation.current = observation
         setStep(current) // 0-based index of the next step
-        setGemini(observation)
         return { advanced: true, now_on: current + 1 }
       },
       problem: onProblem,
+      verdict: setVerdict,
       transcript: (who, text) => (who === 'gemini' ? setGemini(text) : setYou(text)),
     })
     t.step = stepRef.current
@@ -73,9 +76,9 @@ export function TrackerPanel({ doc, step, setStep, onProblem }: Props) {
     const t = tracker.current
     if (!t || status !== 'watching' || t.step === step) return
     t.step = step
-    const speak = !advancedByGemini.current
+    const lead = advancedByGemini.current ? `The checker confirmed step ${step} is complete: ${lastObservation.current}. ` : ''
     advancedByGemini.current = false
-    void t.announceStep(captureExpected, speak)
+    void t.announceStep(captureExpected, lead)
   }, [step, status])
 
   useEffect(() => () => tracker.current?.stop(), [])
@@ -109,6 +112,11 @@ export function TrackerPanel({ doc, step, setStep, onProblem }: Props) {
           </div>
           {you && <p className="line you">{you}</p>}
           {gemini && <p className="line gemini">{gemini}</p>}
+          {verdict && (
+            <p className="line verdict">
+              Checker: {verdict.status.replace('_', ' ')} · {verdict.observation}
+            </p>
+          )}
         </>
       )}
       {status === 'error' && detail && <p className="tracker-error">{detail}</p>}

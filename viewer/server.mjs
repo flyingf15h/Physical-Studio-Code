@@ -5,18 +5,20 @@
 //
 // Env: PORT (8080), GEMINI_API_KEY, GEMINI_LIVE_MODEL, DEMO_CODE (if set, the token endpoint
 // needs the page opened with ?code=<DEMO_CODE>), OUT_DIR (exports, default ../mcp-server/out),
-// TOKENS_PER_MINUTE (per client IP, default 6).
+// TOKENS_PER_MINUTE (per client IP, default 6), GEMINI_CHECK_MODEL, CHECKS_PER_MINUTE (default 30).
 
 import fs from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { handleTokenRequest } from './server/geminiToken.js'
+import { handleCheckRequest } from './server/stepCheck.js'
 
 const ROOT = import.meta.dirname
 const DIST = path.join(ROOT, 'dist')
 const OUT_DIR = path.resolve(process.env.OUT_DIR ?? path.join(ROOT, '../mcp-server/out'))
 const PORT = Number(process.env.PORT ?? 8080)
 const TOKENS_PER_MINUTE = Number(process.env.TOKENS_PER_MINUTE ?? 6)
+const CHECKS_PER_MINUTE = Number(process.env.CHECKS_PER_MINUTE ?? 30)
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -31,15 +33,20 @@ const TYPES = {
   '.ico': 'image/x-icon',
 }
 
-// Each token is a Gemini Live session on our key, so cap how fast one client can ask.
+// Tokens and step checks spend our Gemini quota, so cap how fast one client can ask.
 const recent = new Map()
-function allowToken(ip) {
+function allow(bucket, ip, perMinute) {
+  const key = `${bucket}:${ip}`
   const now = Date.now()
-  const hits = (recent.get(ip) ?? []).filter((t) => now - t < 60_000)
-  if (hits.length >= TOKENS_PER_MINUTE) return false
+  const hits = (recent.get(key) ?? []).filter((t) => now - t < 60_000)
+  if (hits.length >= perMinute) return false
   hits.push(now)
-  recent.set(ip, hits)
+  recent.set(key, hits)
   return true
+}
+
+function clientIp(req) {
+  return String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? '').split(',')[0].trim()
 }
 
 function sendFile(res, file, cache) {
@@ -58,9 +65,21 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/healthz') return res.end('ok')
 
+  if (url.pathname === '/api/check-step') {
+    if (req.method === 'POST' && !allow('check', clientIp(req), CHECKS_PER_MINUTE)) {
+      res.statusCode = 429
+      return res.end(JSON.stringify({ error: 'Too many step checks; slow down.' }))
+    }
+    return handleCheckRequest(req, res, {
+      apiKey: process.env.GEMINI_API_KEY,
+      model: process.env.GEMINI_CHECK_MODEL,
+      passcode: process.env.DEMO_CODE,
+      missingKeyHint: 'The server has no GEMINI_API_KEY; set it in deploy/.env and restart.',
+    })
+  }
+
   if (url.pathname === '/api/gemini-token') {
-    const ip = String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? '').split(',')[0].trim()
-    if (req.method === 'POST' && !allowToken(ip)) {
+    if (req.method === 'POST' && !allow('token', clientIp(req), TOKENS_PER_MINUTE)) {
       res.statusCode = 429
       return res.end(JSON.stringify({ error: 'Too many camera sessions started; wait a minute.' }))
     }

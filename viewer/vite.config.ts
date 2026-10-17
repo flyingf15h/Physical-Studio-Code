@@ -3,6 +3,7 @@ import path from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { handleTokenRequest } from './server/geminiToken.js'
+import { handleCheckRequest } from './server/stepCheck.js'
 
 // Serves the MCP server's exports at /out/<design>/..., so `?design=out/<design>` shows
 // whatever Claude exported last without copying files.
@@ -34,6 +35,14 @@ function geminiToken(env: Record<string, string>): Plugin {
         handleTokenRequest(req, res, {
           apiKey: env.GEMINI_API_KEY,
           model: env.GEMINI_LIVE_MODEL,
+          passcode: env.DEMO_CODE,
+          missingKeyHint: 'Set GEMINI_API_KEY in viewer/.env.local and restart npm run dev.',
+        }),
+      )
+      server.middlewares.use('/api/check-step', (req, res) =>
+        handleCheckRequest(req, res, {
+          apiKey: env.GEMINI_API_KEY,
+          model: env.GEMINI_CHECK_MODEL,
           passcode: env.DEMO_CODE,
           missingKeyHint: 'Set GEMINI_API_KEY in viewer/.env.local and restart npm run dev.',
         }),
