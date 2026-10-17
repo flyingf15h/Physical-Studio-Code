@@ -36,6 +36,7 @@ def load_keys():
     except ImportError:one=os.environ.get('GEMINI_API_KEY','')
     return list(dict.fromkeys(k.strip() for k in [*os.environ.get('GEMINI_API_KEYS','').split(','),one] if k.strip()))
 KEYS=load_keys()
+print(f'[studio] {len(KEYS)} Gemini key(s) in the pool',flush=True)
 
 def classify(e):
     code=getattr(e,'code',None);text=f'{type(e).__name__} {e}'
