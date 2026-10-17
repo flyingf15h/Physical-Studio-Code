@@ -142,7 +142,7 @@ export function DescribePage() {
               value={prompt}
               maxLength={MAX_CHARS}
               rows={4}
-              placeholder="e.g. Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side."
+              placeholder="e.g. Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side."
               aria-label="Describe your project"
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
@@ -251,13 +251,13 @@ export function DescribePage() {
           <p className="describe-sample">
             Or open the{' '}
             <a
-              href={withParams('/guide', { design: 'simon', code })}
+              href={withParams('/guide', { design: 'traffic-light', code })}
               onClick={(e) => {
                 e.preventDefault()
-                navigate(withParams('/guide', { design: 'simon', code }))
+                navigate(withParams('/guide', { design: 'traffic-light', code }))
               }}
             >
-              finished Simon game guide
+              finished traffic light guide
             </a>
             .
           </p>

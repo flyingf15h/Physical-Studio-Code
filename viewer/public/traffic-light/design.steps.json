@@ -1,0 +1,996 @@
+{
+  "format": "physical-studio-steps",
+  "version": 1,
+  "title": "Traffic light",
+  "model": "design.glb",
+  "units": "mm",
+  "bounds": {
+    "min": [
+      -11.2,
+      -5.0,
+      -7.0
+    ],
+    "max": [
+      73.6,
+      58.4,
+      35.1
+    ]
+  },
+  "placements": [
+    {
+      "id": "base",
+      "kind": "enclosure",
+      "part": null,
+      "name": "Case base",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d9d9d9"
+    },
+    {
+      "id": "uno",
+      "kind": "part",
+      "part": "arduino-uno",
+      "name": "Arduino Uno Rev3",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#1f6fb2",
+      "pins": [
+        {
+          "id": "nc",
+          "position": [
+            27.94,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "ioref",
+          "position": [
+            30.48,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "reset",
+          "position": [
+            33.02,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "3v3",
+          "position": [
+            35.56,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "5v",
+          "position": [
+            38.1,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "gnd1",
+          "position": [
+            40.64,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "gnd2",
+          "position": [
+            43.18,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "vin",
+          "position": [
+            45.72,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a0",
+          "position": [
+            50.8,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a1",
+          "position": [
+            53.34,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a2",
+          "position": [
+            55.88,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a3",
+          "position": [
+            58.42,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a4",
+          "position": [
+            60.96,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "a5",
+          "position": [
+            63.5,
+            2.54,
+            10.1
+          ]
+        },
+        {
+          "id": "d0",
+          "position": [
+            63.5,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d1",
+          "position": [
+            60.96,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d2",
+          "position": [
+            58.42,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d3",
+          "position": [
+            55.88,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d4",
+          "position": [
+            53.34,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d5",
+          "position": [
+            50.8,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d6",
+          "position": [
+            48.26,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d7",
+          "position": [
+            45.72,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d8",
+          "position": [
+            41.66,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d9",
+          "position": [
+            39.12,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d10",
+          "position": [
+            36.58,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d11",
+          "position": [
+            34.04,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d12",
+          "position": [
+            31.5,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "d13",
+          "position": [
+            28.96,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "gnd3",
+          "position": [
+            26.42,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "aref",
+          "position": [
+            23.88,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "sda",
+          "position": [
+            21.34,
+            50.8,
+            10.1
+          ]
+        },
+        {
+          "id": "scl",
+          "position": [
+            18.8,
+            50.8,
+            10.1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "led-red",
+      "kind": "part",
+      "part": "led-5mm",
+      "name": "Red LED",
+      "position": [
+        20.0,
+        33.1,
+        26.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "pins": [
+        {
+          "id": "anode",
+          "position": [
+            4.17,
+            2.9,
+            -10.0
+          ]
+        },
+        {
+          "id": "cathode",
+          "position": [
+            1.63,
+            2.9,
+            -10.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "led-yellow",
+      "kind": "part",
+      "part": "led-5mm",
+      "name": "Yellow LED",
+      "position": [
+        20.0,
+        21.1,
+        26.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "pins": [
+        {
+          "id": "anode",
+          "position": [
+            4.17,
+            2.9,
+            -10.0
+          ]
+        },
+        {
+          "id": "cathode",
+          "position": [
+            1.63,
+            2.9,
+            -10.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "led-green",
+      "kind": "part",
+      "part": "led-5mm",
+      "name": "Green LED",
+      "position": [
+        20.0,
+        9.1,
+        26.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "pins": [
+        {
+          "id": "anode",
+          "position": [
+            4.17,
+            2.9,
+            -10.0
+          ]
+        },
+        {
+          "id": "cathode",
+          "position": [
+            1.63,
+            2.9,
+            -10.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "btn-walk",
+      "kind": "part",
+      "part": "tactile-button-12mm",
+      "name": "Crosswalk button",
+      "position": [
+        40.0,
+        18.0,
+        24.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f0f0f0",
+      "pins": [
+        {
+          "id": "a",
+          "position": [
+            -0.25,
+            3.5,
+            -3.5
+          ]
+        },
+        {
+          "id": "b",
+          "position": [
+            -0.25,
+            8.5,
+            -3.5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "screw-h1",
+      "kind": "fastener",
+      "part": "m3-screw-6mm",
+      "name": "M3 x 6 mm socket head screw",
+      "position": [
+        13.97,
+        2.54,
+        1.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a8f98"
+    },
+    {
+      "id": "screw-h3",
+      "kind": "fastener",
+      "part": "m3-screw-6mm",
+      "name": "M3 x 6 mm socket head screw",
+      "position": [
+        66.04,
+        7.62,
+        1.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a8f98"
+    },
+    {
+      "id": "screw-h4",
+      "kind": "fastener",
+      "part": "m3-screw-6mm",
+      "name": "M3 x 6 mm socket head screw",
+      "position": [
+        66.04,
+        35.56,
+        1.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#8a8f98"
+    },
+    {
+      "id": "lid",
+      "kind": "enclosure",
+      "part": null,
+      "name": "Case lid",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f2f2f2"
+    },
+    {
+      "id": "wire-led-red",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Red LED anode to Arduino Uno Rev3 d11",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d03a3a",
+      "from": {
+        "placement": "led-red",
+        "pin": "anode"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "d11"
+      },
+      "length_mm": 21.7,
+      "inline": "220 ohm resistor"
+    },
+    {
+      "id": "wire-led-yellow",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Yellow LED anode to Arduino Uno Rev3 d10",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#e8c52e",
+      "from": {
+        "placement": "led-yellow",
+        "pin": "anode"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "d10"
+      },
+      "length_mm": 34.1,
+      "inline": "220 ohm resistor"
+    },
+    {
+      "id": "wire-led-green",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Green LED anode to Arduino Uno Rev3 d9",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a9d4f",
+      "from": {
+        "placement": "led-green",
+        "pin": "anode"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "d9"
+      },
+      "length_mm": 47.7,
+      "inline": "220 ohm resistor"
+    },
+    {
+      "id": "wire-btn-walk",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Crosswalk button a to Arduino Uno Rev3 d2",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#3a6fd0",
+      "from": {
+        "placement": "btn-walk",
+        "pin": "a"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "d2"
+      },
+      "length_mm": 40.5
+    },
+    {
+      "id": "gnd-red-yellow",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Red LED cathode to Yellow LED cathode",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "led-red",
+        "pin": "cathode"
+      },
+      "to": {
+        "placement": "led-yellow",
+        "pin": "cathode"
+      },
+      "length_mm": 19.0
+    },
+    {
+      "id": "gnd-yellow-green",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Yellow LED cathode to Green LED cathode",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "led-yellow",
+        "pin": "cathode"
+      },
+      "to": {
+        "placement": "led-green",
+        "pin": "cathode"
+      },
+      "length_mm": 19.0
+    },
+    {
+      "id": "gnd-leds-uno",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Green LED cathode to Arduino Uno Rev3 gnd1",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "led-green",
+        "pin": "cathode"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "gnd1"
+      },
+      "length_mm": 24.9
+    },
+    {
+      "id": "gnd-btn-uno",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Crosswalk button b to Arduino Uno Rev3 gnd2",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "btn-walk",
+        "pin": "b"
+      },
+      "to": {
+        "placement": "uno",
+        "pin": "gnd2"
+      },
+      "length_mm": 29.1
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "title": "Lay out the case base",
+      "text": "Put the printed base on the bench with the USB and barrel-jack openings on the left.",
+      "add": [
+        "base"
+      ],
+      "check": "Base is upright with the two port openings in the left wall."
+    },
+    {
+      "index": 2,
+      "title": "Drop in the Arduino",
+      "text": "Lower the Uno onto the standoffs, USB port first into the left opening.",
+      "add": [
+        "uno"
+      ],
+      "motion": [
+        {
+          "placement": "uno",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "USB-B lines up with this opening",
+          "target": "uno",
+          "at": [
+            -3,
+            38.1,
+            7
+          ]
+        }
+      ],
+      "check": "The Uno sits on its standoffs and the USB-B port lines up with the left opening."
+    },
+    {
+      "index": 3,
+      "title": "Screw down the Arduino",
+      "text": "Drive an M3 x 6 screw through the three mounting holes away from the header (leave the hole next to AREF/SCL empty). Snug, not tight.",
+      "add": [
+        "screw-h1",
+        "screw-h3",
+        "screw-h4"
+      ],
+      "motion": [
+        {
+          "placement": "screw-h1",
+          "from_offset": [
+            0,
+            0,
+            20
+          ],
+          "from_rotation": [
+            0,
+            0,
+            720
+          ]
+        },
+        {
+          "placement": "screw-h3",
+          "from_offset": [
+            0,
+            0,
+            20
+          ],
+          "from_rotation": [
+            0,
+            0,
+            720
+          ]
+        },
+        {
+          "placement": "screw-h4",
+          "from_offset": [
+            0,
+            0,
+            20
+          ],
+          "from_rotation": [
+            0,
+            0,
+            720
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "2.5 mm hex key",
+          "for": "M3 x 6 socket screws"
+        }
+      ],
+      "check": "Three screw heads seated; the hole next to the digital header stays empty."
+    },
+    {
+      "index": 4,
+      "title": "Wire the red LED",
+      "text": "Connect the red LED's long leg (anode) to D11 through a 220 ohm resistor.",
+      "add": [
+        "led-red",
+        "wire-led-red"
+      ],
+      "motion": [
+        {
+          "placement": "led-red",
+          "from_offset": [
+            0,
+            0,
+            30
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Long leg (anode) to the resistor",
+          "target": "led-red"
+        }
+      ],
+      "check": "The red LED's long leg goes through a resistor to D11."
+    },
+    {
+      "index": 5,
+      "title": "Wire the yellow LED",
+      "text": "Connect the yellow LED's long leg (anode) to D10 through a 220 ohm resistor.",
+      "add": [
+        "led-yellow",
+        "wire-led-yellow"
+      ],
+      "motion": [
+        {
+          "placement": "led-yellow",
+          "from_offset": [
+            0,
+            0,
+            30
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Long leg (anode) to the resistor",
+          "target": "led-yellow"
+        }
+      ],
+      "check": "The yellow LED's long leg goes through a resistor to D10."
+    },
+    {
+      "index": 6,
+      "title": "Wire the green LED",
+      "text": "Connect the green LED's long leg (anode) to D9 through a 220 ohm resistor.",
+      "add": [
+        "led-green",
+        "wire-led-green"
+      ],
+      "motion": [
+        {
+          "placement": "led-green",
+          "from_offset": [
+            0,
+            0,
+            30
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "Long leg (anode) to the resistor",
+          "target": "led-green"
+        }
+      ],
+      "check": "The green LED's long leg goes through a resistor to D9."
+    },
+    {
+      "index": 7,
+      "title": "Wire the crosswalk button",
+      "text": "Connect one leg of the button to D2 and the leg on the same side to GND.",
+      "add": [
+        "btn-walk",
+        "wire-btn-walk",
+        "gnd-btn-uno"
+      ],
+      "motion": [
+        {
+          "placement": "btn-walk",
+          "from_offset": [
+            0,
+            0,
+            30
+          ]
+        }
+      ],
+      "check": "Button legs on the same side go to D2 and GND."
+    },
+    {
+      "index": 8,
+      "title": "Connect the LED grounds",
+      "text": "Daisy-chain the three LEDs' short legs (cathodes) together and to GND.",
+      "add": [
+        "gnd-red-yellow",
+        "gnd-yellow-green",
+        "gnd-leds-uno"
+      ],
+      "check": "All three LED short legs are on black wires that end at a GND pin."
+    },
+    {
+      "index": 9,
+      "title": "Close the lid",
+      "text": "Fit the lid so the three LED lenses and the button line up with their holes, red at the top, then press it on.",
+      "add": [
+        "lid"
+      ],
+      "motion": [
+        {
+          "placement": "lid",
+          "from_offset": [
+            0,
+            0,
+            50
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "Hands only",
+          "for": "press fit"
+        }
+      ],
+      "check": "Lid sits flush, with red, yellow and green LEDs top to bottom and the button showing through."
+    }
+  ],
+  "prompt": "Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side.",
+  "print": {
+    "size_mm": [
+      84.8,
+      63.4,
+      36.5
+    ],
+    "material": "PLA",
+    "pieces": [
+      {
+        "id": "base",
+        "name": "Case base",
+        "file": "design-base.stl",
+        "volume_mm3": 29417,
+        "grams": 36.5,
+        "minutes": 182
+      },
+      {
+        "id": "lid",
+        "name": "Case lid",
+        "file": "design-lid.stl",
+        "volume_mm3": 11107,
+        "grams": 13.8,
+        "minutes": 69
+      }
+    ],
+    "total_grams": 50.3,
+    "total_minutes": 251,
+    "step_file": "design.step"
+  }
+}

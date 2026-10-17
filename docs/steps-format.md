@@ -7,7 +7,7 @@ The MCP server's `export` tool writes two files into one folder:
 
 The viewer loads both. The step tracker (Gemini) reads the same JSON to know what each step should look like.
 
-Example: [`schemas/examples/simon.steps.json`](../schemas/examples/simon.steps.json).
+Example: [`schemas/examples/traffic-light.steps.json`](../schemas/examples/traffic-light.steps.json).
 
 ## Frames and units
 

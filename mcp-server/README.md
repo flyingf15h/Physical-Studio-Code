@@ -18,7 +18,7 @@ The repo's `.mcp.json` registers the server for anyone who opens Claude Code at 
 claude mcp add physical-studio -- uv run --directory /absolute/path/to/Physical-Studio-Code/mcp-server physical-studio-mcp
 ```
 
-Then ask for a design, e.g. "Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side." Exports go to `mcp-server/out/<title>/` (ignored by git) unless `out_dir` is given.
+Then ask for a design, e.g. "Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side." Exports go to `mcp-server/out/<title>/` (ignored by git) unless `out_dir` is given.
 
 Environment variables: `PHYSICAL_STUDIO_PARTS` (parts folder, default `../parts`), `PHYSICAL_STUDIO_OUT` (export folder).
 

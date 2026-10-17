@@ -1,8 +1,8 @@
 import './ExamplePrompts.css'
 
-/** The demo prompt; same text as mcp-server/examples/simon.py and schemas/examples/simon.steps.json. */
+/** The demo prompt; same text as mcp-server/examples/traffic_light.py and schemas/examples/traffic-light.steps.json. */
 export const DEMO_PROMPT =
-  'Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side.'
+  'Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side.'
 
 interface Example {
   title: string
@@ -13,9 +13,9 @@ interface Example {
 // Only parts from parts/*.json, so every example can actually be built.
 const EXAMPLES: Example[] = [
   {
-    title: 'Simon game',
+    title: 'Traffic light',
     prompt: DEMO_PROMPT,
-    uses: 'Arduino Uno, 4 buttons, 4 LEDs, piezo buzzer',
+    uses: 'Arduino Uno, 3 LEDs (red, yellow, green), 1 button',
   },
   {
     title: 'Reaction timer',

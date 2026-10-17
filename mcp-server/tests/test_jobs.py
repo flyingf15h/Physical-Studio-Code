@@ -28,7 +28,7 @@ def test_design_needs_a_key_and_a_prompt(monkeypatch):
         monkeypatch.delenv(key, raising=False)
     c = client()
     assert c.post("/api/design", json={"prompt": "x"}).status_code == 400
-    r = c.post("/api/design", json={"prompt": "Simon game for an Arduino Uno"})
+    r = c.post("/api/design", json={"prompt": "Traffic light for an Arduino Uno"})
     assert r.status_code == 503 and "OPENAI_API_KEY" in r.json()["error"]
     assert c.get("/api/design/nope").status_code == 404
 
@@ -70,7 +70,7 @@ def test_the_page_can_pick_which_model_goes_first(monkeypatch):
     assert JobManager.providers("deepseek") == ["openai", "gemini"]  # no key: ignored
     c = client()
     assert c.get("/api/design/providers").json() == [{"id": "openai", "label": "OpenAI"}, {"id": "gemini", "label": "Gemini"}]
-    r = c.post("/api/design", json={"prompt": "Simon game for an Arduino Uno", "model": "gpt-2"})
+    r = c.post("/api/design", json={"prompt": "Traffic light for an Arduino Uno", "model": "gpt-2"})
     assert r.status_code == 400 and "model must be one of" in r.json()["error"]
 
 
@@ -196,7 +196,7 @@ PNG_1PX = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAA
 def test_design_validates_attachments(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "o")
     c = client()
-    prompt = "Simon game for an Arduino Uno"
+    prompt = "Traffic light for an Arduino Uno"
     r = c.post("/api/design", json={"prompt": prompt, "images": ["data:text/html;base64,PGI+"]})
     assert r.status_code == 400 and "PNG" in r.json()["error"]
     r = c.post("/api/design", json={"prompt": prompt, "images": [PNG_1PX] * 5})
@@ -219,7 +219,7 @@ def test_attached_images_reach_the_model_and_the_page(tmp_path, monkeypatch):
     from physical_studio import attachments
 
     monkeypatch.setenv("OPENAI_API_KEY", "o")
-    monkeypatch.setattr(attachments, "fetch_link", lambda url: attachments.Link(url, text="Simon game box, 4 buttons in a square"))
+    monkeypatch.setattr(attachments, "fetch_link", lambda url: attachments.Link(url, text="Traffic light box, 3 LEDs in a column"))
     seen = []
 
     class FakeClient:
@@ -228,7 +228,7 @@ def test_attached_images_reach_the_model_and_the_page(tmp_path, monkeypatch):
 
     monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
     images = attachments.parse_images([PNG_1PX])
-    job = DesignJob("job4", "Simon game", tmp_path / "job4", lambda: Studio(REPO / "parts", tmp_path), images, ["https://example.com/simon"])
+    job = DesignJob("job4", "Traffic light", tmp_path / "job4", lambda: Studio(REPO / "parts", tmp_path), images, ["https://example.com/traffic-light"])
     job.studio.new_design("x")
     job.studio.place_part("arduino-uno", (0, 0, 0), id="uno")  # so the final export has something
     monkeypatch.setattr(job.studio, "new_design", lambda *a: None)
@@ -236,7 +236,7 @@ def test_attached_images_reach_the_model_and_the_page(tmp_path, monkeypatch):
     snap = job.snapshot()
     assert snap["status"] == "done", snap["error"]
     content = seen[0][0]["content"]
-    assert "attached 1 image" in content[0]["text"] and "Simon game box, 4 buttons" in content[0]["text"]
+    assert "attached 1 image" in content[0]["text"] and "Traffic light box, 3 LEDs" in content[0]["text"]
     assert content[1] == {"type": "input_image", "image_url": PNG_1PX}
-    assert snap["attachments"] == {"images": ["/out/job4/input-1.png"], "links": [{"url": "https://example.com/simon", "error": None}]}
+    assert snap["attachments"] == {"images": ["/out/job4/input-1.png"], "links": [{"url": "https://example.com/traffic-light", "error": None}]}
     assert (tmp_path / "job4" / "input-1.png").exists()

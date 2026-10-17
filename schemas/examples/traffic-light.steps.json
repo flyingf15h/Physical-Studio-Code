@@ -1,7 +1,7 @@
 {
   "format": "physical-studio-steps",
   "version": 1,
-  "title": "Simon game",
+  "title": "Traffic light",
   "model": "design.glb",
   "units": "mm",
   "bounds": {
@@ -310,41 +310,6 @@
       ]
     },
     {
-      "id": "btn-red",
-      "kind": "part",
-      "part": "tactile-button-12mm",
-      "name": "Red button",
-      "position": [
-        6.0,
-        30.0,
-        24.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e0b020",
-      "pins": [
-        {
-          "id": "a",
-          "position": [
-            -0.25,
-            3.5,
-            -3.5
-          ]
-        },
-        {
-          "id": "b",
-          "position": [
-            -0.25,
-            8.5,
-            -3.5
-          ]
-        }
-      ]
-    },
-    {
       "id": "led-red",
       "kind": "part",
       "part": "led-5mm",
@@ -359,7 +324,7 @@
         0.0,
         0.0
       ],
-      "color": "#d04040",
+      "color": "#d03a3a",
       "pins": [
         {
           "id": "anode",
@@ -375,181 +340,6 @@
             1.63,
             2.9,
             -10.0
-          ]
-        }
-      ]
-    },
-    {
-      "id": "btn-green",
-      "kind": "part",
-      "part": "tactile-button-12mm",
-      "name": "Green button",
-      "position": [
-        40.0,
-        30.0,
-        24.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e0b020",
-      "pins": [
-        {
-          "id": "a",
-          "position": [
-            -0.25,
-            3.5,
-            -3.5
-          ]
-        },
-        {
-          "id": "b",
-          "position": [
-            -0.25,
-            8.5,
-            -3.5
-          ]
-        }
-      ]
-    },
-    {
-      "id": "led-green",
-      "kind": "part",
-      "part": "led-5mm",
-      "name": "Green LED",
-      "position": [
-        54.0,
-        33.1,
-        26.5
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#d04040",
-      "pins": [
-        {
-          "id": "anode",
-          "position": [
-            4.17,
-            2.9,
-            -10.0
-          ]
-        },
-        {
-          "id": "cathode",
-          "position": [
-            1.63,
-            2.9,
-            -10.0
-          ]
-        }
-      ]
-    },
-    {
-      "id": "btn-blue",
-      "kind": "part",
-      "part": "tactile-button-12mm",
-      "name": "Blue button",
-      "position": [
-        6.0,
-        6.0,
-        24.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e0b020",
-      "pins": [
-        {
-          "id": "a",
-          "position": [
-            -0.25,
-            3.5,
-            -3.5
-          ]
-        },
-        {
-          "id": "b",
-          "position": [
-            -0.25,
-            8.5,
-            -3.5
-          ]
-        }
-      ]
-    },
-    {
-      "id": "led-blue",
-      "kind": "part",
-      "part": "led-5mm",
-      "name": "Blue LED",
-      "position": [
-        20.0,
-        9.1,
-        26.5
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#d04040",
-      "pins": [
-        {
-          "id": "anode",
-          "position": [
-            4.17,
-            2.9,
-            -10.0
-          ]
-        },
-        {
-          "id": "cathode",
-          "position": [
-            1.63,
-            2.9,
-            -10.0
-          ]
-        }
-      ]
-    },
-    {
-      "id": "btn-yellow",
-      "kind": "part",
-      "part": "tactile-button-12mm",
-      "name": "Yellow button",
-      "position": [
-        40.0,
-        6.0,
-        24.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e0b020",
-      "pins": [
-        {
-          "id": "a",
-          "position": [
-            -0.25,
-            3.5,
-            -3.5
-          ]
-        },
-        {
-          "id": "b",
-          "position": [
-            -0.25,
-            8.5,
-            -3.5
           ]
         }
       ]
@@ -560,8 +350,8 @@
       "part": "led-5mm",
       "name": "Yellow LED",
       "position": [
-        54.0,
-        9.1,
+        20.0,
+        21.1,
         26.5
       ],
       "rotation": [
@@ -569,7 +359,7 @@
         0.0,
         0.0
       ],
-      "color": "#d04040",
+      "color": "#e8c52e",
       "pins": [
         {
           "id": "anode",
@@ -590,36 +380,71 @@
       ]
     },
     {
-      "id": "piezo",
+      "id": "led-green",
       "kind": "part",
-      "part": "piezo-buzzer",
-      "name": "Piezo buzzer",
+      "part": "led-5mm",
+      "name": "Green LED",
       "position": [
-        26.5,
-        19.0,
-        16.0
+        20.0,
+        9.1,
+        26.5
       ],
       "rotation": [
         0.0,
         0.0,
         0.0
       ],
-      "color": "#d04040",
+      "color": "#3a9d4f",
       "pins": [
         {
-          "id": "pos",
+          "id": "anode",
           "position": [
-            9.8,
-            6.0,
-            -6.5
+            4.17,
+            2.9,
+            -10.0
           ]
         },
         {
-          "id": "neg",
+          "id": "cathode",
           "position": [
-            2.2,
-            6.0,
-            -6.5
+            1.63,
+            2.9,
+            -10.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "btn-walk",
+      "kind": "part",
+      "part": "tactile-button-12mm",
+      "name": "Crosswalk button",
+      "position": [
+        40.0,
+        18.0,
+        24.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f0f0f0",
+      "pins": [
+        {
+          "id": "a",
+          "position": [
+            -0.25,
+            3.5,
+            -3.5
+          ]
+        },
+        {
+          "id": "b",
+          "position": [
+            -0.25,
+            8.5,
+            -3.5
           ]
         }
       ]
@@ -693,36 +518,10 @@
       "color": "#f2f2f2"
     },
     {
-      "id": "wire-btn-red",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Red button a to Arduino Uno Rev3 d2",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#d03a3a",
-      "from": {
-        "placement": "btn-red",
-        "pin": "a"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "d2"
-      },
-      "length_mm": 63.8
-    },
-    {
       "id": "wire-led-red",
       "kind": "wire",
       "part": null,
-      "name": "Wire Red LED anode to Arduino Uno Rev3 d8",
+      "name": "Wire Red LED anode to Arduino Uno Rev3 d11",
       "position": [
         0.0,
         0.0,
@@ -740,16 +539,16 @@
       },
       "to": {
         "placement": "uno",
-        "pin": "d8"
+        "pin": "d11"
       },
-      "length_mm": 26.6,
+      "length_mm": 21.7,
       "inline": "220 ohm resistor"
     },
     {
-      "id": "wire-btn-green",
+      "id": "wire-led-yellow",
       "kind": "wire",
       "part": null,
-      "name": "Wire Green button a to Arduino Uno Rev3 d3",
+      "name": "Wire Yellow LED anode to Arduino Uno Rev3 d10",
       "position": [
         0.0,
         0.0,
@@ -760,16 +559,17 @@
         0.0,
         0.0
       ],
-      "color": "#3a9d4f",
+      "color": "#e8c52e",
       "from": {
-        "placement": "btn-green",
-        "pin": "a"
+        "placement": "led-yellow",
+        "pin": "anode"
       },
       "to": {
         "placement": "uno",
-        "pin": "d3"
+        "pin": "d10"
       },
-      "length_mm": 28.5
+      "length_mm": 34.1,
+      "inline": "220 ohm resistor"
     },
     {
       "id": "wire-led-green",
@@ -795,14 +595,14 @@
         "placement": "uno",
         "pin": "d9"
       },
-      "length_mm": 28.0,
+      "length_mm": 47.7,
       "inline": "220 ohm resistor"
     },
     {
-      "id": "wire-btn-blue",
+      "id": "wire-btn-walk",
       "kind": "wire",
       "part": null,
-      "name": "Wire Blue button a to Arduino Uno Rev3 d4",
+      "name": "Wire Crosswalk button a to Arduino Uno Rev3 d2",
       "position": [
         0.0,
         0.0,
@@ -815,152 +615,20 @@
       ],
       "color": "#3a6fd0",
       "from": {
-        "placement": "btn-blue",
+        "placement": "btn-walk",
         "pin": "a"
       },
       "to": {
         "placement": "uno",
-        "pin": "d4"
+        "pin": "d2"
       },
-      "length_mm": 72.3
+      "length_mm": 40.5
     },
     {
-      "id": "wire-led-blue",
+      "id": "gnd-red-yellow",
       "kind": "wire",
       "part": null,
-      "name": "Wire Blue LED anode to Arduino Uno Rev3 d10",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#3a6fd0",
-      "from": {
-        "placement": "led-blue",
-        "pin": "anode"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "d10"
-      },
-      "length_mm": 46.8,
-      "inline": "220 ohm resistor"
-    },
-    {
-      "id": "wire-btn-yellow",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Yellow button a to Arduino Uno Rev3 d5",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e8c52e",
-      "from": {
-        "placement": "btn-yellow",
-        "pin": "a"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "d5"
-      },
-      "length_mm": 49.5
-    },
-    {
-      "id": "wire-led-yellow",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Yellow LED anode to Arduino Uno Rev3 d11",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e8c52e",
-      "from": {
-        "placement": "led-yellow",
-        "pin": "anode"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "d11"
-      },
-      "length_mm": 52.4,
-      "inline": "220 ohm resistor"
-    },
-    {
-      "id": "wire-piezo",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Piezo buzzer pos to Arduino Uno Rev3 d12",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#e8862e",
-      "from": {
-        "placement": "piezo",
-        "pin": "pos"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "d12"
-      },
-      "length_mm": 30.3
-    },
-    {
-      "id": "gnd-btn-red-green",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Red button b to Green button b",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "btn-red",
-        "pin": "b"
-      },
-      "to": {
-        "placement": "btn-green",
-        "pin": "b"
-      },
-      "length_mm": 42.1
-    },
-    {
-      "id": "gnd-led-red-green",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Red LED cathode to Green LED cathode",
+      "name": "Wire Red LED cathode to Yellow LED cathode",
       "position": [
         0.0,
         0.0,
@@ -977,120 +645,16 @@
         "pin": "cathode"
       },
       "to": {
-        "placement": "led-green",
-        "pin": "cathode"
-      },
-      "length_mm": 42.1
-    },
-    {
-      "id": "gnd-btn-green-blue",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Green button b to Blue button b",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "btn-green",
-        "pin": "b"
-      },
-      "to": {
-        "placement": "btn-blue",
-        "pin": "b"
-      },
-      "length_mm": 51.5
-    },
-    {
-      "id": "gnd-led-green-blue",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Green LED cathode to Blue LED cathode",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "led-green",
-        "pin": "cathode"
-      },
-      "to": {
-        "placement": "led-blue",
-        "pin": "cathode"
-      },
-      "length_mm": 51.5
-    },
-    {
-      "id": "gnd-btn-blue-yellow",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Blue button b to Yellow button b",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "btn-blue",
-        "pin": "b"
-      },
-      "to": {
-        "placement": "btn-yellow",
-        "pin": "b"
-      },
-      "length_mm": 42.1
-    },
-    {
-      "id": "gnd-led-blue-yellow",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Blue LED cathode to Yellow LED cathode",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "led-blue",
-        "pin": "cathode"
-      },
-      "to": {
         "placement": "led-yellow",
         "pin": "cathode"
       },
-      "length_mm": 42.1
+      "length_mm": 19.0
     },
     {
-      "id": "gnd-btn-uno",
+      "id": "gnd-yellow-green",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow button b to Arduino Uno Rev3 gnd1",
+      "name": "Wire Yellow LED cathode to Green LED cathode",
       "position": [
         0.0,
         0.0,
@@ -1103,20 +667,46 @@
       ],
       "color": "#2b2b2b",
       "from": {
-        "placement": "btn-yellow",
-        "pin": "b"
+        "placement": "led-yellow",
+        "pin": "cathode"
+      },
+      "to": {
+        "placement": "led-green",
+        "pin": "cathode"
+      },
+      "length_mm": 19.0
+    },
+    {
+      "id": "gnd-leds-uno",
+      "kind": "wire",
+      "part": null,
+      "name": "Wire Green LED cathode to Arduino Uno Rev3 gnd1",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#2b2b2b",
+      "from": {
+        "placement": "led-green",
+        "pin": "cathode"
       },
       "to": {
         "placement": "uno",
         "pin": "gnd1"
       },
-      "length_mm": 17.7
+      "length_mm": 24.9
     },
     {
-      "id": "gnd-led-uno",
+      "id": "gnd-btn-uno",
       "kind": "wire",
       "part": null,
-      "name": "Wire Yellow LED cathode to Arduino Uno Rev3 gnd2",
+      "name": "Wire Crosswalk button b to Arduino Uno Rev3 gnd2",
       "position": [
         0.0,
         0.0,
@@ -1129,40 +719,14 @@
       ],
       "color": "#2b2b2b",
       "from": {
-        "placement": "led-yellow",
-        "pin": "cathode"
+        "placement": "btn-walk",
+        "pin": "b"
       },
       "to": {
         "placement": "uno",
         "pin": "gnd2"
       },
-      "length_mm": 19.7
-    },
-    {
-      "id": "gnd-piezo-uno",
-      "kind": "wire",
-      "part": null,
-      "name": "Wire Piezo buzzer neg to Arduino Uno Rev3 gnd3",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "color": "#2b2b2b",
-      "from": {
-        "placement": "piezo",
-        "pin": "neg"
-      },
-      "to": {
-        "placement": "uno",
-        "pin": "gnd3"
-      },
-      "length_mm": 29.9
+      "length_mm": 29.1
     }
   ],
   "steps": [
@@ -1178,7 +742,7 @@
     {
       "index": 2,
       "title": "Drop in the Arduino",
-      "text": "Lower the Uno onto the four standoffs, USB port first into the left opening.",
+      "text": "Lower the Uno onto the standoffs, USB port first into the left opening.",
       "add": [
         "uno"
       ],
@@ -1203,7 +767,7 @@
           ]
         }
       ],
-      "check": "All four mounting holes sit on standoffs and the USB-B port lines up with the left opening."
+      "check": "The Uno sits on its standoffs and the USB-B port lines up with the left opening."
     },
     {
       "index": 3,
@@ -1265,23 +829,13 @@
     },
     {
       "index": 4,
-      "title": "Wire the red button and LED",
-      "text": "Connect the red button's leg A to D2 and the red LED's long leg (anode) to D8 through a 220 ohm resistor.",
+      "title": "Wire the red LED",
+      "text": "Connect the red LED's long leg (anode) to D11 through a 220 ohm resistor.",
       "add": [
-        "btn-red",
         "led-red",
-        "wire-btn-red",
         "wire-led-red"
       ],
       "motion": [
-        {
-          "placement": "btn-red",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        },
         {
           "placement": "led-red",
           "from_offset": [
@@ -1297,99 +851,17 @@
           "target": "led-red"
         }
       ],
-      "check": "Red LED's long leg goes to the resistor on D8; button leg A to D2."
+      "check": "The red LED's long leg goes through a resistor to D11."
     },
     {
       "index": 5,
-      "title": "Wire the green button and LED",
-      "text": "Connect the green button's leg A to D3 and the green LED's long leg (anode) to D9 through a 220 ohm resistor.",
+      "title": "Wire the yellow LED",
+      "text": "Connect the yellow LED's long leg (anode) to D10 through a 220 ohm resistor.",
       "add": [
-        "btn-green",
-        "led-green",
-        "wire-btn-green",
-        "wire-led-green"
-      ],
-      "motion": [
-        {
-          "placement": "btn-green",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        },
-        {
-          "placement": "led-green",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        }
-      ],
-      "callouts": [
-        {
-          "text": "Long leg (anode) to the resistor",
-          "target": "led-green"
-        }
-      ],
-      "check": "Green LED's long leg goes to the resistor on D9; button leg A to D3."
-    },
-    {
-      "index": 6,
-      "title": "Wire the blue button and LED",
-      "text": "Connect the blue button's leg A to D4 and the blue LED's long leg (anode) to D10 through a 220 ohm resistor.",
-      "add": [
-        "btn-blue",
-        "led-blue",
-        "wire-btn-blue",
-        "wire-led-blue"
-      ],
-      "motion": [
-        {
-          "placement": "btn-blue",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        },
-        {
-          "placement": "led-blue",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        }
-      ],
-      "callouts": [
-        {
-          "text": "Long leg (anode) to the resistor",
-          "target": "led-blue"
-        }
-      ],
-      "check": "Blue LED's long leg goes to the resistor on D10; button leg A to D4."
-    },
-    {
-      "index": 7,
-      "title": "Wire the yellow button and LED",
-      "text": "Connect the yellow button's leg A to D5 and the yellow LED's long leg (anode) to D11 through a 220 ohm resistor.",
-      "add": [
-        "btn-yellow",
         "led-yellow",
-        "wire-btn-yellow",
         "wire-led-yellow"
       ],
       "motion": [
-        {
-          "placement": "btn-yellow",
-          "from_offset": [
-            0,
-            0,
-            30
-          ]
-        },
         {
           "placement": "led-yellow",
           "from_offset": [
@@ -1405,19 +877,19 @@
           "target": "led-yellow"
         }
       ],
-      "check": "Yellow LED's long leg goes to the resistor on D11; button leg A to D5."
+      "check": "The yellow LED's long leg goes through a resistor to D10."
     },
     {
-      "index": 8,
-      "title": "Wire the buzzer",
-      "text": "Connect the piezo's + leg to D12.",
+      "index": 6,
+      "title": "Wire the green LED",
+      "text": "Connect the green LED's long leg (anode) to D9 through a 220 ohm resistor.",
       "add": [
-        "piezo",
-        "wire-piezo"
+        "led-green",
+        "wire-led-green"
       ],
       "motion": [
         {
-          "placement": "piezo",
+          "placement": "led-green",
           "from_offset": [
             0,
             0,
@@ -1425,29 +897,50 @@
           ]
         }
       ],
-      "check": "Piezo + leg goes to D12."
+      "callouts": [
+        {
+          "text": "Long leg (anode) to the resistor",
+          "target": "led-green"
+        }
+      ],
+      "check": "The green LED's long leg goes through a resistor to D9."
+    },
+    {
+      "index": 7,
+      "title": "Wire the crosswalk button",
+      "text": "Connect one leg of the button to D2 and the leg on the same side to GND.",
+      "add": [
+        "btn-walk",
+        "wire-btn-walk",
+        "gnd-btn-uno"
+      ],
+      "motion": [
+        {
+          "placement": "btn-walk",
+          "from_offset": [
+            0,
+            0,
+            30
+          ]
+        }
+      ],
+      "check": "Button legs on the same side go to D2 and GND."
+    },
+    {
+      "index": 8,
+      "title": "Connect the LED grounds",
+      "text": "Daisy-chain the three LEDs' short legs (cathodes) together and to GND.",
+      "add": [
+        "gnd-red-yellow",
+        "gnd-yellow-green",
+        "gnd-leds-uno"
+      ],
+      "check": "All three LED short legs are on black wires that end at a GND pin."
     },
     {
       "index": 9,
-      "title": "Connect the grounds",
-      "text": "Daisy-chain the buttons' B legs to GND, the LEDs' short legs to the other GND, and the piezo's - leg to the GND next to D13.",
-      "add": [
-        "gnd-btn-red-green",
-        "gnd-led-red-green",
-        "gnd-btn-green-blue",
-        "gnd-led-green-blue",
-        "gnd-btn-blue-yellow",
-        "gnd-led-blue-yellow",
-        "gnd-btn-uno",
-        "gnd-led-uno",
-        "gnd-piezo-uno"
-      ],
-      "check": "Every button B leg, LED short leg and the piezo - leg is on a black wire to a GND pin."
-    },
-    {
-      "index": 10,
       "title": "Close the lid",
-      "text": "Fit the lid so the LED lenses and button plungers line up with their holes, then press it on.",
+      "text": "Fit the lid so the three LED lenses and the button line up with their holes, red at the top, then press it on.",
       "add": [
         "lid"
       ],
@@ -1467,10 +960,10 @@
           "for": "press fit"
         }
       ],
-      "check": "Lid sits flush, with the four LEDs and buttons showing through their holes."
+      "check": "Lid sits flush, with red, yellow and green LEDs top to bottom and the button showing through."
     }
   ],
-  "prompt": "Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side.",
+  "prompt": "Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side.",
   "print": {
     "size_mm": [
       84.8,
@@ -1491,13 +984,13 @@
         "id": "lid",
         "name": "Case lid",
         "file": "design-lid.stl",
-        "volume_mm3": 10633,
-        "grams": 13.2,
-        "minutes": 66
+        "volume_mm3": 11107,
+        "grams": 13.8,
+        "minutes": 69
       }
     ],
-    "total_grams": 49.7,
-    "total_minutes": 248,
+    "total_grams": 50.3,
+    "total_minutes": 251,
     "step_file": "design.step"
   }
 }

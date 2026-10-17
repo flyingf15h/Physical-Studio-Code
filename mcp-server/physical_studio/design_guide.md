@@ -5,8 +5,8 @@ Claude, or any MCP client).
 
 ### Parts and colors
 - Every number comes from get_part. Never take a size from an image, a web page or memory.
-- Set `color` on place_part to match the prompt: a Simon game's buttons are red, green, blue and
-  yellow, and each LED matches the button it sits next to. If the prompt doesn't say, leave it out.
+- Set `color` on place_part to match the prompt: a traffic light's LEDs are red, yellow and green
+  from top to bottom, and an LED next to a button matches it. If the prompt doesn't say, leave it out.
 - Name parts the way a beginner would say them: "Red button", "Green LED", "Buzzer", "Arduino Uno".
   Give each copy of a part its own name. Never use an id like `led-5mm-2` as a name.
 
