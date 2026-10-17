@@ -40,10 +40,16 @@ export function isRateLimit(e) {
   return err?.status === 429 || /RESOURCE_EXHAUSTED|\b429\b|quota/i.test(String(err?.message ?? e))
 }
 
-/** Gemini's 429 says "Please retry in 13.4s"; wait that long (30 s if it doesn't say). @param {unknown} e */
+/**
+ * Gemini's 429 says "Please retry in 13.4s", or "retry in 3h8m25.9s" once the free tier's daily
+ * quota is used up; wait that long (30 s if it doesn't say). @param {unknown} e
+ */
 export function retryDelayMs(e) {
-  const m = String(/** @type {{ message?: string }} */ (e)?.message ?? e).match(/retry in ([\d.]+)s/i)
-  return m ? Math.ceil(Number(m[1]) * 1000) : 30000
+  const text = String(/** @type {{ message?: string }} */ (e)?.message ?? e)
+  const m = text.match(/retry in (?:(\d+)h)?(?:(\d+)m)?([\d.]+)s/i)
+  if (m) return Math.ceil(((Number(m[1] ?? 0) * 60 + Number(m[2] ?? 0)) * 60 + Number(m[3])) * 1000)
+  const info = text.match(/"retryDelay"\s*:\s*"(\d+)s"/)
+  return info ? Number(info[1]) * 1000 : 30000
 }
 
 /**
