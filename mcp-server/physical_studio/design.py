@@ -19,9 +19,9 @@ class EnclosureSpec:
     wall: float = 2.0
     floor: float = 2.0
     lid_thickness: float = 2.0
-    margin: float = 2.0  # gap between the parts' envelopes and the inner walls
+    margin: float = 3.0  # gap between the parts' envelopes and the inner walls (the lid lip takes 1.4)
     top_clearance: float = 2.0  # gap between the tallest part and the lid
-    standoff_min: float = 4.0  # shortest standoff under a mounted board
+    standoff_min: float = 5.0  # shortest standoff under a mounted board (fits an M3 x 6 through a 1.6 mm PCB)
     standoff_diameter: float = 6.0
     pilot_hole: float = 2.5  # M3 self-tapping into PLA; 4.0 for heat-set inserts
     cutout_clearance: float = 0.5  # added on every side of a connector opening

@@ -44,3 +44,26 @@
   .card { top: 8px; left: 8px; width: calc(100% - 16px); padding: 10px 12px; }
   .timeline { bottom: 8px; width: calc(100% - 16px); }
 }
+
+.problem { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; background: #fde8e8; border: 1px solid #f8b4b4; border-radius: 8px; padding: 8px 10px; font-size: 13px; color: #9b1c1c; }
+
+.tracker { position: absolute; top: 16px; right: 16px; width: 280px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.tracker.on { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; box-shadow: 0 6px 24px rgba(31, 41, 51, .08); align-items: stretch; }
+.tracker-start { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 14px; box-shadow: 0 6px 24px rgba(31, 41, 51, .08); }
+.tracker-start:hover { border-color: var(--accent); }
+.tracker-start .dot { width: 10px; height: 10px; border-radius: 50%; background: #e5484d; }
+.tracker video { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #1f2933; }
+.tracker-bar { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.tracker-bar .status { flex: 1; font-weight: 600; }
+.tracker-bar .status.watching::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e5484d; margin-right: 6px; animation: blink 1.4s infinite; }
+.tracker-bar button { border: 1px solid var(--line); background: none; border-radius: 6px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
+.tracker-bar button[aria-pressed='true'] { background: var(--bg); color: var(--muted); }
+.tracker .line { margin: 0; font-size: 13px; line-height: 1.4; padding: 6px 8px; border-radius: 8px; }
+.tracker .line.gemini { background: var(--accent-soft); }
+.tracker .line.you { background: var(--bg); color: var(--muted); }
+.tracker-error { margin: 0; font-size: 12px; color: #9b1c1c; background: #fde8e8; border: 1px solid #f8b4b4; border-radius: 8px; padding: 6px 8px; max-width: 280px; }
+@keyframes blink { 50% { opacity: .3; } }
+
+@media (max-width: 760px) {
+  .tracker { top: auto; bottom: 64px; right: 8px; width: min(260px, calc(100% - 16px)); }
+}

@@ -96,4 +96,37 @@ def test_add_step_rejects_unknown_and_repeated_ids(studio):
 
 def test_tools_are_registered():
     names = {t.name for t in asyncio.run(mcp.list_tools())}
-    assert {"search_parts", "get_part", "place_part", "create_enclosure", "add_fastener", "add_step", "export"} <= names
+    assert {
+        "search_parts", "get_part", "place_part", "create_enclosure", "add_fastener", "add_step",
+        "check_interference", "check_clearance", "render_preview", "export",
+    } <= names
+
+
+def test_check_interference_flags_long_screws_and_accepts_standoff_threads(studio):
+    for hole in ("h1", "h4"):
+        studio.add_fastener("test-m3-screw", "uno", hole)
+    studio.create_enclosure()
+    result = studio.check_interference()
+    assert result["ok"]
+    assert {e["why"] for e in result["expected"]} == {"screw threads into its standoff"}
+    studio.create_enclosure(standoff_min=3.0, margin=1.0)  # 1.6 mm board + 3 mm standoff < 6 mm screw
+    problems = studio.check_interference()["problems"]
+    assert any("bottoms out" in p.get("issue", "") for p in problems)
+
+
+def test_check_clearance_reports_tight_gaps_and_bed_size(studio):
+    studio.create_enclosure()
+    assert studio.check_clearance()["ok"]
+    studio.create_enclosure(margin=0.5)
+    assert any(t["b"] == "base" or t["a"] == "base" for t in studio.check_clearance()["too_close"])
+    notes = studio.check_clearance(bed=(60, 60, 60))["notes"]
+    assert any("print bed" in n for n in notes)
+
+
+def test_render_preview_returns_png(studio):
+    studio.create_enclosure()
+    png = studio.render_preview("iso", hide=["lid"])
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+    assert studio.render_preview("top", step=1)[:4] == b"\x89PNG"
+    with pytest.raises(ValueError):
+        studio.render_preview("iso", step=99)

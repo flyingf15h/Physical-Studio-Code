@@ -3,6 +3,8 @@ import { Canvas } from '@react-three/fiber'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { Assembly } from './Assembly'
 import { loadSteps, type StepsDoc } from './steps'
+import { TrackerPanel } from './tracker/TrackerPanel'
+import type { Problem } from './tracker/session'
 import './App.css'
 
 const PLAY_INTERVAL_MS = 3500
@@ -38,6 +40,7 @@ export default function App() {
   const [step, setStep] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [exploded, setExploded] = useState(false)
+  const [problem, setProblem] = useState<Problem | null>(null)
 
   const use = useCallback((s: Source) => {
     setSource(s)
@@ -107,7 +110,11 @@ export default function App() {
       <main className="stage">
         {error && <div className="error">{error}</div>}
         {source && (
-          <Canvas camera={{ fov: 35, near: 0.001, far: 50, position: [0.15, 0.15, 0.2] }} dpr={[1, 2]}>
+          <Canvas
+            camera={{ fov: 35, near: 0.001, far: 50, position: [0.15, 0.15, 0.2] }}
+            dpr={[1, 2]}
+            gl={{ preserveDrawingBuffer: true }} // the step tracker captures the expected render
+          >
             <color attach="background" args={['#ebe8e4']} />
             <hemisphereLight args={['#ffffff', '#b9b4ae', 1.6]} />
             <directionalLight position={[1, 2, 1.5]} intensity={2.2} />
@@ -143,8 +150,16 @@ export default function App() {
                 <span>Camera check</span> {current.check}
               </p>
             )}
+            {problem && (
+              <div className="problem" role="alert">
+                <strong>{problem.problem}</strong>
+                <span>{problem.fix}</span>
+              </div>
+            )}
           </section>
         )}
+
+        {source && <TrackerPanel key={source.glbUrl} doc={source.doc} step={step} setStep={go} onProblem={setProblem} />}
 
         {source && (
           <nav className="timeline">

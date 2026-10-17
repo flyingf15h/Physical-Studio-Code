@@ -55,6 +55,7 @@ class BuiltPiece:
 class BuiltDesign:
     pieces: dict[str, BuiltPiece]
     cavity: tuple[np.ndarray, np.ndarray] | None = None  # inner min/max corners
+    shell: Part | None = None  # the base without standoffs, for checking boards against walls and floor
     outer: tuple[np.ndarray, np.ndarray] | None = None
     warnings: list[str] = field(default_factory=list)
 
@@ -135,6 +136,10 @@ def proxy_shape(part: dict) -> Part:
     for zone in part.get("keep_out", []):
         if zone["min"][2] >= 0:  # skip underside pin zones, they're mostly empty space
             shape = shape + box_between(zone["min"], zone["max"])
+    for hole in part.get("mounting_holes", []):
+        x, y, _ = hole["position"]
+        drill = Cylinder(hole["diameter"] / 2, size[2] + 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        shape = shape - drill.moved(Location((x, y, -1)))
     return shape
 
 
@@ -238,6 +243,7 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
     base = box_between(outer_lo, [outer_hi[0], outer_hi[1], cavity_hi[2]]) - box_between(
         cavity_lo, [cavity_hi[0], cavity_hi[1], cavity_hi[2] + 1]
     )
+    shell = base
     lid = box_between([outer_lo[0], outer_lo[1], cavity_hi[2]], outer_hi) if spec.lid else None
     if lid is not None:
         # Locating lip that drops inside the walls.
@@ -258,10 +264,12 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
             target, cut = connector_cutout(p, conn, m, spec, cavity_lo, cavity_hi, outer_lo, outer_hi, warnings)
             if target == "base":
                 base = base - cut
+                shell = shell - cut
             elif target == "lid" and lid is not None:
                 lid = lid - cut
 
     identity = np.eye(4)
+    built.shell = shell
     built.pieces["base"] = BuiltPiece("base", "enclosure", None, "Case base", base, identity, ENCLOSURE_COLORS["base"])
     built.pieces.update(pieces)
     if lid is not None:
