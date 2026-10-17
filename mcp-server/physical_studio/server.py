@@ -37,6 +37,13 @@ WIRE_COLORS = {
 }
 
 
+def hex_color(color: str) -> str:
+    value = WIRE_COLORS.get(color.lower(), color)
+    if not (value.startswith("#") and len(value) == 7):
+        raise ValueError(f"color must be one of {sorted(WIRE_COLORS)} or #rrggbb")
+    return value
+
+
 def r3(values) -> list[float]:
     return [round(float(v), 2) for v in values]
 
@@ -83,6 +90,7 @@ class Studio:
         id: str | None = None,
         mount: bool = True,
         name: str | None = None,
+        color: str | None = None,
     ) -> dict:
         part = self.part(part_id)
         if part.get("category") == "fastener":
@@ -97,6 +105,7 @@ class Studio:
             position=tuple(float(v) for v in position),
             rotation=tuple(float(v) for v in rotation),
             mount=mount,
+            color=hex_color(color) if color else None,
         )
         lo, hi = aabb(placement_matrix(placement.position, placement.rotation), *envelope(part))
         warnings = []
@@ -192,12 +201,10 @@ class Studio:
     ) -> dict:
         self.pin(from_placement, from_pin)
         self.pin(to_placement, to_pin)
-        hex_color = WIRE_COLORS.get(color.lower(), color)
-        if not (hex_color.startswith("#") and len(hex_color) == 7):
-            raise ValueError(f"color must be one of {sorted(WIRE_COLORS)} or #rrggbb")
+        wire_color = hex_color(color)
         wire_id = id or self.design.new_id(f"wire-{to_placement}-{to_pin}")
         self.design.check_new_id(wire_id)
-        wire = Wire(wire_id, (from_placement, from_pin), (to_placement, to_pin), hex_color, inline, label)
+        wire = Wire(wire_id, (from_placement, from_pin), (to_placement, to_pin), wire_color, inline, label)
         self.design.wires[wire_id] = wire
         piece = wire_piece(self.design, self.parts_used(), wire)
         return {"id": wire_id, "length_mm": piece.extra["length_mm"]}
@@ -308,7 +315,8 @@ mcp = FastMCP(
         "from get_part) -> add_step for each "
         "assembly step -> check_interference + check_clearance + render_preview (look at it, fix, repeat) -> "
         "export. Connectors that face a wall (e.g. USB on -x) get a cutout if the part "
-        "is within reach of that wall; parts poking up through the lid need a '+z' connector."
+        "is within reach of that wall; parts poking up through the lid need a '+z' connector.\n\n"
+        + Path(__file__).with_name("design_guide.md").read_text(encoding="utf-8")
     ),
 )
 
@@ -339,12 +347,15 @@ def place_part(
     id: str | None = None,
     mount: bool = True,
     name: str | None = None,
+    color: str | None = None,
 ) -> dict:
     """Place a library part. position is where the part's origin (bottom-left corner of its footprint)
     goes, in mm; rotation is degrees, Euler XYZ. Boards with mount=true get standoffs under their
     mounting holes. name: what the builder calls it in the guide, e.g. "Red LED" (give each copy of a
-    part its own name). Returns the placement id and its envelope in the design frame."""
-    return studio.place_part(part_id, position, rotation, id, mount, name)
+    part its own name). color: how it renders, the same names as add_wire or #rrggbb; set it to match
+    the prompt (a red button, a blue LED) or leave it out for the category default. Returns the
+    placement id and its envelope in the design frame."""
+    return studio.place_part(part_id, position, rotation, id, mount, name, color)
 
 
 @mcp.tool

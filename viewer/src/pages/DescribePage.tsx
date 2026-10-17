@@ -1,8 +1,8 @@
 // Screen 1 · Describe the project. Mockup: docs/product-vision.html. The prompt box starts a design
 // job and moves on to screen 2; the example prompts (Senna's Claude) and the parts library (Kelly's
 // Claude) fill or extend the prompt. Images (upload, paste or drop) and links go along with it.
-import { useRef, useState } from 'react'
-import { startDesign } from '../api'
+import { useEffect, useRef, useState } from 'react'
+import { listProviders, startDesign, type Provider } from '../api'
 import { ExamplePrompts } from '../components/ExamplePrompts'
 import { PartsLibrary } from '../components/PartsLibrary'
 import { ProgressHeader } from '../components/ProgressHeader'
@@ -47,6 +47,12 @@ export function DescribePage() {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [providers, setProviders] = useState<Provider[]>([])
+  const [model, setModel] = useState<string | null>(null) // null: the server default
+
+  useEffect(() => {
+    listProviders().then(setProviders, () => setProviders([])) // no picker if it fails
+  }, [])
   const box = useRef<HTMLTextAreaElement>(null)
   const filePicker = useRef<HTMLInputElement>(null)
   const { code } = designParams()
@@ -87,7 +93,7 @@ export function DescribePage() {
     setBusy(true)
     setError(null)
     try {
-      const { id } = await startDesign(prompt.trim(), { images, links })
+      const { id } = await startDesign(prompt.trim(), { images, links, ...(model ? { model } : {}) })
       navigate(withParams(`/design/${id}`, { code }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -222,6 +228,18 @@ export function DescribePage() {
               <span className="describe-count">
                 {length}/{MAX_CHARS}
               </span>
+              {providers.length > 1 && (
+                <label className="describe-model">
+                  <span>Model</span>
+                  <select value={model ?? providers[0].id} onChange={(e) => setModel(e.target.value)}>
+                    {providers.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <button type="submit" className="describe-go" disabled={!ready}>
                 {busy ? 'Starting…' : 'Design it'}
               </button>

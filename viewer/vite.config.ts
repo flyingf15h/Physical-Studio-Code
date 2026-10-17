@@ -3,6 +3,7 @@ import path from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { handleTokenRequest } from './server/geminiToken.js'
+import { geminiKeys } from './server/geminiKeys.js'
 import { handleCheckRequest } from './server/stepCheck.js'
 
 // Serves the MCP server's exports at /out/<design>/..., so `?design=out/<design>` shows
@@ -28,24 +29,25 @@ function serveExports(): Plugin {
 // camera straight to Gemini without ever seeing GEMINI_API_KEY (read from viewer/.env.local).
 // Same handler as the production server (server.mjs).
 function geminiToken(env: Record<string, string>): Plugin {
+  const apiKeys = geminiKeys(env)
   return {
     name: 'gemini-token',
     configureServer(server) {
       server.middlewares.use('/api/gemini-token', (req, res) =>
         handleTokenRequest(req, res, {
-          apiKey: env.GEMINI_API_KEY,
+          apiKeys,
           model: env.GEMINI_LIVE_MODEL,
           passcode: env.DEMO_CODE,
-          missingKeyHint: 'Set GEMINI_API_KEY in viewer/.env.local and restart npm run dev.',
+          missingKeyHint: 'Set GEMINI_API_KEY (or GEMINI_API_KEYS=k1,k2) in viewer/.env.local and restart npm run dev.',
         }),
       )
       server.middlewares.use('/api/check-step', (req, res) =>
         handleCheckRequest(req, res, {
-          apiKey: env.GEMINI_API_KEY,
+          apiKeys,
           model: env.GEMINI_CHECK_MODEL,
           fallback: { apiKey: env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_CHECK_MODEL },
           passcode: env.DEMO_CODE,
-          missingKeyHint: 'Set GEMINI_API_KEY in viewer/.env.local and restart npm run dev.',
+          missingKeyHint: 'Set GEMINI_API_KEY (or GEMINI_API_KEYS=k1,k2) in viewer/.env.local and restart npm run dev.',
         }),
       )
     },

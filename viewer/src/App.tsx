@@ -41,6 +41,7 @@ export default function App() {
   const [step, setStep] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [exploded, setExploded] = useState(false)
+  const [view, setView] = useState(0) // bumped by Reset view
   const [problem, setProblem] = useState<Problem | null>(null)
 
   const use = useCallback((s: Source) => {
@@ -139,11 +140,18 @@ export default function App() {
                     doc={source.doc}
                     step={step}
                     exploded={exploded}
+                    view={view}
                   />
                 </Bounds>
               </Suspense>
               <OrbitControls makeDefault />
             </Canvas>
+          )}
+          {source && (
+            <div className="view-tools">
+              <span>Drag to rotate · scroll to zoom · right-drag to pan</span>
+              <button onClick={() => setView((v) => v + 1)}>Reset view</button>
+            </div>
           )}
 
           {current && (

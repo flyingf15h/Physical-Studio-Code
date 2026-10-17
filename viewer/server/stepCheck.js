@@ -2,16 +2,17 @@
 // verdict from a regular Gemini model. Gemini Live is only the voice; this decides when a step is
 // done, because Live function calling proved unreliable (it speaks function names instead of
 // calling them). Shared by the Vite dev server and server.mjs, like geminiToken.js.
-// When Gemini is rate limited (the free tier allows 5 requests a minute), DeepSeek's vision model
-// judges the frame instead, and Gemini is skipped until its retry delay has passed.
+// Gemini keys are taken in turn (geminiKeys.js); a rate-limited key sits out until its retry delay
+// passes. When every key is rate limited (the free tier allows 5 requests a minute), DeepSeek's
+// vision model judges the frame instead.
 
 import { GoogleGenAI, Type } from '@google/genai'
+import { isRateLimit, redact, withGeminiKey } from './geminiKeys.js'
 
 export const DEFAULT_CHECK_MODEL = 'gemini-3.8-flash'
 export const DEFAULT_FALLBACK_MODEL = 'deepseek-flash'
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions'
 const STATUSES = ['done', 'problem', 'in_progress', 'unclear']
-let geminiPausedUntil = 0
 const MAX_BODY = 4 * 1024 * 1024
 
 const VERDICT_SCHEMA = {
@@ -53,34 +54,24 @@ function briefFor({ step, expected, note }) {
 /**
  * Gemini first; DeepSeek when Gemini is rate limited (or has no key). The verdict says which
  * model judged it in `judge`.
- * @param {{ apiKey?: string, model?: string, fallback?: { apiKey?: string, model?: string }, step: object,
+ * @param {{ apiKeys: string[], model?: string, fallback?: { apiKey?: string, model?: string }, step: object,
  *   frame: string, expected?: string | null, note?: string }} input
  */
-export async function checkStep({ apiKey, model = DEFAULT_CHECK_MODEL, fallback, ...input }) {
+export async function checkStep({ apiKeys, model = DEFAULT_CHECK_MODEL, fallback, ...input }) {
   const canFallBack = Boolean(fallback?.apiKey)
-  if (apiKey && (Date.now() >= geminiPausedUntil || !canFallBack)) {
+  if (apiKeys.length) {
     try {
-      return { ...(await checkWithGemini({ apiKey, model, ...input })), judge: model }
+      const verdict = await withGeminiKey(apiKeys, (apiKey) => checkWithGemini({ apiKey, model, ...input }), {
+        includePaused: !canFallBack,
+      })
+      return { ...verdict, judge: model }
     } catch (e) {
       if (!canFallBack || !isRateLimit(e)) throw e
-      geminiPausedUntil = Date.now() + retryDelayMs(e)
     }
   }
   if (!canFallBack) throw new Error('no step-check model available')
   const fbModel = fallback.model || DEFAULT_FALLBACK_MODEL
   return { ...(await checkWithDeepSeek({ apiKey: fallback.apiKey, model: fbModel, ...input })), judge: fbModel }
-}
-
-/** @param {unknown} e */
-function isRateLimit(e) {
-  const err = /** @type {{ status?: number, message?: string }} */ (e)
-  return err?.status === 429 || /RESOURCE_EXHAUSTED|\b429\b|quota/i.test(String(err?.message ?? e))
-}
-
-/** Gemini's 429 says "Please retry in 13.4s"; wait that long (30 s if it doesn't say). @param {unknown} e */
-function retryDelayMs(e) {
-  const m = String(/** @type {{ message?: string }} */ (e)?.message ?? e).match(/retry in ([\d.]+)s/i)
-  return m ? Math.ceil(Number(m[1]) * 1000) : 30000
 }
 
 async function checkWithGemini({ apiKey, model, step, frame, expected, note }) {
@@ -157,10 +148,10 @@ function readJson(req) {
  * Handles POST /api/check-step with JSON {step, frame, expected?, note?}.
  * @param {import('node:http').IncomingMessage} req
  * @param {import('node:http').ServerResponse} res
- * @param {{ apiKey?: string, model?: string, fallback?: { apiKey?: string, model?: string }, passcode?: string,
+ * @param {{ apiKeys: string[], model?: string, fallback?: { apiKey?: string, model?: string }, passcode?: string,
  *   missingKeyHint: string }} options
  */
-export async function handleCheckRequest(req, res, { apiKey, model, fallback, passcode, missingKeyHint }) {
+export async function handleCheckRequest(req, res, { apiKeys, model, fallback, passcode, missingKeyHint }) {
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Cache-Control', 'no-store')
   const fail = (status, error) => {
@@ -168,15 +159,14 @@ export async function handleCheckRequest(req, res, { apiKey, model, fallback, pa
     res.end(JSON.stringify({ error }))
   }
   if (req.method !== 'POST') return fail(405, 'POST only')
-  if (!apiKey && !fallback?.apiKey) return fail(503, missingKeyHint)
+  if (!apiKeys.length && !fallback?.apiKey) return fail(503, missingKeyHint)
   if (passcode && req.headers['x-demo-code'] !== passcode) return fail(401, 'Wrong or missing demo code.')
   try {
     const body = await readJson(req)
     if (!body?.frame || !body?.step) return fail(400, 'need step and frame')
-    res.end(JSON.stringify(await checkStep({ ...body, apiKey, model: model || DEFAULT_CHECK_MODEL, fallback })))
+    res.end(JSON.stringify(await checkStep({ ...body, apiKeys, model: model || DEFAULT_CHECK_MODEL, fallback })))
   } catch (e) {
-    let message = e instanceof Error ? e.message : String(e)
-    for (const key of [apiKey, fallback?.apiKey]) if (key) message = message.replaceAll(key, '[key]')
+    const message = redact(e instanceof Error ? e.message : String(e), [...apiKeys, fallback?.apiKey])
     fail(502, `Step check failed: ${message}`)
   }
 }

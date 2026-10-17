@@ -277,10 +277,14 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
             name=p.name,
             shape=shape_cache[p.part_id],
             matrix=placement_matrix(p.position, p.rotation),
-            color=CATEGORY_COLORS.get(part.get("category", "misc"), "#999999"),
+            color=p.color or CATEGORY_COLORS.get(part.get("category", "misc"), "#999999"),
             position=tuple(p.position),
             rotation=tuple(p.rotation),
             category=part.get("category"),
+            # Pin tips in the part frame, so the viewer can draw legs (display only).
+            extra={"pins": [{"id": q["id"], "position": [float(v) for v in q["position"]]} for q in part["pins"]]}
+            if part.get("pins")
+            else {},
         )
 
     built = BuiltDesign(pieces={}, warnings=warnings)

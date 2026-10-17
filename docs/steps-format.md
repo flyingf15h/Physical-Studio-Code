@@ -17,7 +17,7 @@ Example: [`schemas/examples/simon.steps.json`](../schemas/examples/simon.steps.j
 
 ## Placements
 
-`placements` lists everything in the GLB: enclosure pieces (`kind: "enclosure"`, `part: null`), library parts (`kind: "part"`), fasteners (`kind: "fastener"`) and wires (`kind: "wire"`, `part: null`). A wire also has `from` / `to` (`{placement, pin}`, pin ids from the parts library), `length_mm` and optionally `inline` (a component spliced into it, e.g. a resistor); its mesh is already routed, so the viewer treats it like any other node. `position`/`rotation` repeat the node's transform for anything that doesn't read the GLB (rotation is degrees, Euler order XYZ, the same as three.js `Euler` with order `'XYZ'`).
+`placements` lists everything in the GLB: enclosure pieces (`kind: "enclosure"`, `part: null`), library parts (`kind: "part"`), fasteners (`kind: "fastener"`) and wires (`kind: "wire"`, `part: null`). A wire also has `from` / `to` (`{placement, pin}`, pin ids from the parts library), `length_mm` and optionally `inline` (a component spliced into it, e.g. a resistor); its mesh is already routed, so the viewer treats it like any other node. A part with pins also has `pins` (`[{id, position}]`, pin tips in the part's own frame) so the viewer can draw its legs; the GLB has no leg geometry. `position`/`rotation` repeat the node's transform for anything that doesn't read the GLB (rotation is degrees, Euler order XYZ, the same as three.js `Euler` with order `'XYZ'`).
 
 ## Steps
 

@@ -15,6 +15,7 @@ export interface Placement {
   position: Vec3
   rotation: Vec3
   color?: string
+  pins?: { id: string; position: Vec3 }[] // parts: pin tips in the part frame, for drawing legs
   // wires only
   from?: PinRef
   to?: PinRef

@@ -7,6 +7,21 @@ import { addedAt, motions, type StepsDoc, type Vec3 } from './steps'
 const DURATION = 1.4 // seconds for a part to fly in
 const HIGHLIGHT = new THREE.Color('#26c6da')
 const DEG = Math.PI / 180
+// Legs: the GLB has the part bodies only, so pins get thin grey cylinders down to their tips.
+const LEG_RADIUS = 0.3 // mm
+const LEG_GEOMETRY = new THREE.CylinderGeometry(LEG_RADIUS, LEG_RADIUS, 1, 8).rotateX(Math.PI / 2) // along Z
+const LEG_MATERIAL = new THREE.MeshStandardMaterial({ color: '#a8adb4', metalness: 0.6, roughness: 0.4 })
+
+function addLegs(obj: THREE.Object3D, pins: { position: Vec3 }[]) {
+  for (const { position: [x, y, z] } of pins) {
+    if (z >= 0) continue // the pin ends at or above the body bottom: nothing to draw
+    const leg = new THREE.Mesh(LEG_GEOMETRY, LEG_MATERIAL)
+    leg.name = 'leg'
+    leg.scale.set(1, 1, -z)
+    leg.position.set(x, y, z / 2)
+    obj.add(leg)
+  }
+}
 
 interface Node {
   obj: THREE.Object3D
@@ -24,9 +39,11 @@ interface Props {
   doc: StepsDoc
   step: number // 0-based
   exploded: boolean
+  view?: number // bump to refit the camera (the "Reset view" button)
+  still?: boolean // show the finished state: no fly-in, highlight or callouts for the current step
 }
 
-export function Assembly({ glbUrl, doc, step, exploded }: Props) {
+export function Assembly({ glbUrl, doc, step, exploded, view = 0, still = false }: Props) {
   const gltf = useGLTF(glbUrl)
   const added = useMemo(() => addedAt(doc), [doc])
   const motionOf = useMemo(() => motions(doc), [doc])
@@ -34,6 +51,7 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
   // Each placement is a direct child of the "design" node, named by its id (docs/steps-format.md).
   const { root, design, nodes } = useMemo(() => {
     const kinds = new Map(doc.placements.map((p) => [p.id, p.kind]))
+    const pins = new Map(doc.placements.map((p) => [p.id, p.pins ?? []]))
     const root = gltf.scene.clone(true)
     const design = root.getObjectByName('design') ?? root
     const nodes = new Map<string, Node>()
@@ -56,16 +74,17 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
         materials,
         pulses: kinds.get(obj.name) !== 'wire',
       })
+      addLegs(obj, pins.get(obj.name) ?? []) // after collecting materials, so legs don't pulse
     }
     return { root, design, nodes }
   }, [gltf, doc])
 
-  // Refit the camera when the exploded view changes how much space the design takes.
+  // Refit the camera when the exploded view changes how much space the design takes, or on Reset view.
   const bounds = useBounds()
   useEffect(() => {
     const t = setTimeout(() => bounds.refresh().clip().fit(), 60)
     return () => clearTimeout(t)
-  }, [exploded, bounds])
+  }, [exploded, view, bounds])
 
   const stepStart = useRef({ step: -1, time: 0 })
   const euler = useMemo(() => new THREE.Euler(), [])
@@ -81,7 +100,7 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
       const at = added.get(id) ?? 0
       node.obj.visible = at <= step
       if (!node.obj.visible) continue
-      const current = at === step
+      const current = at === step && !still
       const m = motionOf.get(id)
       const f = exploded ? 1 : current ? 1 - progress : 0
       const offset = m?.from_offset ?? [0, 0, 0]
@@ -102,7 +121,7 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
     }
   })
 
-  const current = doc.steps[step]
+  const current = still ? undefined : doc.steps[step]
 
   // Turns a point in a placement's local frame into the design frame, using its final transform.
   const toDesign = (target: string, at?: Vec3): Vec3 | null => {

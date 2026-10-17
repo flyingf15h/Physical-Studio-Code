@@ -235,3 +235,21 @@ def test_move_part_takes_its_screws_and_remove_part_cleans_up(studio):
     assert [s.title for s in studio.design.steps] == ["Board"]  # the LED step was left empty
     with pytest.raises(ValueError, match="remove it and add it again"):
         studio.move_part("screw-h1", (0, 0, 0))
+
+
+def test_place_part_color_reaches_the_build_and_steps(studio, tmp_path):
+    shutil.copy(REPO / "parts" / "led-5mm.json", studio.parts_dir)
+    studio.place_part("led-5mm", (30, 20, 30), id="led-blue", color="blue")
+    studio.place_part("led-5mm", (40, 20, 30), id="led-hex", color="#123abc")
+    studio.place_part("led-5mm", (50, 20, 30), id="led-default")
+    pieces = studio.build().pieces
+    assert pieces["led-blue"].color == "#3a6fd0"
+    assert pieces["led-hex"].color == "#123abc"
+    assert pieces["led-default"].color == "#d04040"  # output category default
+    with pytest.raises(ValueError, match="color must be"):
+        studio.place_part("led-5mm", (60, 20, 30), id="led-bad", color="sparkly")
+    out = tmp_path / "colored"
+    studio.export(["glb"], str(out))
+    doc = json.loads((out / "design.steps.json").read_text())
+    colors = {p["id"]: p["color"] for p in doc["placements"]}
+    assert colors["led-blue"] == "#3a6fd0"

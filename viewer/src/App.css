@@ -33,6 +33,10 @@
 .timeline button.active { background: var(--accent); color: #fff; }
 .timeline button:last-child { font-size: 13px; padding: 0 12px; }
 .timeline input { flex: 1; accent-color: var(--accent); min-width: 0; }
+.view-tools { position: absolute; right: 16px; bottom: 72px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); pointer-events: none; }
+.view-tools span { background: color-mix(in srgb, var(--panel) 80%, transparent); border-radius: 999px; padding: 4px 10px; }
+.view-tools button { pointer-events: auto; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: inherit; }
+.view-tools button:hover { border-color: var(--accent); }
 
 .callout { background: var(--ink); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
 .dimension { background: var(--warn); color: #fff; font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
@@ -43,6 +47,8 @@
   .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 34vh; }
   .card { top: 8px; left: 8px; width: calc(100% - 16px); padding: 10px 12px; }
   .timeline { bottom: 8px; width: calc(100% - 16px); }
+  .view-tools { right: auto; left: 8px; bottom: 60px; }
+  .view-tools span { display: none; }
 }
 
 .problem { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; background: #fde8e8; border: 1px solid #f8b4b4; border-radius: 8px; padding: 8px 10px; font-size: 13px; color: #9b1c1c; }

@@ -198,7 +198,17 @@
           "type": "number",
           "description": "Wires: routed length, so the builder can cut it."
         },
-        "inline": {
+        "pins": {
+        "type": "array",
+        "description": "Parts: pin tips in the part's own frame (mm), so viewers can draw legs. Display only.",
+        "items": {
+          "type": "object",
+          "required": ["id", "position"],
+          "additionalProperties": false,
+          "properties": { "id": { "type": "string" }, "position": { "$ref": "#/$defs/vec3" } }
+        }
+      },
+      "inline": {
           "type": "string",
           "description": "Wires: component spliced into the wire, e.g. \"220 ohm resistor\"."
         }

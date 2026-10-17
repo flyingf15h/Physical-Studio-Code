@@ -38,7 +38,7 @@ export interface DesignJob {
   design: string | null // "out/<id>", for /guide?design= and /print?design=
   checks: JobChecks
   error: string | null
-  designer: string | null // which model is designing: OpenAI, DeepSeek or Claude
+  designer: string | null // which model is designing: OpenAI, DeepSeek, Gemini or Claude
   attachments?: { images: string[]; links: { url: string; error: string | null }[] }
 }
 
@@ -46,6 +46,13 @@ export interface DesignJob {
 export interface DesignInputs {
   images?: string[]
   links?: string[]
+  model?: string // a Provider id to go first; the others stay as fallbacks
+}
+
+/** A design model the server has a key for. */
+export interface Provider {
+  id: string // openai, deepseek, gemini, anthropic
+  label: string
 }
 
 function headers(json = false): Record<string, string> {
@@ -63,6 +70,9 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const listParts = () => call<PartSummary[]>('/api/parts')
+
+/** The server's design models, its default first. */
+export const listProviders = () => call<Provider[]>('/api/design/providers')
 
 export const startDesign = (prompt: string, inputs: DesignInputs = {}) =>
   call<{ id: string }>('/api/design', {

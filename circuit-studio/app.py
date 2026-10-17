@@ -1,4 +1,4 @@
-import base64, io, json, re
+import base64, io, json, os, re
 from pathlib import Path
 import numpy as np
 import streamlit as st
@@ -9,8 +9,22 @@ from google import genai
 from google.genai import types
 try:from config import GEMINI_API_KEY,GEMINI_MODEL
 except ImportError:  # hosted (deploy/): settings come from the environment instead of config.py
-    import os;GEMINI_API_KEY=os.environ.get('GEMINI_API_KEY','');GEMINI_MODEL=os.environ.get('GEMINI_MODEL','gemini-3.8-flash')
+    GEMINI_API_KEY=os.environ.get('GEMINI_API_KEY','');GEMINI_MODEL=os.environ.get('GEMINI_MODEL','gemini-3.8-flash')
 from geometry import build
+# Several keys (GEMINI_API_KEYS=k1,k2,k3) are taken in turn; a rate-limited key hands over to the next.
+GEMINI_KEYS=list(dict.fromkeys(k.strip() for k in [*os.environ.get('GEMINI_API_KEYS','').split(','),GEMINI_API_KEY] if k.strip()))
+turn=st.cache_resource(lambda:{'n':0})()
+def rate_limited(e):return getattr(e,'code',None)==429 or bool(re.search(r'RESOURCE_EXHAUSTED|\b429\b|quota',str(e),re.I))
+def generate(contents,config):
+    start=turn['n']%len(GEMINI_KEYS);turn['n']+=1;last=None
+    for key in GEMINI_KEYS[start:]+GEMINI_KEYS[:start]:
+        client=genai.Client(api_key=key)
+        try:return client.models.generate_content(model=GEMINI_MODEL,contents=contents,config=config)
+        except Exception as e:
+            if not rate_limited(e):raise
+            last=e
+        finally:client.close()
+    raise last
 
 class Terminal(BaseModel):
     name:str=Field(description="Terminal label such as gpio25 or gnd. Lowercase without spaces.")
@@ -60,7 +74,7 @@ def validate(s):
 st.set_page_config(page_title='Circuit Model Studio V7',layout='wide')
 st.title('Circuit Model Studio')
 st.caption('Reference photos + your connection instructions → labelled 3D model')
-if not GEMINI_API_KEY:st.error('No Gemini key: set GEMINI_API_KEY in config.py or the environment.');st.stop()
+if not GEMINI_KEYS:st.error('No Gemini key: set GEMINI_API_KEY in config.py, or GEMINI_API_KEY / GEMINI_API_KEYS in the environment.');st.stop()
 files=st.file_uploader('Upload up to 10 reference photos',type=['jpg','jpeg','png','webp'],accept_multiple_files=True)
 notes=st.text_area('Additional instructions and connections',height=190,placeholder='Describe the parts, placement and where to plug each wire. Include GPIO names and breadboard holes when known. There is no prewired circuit.')
 consent=st.checkbox('Send my photos and instructions to Google Gemini.')
@@ -95,14 +109,14 @@ WIRE TERMINALS: LED anode/cathode; resistor 1/2; breadboard a1..j63 or rail keys
 PART KINDS: breadboard, development_board, led, resistor, generic. No expected counts or predefined GPIO network. Use correct visible LED colors. Give useful names for clickable model parts. Evidence describes user supplied vs visually observed. Additional instructions guide intended layout but are not proof of what is visible.
 USER INSTRUCTIONS:\n"""+notes[:12000]
             with st.spinner('Gemini is planning the scene; building detailed geometry…'):
-                client=genai.Client(api_key=GEMINI_API_KEY)
-                try:r=client.models.generate_content(model=GEMINI_MODEL,contents=[prompt]+images,config=types.GenerateContentConfig(response_mime_type='application/json',response_schema=Spec))
-                finally:client.close()
+                r=generate([prompt]+images,types.GenerateContentConfig(response_mime_type='application/json',response_schema=Spec))
                 s=validate(Spec.model_validate_json(r.text or ''));glb,labels=build(s)
                 st.session_state['model']={'glb':glb,'labels':labels,'spec':s.model_dump(),'notes':notes}
             st.success('Model built. Select a name above the viewer, or click a component.')
         except Exception as e:
-            msg=str(e).replace(GEMINI_API_KEY,'[REDACTED]');st.error('Generation failed: '+msg[:1000]);st.info('503: wait and retry. No substitute scene is fabricated. Any previous model below is unchanged.')
+            msg=str(e)
+            for key in GEMINI_KEYS:msg=msg.replace(key,'[REDACTED]')
+            st.error('Generation failed: '+msg[:1000]);st.info('503: wait and retry. No substitute scene is fabricated. Any previous model below is unchanged.')
 if 'model' in st.session_state:
     result=st.session_state['model'];st.subheader('Last successful model')
     html=Path(__file__).with_name('viewer.html').read_text().replace('__MODEL_DATA__',base64.b64encode(result['glb']).decode()).replace('__PART_DATA__',json.dumps(result['labels']).replace('<','\\u003c'))

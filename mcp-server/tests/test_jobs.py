@@ -24,7 +24,7 @@ def test_parts_endpoint_lists_the_library():
 
 
 def test_design_needs_a_key_and_a_prompt(monkeypatch):
-    for key in ("OPENAI_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY"):
+    for key in ("OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "ANTHROPIC_API_KEY"):
         monkeypatch.delenv(key, raising=False)
     c = client()
     assert c.post("/api/design", json={"prompt": "x"}).status_code == 400
@@ -57,6 +57,57 @@ def test_providers_follow_the_order_and_skip_missing_keys(monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert JobManager.providers() == ["deepseek", "openai"]
+
+
+def test_the_page_can_pick_which_model_goes_first(monkeypatch):
+    monkeypatch.delenv("DESIGN_PROVIDERS", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("GEMINI_API_KEYS", "g1, g2")
+    for key in ("DEEPSEEK_API_KEY", "GEMINI_API_KEY", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(key, raising=False)
+    assert JobManager.providers() == ["openai", "gemini"]
+    assert JobManager.providers("gemini") == ["gemini", "openai"]
+    assert JobManager.providers("deepseek") == ["openai", "gemini"]  # no key: ignored
+    c = client()
+    assert c.get("/api/design/providers").json() == [{"id": "openai", "label": "OpenAI"}, {"id": "gemini", "label": "Gemini"}]
+    r = c.post("/api/design", json={"prompt": "Simon game for an Arduino Uno", "model": "gpt-2"})
+    assert r.status_code == 400 and "model must be one of" in r.json()["error"]
+
+
+def test_gemini_keys_take_turns_and_a_rate_limited_key_hands_over(tmp_path, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEYS", "g1,g2")
+    monkeypatch.setenv("GEMINI_API_KEY", "g1")  # duplicates count once
+    monkeypatch.setattr(jobs, "_gemini_turn", 0)
+    assert jobs.provider_keys("gemini") == ["g1", "g2"]
+    assert jobs.provider_keys("gemini", rotate=True) == ["g1", "g2"]
+    assert jobs.provider_keys("gemini", rotate=True) == ["g2", "g1"]
+    limited = openai.RateLimitError("RESOURCE_EXHAUSTED", response=httpx2.Response(429, request=httpx2.Request("POST", "http://x")), body=None)
+    used = []
+    place = NS(id="c0", function=NS(name="place_part", arguments='{"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}'))
+    script = [
+        NS(choices=[NS(finish_reason="tool_calls", message=NS(content=None, tool_calls=[place]))]),
+        NS(choices=[NS(finish_reason="stop", message=NS(content="Done.", tool_calls=None))]),
+    ]
+
+    class FakeClient:
+        def __init__(self, api_key, base_url):
+            def create(**kw):
+                used.append((api_key, base_url, kw["model"]))
+                if api_key == "g1":
+                    raise limited
+                return script.pop(0)
+
+            self.chat = NS(completions=NS(create=create))
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
+    job = DesignJob("job3", "Uno case", tmp_path / "job3", lambda: Studio(REPO / "parts", tmp_path))
+    job.run([{"name": "get_part", "description": "", "input_schema": {"type": "object"}}], ["gemini"])
+    snap = job.snapshot()
+    assert snap["status"] == "done", snap["error"]
+    assert snap["designer"] == "Gemini"
+    assert [u[0] for u in used] == ["g1", "g2", "g2"]
+    assert used[0][1].startswith("https://generativelanguage.googleapis.com/") and used[0][2] == "gemini-3.8-flash"
+    assert any("Gemini carries on with another key" in e["text"] for e in snap["events"] if e["kind"] == "note")
 
 
 def fn_call(id, name, args):

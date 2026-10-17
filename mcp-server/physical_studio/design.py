@@ -40,6 +40,7 @@ class Placement:
     mount: bool = True  # boards: put standoffs under the mounting holes
     attached_to: str | None = None  # fasteners: placement id and hole id they go into
     hole: str | None = None
+    color: str | None = None  # "#rrggbb"; None uses the library category's color
 
 
 @dataclass

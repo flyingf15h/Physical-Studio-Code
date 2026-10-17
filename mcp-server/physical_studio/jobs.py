@@ -5,13 +5,16 @@ runs in a thread with its own Studio (so it never touches the MCP clients' desig
 OUT_DIR/<id>, which the viewer serves as /out/<id>/. Tool calls become progress events: parts found,
 parts placed, case built, wires, fit checks, fixes, previews, steps.
 
-Models: OpenAI (Responses API), DeepSeek (Chat Completions), both through the OpenAI SDK, or Claude.
-DESIGN_PROVIDERS (default "openai,deepseek,anthropic") is the order to try; providers without a key are
-skipped. If OpenAI or DeepSeek runs out of quota or goes down mid-design, the next one carries on from
-the design's current state. Claude only runs when it comes first.
+Models: OpenAI (Responses API), DeepSeek and Gemini (Chat Completions; Gemini through its
+OpenAI-compatible endpoint), all through the OpenAI SDK, or Claude. DESIGN_PROVIDERS (default
+"openai,deepseek,gemini,anthropic") is the order to try; providers without a key are skipped, and the
+page can pick one to go first ("model" in POST /api/design). If one runs out of quota or goes down
+mid-design, the next one carries on from the design's current state; Gemini tries each of its keys
+first. Claude only runs when it comes first.
 
 Env: OPENAI_API_KEY, OPENAI_DESIGN_MODEL (gpt-6.1-sol), DEEPSEEK_API_KEY, DEEPSEEK_DESIGN_MODEL
-(deepseek-flash, which reads images), ANTHROPIC_API_KEY, DESIGN_MODEL (claude-opus-5-5), DEMO_CODE
+(deepseek-flash, which reads images), GEMINI_API_KEY and/or GEMINI_API_KEYS (k1,k2,... taken in
+turn), GEMINI_DESIGN_MODEL (gemini-3.8-flash), ANTHROPIC_API_KEY, DESIGN_MODEL (claude-opus-5-5), DEMO_CODE
 (required in x-demo-code when set), DESIGNS_PER_HOUR (per client IP, 4), DESIGN_MAX_RUNNING (1).
 """
 
@@ -39,7 +42,35 @@ MODEL = os.environ.get("DESIGN_MODEL", "claude-opus-5-5")
 COMPATIBLE = {
     "openai": ("OpenAI", "OPENAI_API_KEY", None, "OPENAI_DESIGN_MODEL", "gpt-6.1-sol"),
     "deepseek": ("DeepSeek", "DEEPSEEK_API_KEY", "https://api.deepseek.com", "DEEPSEEK_DESIGN_MODEL", "deepseek-flash"),
+    "gemini": (
+        "Gemini",
+        "GEMINI_API_KEY",
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "GEMINI_DESIGN_MODEL",
+        "gemini-3.8-flash",
+    ),
 }
+LABELS = {**{name: c[0] for name, c in COMPATIBLE.items()}, "anthropic": "Claude"}
+DEFAULT_PROVIDERS = "openai,deepseek,gemini,anthropic"
+_gemini_turn = 0
+
+
+def provider_keys(name: str, rotate: bool = False) -> list[str]:
+    """API keys for a provider. Gemini can have several (GEMINI_API_KEYS); with rotate=True (once per
+    design) the list starts one key further on each time, so the quota is shared out."""
+    global _gemini_turn
+    if name == "gemini":
+        raw = [*os.environ.get("GEMINI_API_KEYS", "").split(","), os.environ.get("GEMINI_API_KEY", "")]
+    else:
+        raw = [os.environ.get(COMPATIBLE[name][1] if name in COMPATIBLE else "ANTHROPIC_API_KEY", "")]
+    keys = list(dict.fromkeys(k.strip() for k in raw if k.strip()))
+    if rotate and len(keys) > 1:
+        start = _gemini_turn % len(keys)
+        _gemini_turn += 1
+        keys = keys[start:] + keys[:start]
+    return keys
+
+
 # Errors worth handing the design to the next provider for: quota, bad key, outages.
 SWITCH_ERRORS = (
     openai.RateLimitError,
@@ -51,6 +82,7 @@ SWITCH_ERRORS = (
 MAX_TURNS = 80
 DESIGNS_PER_HOUR = int(os.environ.get("DESIGNS_PER_HOUR", "4"))
 MAX_RUNNING = int(os.environ.get("DESIGN_MAX_RUNNING", "1"))
+DESIGN_GUIDE = Path(__file__).with_name("design_guide.md").read_text(encoding="utf-8")
 SKIP_TOOLS = {"new_design"}  # the job names the design itself
 
 SYSTEM = """You design hardware projects for Physical Studio: a 3D-printed case built around real,
@@ -82,7 +114,9 @@ they want: the layout, the look, which parts go where. Never take a dimension fr
 web page; every number still comes from get_part.
 
 Before each phase, write a short progress note (one sentence, plain words) about what you're
-doing and why."""
+doing and why.
+
+""" + DESIGN_GUIDE
 
 
 class JobError(Exception):
@@ -218,14 +252,15 @@ class DesignJob:
         self.prepare_attachments()
         if providers[0] == "anthropic":
             return self.run_claude(tools)
-        queue = [p for p in providers if p in COMPATIBLE]
+        # One entry per key, so a rate-limited Gemini key hands over to the next before another provider.
+        queue = [(p, key) for p in providers if p in COMPATIBLE for key in provider_keys(p, rotate=True)]
         resume = False
         try:
             while True:
-                name = queue.pop(0)
-                label, key_env, base_url, model_env, default_model = COMPATIBLE[name]
+                name, key = queue.pop(0)
+                label, _, base_url, model_env, default_model = COMPATIBLE[name]
                 self.designer = label
-                client = openai.OpenAI(api_key=os.environ[key_env], base_url=base_url)
+                client = openai.OpenAI(api_key=key, base_url=base_url)
                 model = os.environ.get(model_env, default_model)
                 loop = self.run_openai if name == "openai" else self.run_chat
                 try:
@@ -234,7 +269,9 @@ class DesignJob:
                 except SWITCH_ERRORS as e:
                     if not queue:
                         raise
-                    self.event("note", f"{label} stopped ({type(e).__name__}); {COMPATIBLE[queue[0]][0]} carries on with the design.")
+                    nxt = COMPATIBLE[queue[0][0]][0]
+                    carries = f"{nxt} carries on with another key" if queue[0][0] == name else f"{nxt} carries on with the design"
+                    self.event("note", f"{label} stopped ({type(e).__name__}); {carries}.")
                     resume = True
             if not self.exported:
                 self.run_tool("export", {})
@@ -319,7 +356,7 @@ class DesignJob:
                 pending.append({"type": "function_call_output", "call_id": call.call_id, "output": out})
 
     def run_chat(self, client, model: str, tools: list[dict], opening: str):
-        """Chat Completions (DeepSeek). Tool messages carry text only, so previews follow as a user message."""
+        """Chat Completions (DeepSeek, Gemini). Tool messages carry text only, so previews follow as a user message."""
         defs = [{"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t["input_schema"]}} for t in tools]
         messages: list[dict] = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": [
             {"type": "text", "text": opening},
@@ -438,19 +475,24 @@ class JobManager:
         return self.tools
 
     @staticmethod
-    def providers() -> list[str]:
-        """Providers to try, in order, that have a key set."""
-        keys = {"openai": "OPENAI_API_KEY", "deepseek": "DEEPSEEK_API_KEY", "anthropic": "ANTHROPIC_API_KEY"}
-        order = [p.strip() for p in os.environ.get("DESIGN_PROVIDERS", "openai,deepseek,anthropic").split(",")]
-        return [p for p in order if p in keys and os.environ.get(keys[p])]
+    def providers(first: str | None = None) -> list[str]:
+        """Providers to try, in order, that have a key set. `first` (the page's pick) goes to the front."""
+        order = [p.strip() for p in os.environ.get("DESIGN_PROVIDERS", DEFAULT_PROVIDERS).split(",")]
+        available = [p for p in order if p in LABELS and provider_keys(p)]
+        if first in available:
+            available.remove(first)
+            available.insert(0, first)
+        return available
 
     def running(self) -> int:
         return sum(1 for j in self.jobs.values() if j.status in ("queued", "running"))
 
-    async def start(self, prompt: str, ip: str, images=(), links=()) -> DesignJob:
-        providers = self.providers()
+    async def start(self, prompt: str, ip: str, images=(), links=(), model: str | None = None) -> DesignJob:
+        providers = self.providers(model)
         if not providers:
-            raise JobError("The server has no OPENAI_API_KEY or DEEPSEEK_API_KEY (or ANTHROPIC_API_KEY); set one to design.")
+            raise JobError(
+                "The server has no OPENAI_API_KEY, DEEPSEEK_API_KEY or GEMINI_API_KEY (or ANTHROPIC_API_KEY); set one to design."
+            )
         now = time.time()
         self.recent[ip] = [t for t in self.recent[ip] if now - t < 3600]
         if len(self.recent[ip]) >= DESIGNS_PER_HOUR:
@@ -492,12 +534,21 @@ def register_routes(mcp, manager: JobManager, parts_dir: Path):
             links = attachments.parse_links(body.get("links"))
         except attachments.AttachmentError as e:
             return JSONResponse({"error": str(e)}, status_code=400)
+        model = body.get("model") or None
+        if model is not None and model not in LABELS:
+            return JSONResponse({"error": f"model must be one of {sorted(LABELS)}"}, status_code=400)
         ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
         try:
-            job = await manager.start(prompt, ip, images, links)
+            job = await manager.start(prompt, ip, images, links, model)
         except JobError as e:
             return JSONResponse({"error": str(e)}, status_code=429 if "try again" in str(e) else 503)
         return JSONResponse({"id": job.id}, status_code=202)
+
+    # Registered before /api/design/{job_id} so "providers" isn't taken for a job id.
+    @mcp.custom_route("/api/design/providers", methods=["GET"])
+    async def providers(request: Request):
+        """The models the page can offer: only providers this server has a key for, default first."""
+        return JSONResponse([{"id": p, "label": LABELS[p]} for p in manager.providers()])
 
     @mcp.custom_route("/api/design/{job_id}", methods=["GET"])
     async def status(request: Request):

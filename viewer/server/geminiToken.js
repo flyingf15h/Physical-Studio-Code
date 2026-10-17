@@ -1,8 +1,9 @@
 // Mints single-use Gemini Live tokens so the browser can stream to Gemini without ever seeing
-// GEMINI_API_KEY. Shared by the Vite dev server (vite.config.ts) and the production server
+// the Gemini keys (taken in turn, see geminiKeys.js). Shared by the Vite dev server (vite.config.ts) and the production server
 // (server.mjs). Plain JS so both can import it without a build step.
 
 import { GoogleGenAI } from '@google/genai'
+import { redact, withGeminiKey } from './geminiKeys.js'
 
 export const DEFAULT_LIVE_MODEL = 'gemini-3.8-live'
 
@@ -30,9 +31,9 @@ export async function mintLiveToken({ apiKey, model = DEFAULT_LIVE_MODEL }) {
  * Handles POST /api/gemini-token on a plain Node request/response pair.
  * @param {import('node:http').IncomingMessage} req
  * @param {import('node:http').ServerResponse} res
- * @param {{ apiKey?: string, model?: string, passcode?: string, missingKeyHint: string }} options
+ * @param {{ apiKeys: string[], model?: string, passcode?: string, missingKeyHint: string }} options
  */
-export async function handleTokenRequest(req, res, { apiKey, model, passcode, missingKeyHint }) {
+export async function handleTokenRequest(req, res, { apiKeys, model, passcode, missingKeyHint }) {
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Cache-Control', 'no-store')
   const fail = (status, error) => {
@@ -40,14 +41,17 @@ export async function handleTokenRequest(req, res, { apiKey, model, passcode, mi
     res.end(JSON.stringify({ error }))
   }
   if (req.method !== 'POST') return fail(405, 'POST only')
-  if (!apiKey) return fail(503, missingKeyHint)
+  if (!apiKeys.length) return fail(503, missingKeyHint)
   if (passcode && req.headers['x-demo-code'] !== passcode) {
     return fail(401, 'This demo needs a code: open the page with ?code=<the code> in the address.')
   }
   try {
-    res.end(JSON.stringify(await mintLiveToken({ apiKey, model: model || DEFAULT_LIVE_MODEL })))
+    const live = model || DEFAULT_LIVE_MODEL
+    // includePaused: there's no other voice model to fall back to, so a resting key beats none.
+    const token = await withGeminiKey(apiKeys, (apiKey) => mintLiveToken({ apiKey, model: live }), { includePaused: true })
+    res.end(JSON.stringify(token))
   } catch (e) {
-    const message = (e instanceof Error ? e.message : String(e)).replaceAll(apiKey, '[key]')
+    const message = redact(e instanceof Error ? e.message : String(e), apiKeys)
     fail(502, `Gemini token request failed: ${message}`)
   }
 }

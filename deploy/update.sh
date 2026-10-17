@@ -14,7 +14,8 @@ cd deploy
 if [ $# -gt 0 ]; then
   if grep -q '^DOMAIN=' .env; then sed -i "s|^DOMAIN=.*|DOMAIN=$1|" .env; else echo "DOMAIN=$1" >> .env; fi
 fi
-for key in GEMINI_API_KEY OPENAI_API_KEY DEEPSEEK_API_KEY; do
+grep -qE "^GEMINI_API_KEYS?=." .env || echo "warning: GEMINI_API_KEY and GEMINI_API_KEYS are both empty in deploy/.env"
+for key in OPENAI_API_KEY DEEPSEEK_API_KEY; do
   grep -q "^$key=." .env || echo "warning: $key is empty in deploy/.env"
 done
 docker compose up -d --build

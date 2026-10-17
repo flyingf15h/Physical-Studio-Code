@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
       GEMINI_LIVE_MODEL: ${GEMINI_LIVE_MODEL:-gemini-3.8-live}
       GEMINI_CHECK_MODEL: ${GEMINI_CHECK_MODEL:-gemini-3.8-flash}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
@@ -47,11 +48,14 @@ services:
     environment:
       MCP_TOKEN: ${MCP_TOKEN:?set MCP_TOKEN in deploy/.env}
       MCP_ALLOWED_HOSTS: ${DOMAIN}
-      DESIGN_PROVIDERS: ${DESIGN_PROVIDERS:-openai,deepseek,anthropic}
+      DESIGN_PROVIDERS: ${DESIGN_PROVIDERS:-openai,deepseek,gemini,anthropic}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_DESIGN_MODEL: ${OPENAI_DESIGN_MODEL:-gpt-6.1-sol}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_DESIGN_MODEL: ${DEEPSEEK_DESIGN_MODEL:-deepseek-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
+      GEMINI_DESIGN_MODEL: ${GEMINI_DESIGN_MODEL:-gemini-3.8-flash}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       DESIGN_MODEL: ${DESIGN_MODEL:-claude-opus-5-5}
       DESIGNS_PER_HOUR: ${DESIGNS_PER_HOUR:-4}
@@ -66,6 +70,7 @@ services:
     restart: unless-stopped
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
       GEMINI_MODEL: ${GEMINI_STUDIO_MODEL:-gemini-3.8-flash}
 
 volumes:

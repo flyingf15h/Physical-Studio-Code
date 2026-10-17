@@ -1,6 +1,7 @@
 // Screen 2 · the AI designs it. Polls the design job and shows its progress, previews and checks.
 import { useEffect, useState } from 'react'
 import { getDesign, type DesignJob, type JobEvent, type JobEventKind } from '../api'
+import { DesignModel } from '../components/DesignModel'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { designParams, navigate, withParams } from '../router'
 import './DesignPage.css'
@@ -156,14 +157,21 @@ export function DesignPage({ jobId }: { jobId: string }) {
               )}
             </div>
             <div className="preview">
-              {image ? (
+              {job?.design && !shown ? (
+                <DesignModel design={job.design} />
+              ) : image ? (
                 <img src={image} alt="Preview of the design" />
               ) : (
                 <p className="muted">The 3D preview appears here as {designer} works.</p>
               )}
             </div>
-            {previews.length > 1 && (
+            {(previews.length > 1 || (job?.design && previews.length > 0)) && (
               <div className="strip">
+                {job?.design && (
+                  <button className={shown ? 'model' : 'model on'} onClick={() => setShown(null)} title="Rotate the finished design">
+                    3D
+                  </button>
+                )}
                 {previews.map((p) => (
                   <button
                     key={p.image}
