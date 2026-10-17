@@ -1,0 +1,13 @@
+# Caddy entry point, loaded by docker-compose.override.yml.
+# Serves the team's Caddyfile unchanged, plus Circuit Studio on its own host name.
+import /etc/caddy/Caddyfile.main
+
+# Circuit Studio at the root of its own address. STUDIO_DOMAIN comes from deploy/.env
+# (comma-separated list); add studio.physicalstudio.work once its DNS points here.
+{$STUDIO_DOMAIN} {
+	encode zstd gzip
+
+	# Streamlit runs with baseUrlPath=studio (same container as /studio/ on the main site).
+	redir / /studio/
+	reverse_proxy studio:8501
+}

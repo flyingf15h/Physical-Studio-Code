@@ -1,0 +1,20 @@
+# Compose merges this into docker-compose.yml automatically (committed since Sat Oct 17; it was server-local before).
+# - Circuit Studio on its own address (see Caddyfile.local).
+# - Circuit Studio runs app_plus.py (app.py + the build helper in builder.py, both untracked in
+#   circuit-studio/) with its own Gemini keys (STUDIO_GEMINI_API_KEYS in deploy/.env) and the
+#   main site's OpenAI key as backup.
+services:
+  caddy:
+    environment:
+      STUDIO_DOMAIN: ${STUDIO_DOMAIN:-studio.155-138-154-8.sslip.io}
+    volumes:
+      - ./Caddyfile.local:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile.main:ro
+
+  studio:
+    environment:
+      GEMINI_API_KEYS: ${STUDIO_GEMINI_API_KEYS:-${GEMINI_API_KEYS:-}}
+      # OpenAI backup when gemini-3.8-flash is overloaded: same key and model as the main site's design jobs.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_STUDIO_MODEL: ${OPENAI_DESIGN_MODEL:-gpt-6.1-sol}
+    command: ["streamlit", "run", "app_plus.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.baseUrlPath=studio", "--server.headless=true", "--browser.gatherUsageStats=false"]
