@@ -4,6 +4,10 @@
 .design-page h2 { font-size: 17px; margin: 0; }
 .design-page .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .prompt-card p { margin: 6px 0 0; font-size: 15px; line-height: 1.45; }
+.prompt-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.prompt-images img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); display: block; }
+.prompt-card p.prompt-link { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.prompt-link a { color: var(--accent); }
 .badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; background: var(--bg); color: var(--muted); }
 .badge.running { background: var(--accent-soft); color: var(--accent); }
 .badge.done { background: #dcf5e4; color: #1d7a3e; }

@@ -32,7 +32,7 @@ import openai
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from . import checks, library
+from . import attachments, checks, library
 
 MODEL = os.environ.get("DESIGN_MODEL", "claude-opus-5-5")
 # OpenAI-compatible providers: (label shown on the page, key env, base URL, model env, default model)
@@ -77,6 +77,10 @@ Rules:
   per part), close the lid. Each step needs a one-sentence check line a camera can verify.
 - Finish with export(["glb", "stl", "step"]). Your final message: two sentences on what you built.
 
+The user may attach images (photos, sketches, screenshots) and links. Use them to understand what
+they want: the layout, the look, which parts go where. Never take a dimension from an image or a
+web page; every number still comes from get_part.
+
 Before each phase, write a short progress note (one sentence, plain words) about what you're
 doing and why."""
 
@@ -86,9 +90,13 @@ class JobError(Exception):
 
 
 class DesignJob:
-    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory):
+    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory, images=(), links=()):
         self.id = job_id
         self.prompt = prompt
+        self.images: list[attachments.Image] = list(images)
+        self.link_urls: list[str] = list(links)
+        self.links: list[attachments.Link] = []
+        self.inputs: list[str] = []  # urls of the attached images, for the page
         self.out_dir = out_dir
         self.studio = studio_factory()
         self.started = time.time()
@@ -134,6 +142,10 @@ class DesignJob:
                 },
                 "error": self.error,
                 "designer": self.designer,
+                "attachments": {
+                    "images": list(self.inputs),
+                    "links": [{"url": u, "error": next((k.error for k in self.links if k.url == u), None)} for u in self.link_urls],
+                },
             }
 
     # --- tools --------------------------------------------------------------------------------
@@ -203,6 +215,7 @@ class DesignJob:
         title = re.sub(r"\s+", " ", self.prompt).strip()[:60]
         self.studio.new_design(title, self.prompt)
         self.title = title
+        self.prepare_attachments()
         if providers[0] == "anthropic":
             return self.run_claude(tools)
         queue = [p for p in providers if p in COMPATIBLE]
@@ -233,8 +246,35 @@ class DesignJob:
         except Exception as e:
             self.fail(str(e))
 
+    def prepare_attachments(self):
+        """Saves the attached images where the page can show them and reads the links."""
+        ext = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif"}
+        if self.images:
+            self.out_dir.mkdir(parents=True, exist_ok=True)
+        for i, img in enumerate(self.images, 1):
+            name = f"input-{i}.{ext[img.media_type]}"
+            (self.out_dir / name).write_bytes(base64.b64decode(img.data))
+            self.inputs.append(f"/out/{self.id}/{name}")
+        self.links = [attachments.fetch_link(u) for u in self.link_urls]
+        if self.links:
+            read = sum(1 for k in self.links if not k.error)
+            self.event("note", f"Read {read} of {len(self.links)} link{'s' if len(self.links) != 1 else ''}"
+                       + "".join(f"; {k.url}: {k.error}" for k in self.links if k.error))
+
+    def opening_images(self) -> list[attachments.Image]:
+        return self.images + [k.image for k in self.links if k.image]
+
     def opening(self, resume: bool) -> str:
         text = f"Design this project: {self.prompt}"
+        if self.images:
+            text += f"\n\nThe user attached {len(self.images)} image{'s' if len(self.images) != 1 else ''} (below)."
+        for k in self.links:
+            if k.text:
+                text += f"\n\nLinked page {k.url}:\n{k.text}"
+            elif k.image:
+                text += f"\n\nLinked image {k.url} (below)."
+            else:
+                text += f"\n\nLinked {k.url} (couldn't read it: {k.error})."
         if resume:
             state = json.dumps(self.studio.describe_design(), default=str)
             text += (
@@ -257,7 +297,10 @@ class DesignJob:
         """OpenAI's Responses API: the only way its reasoning models take function tools."""
         defs = [{"type": "function", "name": t["name"], "description": t["description"], "parameters": t["input_schema"]} for t in tools]
         previous = None
-        pending: list[dict] | str = opening
+        pending: list[dict] = [{"role": "user", "content": [
+            {"type": "input_text", "text": opening},
+            *({"type": "input_image", "image_url": img.data_url} for img in self.opening_images()),
+        ]}]
         for _ in range(MAX_TURNS):
             response = client.responses.create(
                 model=model, instructions=SYSTEM, tools=defs, input=pending, previous_response_id=previous, reasoning={"effort": "medium"}
@@ -278,7 +321,10 @@ class DesignJob:
     def run_chat(self, client, model: str, tools: list[dict], opening: str):
         """Chat Completions (DeepSeek). Tool messages carry text only, so previews follow as a user message."""
         defs = [{"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t["input_schema"]}} for t in tools]
-        messages: list[dict] = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": opening}]
+        messages: list[dict] = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": [
+            {"type": "text", "text": opening},
+            *({"type": "image_url", "image_url": {"url": img.data_url}} for img in self.opening_images()),
+        ]}]
         for _ in range(MAX_TURNS):
             choice = client.chat.completions.create(model=model, messages=messages, tools=defs).choices[0]
             msg = choice.message
@@ -316,7 +362,10 @@ class DesignJob:
     def run_claude(self, tools: list[dict]):
         self.designer = "Claude"
         client = anthropic.Anthropic()
-        messages: list[dict] = [{"role": "user", "content": f"Design this project: {self.prompt}"}]
+        messages: list[dict] = [{"role": "user", "content": [
+            {"type": "text", "text": self.opening(False)},
+            *({"type": "image", "source": {"type": "base64", "media_type": img.media_type, "data": img.data}} for img in self.opening_images()),
+        ]}]
         try:
             for _ in range(MAX_TURNS):
                 response = client.beta.messages.create(
@@ -398,7 +447,7 @@ class JobManager:
     def running(self) -> int:
         return sum(1 for j in self.jobs.values() if j.status in ("queued", "running"))
 
-    async def start(self, prompt: str, ip: str) -> DesignJob:
+    async def start(self, prompt: str, ip: str, images=(), links=()) -> DesignJob:
         providers = self.providers()
         if not providers:
             raise JobError("The server has no OPENAI_API_KEY or DEEPSEEK_API_KEY (or ANTHROPIC_API_KEY); set one to design.")
@@ -410,7 +459,7 @@ class JobManager:
             raise JobError("Another design is running; try again in a minute.")
         self.recent[ip].append(now)
         job_id = uuid.uuid4().hex[:10]
-        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory)
+        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory, images, links)
         self.jobs[job_id] = job
         tools = await self.tool_defs()
         threading.Thread(target=job.run, args=(tools, providers), daemon=True).start()
@@ -438,9 +487,14 @@ def register_routes(mcp, manager: JobManager, parts_dir: Path):
         prompt = str(body.get("prompt", "")).strip()
         if not 3 <= len(prompt) <= 1000:
             return JSONResponse({"error": "Describe the project in 3 to 1000 characters."}, status_code=400)
+        try:
+            images = attachments.parse_images(body.get("images"))
+            links = attachments.parse_links(body.get("links"))
+        except attachments.AttachmentError as e:
+            return JSONResponse({"error": str(e)}, status_code=400)
         ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
         try:
-            job = await manager.start(prompt, ip)
+            job = await manager.start(prompt, ip, images, links)
         except JobError as e:
             return JSONResponse({"error": str(e)}, status_code=429 if "try again" in str(e) else 503)
         return JSONResponse({"id": job.id}, status_code=202)

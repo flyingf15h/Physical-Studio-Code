@@ -39,6 +39,13 @@ export interface DesignJob {
   checks: JobChecks
   error: string | null
   designer: string | null // which model is designing: OpenAI, DeepSeek or Claude
+  attachments?: { images: string[]; links: { url: string; error: string | null }[] }
+}
+
+/** What the user attached to the prompt: images as data URLs, links as http(s) URLs. */
+export interface DesignInputs {
+  images?: string[]
+  links?: string[]
 }
 
 function headers(json = false): Record<string, string> {
@@ -57,11 +64,11 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
 
 export const listParts = () => call<PartSummary[]>('/api/parts')
 
-export const startDesign = (prompt: string) =>
+export const startDesign = (prompt: string, inputs: DesignInputs = {}) =>
   call<{ id: string }>('/api/design', {
     method: 'POST',
     headers: headers(true),
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, ...inputs }),
   })
 
 export const getDesign = (id: string) => call<DesignJob>(`/api/design/${encodeURIComponent(id)}`)

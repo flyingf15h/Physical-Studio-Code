@@ -77,6 +77,23 @@ export function DesignPage({ jobId }: { jobId: string }) {
           <div className="ds-card prompt-card">
             <div className="eyebrow">Your prompt</div>
             <p>{job?.prompt ?? '…'}</p>
+            {!!job?.attachments?.images.length && (
+              <div className="prompt-images">
+                {job.attachments.images.map((src, i) => (
+                  <a key={src} href={src} target="_blank" rel="noreferrer">
+                    <img src={src} alt={`Attached image ${i + 1}`} />
+                  </a>
+                ))}
+              </div>
+            )}
+            {job?.attachments?.links.map((link) => (
+              <p key={link.url} className="prompt-link">
+                <a href={link.url} target="_blank" rel="noreferrer">
+                  {link.url}
+                </a>
+                {link.error && <span> · couldn't read it ({link.error})</span>}
+              </p>
+            ))}
           </div>
 
           <div className="ds-card">

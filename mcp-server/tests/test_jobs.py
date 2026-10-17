@@ -102,7 +102,7 @@ def test_openai_designs_then_deepseek_carries_on_when_quota_runs_out(tmp_path, m
     outputs = seen[1][2]  # OpenAI's second turn: the four tool results, chained to the first response
     assert seen[1][3] == "r1" and [o["call_id"] for o in outputs] == ["c1", "c2", "c3", "c4"]
     assert outputs[3]["output"][0]["image_url"].startswith("data:image/png;base64,")
-    opening = seen[2][2][1]["content"]  # DeepSeek starts from the design's current state
+    opening = seen[2][2][1]["content"][0]["text"]  # DeepSeek starts from the design's current state
     assert "Carry on from there" in opening and '"uno"' in opening
     notes = [e["text"] for e in snap["events"] if e["kind"] == "note"]
     assert any("OpenAI stopped" in n and "DeepSeek carries on" in n for n in notes)
@@ -132,3 +132,55 @@ def test_deepseek_gets_previews_as_a_user_image(tmp_path, monkeypatch):
     history = seen[1]
     assert history[2]["reasoning_content"] == "r" and [m["role"] for m in history[3:5]] == ["tool", "tool"]
     assert history[5]["role"] == "user" and history[5]["content"][1]["image_url"]["url"].startswith("data:image/png;base64,")
+
+
+PNG_1PX = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+
+
+def test_design_validates_attachments(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    c = client()
+    prompt = "Simon game for an Arduino Uno"
+    r = c.post("/api/design", json={"prompt": prompt, "images": ["data:text/html;base64,PGI+"]})
+    assert r.status_code == 400 and "PNG" in r.json()["error"]
+    r = c.post("/api/design", json={"prompt": prompt, "images": [PNG_1PX] * 5})
+    assert r.status_code == 400 and "at most 4" in r.json()["error"]
+    r = c.post("/api/design", json={"prompt": prompt, "links": ["file:///etc/passwd"]})
+    assert r.status_code == 400 and "http" in r.json()["error"]
+
+
+def test_links_to_private_addresses_are_refused():
+    from physical_studio import attachments
+
+    for url in ("http://127.0.0.1:8000/api/parts", "http://169.254.169.254/latest/meta-data", "http://localhost/", "http://10.0.0.1/"):
+        link = attachments.fetch_link(url)
+        assert link.error and link.text is None and link.image is None, url
+    text = attachments.page_text("<html><title>Uno &amp; LEDs</title><script>x()</script><p>Four <b>buttons</b></p></html>")
+    assert text == "Title: Uno & LEDs\nUno & LEDs Four buttons"
+
+
+def test_attached_images_reach_the_model_and_the_page(tmp_path, monkeypatch):
+    from physical_studio import attachments
+
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setattr(attachments, "fetch_link", lambda url: attachments.Link(url, text="Simon game box, 4 buttons in a square"))
+    seen = []
+
+    class FakeClient:
+        def __init__(self, api_key, base_url):
+            self.responses = NS(create=lambda **kw: (seen.append(kw["input"]), NS(id="r1", output_text="Done.", output=[]))[1])
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
+    images = attachments.parse_images([PNG_1PX])
+    job = DesignJob("job4", "Simon game", tmp_path / "job4", lambda: Studio(REPO / "parts", tmp_path), images, ["https://example.com/simon"])
+    job.studio.new_design("x")
+    job.studio.place_part("arduino-uno", (0, 0, 0), id="uno")  # so the final export has something
+    monkeypatch.setattr(job.studio, "new_design", lambda *a: None)
+    job.run([], ["openai"])
+    snap = job.snapshot()
+    assert snap["status"] == "done", snap["error"]
+    content = seen[0][0]["content"]
+    assert "attached 1 image" in content[0]["text"] and "Simon game box, 4 buttons" in content[0]["text"]
+    assert content[1] == {"type": "input_image", "image_url": PNG_1PX}
+    assert snap["attachments"] == {"images": ["/out/job4/input-1.png"], "links": [{"url": "https://example.com/simon", "error": None}]}
+    assert (tmp_path / "job4" / "input-1.png").exists()
