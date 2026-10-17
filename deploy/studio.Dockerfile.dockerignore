@@ -1,5 +1,7 @@
 **
 !circuit-studio/**
+!parts/**
+!firmware/traffic-light/**
 circuit-studio/config.py
 circuit-studio/.venv
 circuit-studio/__pycache__
