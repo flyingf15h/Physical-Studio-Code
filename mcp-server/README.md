@@ -32,7 +32,7 @@ Environment variables: `PHYSICAL_STUDIO_PARTS` (parts folder, default `../parts`
 | `add_fastener(part_id, target, hole)` | Put a screw into a board's mounting hole. |
 | `move_part(id, position, rotation)` | Move or rotate a placed part; its screws move with it. How the model fixes what the checks report. |
 | `remove_part(id)` | Remove a part, screw or wire (a part takes its screws and wires with it) and drop it from the steps. |
-| `add_wire(from_placement, from_pin, to_placement, to_pin, color, inline)` | Jumper wire between two pins (from the parts' `pins`), routed as a curve; `inline` for a spliced resistor. Returns its length. Wiring plan for the demo: [docs/simon-wiring.md](../docs/simon-wiring.md). |
+| `add_wire(from_placement, from_pin, to_placement, to_pin, color, inline)` | Jumper wire between two pins (from the parts' `pins`), routed as a curve; `inline` for a spliced resistor. Returns its length. Wiring plan for the demo: [docs/traffic-light-wiring.md](../docs/traffic-light-wiring.md). |
 | `create_enclosure(...)` | Base + lid sized around the placed parts, standoffs under mounted boards' holes, cutouts for connectors within `cutout_reach` (12 mm) of a wall, lid holes for `+z` connectors. Parts with `lid_mount` (buttons, LEDs) set the lid height and poke through it; a warning says how far to raise any that sit lower. |
 | `add_step(title, text, add, motion, tools, callouts, dimensions, check)` | Append an assembly step. Without steps, export generates base, parts, fasteners, lid. |
 | `check_interference()` | Solid overlaps between every pair of pieces, and screws too long for their standoff. Intended contacts (screw in standoff) are listed separately. |
