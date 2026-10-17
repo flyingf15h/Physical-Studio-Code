@@ -83,6 +83,34 @@
       ]
     }
   ],
+  "appearance": {
+    "color": "#5a2d82",
+    "roughness": 0.5,
+    "top": {
+      "pcb": {
+        "mask": "#5a2d82",
+        "title": "GY-530",
+        "title_at": [
+          6.5,
+          19
+        ],
+        "chips": [
+          {
+            "at": [
+              6.5,
+              22
+            ],
+            "size": [
+              4.4,
+              2.4
+            ],
+            "label": ""
+          }
+        ]
+      }
+    },
+    "source": "https://st.robu.in/product/unsoldered-purple-gy-530-vl53l0x-time-of-flight-tof-laser-ranging-sensor-module"
+  },
   "notes": "Time-of-flight distance sensor, up to about 1.2 m, I2C address 0x29. Faces the carriage to measure where the cart is.",
   "verified": false,
   "verified_by": null,

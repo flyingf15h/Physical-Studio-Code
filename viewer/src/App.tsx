@@ -6,9 +6,15 @@ import { loadSteps, type StepsDoc } from './steps'
 import { TrackerPanel } from './tracker/TrackerPanel'
 import type { Problem } from './tracker/session'
 import { ProgressHeader } from './components/ProgressHeader'
+import { rememberProject } from './projects'
 import './App.css'
 
 const PLAY_INTERVAL_MS = 3500
+
+/** ?step=N (1-based) opens the guide at that step, so a step can be linked. */
+/** ?finished shows the completed build: no fly-in, highlight or callouts (used for project thumbnails). */
+const FINISHED = new URLSearchParams(location.search).has('finished')
+const stepFromUrl = () => Math.max(0, (Number(new URLSearchParams(location.search).get('step')) || 1) - 1)
 
 interface Source {
   doc: StepsDoc
@@ -44,14 +50,20 @@ export default function App() {
   const [view, setView] = useState(0) // bumped by Reset view
   const [problem, setProblem] = useState<Problem | null>(null)
 
-  const use = useCallback((s: Source) => {
+  const use = useCallback((s: Source, at = 0) => {
     setSource(s)
-    setStep(0)
+    setStep(Math.min(at, s.doc.steps.length - 1))
     setError(null)
   }, [])
 
   useEffect(() => {
-    loadFromUrl().then(use, (e) => setError(String(e.message ?? e)))
+    loadFromUrl().then(
+      (s) => {
+        use(s, stepFromUrl())
+        rememberProject({ design: s.label, title: s.doc.title, prompt: s.doc.prompt, steps: s.doc.steps.length })
+      },
+      (e) => setError(String(e.message ?? e)),
+    )
   }, [use])
 
   const count = source?.doc.steps.length ?? 0
@@ -140,6 +152,7 @@ export default function App() {
                     doc={source.doc}
                     step={step}
                     exploded={exploded}
+                    still={FINISHED}
                     view={view}
                   />
                 </Bounds>

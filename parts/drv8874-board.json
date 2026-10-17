@@ -2,12 +2,12 @@
   "id": "drv8874-board",
   "name": "DRV8874 motor driver board",
   "category": "board",
-  "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
+  "source": "Pololu DRV8874 carrier #4035: 0.6 x 0.7 in, pinout from its top-view picture; not yet measured",
   "step_file": null,
   "body": {
     "size": [
-      20.3,
-      12.7,
+      15.24,
+      17.78,
       1.6
     ]
   },
@@ -18,60 +18,18 @@
       0
     ],
     "max": [
-      20.3,
-      12.7,
+      15.24,
+      17.78,
       3
     ]
   },
   "pins": [
     {
-      "id": "in1",
-      "label": "IN1/EN",
+      "id": "vm",
+      "label": "VM",
       "position": [
         1.27,
-        1.27,
-        1.6
-      ],
-      "direction": [
-        0,
-        0,
-        1
-      ]
-    },
-    {
-      "id": "in2",
-      "label": "IN2/PH",
-      "position": [
-        3.81,
-        1.27,
-        1.6
-      ],
-      "direction": [
-        0,
-        0,
-        1
-      ]
-    },
-    {
-      "id": "pmode",
-      "label": "PMODE",
-      "position": [
-        6.35,
-        1.27,
-        1.6
-      ],
-      "direction": [
-        0,
-        0,
-        1
-      ]
-    },
-    {
-      "id": "nsleep",
-      "label": "nSLEEP",
-      "position": [
-        8.89,
-        1.27,
+        16.51,
         1.6
       ],
       "direction": [
@@ -84,8 +42,8 @@
       "id": "gnd",
       "label": "GND",
       "position": [
-        11.43,
         1.27,
+        13.970000000000002,
         1.6
       ],
       "direction": [
@@ -95,11 +53,81 @@
       ]
     },
     {
-      "id": "vm",
-      "label": "VM (12 V)",
+      "id": "in1",
+      "label": "EN/IN1",
       "position": [
         1.27,
-        11.43,
+        11.430000000000001,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "in2",
+      "label": "PH/IN2",
+      "position": [
+        1.27,
+        8.89,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "pmode",
+      "label": "PMODE",
+      "position": [
+        1.27,
+        6.350000000000001,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "nsleep",
+      "label": "SLEEP",
+      "position": [
+        1.27,
+        3.8100000000000023,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vref",
+      "label": "VREF",
+      "position": [
+        1.27,
+        1.2700000000000014,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vin",
+      "label": "VIN",
+      "position": [
+        13.97,
+        16.51,
         1.6
       ],
       "direction": [
@@ -112,8 +140,8 @@
       "id": "gnd_p",
       "label": "GND",
       "position": [
-        3.81,
-        11.43,
+        13.97,
+        13.970000000000002,
         1.6
       ],
       "direction": [
@@ -126,8 +154,8 @@
       "id": "out1",
       "label": "OUT1",
       "position": [
-        6.35,
-        11.43,
+        13.97,
+        11.430000000000001,
         1.6
       ],
       "direction": [
@@ -140,8 +168,50 @@
       "id": "out2",
       "label": "OUT2",
       "position": [
+        13.97,
         8.89,
-        11.43,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "imode",
+      "label": "IMODE",
+      "position": [
+        13.97,
+        6.350000000000001,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "nfault",
+      "label": "FAULT",
+      "position": [
+        13.97,
+        3.8100000000000023,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "cs",
+      "label": "CS",
+      "position": [
+        13.97,
+        1.2700000000000014,
         1.6
       ],
       "direction": [
@@ -151,7 +221,15 @@
       ]
     }
   ],
-  "notes": "H-bridge, up to 37 V / 2.1 A. PMODE high = IN/IN (PWM) mode; nSLEEP high to run.",
+  "appearance": {
+    "color": "#1f6f48",
+    "roughness": 0.5,
+    "top": {
+      "image": "drv8874-board.top.jpg"
+    },
+    "source": "https://www.pololu.com/product/4035 (picture 0J11426)"
+  },
+  "notes": "H-bridge, motor supply 4.5 to 37 V on VIN, 2.1 A continuous. PMODE high = IN/IN (PWM) mode; SLEEP high to run. VM is the reverse-protected motor voltage, an output.",
   "verified": false,
   "verified_by": null,
   "verified_on": null

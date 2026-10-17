@@ -49,7 +49,7 @@
         0.0,
         0.0
       ],
-      "color": "#6a9955"
+      "color": "#b8bdc2"
     },
     {
       "id": "block",
@@ -66,7 +66,7 @@
         0.0,
         0.0
       ],
-      "color": "#6a9955"
+      "color": "#b8bdc2"
     },
     {
       "id": "riser",
@@ -100,7 +100,7 @@
         0.0,
         0.0
       ],
-      "color": "#c0c4c8"
+      "color": "#9aa0a6"
     },
     {
       "id": "cart",
@@ -134,7 +134,7 @@
         0.0,
         0.0
       ],
-      "color": "#c0c4c8"
+      "color": "#9aa0a6"
     },
     {
       "id": "motor",
@@ -203,7 +203,7 @@
         0.0,
         0.0
       ],
-      "color": "#c0c4c8"
+      "color": "#d6dadd"
     },
     {
       "id": "bearing-back",
@@ -220,7 +220,7 @@
         0.0,
         0.0
       ],
-      "color": "#c0c4c8"
+      "color": "#d6dadd"
     },
     {
       "id": "shaft-cart",
@@ -237,7 +237,7 @@
         0.0,
         0.0
       ],
-      "color": "#d9d9d9"
+      "color": "#b8bdc2"
     },
     {
       "id": "arm-lower",
@@ -271,7 +271,7 @@
         0.0,
         0.0
       ],
-      "color": "#555555"
+      "color": "#c4c7ca"
     },
     {
       "id": "mount-cart",
@@ -305,45 +305,61 @@
         0.0,
         0.0
       ],
-      "color": "#8a4fc0",
+      "color": "#f2f2ee",
       "pins": [
-        {
-          "id": "vcc",
-          "position": [
-            3.0,
-            1.27,
-            0.0
-          ]
-        },
-        {
-          "id": "gnd",
-          "position": [
-            5.54,
-            1.27,
-            0.0
-          ]
-        },
         {
           "id": "dir",
           "position": [
-            8.08,
-            1.27,
+            7.7,
+            18.5,
             0.0
           ]
         },
         {
           "id": "scl",
           "position": [
-            10.620000000000001,
-            1.27,
+            10.24,
+            18.5,
             0.0
           ]
         },
         {
           "id": "sda",
           "position": [
-            13.16,
-            1.27,
+            12.78,
+            18.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gpo",
+          "position": [
+            15.32,
+            18.5,
+            0.0
+          ]
+        },
+        {
+          "id": "vcc",
+          "position": [
+            11.5,
+            4.5,
+            0.0
+          ]
+        },
+        {
+          "id": "out",
+          "position": [
+            14.04,
+            4.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            16.58,
+            4.5,
             0.0
           ]
         }
@@ -364,7 +380,7 @@
         0.0,
         0.0
       ],
-      "color": "#c0c4c8"
+      "color": "#d6dadd"
     },
     {
       "id": "shaft-elbow",
@@ -381,7 +397,7 @@
         0.0,
         0.0
       ],
-      "color": "#d9d9d9"
+      "color": "#b8bdc2"
     },
     {
       "id": "arm-upper",
@@ -415,7 +431,7 @@
         0.0,
         0.0
       ],
-      "color": "#555555"
+      "color": "#c4c7ca"
     },
     {
       "id": "mount-elbow",
@@ -449,45 +465,61 @@
         0.0,
         0.0
       ],
-      "color": "#8a4fc0",
+      "color": "#f2f2ee",
       "pins": [
-        {
-          "id": "vcc",
-          "position": [
-            3.0,
-            1.27,
-            0.0
-          ]
-        },
-        {
-          "id": "gnd",
-          "position": [
-            5.54,
-            1.27,
-            0.0
-          ]
-        },
         {
           "id": "dir",
           "position": [
-            8.08,
-            1.27,
+            7.7,
+            18.5,
             0.0
           ]
         },
         {
           "id": "scl",
           "position": [
-            10.620000000000001,
-            1.27,
+            10.24,
+            18.5,
             0.0
           ]
         },
         {
           "id": "sda",
           "position": [
-            13.16,
-            1.27,
+            12.78,
+            18.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gpo",
+          "position": [
+            15.32,
+            18.5,
+            0.0
+          ]
+        },
+        {
+          "id": "vcc",
+          "position": [
+            11.5,
+            4.5,
+            0.0
+          ]
+        },
+        {
+          "id": "out",
+          "position": [
+            14.04,
+            4.5,
+            0.0
+          ]
+        },
+        {
+          "id": "gnd",
+          "position": [
+            16.58,
+            4.5,
             0.0
           ]
         }
@@ -525,7 +557,7 @@
         90.0,
         0.0
       ],
-      "color": "#3a9d4f",
+      "color": "#5a2d82",
       "pins": [
         {
           "id": "vin",
@@ -601,7 +633,7 @@
         -90.0,
         0.0
       ],
-      "color": "#3a9d4f",
+      "color": "#5a2d82",
       "pins": [
         {
           "id": "vin",
@@ -660,85 +692,85 @@
         0.0,
         0.0
       ],
-      "color": "#1f6fb2",
+      "color": "#1d6b3a",
       "pins": [
         {
           "id": "vin",
           "position": [
-            3.17,
-            16.62,
+            1.27,
+            16.51,
             1.6
           ]
         },
         {
           "id": "gnd2",
           "position": [
-            5.71,
-            16.62,
+            3.81,
+            16.51,
             1.6
           ]
         },
         {
           "id": "3v3",
           "position": [
-            8.25,
-            16.62,
+            6.35,
+            16.51,
             1.6
           ]
         },
         {
           "id": "d19",
           "position": [
-            20.950000000000003,
-            16.62,
+            19.05,
+            16.51,
             1.6
           ]
         },
         {
           "id": "d18",
           "position": [
-            23.490000000000002,
-            16.62,
+            21.59,
+            16.51,
             1.6
           ]
         },
         {
           "id": "d17",
           "position": [
-            26.03,
-            16.62,
+            24.13,
+            16.51,
             1.6
           ]
         },
         {
           "id": "d16",
           "position": [
-            28.57,
-            16.62,
+            26.669999999999998,
+            16.51,
             1.6
           ]
         },
         {
           "id": "gnd",
           "position": [
-            3.17,
-            1.38,
+            1.27,
+            1.27,
             1.6
           ]
         },
         {
           "id": "d2",
           "position": [
-            10.79,
-            1.38,
+            8.89,
+            1.27,
             1.6
           ]
         },
         {
           "id": "d3",
           "position": [
-            13.33,
-            1.38,
+            11.43,
+            1.27,
             1.6
           ]
         }
@@ -759,77 +791,117 @@
         0.0,
         0.0
       ],
-      "color": "#b03030",
+      "color": "#1f6f48",
       "pins": [
         {
-          "id": "in1",
+          "id": "vm",
           "position": [
             1.27,
-            1.27,
-            1.6
-          ]
-        },
-        {
-          "id": "in2",
-          "position": [
-            3.81,
-            1.27,
-            1.6
-          ]
-        },
-        {
-          "id": "pmode",
-          "position": [
-            6.35,
-            1.27,
-            1.6
-          ]
-        },
-        {
-          "id": "nsleep",
-          "position": [
-            8.89,
-            1.27,
+            16.51,
             1.6
           ]
         },
         {
           "id": "gnd",
           "position": [
-            11.43,
             1.27,
+            13.970000000000002,
             1.6
           ]
         },
         {
-          "id": "vm",
+          "id": "in1",
           "position": [
             1.27,
-            11.43,
+            11.430000000000001,
+            1.6
+          ]
+        },
+        {
+          "id": "in2",
+          "position": [
+            1.27,
+            8.89,
+            1.6
+          ]
+        },
+        {
+          "id": "pmode",
+          "position": [
+            1.27,
+            6.350000000000001,
+            1.6
+          ]
+        },
+        {
+          "id": "nsleep",
+          "position": [
+            1.27,
+            3.8100000000000023,
+            1.6
+          ]
+        },
+        {
+          "id": "vref",
+          "position": [
+            1.27,
+            1.2700000000000014,
+            1.6
+          ]
+        },
+        {
+          "id": "vin",
+          "position": [
+            13.97,
+            16.51,
             1.6
           ]
         },
         {
           "id": "gnd_p",
           "position": [
-            3.81,
-            11.43,
+            13.97,
+            13.970000000000002,
             1.6
           ]
         },
         {
           "id": "out1",
           "position": [
-            6.35,
-            11.43,
+            13.97,
+            11.430000000000001,
             1.6
           ]
         },
         {
           "id": "out2",
           "position": [
+            13.97,
             8.89,
-            11.43,
+            1.6
+          ]
+        },
+        {
+          "id": "imode",
+          "position": [
+            13.97,
+            6.350000000000001,
+            1.6
+          ]
+        },
+        {
+          "id": "nfault",
+          "position": [
+            13.97,
+            3.8100000000000023,
+            1.6
+          ]
+        },
+        {
+          "id": "cs",
+          "position": [
+            13.97,
+            1.2700000000000014,
             1.6
           ]
         }
@@ -901,7 +973,7 @@
         0.0,
         0.0
       ],
-      "color": "#2b2b2b",
+      "color": "#1c1c1c",
       "pins": [
         {
           "id": "v12",
@@ -922,10 +994,10 @@
       ]
     },
     {
-      "id": "w-psu-vm",
+      "id": "w-psu-vin",
       "kind": "wire",
       "part": null,
-      "name": "Wire 12 V adapter v12 to Motor driver vm",
+      "name": "Wire 12 V adapter v12 to Motor driver vin",
       "position": [
         0.0,
         0.0,
@@ -943,9 +1015,9 @@
       },
       "to": {
         "placement": "driver",
-        "pin": "vm"
+        "pin": "vin"
       },
-      "length_mm": 158.8
+      "length_mm": 169.8
     },
     {
       "id": "w-psu-gnd",
@@ -971,7 +1043,7 @@
         "placement": "driver",
         "pin": "gnd_p"
       },
-      "length_mm": 163.7
+      "length_mm": 172.4
     },
     {
       "id": "w-reg-in",
@@ -1049,7 +1121,7 @@
         "placement": "motor",
         "pin": "m_pos"
       },
-      "length_mm": 166.9
+      "length_mm": 162.5
     },
     {
       "id": "w-motor-b",
@@ -1075,7 +1147,7 @@
         "placement": "motor",
         "pin": "m_neg"
       },
-      "length_mm": 173.3
+      "length_mm": 171.3
     },
     {
       "id": "w-in1",
@@ -1101,7 +1173,7 @@
         "placement": "driver",
         "pin": "in1"
       },
-      "length_mm": 72.4
+      "length_mm": 75.8
     },
     {
       "id": "w-in2",
@@ -1127,7 +1199,7 @@
         "placement": "driver",
         "pin": "in2"
       },
-      "length_mm": 72.4
+      "length_mm": 72.2
     },
     {
       "id": "w-pmode",
@@ -1153,7 +1225,7 @@
         "placement": "driver",
         "pin": "pmode"
       },
-      "length_mm": 84.0
+      "length_mm": 78.9
     },
     {
       "id": "w-nsleep",
@@ -1179,7 +1251,7 @@
         "placement": "driver",
         "pin": "nsleep"
       },
-      "length_mm": 87.0
+      "length_mm": 79.4
     },
     {
       "id": "w-logic-gnd",
@@ -1205,7 +1277,7 @@
         "placement": "driver",
         "pin": "gnd"
       },
-      "length_mm": 94.4
+      "length_mm": 85.6
     },
     {
       "id": "w-common-gnd",
@@ -1231,7 +1303,7 @@
         "placement": "regulator",
         "pin": "out_n"
       },
-      "length_mm": 135.3
+      "length_mm": 137.6
     },
     {
       "id": "w-enc-cart-3v3",
@@ -1257,7 +1329,7 @@
         "placement": "enc-cart",
         "pin": "vcc"
       },
-      "length_mm": 80.8
+      "length_mm": 89.9
     },
     {
       "id": "w-enc-cart-gnd",
@@ -1283,7 +1355,7 @@
         "placement": "enc-cart",
         "pin": "gnd"
       },
-      "length_mm": 76.1
+      "length_mm": 88.4
     },
     {
       "id": "w-enc-elbow-3v3",
@@ -1309,7 +1381,7 @@
         "placement": "enc-elbow",
         "pin": "vcc"
       },
-      "length_mm": 229.8
+      "length_mm": 234.8
     },
     {
       "id": "w-enc-elbow-gnd",
@@ -1335,7 +1407,7 @@
         "placement": "enc-elbow",
         "pin": "gnd"
       },
-      "length_mm": 230.5
+      "length_mm": 236.4
     },
     {
       "id": "w-tof-left-3v3",
@@ -1465,7 +1537,7 @@
         "placement": "enc-cart",
         "pin": "gnd"
       },
-      "length_mm": 12.7
+      "length_mm": 22.8
     },
     {
       "id": "w-enc-elbow-dir",
@@ -1491,7 +1563,7 @@
         "placement": "enc-elbow",
         "pin": "gnd"
       },
-      "length_mm": 12.7
+      "length_mm": 22.8
     },
     {
       "id": "w-enc-cart-sda",
@@ -1517,7 +1589,7 @@
         "placement": "enc-cart",
         "pin": "sda"
       },
-      "length_mm": 173.7
+      "length_mm": 179.2
     },
     {
       "id": "w-enc-cart-scl",
@@ -1543,7 +1615,7 @@
         "placement": "enc-cart",
         "pin": "scl"
       },
-      "length_mm": 173.7
+      "length_mm": 179.2
     },
     {
       "id": "w-tof-left-sda",
@@ -1569,7 +1641,7 @@
         "placement": "tof-left",
         "pin": "sda"
       },
-      "length_mm": 65.7
+      "length_mm": 64.0
     },
     {
       "id": "w-tof-left-scl",
@@ -1595,7 +1667,7 @@
         "placement": "tof-left",
         "pin": "scl"
       },
-      "length_mm": 62.0
+      "length_mm": 60.3
     },
     {
       "id": "w-enc-elbow-sda",
@@ -1621,7 +1693,7 @@
         "placement": "enc-elbow",
         "pin": "sda"
       },
-      "length_mm": 273.0
+      "length_mm": 287.9
     },
     {
       "id": "w-enc-elbow-scl",
@@ -1647,7 +1719,7 @@
         "placement": "enc-elbow",
         "pin": "scl"
       },
-      "length_mm": 270.2
+      "length_mm": 285.2
     },
     {
       "id": "w-tof-right-sda",
@@ -1673,7 +1745,7 @@
         "placement": "tof-right",
         "pin": "sda"
       },
-      "length_mm": 386.1
+      "length_mm": 388.0
     },
     {
       "id": "w-tof-right-scl",
@@ -1699,7 +1771,7 @@
         "placement": "tof-right",
         "pin": "scl"
       },
-      "length_mm": 383.5
+      "length_mm": 385.3
     }
   ],
   "steps": [
@@ -2344,10 +2416,10 @@
     {
       "index": 33,
       "title": "Wire the power",
-      "text": "Connect the 12 V adapter to the driver's VM and GND and to the regulator's IN+ and IN-, and join the Teensy's GND to the regulator's OUT-.",
+      "text": "Connect the 12 V adapter to the driver's VIN and GND and to the regulator's IN+ and IN-, and join the Teensy's GND to the regulator's OUT-.",
       "add": [
         "psu",
-        "w-psu-vm",
+        "w-psu-vin",
         "w-psu-gnd",
         "w-reg-in",
         "w-reg-gnd",

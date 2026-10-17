@@ -18,6 +18,8 @@ from build123d import export_step, export_stl
 
 from .design import Design, Step
 from .geometry import BuiltDesign, assembly
+from .render import render
+from .textures import top_image
 
 DESIGN_TO_GLTF = np.array(
     [
@@ -34,17 +36,39 @@ def hex_to_rgba(color: str) -> list[int]:
     return [int(c[i : i + 2], 16) for i in (0, 2, 4)] + [255]
 
 
-def write_glb(built: BuiltDesign, path: Path) -> None:
+def top_face(piece, part: dict, parts_dir: Path) -> trimesh.Trimesh | None:
+    """A quad just above the body's top face, textured with the part's top picture (textures.py)."""
+    image = top_image(part, parts_dir)
+    if image is None:
+        return None
+    sx, sy, sz = (float(v) for v in part["body"]["size"])
+    z = sz + 0.03  # just above the body so it never z-fights
+    quad = trimesh.Trimesh(
+        vertices=[[0, 0, z], [sx, 0, z], [sx, sy, z], [0, sy, z]], faces=[[0, 1, 2], [0, 2, 3]], process=False
+    )
+    quad.visual = trimesh.visual.TextureVisuals(
+        uv=[[0, 0], [1, 0], [1, 1], [0, 1]],
+        material=trimesh.visual.material.PBRMaterial(
+            name=f"{piece.id}-top", baseColorTexture=image, metallicFactor=0.0, roughnessFactor=0.55
+        ),
+    )
+    return quad
+
+
+def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = None, parts_dir: Path | None = None) -> None:
+    """parts (library entries by id) adds each part's appearance: metal finish and top picture."""
     scene = trimesh.Scene(base_frame="world")
     scene.graph.update(frame_from="world", frame_to="design", matrix=DESIGN_TO_GLTF)
     for piece in built.pieces.values():
+        part = (parts or {}).get(piece.part_id) or {}
+        look = part.get("appearance") or {}
         mesh = piece.local_mesh().copy()
         mesh.visual = trimesh.visual.TextureVisuals(
             material=trimesh.visual.material.PBRMaterial(
                 name=piece.id,
                 baseColorFactor=hex_to_rgba(piece.color),
-                metallicFactor=0.6 if piece.kind == "fastener" else 0.0,
-                roughnessFactor=0.6,
+                metallicFactor=float(look.get("metallic", 0.6 if piece.kind == "fastener" else 0.0)),
+                roughnessFactor=float(look.get("roughness", 0.6)),
             )
         )
         scene.add_geometry(
@@ -54,6 +78,9 @@ def write_glb(built: BuiltDesign, path: Path) -> None:
             parent_node_name="design",
             transform=piece.matrix,
         )
+        quad = top_face(piece, part, parts_dir) if parts_dir and piece.kind == "part" else None
+        if quad is not None:
+            scene.add_geometry(quad, node_name=f"{piece.id}-top", geom_name=f"{piece.id}-top", parent_node_name=piece.id)
     path.write_bytes(scene.export(file_type="glb"))
 
 
@@ -203,12 +230,24 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str, printing
     return doc
 
 
-def export_design(design: Design, built: BuiltDesign, out_dir: Path, formats: list[str], name: str = "design") -> dict:
+def export_design(
+    design: Design,
+    built: BuiltDesign,
+    out_dir: Path,
+    formats: list[str],
+    name: str = "design",
+    parts: dict[str, dict] | None = None,
+    parts_dir: Path | None = None,
+) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
     if "glb" in formats:
         glb = out_dir / f"{name}.glb"
-        write_glb(built, glb)
+        write_glb(built, glb, parts, parts_dir)
+        # Thumbnail for the projects list on screen 1: the finished design, no labels.
+        thumb = out_dir / f"{name}.png"
+        thumb.write_bytes(render(built, "iso", size=(480, 360), labels=False))
+        written.append(str(thumb))
         steps_path = out_dir / f"{name}.steps.json"
         printing = print_info(built, name, formats)
         steps_path.write_text(json.dumps(steps_document(design, built, glb.name, printing), indent=2) + "\n")

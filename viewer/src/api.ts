@@ -64,8 +64,10 @@ function headers(json = false): Record<string, string> {
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init)
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(body.error ?? `${url}: ${res.status}`)
+  const body = await res.json().catch(() => null)
+  if (!res.ok) throw new Error(body?.error ?? `${url}: ${res.status}`)
+  // e.g. the app's own index.html when no API server is behind it: an error, not an empty result
+  if (body === null) throw new Error(`${url}: the server didn't answer with JSON`)
   return body as T
 }
 

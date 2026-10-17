@@ -11,41 +11,51 @@
       1.6
     ]
   },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3,
+        3,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        20,
+        3,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        3,
+        20,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        20,
+        20,
+        0
+      ],
+      "diameter": 3.2
+    }
+  ],
   "pins": [
-    {
-      "id": "vcc",
-      "label": "VCC",
-      "position": [
-        3.0,
-        1.27,
-        0
-      ],
-      "direction": [
-        0,
-        0,
-        -1
-      ]
-    },
-    {
-      "id": "gnd",
-      "label": "GND",
-      "position": [
-        5.54,
-        1.27,
-        0
-      ],
-      "direction": [
-        0,
-        0,
-        -1
-      ]
-    },
     {
       "id": "dir",
       "label": "DIR",
       "position": [
-        8.08,
-        1.27,
+        7.7,
+        18.5,
         0
       ],
       "direction": [
@@ -58,8 +68,8 @@
       "id": "scl",
       "label": "SCL",
       "position": [
-        10.620000000000001,
-        1.27,
+        10.24,
+        18.5,
         0
       ],
       "direction": [
@@ -72,8 +82,64 @@
       "id": "sda",
       "label": "SDA",
       "position": [
-        13.16,
-        1.27,
+        12.78,
+        18.5,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gpo",
+      "label": "GPO",
+      "position": [
+        15.32,
+        18.5,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        11.5,
+        4.5,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out",
+      "label": "OUT",
+      "position": [
+        14.04,
+        4.5,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        16.58,
+        4.5,
         0
       ],
       "direction": [
@@ -83,6 +149,34 @@
       ]
     }
   ],
+  "appearance": {
+    "color": "#f2f2ee",
+    "roughness": 0.55,
+    "top": {
+      "pcb": {
+        "mask": "#f2f2ee",
+        "title": "AS5600",
+        "title_at": [
+          11.5,
+          8
+        ],
+        "chips": [
+          {
+            "at": [
+              11.5,
+              11.5
+            ],
+            "size": [
+              5,
+              4
+            ],
+            "label": "AS5600"
+          }
+        ]
+      }
+    },
+    "source": "https://www.tinytronics.nl/shop/en/sensors/magnetic-field/as5600-magnetic-angle-sensor-encoder-module"
+  },
   "notes": "12-bit angle sensor, I2C address 0x36 (fixed), so each one needs its own I2C bus. Chip side faces the magnet, 0.5 to 3 mm away.",
   "verified": false,
   "verified_by": null,

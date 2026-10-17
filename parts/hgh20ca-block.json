@@ -11,6 +11,12 @@
       25.4
     ]
   },
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.9,
+    "roughness": 0.32,
+    "source": "https://www.industrybuying.com/linear-guides-hiwin-BEA.LIN.120965886"
+  },
   "notes": "Rides on the HGR20 rail; the 20 mm channel wraps the rail. 30 mm from the rail's bottom to the block's top. 4x M5 on top for the cart plate.",
   "verified": false,
   "verified_by": null,

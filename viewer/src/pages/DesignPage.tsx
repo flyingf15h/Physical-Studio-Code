@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { getDesign, type DesignJob, type JobEvent, type JobEventKind } from '../api'
 import { DesignModel } from '../components/DesignModel'
 import { ProgressHeader } from '../components/ProgressHeader'
+import { rememberProject } from '../projects'
 import { designParams, navigate, withParams } from '../router'
 import './DesignPage.css'
 
@@ -36,6 +37,8 @@ export function DesignPage({ jobId }: { jobId: string }) {
         if (stop) return
         setJob(j)
         setError(null)
+        // A finished design goes into "Your projects" even if its guide is never opened.
+        if (j.status === 'done' && j.design) rememberProject({ design: j.design, title: j.title ?? j.prompt, prompt: j.prompt })
         if (j.status === 'done' || j.status === 'error') return
       } catch (e) {
         if (!stop) setError(e instanceof Error ? e.message : String(e))

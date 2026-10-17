@@ -11,6 +11,10 @@
       32
     ]
   },
+  "appearance": {
+    "color": "#1c1c1c",
+    "roughness": 0.85
+  },
   "pins": [
     {
       "id": "v12",
@@ -41,7 +45,7 @@
       ]
     }
   ],
-  "notes": "Wall adapter. Feeds the motor driver (VM) and the 3.3 V regulator.",
+  "notes": "Wall adapter. Feeds the motor driver (VIN) and the 3.3 V regulator.",
   "verified": false,
   "verified_by": null,
   "verified_on": null

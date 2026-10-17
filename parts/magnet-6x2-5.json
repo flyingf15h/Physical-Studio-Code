@@ -11,6 +11,11 @@
       2.5
     ]
   },
+  "appearance": {
+    "color": "#c4c7ca",
+    "metallic": 0.9,
+    "roughness": 0.25
+  },
   "notes": "Comes with the AS5600 board. Glue it centred on the shaft end.",
   "verified": false,
   "verified_by": null,

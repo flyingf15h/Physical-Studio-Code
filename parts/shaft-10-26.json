@@ -11,6 +11,11 @@
       26
     ]
   },
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.9,
+    "roughness": 0.32
+  },
   "notes": "Cut from 10 mm rod. Elbow joint: through the lower arm's bearing into the upper arm.",
   "verified": false,
   "verified_by": null,

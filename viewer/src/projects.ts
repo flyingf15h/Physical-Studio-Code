@@ -1,0 +1,56 @@
+// Projects on screen 1: the ready-made guides that ship with the viewer (public/<folder>), and the
+// designs this browser has opened a guide for ("Your projects"). There are no accounts, so your
+// projects live in localStorage: per browser, and the page still works when storage is blocked.
+
+export interface Project {
+  design: string // ?design= value: a public/ folder or "out/<job id>"
+  title: string
+  prompt?: string
+  steps?: number
+  openedAt?: number // ms; your projects only
+}
+
+export const READY_MADE: Project[] = [
+  {
+    design: 'traffic-light',
+    title: 'Traffic light',
+    prompt: 'Arduino Uno with red, yellow and green LEDs in a column and a crosswalk button.',
+  },
+  {
+    design: 'double-pendulum',
+    title: 'Double inverted pendulum',
+    prompt: 'Rack-and-pinion cart on a linear rail, two arms with magnetic encoders, Teensy 4.1.',
+  },
+]
+
+const KEY = 'physical-studio:projects'
+const MAX = 30
+
+export const thumbnail = (design: string) => `/${design}/design.png`
+
+export function yourProjects(): Project[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(KEY) ?? '[]') as Project[]
+    return Array.isArray(list) ? list.filter((p) => p && typeof p.design === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function save(list: Project[]) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)))
+  } catch {
+    // storage blocked (private window): the list just isn't kept
+  }
+}
+
+/** Records a guide you opened, newest first. Ready-made guides and the bundled sample are skipped. */
+export function rememberProject(p: Project) {
+  if (p.design === 'sample' || READY_MADE.some((r) => r.design === p.design)) return
+  save([{ ...p, openedAt: Date.now() }, ...yourProjects().filter((q) => q.design !== p.design)])
+}
+
+export function forgetProject(design: string) {
+  save(yourProjects().filter((p) => p.design !== design))
+}

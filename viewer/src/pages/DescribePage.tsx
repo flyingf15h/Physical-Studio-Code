@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { listProviders, startDesign, type Provider } from '../api'
 import { ExamplePrompts } from '../components/ExamplePrompts'
 import { PartsLibrary } from '../components/PartsLibrary'
+import { ProjectsList } from '../components/ProjectsList'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { designParams, navigate, withParams } from '../router'
 import './DescribePage.css'
@@ -248,19 +249,7 @@ export function DescribePage() {
           </form>
           <h2 className="describe-sub">Try one</h2>
           <ExamplePrompts onPick={fill} />
-          <p className="describe-sample">
-            Or open the{' '}
-            <a
-              href={withParams('/guide', { design: 'traffic-light', code })}
-              onClick={(e) => {
-                e.preventDefault()
-                navigate(withParams('/guide', { design: 'traffic-light', code }))
-              }}
-            >
-              finished traffic light guide
-            </a>
-            .
-          </p>
+          <ProjectsList />
         </section>
         <PartsLibrary onPick={(part) => fill(prompt.trim() ? `${prompt.trim()} ${part.name}` : part.name)} />
       </main>

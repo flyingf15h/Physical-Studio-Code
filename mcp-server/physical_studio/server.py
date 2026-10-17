@@ -296,7 +296,7 @@ class Studio:
     def export(self, formats: list[str], out_dir: str | None = None) -> dict:
         slug = re.sub(r"[^a-z0-9]+", "-", self.design.title.lower()).strip("-") or "design"
         target = Path(out_dir) if out_dir else self.out_dir / slug
-        return export_design(self.design, self.build(), target, formats)
+        return export_design(self.design, self.build(), target, formats, parts=self.parts_used(), parts_dir=self.parts_dir)
 
 
 HTTP = os.environ.get("MCP_TRANSPORT", "stdio") == "http"

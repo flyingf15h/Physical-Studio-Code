@@ -12,7 +12,7 @@ VL53L0X at each end of the rail measures the cart's position.
 Wiring: Teensy 4.1 on USB. DRV8874 in IN/IN mode (PMODE high): IN1 = pin 2, IN2 = pin 3.
 I2C bus Wire (SDA 18, SCL 19): cart encoder + left distance sensor. Wire1 (SDA1 17, SCL1 16):
 elbow encoder + right distance sensor. AS5600 is fixed at 0x36 and VL53L0X at 0x29, so each bus
-gets one of each. The 12 V adapter feeds the driver and the 3.3 V regulator, which powers the sensors.
+gets one of each. The 12 V adapter feeds the driver (VIN) and the 3.3 V regulator, which powers the sensors.
 """
 
 import json
@@ -39,44 +39,44 @@ place("base-plate-500", (0, 15, 0), id="base-plate", name="Base plate")
 place("hgr20-rail-400", (50, 50, 10), id="rail", name="Linear rail")
 place("hgh20ca-block", (200, 38, 14.6), id="block", name="Carriage block")
 place("rack-riser-400", (50, 112, 10), id="riser", name="Rack riser", color="grey")
-place("gear-rack-m1-400", (50, 112, 29), id="rack", name="Gear rack", color="#c0c4c8")
+place("gear-rack-m1-400", (50, 112, 29), id="rack", name="Gear rack")
 place("cart-plate", (170.7, 25, 40), id="cart", name="Cart plate", color="#4a7fb5")
-place("pinion-m1-26t", (216.7, 86, 29), id="pinion", name="Pinion gear", color="#c0c4c8")
+place("pinion-m1-26t", (216.7, 86, 29), id="pinion", name="Pinion gear")
 place("dc-gearmotor-12v-37", (212.2, 81.5, 29), id="motor", name="Drive motor", color="#8a8f98")
 
 # Cart joint: two bearings in the pivot block, the shaft through them into the lower arm.
 place("pivot-block", (215.7, 25, 46), id="pivot", name="Pivot block", color="orange")
-place("bearing-f6800zz", (220.2, 24, 71.5), (-X, 0, 0), id="bearing-front", name="Front cart bearing", color="#c0c4c8")
-place("bearing-f6800zz", (220.2, 46, 50.5), (X, 0, 0), id="bearing-back", name="Back cart bearing", color="#c0c4c8")
-place("shaft-10-48", (225.7, 1, 66), (-X, 0, 0), id="shaft-cart", name="Cart shaft", color="#d9d9d9")
+place("bearing-f6800zz", (220.2, 24, 71.5), (-X, 0, 0), id="bearing-front", name="Front cart bearing")
+place("bearing-f6800zz", (220.2, 46, 50.5), (X, 0, 0), id="bearing-back", name="Back cart bearing")
+place("shaft-10-48", (225.7, 1, 66), (-X, 0, 0), id="shaft-cart", name="Cart shaft")
 place("arm-lower-210", (215.7, 3, 46), id="arm-lower", name="Lower arm", color="red")
-place("magnet-6x2-5", (227.7, 49, 64), (-X, 0, 0), id="magnet-cart", name="Cart joint magnet", color="#555555")
+place("magnet-6x2-5", (227.7, 49, 64), (-X, 0, 0), id="magnet-cart", name="Cart joint magnet")
 place("encoder-mount", (215.7, 46, 46), id="mount-cart", name="Cart encoder mount", color="orange")
-place("as5600-board", (219.2, 54.1, 49.5), (X, 0, 0), id="enc-cart", name="Cart joint encoder", color="purple")
+place("as5600-board", (219.2, 54.1, 49.5), (X, 0, 0), id="enc-cart", name="Cart joint encoder")
 
 # Elbow joint: a bearing in the top of the lower arm, the shaft into the upper arm.
-place("bearing-f6800zz", (220.2, 2, 251.5), (-X, 0, 0), id="bearing-elbow", name="Elbow bearing", color="#c0c4c8")
-place("shaft-10-26", (225.7, -12, 246), (-X, 0, 0), id="shaft-elbow", name="Elbow shaft", color="#d9d9d9")
+place("bearing-f6800zz", (220.2, 2, 251.5), (-X, 0, 0), id="bearing-elbow", name="Elbow bearing")
+place("shaft-10-26", (225.7, -12, 246), (-X, 0, 0), id="shaft-elbow", name="Elbow shaft")
 place("arm-upper-210", (215.7, -10, 226), id="arm-upper", name="Upper arm", color="yellow")
-place("magnet-6x2-5", (227.7, 14, 244), (-X, 0, 0), id="magnet-elbow", name="Elbow magnet", color="#555555")
+place("magnet-6x2-5", (227.7, 14, 244), (-X, 0, 0), id="magnet-elbow", name="Elbow magnet")
 place("encoder-mount", (215.7, 11, 226), id="mount-elbow", name="Elbow encoder mount", color="orange")
-place("as5600-board", (219.2, 19.1, 229.5), (X, 0, 0), id="enc-elbow", name="Elbow encoder", color="purple")
+place("as5600-board", (219.2, 19.1, 229.5), (X, 0, 0), id="enc-elbow", name="Elbow encoder")
 
 # Distance sensors at both ends of the rail, facing the carriage.
 place("tof-bracket", (30, 45, 10), id="tof-bracket-left", name="Left sensor bracket", color="orange")
-place("vl53l0x-board", (40, 47.5, 38.4), (0, 90, 0), id="tof-left", name="Left distance sensor", color="green")
+place("vl53l0x-board", (40, 47.5, 38.4), (0, 90, 0), id="tof-left", name="Left distance sensor")
 place("tof-bracket", (460, 45, 10), id="tof-bracket-right", name="Right sensor bracket", color="orange")
-place("vl53l0x-board", (460, 47.5, 27.7), (0, -90, 0), id="tof-right", name="Right distance sensor", color="green")
+place("vl53l0x-board", (460, 47.5, 27.7), (0, -90, 0), id="tof-right", name="Right distance sensor")
 
 # Electronics on the front strip of the base (the cart plate passes over them), adapter beside it.
 place("teensy-41", (60, 17, 10), id="teensy", name="Teensy 4.1")
-place("drv8874-board", (128, 17, 10), id="driver", name="Motor driver", color="#b03030")
+place("drv8874-board", (128, 17, 10), id="driver", name="Motor driver")
 place("buck-12v-3v3", (155, 17, 10), id="regulator", name="3.3 V regulator", color="#2a7a4a")
-place("psu-12v-2a", (-100, 40, 0), id="psu", name="12 V adapter", color="#2b2b2b")
+place("psu-12v-2a", (-100, 40, 0), id="psu", name="12 V adapter")
 
 wire = studio.add_wire
 # Power
-wire("psu", "v12", "driver", "vm", color="red", id="w-psu-vm")
+wire("psu", "v12", "driver", "vin", color="red", id="w-psu-vin")
 wire("psu", "gnd", "driver", "gnd_p", color="black", id="w-psu-gnd")
 wire("psu", "v12", "regulator", "in_p", color="red", id="w-reg-in")
 wire("psu", "gnd", "regulator", "in_n", color="black", id="w-reg-gnd")
@@ -194,8 +194,8 @@ step("Wire the distance sensors", "Left sensor: SDA to 18, SCL to 19. Right sens
      ["w-tof-left-3v3", "w-tof-left-gnd", "w-tof-left-sda", "w-tof-left-scl",
       "w-tof-right-3v3", "w-tof-right-gnd", "w-tof-right-sda", "w-tof-right-scl"],
      check="Each distance sensor has red, black, green and yellow wires.")
-step("Wire the power", "Connect the 12 V adapter to the driver's VM and GND and to the regulator's IN+ and IN-, and join the Teensy's GND to the regulator's OUT-.",
-     ["psu", "w-psu-vm", "w-psu-gnd", "w-reg-in", "w-reg-gnd", "w-common-gnd"],
+step("Wire the power", "Connect the 12 V adapter to the driver's VIN and GND and to the regulator's IN+ and IN-, and join the Teensy's GND to the regulator's OUT-.",
+     ["psu", "w-psu-vin", "w-psu-gnd", "w-reg-in", "w-reg-gnd", "w-common-gnd"],
      callouts=[{"text": "Plug the adapter in last", "target": "psu"}],
      check="Red and black wires run from the adapter to the driver and the regulator; the adapter is still unplugged.")
 

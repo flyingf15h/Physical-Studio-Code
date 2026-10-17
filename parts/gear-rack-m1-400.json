@@ -3,7 +3,7 @@
   "name": "Gear rack M1 10 x 10, 400 mm",
   "category": "misc",
   "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
-  "step_file": null,
+  "step_file": "gear-rack-m1-400.step",
   "body": {
     "size": [
       400,
@@ -11,7 +11,12 @@
       10
     ]
   },
-  "notes": "Module 1 rack, 10 x 10 mm section. The teeth face the rail (-y); pitch line 1 mm in from the toothed face.",
+  "appearance": {
+    "color": "#9aa0a6",
+    "metallic": 0.85,
+    "roughness": 0.45
+  },
+  "notes": "Module 1 rack, 10 x 10 mm section, 127 teeth. The teeth face the rail (-y); pitch line 1 mm in from the tooth tips.",
   "verified": false,
   "verified_by": null,
   "verified_on": null
