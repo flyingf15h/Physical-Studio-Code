@@ -56,11 +56,11 @@
     { "id": "scl", "label": "SCL", "position": [18.8, 50.8, 10.1], "direction": [0, 0, 1] }
   ],
   "keep_out": [
-    { "id": "digital_header", "min": [17.0, 48.0, 1.6], "max": [66.0, 53.4, 10.1] },
-    { "id": "power_analog_header", "min": [26.0, 0.0, 1.6], "max": [66.0, 5.1, 10.1] },
+    { "id": "digital_header", "min": [17.53, 49.53, 1.6], "max": [64.77, 52.07, 10.1] },
+    { "id": "power_analog_header", "min": [26.67, 1.27, 1.6], "max": [64.77, 3.81, 10.1] },
     { "id": "underside_pins", "min": [0.0, 0.0, -2.0], "max": [68.6, 53.4, 0.0] }
   ],
-  "notes": "The four mounting holes are unevenly spaced on purpose; h2 is offset from h1 in X, so standoffs must use these exact positions. Through-hole pins stick out about 2 mm under the board, so standoffs need to be at least 3 mm tall. USB-B and barrel jack both face -x.",
+  "notes": "The four mounting holes are unevenly spaced on purpose; h2 is offset from h1 in X, so standoffs must use these exact positions. Through-hole pins stick out about 2 mm under the board, so standoffs need to be at least 3 mm tall. USB-B and barrel jack both face -x. Header keep-outs are the female header housings (pin rows from the KiCad footprint, +/-1.27 mm); an M3 socket head at h2 still touches the digital header housing.",
   "verified": false,
   "verified_by": null,
   "verified_on": null
