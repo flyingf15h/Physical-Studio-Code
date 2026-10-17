@@ -7,7 +7,9 @@ from PIL import Image, ImageOps
 from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
-from config import GEMINI_API_KEY,GEMINI_MODEL
+try:from config import GEMINI_API_KEY,GEMINI_MODEL
+except ImportError:  # hosted (deploy/): settings come from the environment instead of config.py
+    import os;GEMINI_API_KEY=os.environ.get('GEMINI_API_KEY','');GEMINI_MODEL=os.environ.get('GEMINI_MODEL','gemini-3.8-flash')
 from geometry import build
 
 class Terminal(BaseModel):
@@ -58,6 +60,7 @@ def validate(s):
 st.set_page_config(page_title='Circuit Model Studio V7',layout='wide')
 st.title('Circuit Model Studio')
 st.caption('Reference photos + your connection instructions → labelled 3D model')
+if not GEMINI_API_KEY:st.error('No Gemini key: set GEMINI_API_KEY in config.py or the environment.');st.stop()
 files=st.file_uploader('Upload up to 10 reference photos',type=['jpg','jpeg','png','webp'],accept_multiple_files=True)
 notes=st.text_area('Additional instructions and connections',height=190,placeholder='Describe the parts, placement and where to plug each wire. Include GPIO names and breadboard holes when known. There is no prewired circuit.')
 consent=st.checkbox('Send my photos and instructions to Google Gemini.')

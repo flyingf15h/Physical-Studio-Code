@@ -1,0 +1,5 @@
+**
+!circuit-studio/**
+circuit-studio/config.py
+circuit-studio/.venv
+circuit-studio/__pycache__

@@ -20,6 +20,7 @@ services:
     depends_on:
       - viewer
       - mcp
+      - studio
 
   viewer:
     build:
@@ -57,6 +58,15 @@ services:
       DEMO_CODE: ${DEMO_CODE:-}
     volumes:
       - designs:/data/out
+
+  studio:
+    build:
+      context: ..
+      dockerfile: deploy/studio.Dockerfile
+    restart: unless-stopped
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_STUDIO_MODEL:-gemini-3.8-flash}
 
 volumes:
   designs:

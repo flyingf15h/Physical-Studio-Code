@@ -12,6 +12,12 @@
 		reverse_proxy mcp:8000
 	}
 
+	# Circuit Studio (Streamlit). It needs websockets, which reverse_proxy passes through.
+	redir /studio /studio/
+	handle /studio/* {
+		reverse_proxy studio:8501
+	}
+
 	handle /mcp* {
 		reverse_proxy mcp:8000 {
 			flush_interval -1 # MCP streams responses
