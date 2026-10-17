@@ -1,0 +1,25 @@
+{
+  "id": "led-5mm",
+  "name": "LED 5 mm (T-1 3/4)",
+  "category": "output",
+  "source": "Typical 5 mm through-hole LED datasheet (5.8 mm flange, 8.6 mm tall, 2.54 mm lead pitch); legs assumed trimmed to 10 mm; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [5.8, 5.8, 8.6]
+  },
+  "envelope": {
+    "min": [0.0, 0.0, -10.0],
+    "max": [5.8, 5.8, 8.6]
+  },
+  "connectors": [
+    { "id": "lens", "type": "led-lens", "face": "+z", "center": [2.9, 2.9, 8.6], "size": [5.0, 5.0], "protrusion": 0.0 }
+  ],
+  "pins": [
+    { "id": "anode", "label": "+ (long leg)", "position": [4.17, 2.9, -10.0], "direction": [0, 0, -1] },
+    { "id": "cathode", "label": "- (flat side)", "position": [1.63, 2.9, -10.0], "direction": [0, 0, -1] }
+  ],
+  "notes": "Anode is the longer leg; the cathode is on the flat side of the flange. A 5 mm lid hole holds the lens and the 5.8 mm flange stops it from pushing through. Needs a 220 ohm series resistor on the anode.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,25 @@
+{
+  "id": "piezo-buzzer",
+  "name": "Piezo buzzer 12 mm",
+  "category": "output",
+  "source": "Typical 12 mm x 9.5 mm PCB-mount buzzer datasheet (pins 7.6 mm apart); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [12.0, 12.0, 9.5]
+  },
+  "envelope": {
+    "min": [0.0, 0.0, -6.5],
+    "max": [12.0, 12.0, 9.5]
+  },
+  "connectors": [
+    { "id": "sound_hole", "type": "sound-port", "face": "+z", "center": [6.0, 6.0, 9.5], "size": [3.0, 3.0], "protrusion": 0.0 }
+  ],
+  "pins": [
+    { "id": "pos", "label": "+", "position": [9.8, 6.0, -6.5], "direction": [0, 0, -1] },
+    { "id": "neg", "label": "-", "position": [2.2, 6.0, -6.5], "direction": [0, 0, -1] }
+  ],
+  "notes": "The firmware drives it with tone(), so it should be a passive piezo; an active buzzer (sealed bottom, sticker on top) only beeps at one pitch. The + pin is usually the longer leg and marked on top.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

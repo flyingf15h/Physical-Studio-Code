@@ -1,0 +1,25 @@
+{
+  "id": "tactile-button-12mm",
+  "name": "Tactile push button 12x12 mm",
+  "category": "input",
+  "source": "Typical 12x12x7.3 mm 4-leg tactile switch datasheet (legs on a 12.5 x 5.0 mm grid); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [12.0, 12.0, 7.3]
+  },
+  "envelope": {
+    "min": [-0.5, 0.0, -3.5],
+    "max": [12.5, 12.0, 7.3]
+  },
+  "connectors": [
+    { "id": "plunger", "type": "button-actuator", "face": "+z", "center": [6.0, 6.0, 7.3], "size": [7.0, 7.0], "protrusion": 0.0 }
+  ],
+  "pins": [
+    { "id": "a", "label": "A", "position": [-0.25, 3.5, -3.5], "direction": [0, 0, -1] },
+    { "id": "b", "label": "B", "position": [-0.25, 8.5, -3.5], "direction": [0, 0, -1] }
+  ],
+  "notes": "Legs 12.5 mm apart (across the body) are always connected; the two legs on the same side, 5 mm apart, are the switch. Pins a and b are that normally-open pair. If the button has a snap-on colored cap, the cap adds height and needs a bigger lid hole; measure it.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}
