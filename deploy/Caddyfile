@@ -4,6 +4,14 @@
 {$DOMAIN} {
 	encode zstd gzip
 
+	# The front page of the hosts in FRONT_HOSTS (deploy/front.sh) opens Circuit Studio's Build
+	# helper; everything else on them (/guide, /api, /studio, assets) stays the viewer app's.
+	@front {
+		path /
+		host {$FRONT_HOSTS}
+	}
+	redir @front /studio/
+
 	# Web app backend in the MCP server: parts list and Claude design jobs (screens 1 and 2).
 	handle /api/parts {
 		reverse_proxy mcp:8000

@@ -1,30 +1,25 @@
 #!/bin/sh
-# Choose what https://physicalstudio.work shows, on the Vultr box, as root:
+# Choose what the front page of https://physicalstudio.work shows, on the Vultr box, as root:
 #
 #   sh /opt/Physical-Studio-Code/deploy/front.sh builder   # Circuit Studio's Build helper
-#   sh /opt/Physical-Studio-Code/deploy/front.sh classic   # the viewer app (screen 1 -> design -> guide)
+#   sh /opt/Physical-Studio-Code/deploy/front.sh classic   # the viewer app's screen 1
 #
-# Either way the viewer app stays at https://classic.physicalstudio.work and Circuit Studio at
-# /studio/. It only moves host names between DOMAIN (viewer app, deploy/Caddyfile) and
-# STUDIO_DOMAIN (Build helper, deploy/Caddyfile.local) in deploy/.env and restarts Caddy, so
-# switching back is the same command with the other word.
+# Only the bare root (/) changes: /guide, /api, /studio and the viewer app's assets keep working
+# on physicalstudio.work either way, and https://classic.physicalstudio.work always shows the
+# viewer app. It sets FRONT_HOSTS in deploy/.env (read by deploy/Caddyfile) and restarts Caddy,
+# so switching back is the same command with the other word.
 set -eu
 cd "$(dirname "$0")"
-MAIN="physicalstudio.work, www.physicalstudio.work"
 case "${1:-}" in
-  builder)
-    domain="classic.physicalstudio.work, 155-138-154-8.sslip.io"
-    studio="$MAIN, studio.155-138-154-8.sslip.io" ;;
-  classic)
-    domain="$MAIN, classic.physicalstudio.work, 155-138-154-8.sslip.io"
-    studio="studio.155-138-154-8.sslip.io" ;;
+  builder) hosts="physicalstudio.work www.physicalstudio.work" ;;
+  classic) hosts="" ;;
   *) echo "usage: sh deploy/front.sh builder|classic"; exit 2 ;;
 esac
 cp .env ".env.bak-$(date +%s)"
-for kv in "DOMAIN=$domain" "STUDIO_DOMAIN=$studio"; do
-  k=${kv%%=*}
-  if grep -q "^$k=" .env; then sed -i "s|^$k=.*|$kv|" .env; else echo "$kv" >> .env; fi
-done
-docker compose up -d caddy mcp
-grep -E '^(DOMAIN|STUDIO_DOMAIN)=' .env
-echo "physicalstudio.work now shows: $1 (certificates for moved names can take a minute)"
+grep -v '^FRONT_HOSTS=' .env > .env.new
+if [ -n "$hosts" ]; then echo "FRONT_HOSTS=$hosts" >> .env.new; fi
+mv .env.new .env
+chmod 600 .env
+docker compose up -d caddy
+grep '^FRONT_HOSTS=' .env || echo "FRONT_HOSTS unset"
+echo "physicalstudio.work/ now opens: $1"
