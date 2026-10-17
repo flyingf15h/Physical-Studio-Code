@@ -1,0 +1,24 @@
+.parts-library { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-width: 0; }
+.parts-head { display: flex; align-items: center; gap: 8px; }
+.parts-head h2 { font-size: 15px; margin: 0; }
+.parts-total { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.parts-lede { font-size: 13px; color: var(--muted); margin: 4px 0 10px; line-height: 1.4; }
+.parts-search { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); }
+.parts-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.parts-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.parts-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+.parts-card:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.parts-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.parts-card:disabled { cursor: default; }
+.parts-name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.parts-badge { justify-self: end; align-self: start; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: #fff1e8; color: #a8461b; }
+.parts-badge.measured { background: var(--accent-soft); color: #0b6f7d; }
+.parts-size { grid-column: 1 / -1; font-size: 13px; font-variant-numeric: tabular-nums; }
+.parts-meta { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.parts-skeleton { height: 62px; cursor: default; background: linear-gradient(90deg, var(--bg), var(--panel), var(--bg)); background-size: 200% 100%; animation: parts-shimmer 1.2s linear infinite; }
+@keyframes parts-shimmer { to { background-position: -200% 0; } }
+.parts-empty { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.parts-error { margin: 10px 0 0; background: #fde8e8; color: #9b1c1c; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+.parts-error p { margin: 0 0 8px; }
+.parts-error button { border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-size: 13px; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .parts-skeleton { animation: none; } }
