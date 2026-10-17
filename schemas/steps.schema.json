@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://physical-studio/schemas/steps.schema.json",
+  "title": "Physical Studio assembly steps",
+  "description": "Written by the MCP server's export tool next to design.glb. See docs/steps-format.md.",
+  "type": "object",
+  "required": ["format", "version", "title", "model", "units", "placements", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "physical-studio-steps" },
+    "version": { "const": 1 },
+    "title": { "type": "string" },
+    "prompt": { "type": "string", "description": "The request the design was generated from." },
+    "model": { "type": "string", "description": "GLB file name, relative to this JSON file." },
+    "units": { "const": "mm" },
+    "bounds": {
+      "description": "Bounding box of the assembled design, design frame.",
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": { "min": { "$ref": "#/$defs/vec3" }, "max": { "$ref": "#/$defs/vec3" } }
+    },
+    "placements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/placement" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+    "placement": {
+      "type": "object",
+      "required": ["id", "kind", "name", "position", "rotation"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id", "description": "Also the GLB node name." },
+        "kind": { "enum": ["enclosure", "part", "fastener"] },
+        "part": { "type": ["string", "null"], "description": "Parts library id, or null for generated geometry (enclosure pieces)." },
+        "name": { "type": "string" },
+        "position": { "$ref": "#/$defs/vec3" },
+        "rotation": { "$ref": "#/$defs/vec3", "description": "Degrees, Euler order XYZ (same as three.js Euler 'XYZ')." },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "required": ["placement"],
+      "additionalProperties": false,
+      "properties": {
+        "placement": { "$ref": "#/$defs/id" },
+        "from_offset": {
+          "$ref": "#/$defs/vec3",
+          "description": "Where the placement starts, relative to its final position (design frame, mm). It animates to [0,0,0]."
+        },
+        "from_rotation": {
+          "$ref": "#/$defs/vec3",
+          "description": "Extra rotation (degrees, XYZ) at the start, animated to none. Use for screws (spin) or flipping a lid."
+        }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "e.g. \"2.5 mm hex key\"" },
+        "for": { "type": "string", "description": "e.g. \"M3 x 8 screw\"" }
+      }
+    },
+    "callout": {
+      "type": "object",
+      "required": ["text", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "target": { "$ref": "#/$defs/id" },
+        "at": { "$ref": "#/$defs/vec3", "description": "Anchor point in the target's local frame (mm). Defaults to the target's bounding-box centre." }
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "required": ["from", "to", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "$ref": "#/$defs/vec3" },
+        "to": { "$ref": "#/$defs/vec3" },
+        "label": { "type": "string" }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": ["index", "title", "text", "add"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "add": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "description": "Placements that appear in this step. Every placement is added in exactly one step."
+        },
+        "motion": { "type": "array", "items": { "$ref": "#/$defs/motion" } },
+        "tools": { "type": "array", "items": { "$ref": "#/$defs/tool" } },
+        "callouts": { "type": "array", "items": { "$ref": "#/$defs/callout" } },
+        "dimensions": { "type": "array", "items": { "$ref": "#/$defs/dimension" } },
+        "check": {
+          "type": "string",
+          "description": "What the step tracker (Gemini) should verify on camera before moving on."
+        }
+      }
+    }
+  }
+}

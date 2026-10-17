@@ -1,0 +1,163 @@
+{
+  "format": "physical-studio-steps",
+  "version": 1,
+  "title": "Arduino Uno case",
+  "model": "design.glb",
+  "units": "mm",
+  "bounds": {
+    "min": [
+      -10.2,
+      -4.0,
+      -6.0
+    ],
+    "max": [
+      72.6,
+      57.4,
+      16.5
+    ]
+  },
+  "placements": [
+    {
+      "id": "base",
+      "kind": "enclosure",
+      "part": null,
+      "name": "Case base",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#d9d9d9"
+    },
+    {
+      "id": "uno",
+      "kind": "part",
+      "part": "arduino-uno",
+      "name": "Arduino Uno Rev3",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#1f6fb2"
+    },
+    {
+      "id": "lid",
+      "kind": "enclosure",
+      "part": null,
+      "name": "Case lid",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "color": "#f2f2f2"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "title": "Lay out the case base",
+      "text": "Put the printed base on the bench with the two port openings on the left.",
+      "add": [
+        "base"
+      ],
+      "check": "Base is upright with the USB and barrel-jack openings on the left wall."
+    },
+    {
+      "index": 2,
+      "title": "Drop in the Arduino",
+      "text": "Lower the Uno onto the four standoffs, USB port first into the left opening.",
+      "add": [
+        "uno"
+      ],
+      "motion": [
+        {
+          "placement": "uno",
+          "from_offset": [
+            0,
+            0,
+            40
+          ]
+        }
+      ],
+      "callouts": [
+        {
+          "text": "USB-B goes into this opening",
+          "target": "uno",
+          "at": [
+            -3,
+            38.1,
+            7
+          ]
+        },
+        {
+          "text": "Barrel jack",
+          "target": "uno",
+          "at": [
+            -1,
+            7.6,
+            7
+          ]
+        }
+      ],
+      "dimensions": [
+        {
+          "from": [
+            13.97,
+            2.54,
+            1.6
+          ],
+          "to": [
+            15.24,
+            50.8,
+            1.6
+          ],
+          "label": "48.3 mm hole spacing"
+        }
+      ],
+      "check": "All four mounting holes sit on standoffs and the USB-B port lines up with the left opening."
+    },
+    {
+      "index": 3,
+      "title": "Close the lid",
+      "text": "Press the lid on until the lip seats inside the walls.",
+      "add": [
+        "lid"
+      ],
+      "motion": [
+        {
+          "placement": "lid",
+          "from_offset": [
+            0,
+            0,
+            50
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "Hands only",
+          "for": "press fit"
+        }
+      ],
+      "check": "Lid sits flush all the way round."
+    }
+  ],
+  "prompt": "A case for an Arduino Uno with the USB port reachable on the side."
+}

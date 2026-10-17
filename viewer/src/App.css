@@ -1,0 +1,46 @@
+.app { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+
+.sidebar { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
+.sidebar header { padding: 20px 20px 12px; }
+.eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.sidebar h1 { font-size: 20px; margin: 6px 0 4px; line-height: 1.25; }
+.prompt { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+
+.steps { list-style: none; margin: 0; padding: 4px 10px; overflow-y: auto; flex: 1; }
+.steps button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 9px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; font-size: 14px; }
+.steps button:hover { background: var(--bg); }
+.steps .num { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; border: 1.5px solid var(--line); color: var(--muted); }
+.steps button.done .num { background: var(--line); border-color: var(--line); color: var(--ink); }
+.steps button.active { background: var(--accent-soft); font-weight: 600; }
+.steps button.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hint { padding: 12px 20px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+
+.stage { position: relative; min-width: 0; min-height: 0; }
+.stage canvas { touch-action: none; }
+
+.card { position: absolute; top: 16px; left: 16px; width: min(360px, calc(100% - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 6px 24px rgba(31, 41, 51, .08); }
+.card h2 { margin: 4px 0 6px; font-size: 18px; }
+.card p { margin: 0; font-size: 14px; line-height: 1.45; }
+.tools { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tools li { background: #fff3ec; border: 1px solid #ffd5c2; border-radius: 6px; padding: 4px 8px; font-size: 13px; }
+.check { margin-top: 10px !important; font-size: 13px !important; color: var(--muted); }
+.check span { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-right: 4px; }
+
+.timeline { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; box-shadow: 0 6px 24px rgba(31, 41, 51, .08); width: min(560px, calc(100% - 32px)); }
+.timeline button { border: 0; background: none; min-width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 16px; }
+.timeline button:hover:not(:disabled) { background: var(--bg); }
+.timeline button:disabled { opacity: .3; cursor: default; }
+.timeline button.active { background: var(--accent); color: #fff; }
+.timeline button:last-child { font-size: 13px; padding: 0 12px; }
+.timeline input { flex: 1; accent-color: var(--accent); min-width: 0; }
+
+.callout { background: var(--ink); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
+.dimension { background: var(--warn); color: #fff; font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+.error { position: absolute; top: 16px; right: 16px; background: #fde8e8; color: #9b1c1c; border: 1px solid #f8b4b4; border-radius: 8px; padding: 10px 14px; font-size: 13px; z-index: 5; max-width: 420px; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 34vh; }
+  .card { top: 8px; left: 8px; width: calc(100% - 16px); padding: 10px 12px; }
+  .timeline { bottom: 8px; width: calc(100% - 16px); }
+}

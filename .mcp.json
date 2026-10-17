@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "physical-studio": {
+      "command": "uv",
+      "args": ["run", "--directory", "mcp-server", "physical-studio-mcp"]
+    }
+  }
+}

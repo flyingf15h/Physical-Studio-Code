@@ -1,0 +1,47 @@
+{
+  "id": "arduino-uno",
+  "name": "Arduino Uno Rev3",
+  "category": "board",
+  "source": "Arduino Uno Rev3 reference drawing (hole grid is on 0.1 inch / 2.54 mm); connector extents are approximate until measured",
+  "step_file": null,
+  "body": {
+    "size": [68.6, 53.4, 1.6]
+  },
+  "envelope": {
+    "min": [-6.2, 0.0, -2.0],
+    "max": [68.6, 53.4, 12.5]
+  },
+  "mounting_holes": [
+    { "id": "h1", "position": [13.97, 2.54, 0.0], "diameter": 3.2 },
+    { "id": "h2", "position": [15.24, 50.8, 0.0], "diameter": 3.2 },
+    { "id": "h3", "position": [66.04, 7.62, 0.0], "diameter": 3.2 },
+    { "id": "h4", "position": [66.04, 35.56, 0.0], "diameter": 3.2 }
+  ],
+  "connectors": [
+    {
+      "id": "usb_b",
+      "type": "usb-b",
+      "face": "-x",
+      "center": [0.0, 38.1, 7.05],
+      "size": [12.0, 10.9],
+      "protrusion": 6.2
+    },
+    {
+      "id": "barrel_jack",
+      "type": "dc-barrel-2.1mm",
+      "face": "-x",
+      "center": [0.0, 7.6, 7.1],
+      "size": [9.0, 11.0],
+      "protrusion": 1.8
+    }
+  ],
+  "keep_out": [
+    { "id": "digital_header", "min": [17.0, 48.0, 1.6], "max": [66.0, 53.4, 10.1] },
+    { "id": "power_analog_header", "min": [26.0, 0.0, 1.6], "max": [66.0, 5.1, 10.1] },
+    { "id": "underside_pins", "min": [0.0, 0.0, -2.0], "max": [68.6, 53.4, 0.0] }
+  ],
+  "notes": "The four mounting holes are unevenly spaced on purpose; h2 is offset from h1 in X, so standoffs must use these exact positions. Through-hole pins stick out about 2 mm under the board, so standoffs need to be at least 3 mm tall. USB-B and barrel jack both face -x.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

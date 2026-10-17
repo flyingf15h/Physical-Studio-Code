@@ -1,3 +1,5 @@
+NOTE: moved into circuit-studio/ (run from here: `streamlit run app.py`). Put config.py next to app.py; it is gitignored.
+
 CIRCUIT MODEL STUDIO V7 — BASED ON YOUR UPLOADED WORKING V5 FILES
 
 Full standalone project, not a patch. Same Python geometry -> GLB -> GLTFLoader viewer

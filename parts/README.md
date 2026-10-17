@@ -1,0 +1,27 @@
+# Parts library
+
+One JSON file per part (`<id>.json`), plus an optional STEP model (`<id>.step`) next to it. The MCP server reads these files; Claude never invents dimensions, so every number the design uses has to come from here.
+
+## Conventions
+
+- All lengths are in **millimetres**, angles in degrees.
+- **Origin**: the bottom-left corner of the part's footprint, on its bottom face. For a PCB that is the corner of the board on the solder side.
+- **Axes**: +X along the part's length, +Y along its width, +Z up (away from the bottom face).
+- A position is `[x, y, z]` in the part's own frame. The MCP server applies the placement transform.
+- `verified` is `false` until someone has checked the number against the real part with calipers. Set `verified_by` and `verified_on` when you do.
+
+## Fields
+
+| Field | Meaning |
+|---|---|
+| `id` | File name without `.json`, kebab-case. |
+| `name`, `category` | Human-readable name; one of `board`, `input`, `output`, `fastener`, `misc`. |
+| `source` | Where the dimensions came from (datasheet, drawing, STEP file, calipers). |
+| `step_file` | STEP model next to this file, or `null` if we don't have one yet. |
+| `body` | Bounding box of the part itself: `size` `[x, y, z]`. For a PCB, `z` is the board thickness. |
+| `envelope` | Bounding box including everything mounted on it (`min`, `max`), used for a first-pass fit check. |
+| `mounting_holes` | `{id, position, diameter}`. Position is the hole centre on the bottom face. |
+| `connectors` | Things the enclosure has to leave reachable: `{id, type, face, center, size, protrusion}`. `face` is the side it is reached from (`-x`, `+x`, `-y`, `+y`, `+z`), `center` is the middle of the opening on that face, `size` is `[width, height]` of the opening, `protrusion` is how far it sticks out past the body. |
+| `keep_out` | Boxes (`min`, `max`) nothing else may occupy, e.g. tall components or header pins. |
+| `notes` | Anything an assembler or the design tools should know. |
+| `verified`, `verified_by`, `verified_on` | Caliper check status. |

@@ -1,0 +1,59 @@
+{
+  "format": "physical-studio-steps",
+  "version": 1,
+  "title": "Simon game for an Arduino Uno",
+  "prompt": "Simon game for an Arduino Uno, 4 colored buttons with LEDs, buzzer, USB accessible on the side.",
+  "model": "design.glb",
+  "units": "mm",
+  "bounds": { "min": [0, 0, 0], "max": [84.6, 69.4, 30] },
+  "placements": [
+    { "id": "base", "kind": "enclosure", "part": null, "name": "Case base", "position": [0, 0, 0], "rotation": [0, 0, 0], "color": "#d9d9d9" },
+    { "id": "uno", "kind": "part", "part": "arduino-uno", "name": "Arduino Uno Rev3", "position": [8, 8, 5], "rotation": [0, 0, 0], "color": "#1f6fb2" },
+    { "id": "screw-h1", "kind": "fastener", "part": "m3-screw-6mm", "name": "M3 x 6 screw", "position": [21.97, 10.54, 6.6], "rotation": [0, 0, 0] },
+    { "id": "screw-h2", "kind": "fastener", "part": "m3-screw-6mm", "name": "M3 x 6 screw", "position": [23.24, 58.8, 6.6], "rotation": [0, 0, 0] },
+    { "id": "screw-h3", "kind": "fastener", "part": "m3-screw-6mm", "name": "M3 x 6 screw", "position": [74.04, 15.62, 6.6], "rotation": [0, 0, 0] },
+    { "id": "screw-h4", "kind": "fastener", "part": "m3-screw-6mm", "name": "M3 x 6 screw", "position": [74.04, 43.56, 6.6], "rotation": [0, 0, 0] },
+    { "id": "lid", "kind": "enclosure", "part": null, "name": "Case lid", "position": [0, 0, 28], "rotation": [0, 0, 0], "color": "#f2f2f2" }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "title": "Lay out the case base",
+      "text": "Put the printed base on the bench with the two side cutouts facing left.",
+      "add": ["base"],
+      "check": "Base is upright with the USB and barrel-jack cutouts on the left wall."
+    },
+    {
+      "index": 2,
+      "title": "Drop in the Arduino",
+      "text": "Lower the Uno onto the four standoffs, USB port into the left cutout.",
+      "add": ["uno"],
+      "motion": [{ "placement": "uno", "from_offset": [0, 0, 40] }],
+      "callouts": [{ "text": "USB-B faces the cutout", "target": "uno", "at": [0, 38.1, 7] }],
+      "check": "All four Uno mounting holes sit on standoffs and the USB-B port lines up with the left cutout."
+    },
+    {
+      "index": 3,
+      "title": "Screw the board down",
+      "text": "Fasten the Uno with four M3 x 6 screws. Snug, not tight.",
+      "add": ["screw-h1", "screw-h2", "screw-h3", "screw-h4"],
+      "motion": [
+        { "placement": "screw-h1", "from_offset": [0, 0, 20], "from_rotation": [0, 0, 720] },
+        { "placement": "screw-h2", "from_offset": [0, 0, 20], "from_rotation": [0, 0, 720] },
+        { "placement": "screw-h3", "from_offset": [0, 0, 20], "from_rotation": [0, 0, 720] },
+        { "placement": "screw-h4", "from_offset": [0, 0, 20], "from_rotation": [0, 0, 720] }
+      ],
+      "tools": [{ "name": "2.5 mm hex key", "for": "M3 x 6 screws" }],
+      "dimensions": [{ "from": [21.97, 10.54, 6.6], "to": [23.24, 58.8, 6.6], "label": "48.3 mm" }],
+      "check": "Four screws in, board does not rock."
+    },
+    {
+      "index": 4,
+      "title": "Close the lid",
+      "text": "Press the lid onto the base until it clicks.",
+      "add": ["lid"],
+      "motion": [{ "placement": "lid", "from_offset": [0, 0, 50] }],
+      "check": "Lid sits flush all the way round."
+    }
+  ]
+}

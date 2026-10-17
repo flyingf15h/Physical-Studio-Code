@@ -1,0 +1,30 @@
+[project]
+name = "physical-studio-mcp"
+version = "0.1.0"
+description = "MCP server that designs hardware enclosures from a measured parts library"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "build123d>=0.9",
+    "fastmcp>=2.0",
+    "trimesh>=4.0",
+]
+
+[project.scripts]
+physical-studio-mcp = "physical_studio.server:main"
+
+[dependency-groups]
+dev = [
+    "jsonschema>=4.26.0",
+    "pytest>=8",
+]
+
+[build-system]
+requires = ["uv_build>=0.8,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "physical_studio"
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
