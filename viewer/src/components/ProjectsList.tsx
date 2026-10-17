@@ -1,6 +1,7 @@
-// "Projects" on screen 1: ready-made guides, then the guides you've opened before (src/projects.ts).
-import { useState } from 'react'
-import { forgetProject, READY_MADE, thumbnail, yourProjects, type Project } from '../projects'
+// Projects on screen 1: the ready-made guides, and your own (opened here or exported by your AI; src/projects.ts).
+import { useEffect, useState } from 'react'
+import { listMyProjects } from '../api'
+import { forgetProject, READY_MADE, savedKey, thumbnail, yourProjects, type Project } from '../projects'
 import { designParams, navigate, withParams } from '../router'
 import './ProjectsList.css'
 
@@ -29,7 +30,7 @@ function Card({ project, onRemove }: { project: Project; onRemove?: () => void }
         <span className="projects-title">{project.title}</span>
         {project.prompt && <span className="projects-prompt">{project.prompt}</span>}
         <span className="projects-meta">
-          {[project.steps ? `${project.steps} steps` : '', when(project.openedAt)].filter(Boolean).join(' · ')}
+          {[project.steps ? `${project.steps} step${project.steps === 1 ? '' : 's'}` : '', when(project.openedAt)].filter(Boolean).join(' · ')}
         </span>
       </a>
       {onRemove && (
@@ -41,17 +42,48 @@ function Card({ project, onRemove }: { project: Project; onRemove?: () => void }
   )
 }
 
-export function ProjectsList() {
-  const [mine, setMine] = useState(yourProjects)
+/** The guides you opened here, plus the ones your AI exported with your key, newest first. */
+function merge(opened: Project[], exported: Project[]): Project[] {
+  const byDesign = new Map<string, Project>()
+  for (const p of [...exported, ...opened]) {
+    const seen = byDesign.get(p.design)
+    if (!seen || (p.openedAt ?? 0) > (seen.openedAt ?? 0)) byDesign.set(p.design, { ...seen, ...p })
+  }
+  return [...byDesign.values()].sort((a, b) => (b.openedAt ?? 0) - (a.openedAt ?? 0))
+}
+
+export function ReadyMadeGuides() {
+  return (
+    <ul className="projects-grid">
+      {READY_MADE.map((p) => (
+        <Card key={p.design} project={p} />
+      ))}
+    </ul>
+  )
+}
+
+/** keyVersion: bump it when a new key is saved, so its projects are fetched. Also refetched when
+ * the tab gets focus again, since the visitor's AI exports while they're in another window. */
+export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
+  const [opened, setOpened] = useState(yourProjects)
+  const [exported, setExported] = useState<Project[]>([])
+  useEffect(() => {
+    const load = () => {
+      setOpened(yourProjects())
+      const key = savedKey()
+      if (!key) return
+      listMyProjects(key).then(
+        (list) => setExported(list.map((p) => ({ design: p.design, title: p.title, prompt: p.prompt, steps: p.steps, openedAt: p.at * 1000 }))),
+        () => setExported([]),
+      )
+    }
+    load()
+    window.addEventListener('focus', load)
+    return () => window.removeEventListener('focus', load)
+  }, [keyVersion])
+  const mine = merge(opened, exported)
   return (
     <section className="projects" id="projects">
-      <h2 className="describe-sub">Ready-made guides</h2>
-      <ul className="projects-grid">
-        {READY_MADE.map((p) => (
-          <Card key={p.design} project={p} />
-        ))}
-      </ul>
-      <h2 className="describe-sub">Your projects</h2>
       {mine.length ? (
         <ul className="projects-grid">
           {mine.map((p) => (
@@ -60,13 +92,16 @@ export function ProjectsList() {
               project={p}
               onRemove={() => {
                 forgetProject(p.design)
-                setMine(yourProjects())
+                setOpened(yourProjects())
+                setExported(exported.filter((q) => q.design !== p.design))
               }}
             />
           ))}
         </ul>
       ) : (
-        <p className="projects-empty">Guides you open show up here, so you can come back to them. They're kept in this browser.</p>
+        <p className="projects-empty">
+          Guides you open, and the ones your AI makes with your key, show up here so you can come back to them.
+        </p>
       )}
     </section>
   )

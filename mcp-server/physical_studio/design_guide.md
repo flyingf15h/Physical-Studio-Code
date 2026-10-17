@@ -10,6 +10,15 @@ Claude, or any MCP client).
 - Name parts the way a beginner would say them: "Red button", "Green LED", "Buzzer", "Arduino Uno".
   Give each copy of a part its own name. Never use an id like `led-5mm-2` as a name.
 
+### Real looks (when you can browse the web)
+- Before exporting, look up each part you placed (manufacturer page first, then a shop listing) and
+  call set_part_look with what the real part looks like: the PCB's solder-mask color, the metal's
+  finish (bare steel about metallic 0.9 / roughness 0.3; a PCB metallic 0 / roughness 0.5) and,
+  for boards, top_image_url: the image file of a straight-on top view. Pass the page in `source`.
+- Skip a part you can't identify for sure (an unbranded motor); its library look stays. Parts that
+  already have a library look (get_part's `appearance`) only need a call if the real one differs.
+- Sizes still come from get_part only: a photo never changes a dimension.
+
 ### Layout
 - Put the main board at the origin first, then everything else around it.
 - Parts that poke through the lid (buttons, LEDs) sit in the lid, not floating above the board.

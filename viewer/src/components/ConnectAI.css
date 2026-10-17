@@ -1,0 +1,20 @@
+.connect { list-style: none; counter-reset: connect; margin: 0; padding: 0; display: grid; gap: 12px; }
+.connect > li { counter-increment: connect; position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 14px 52px; min-width: 0; }
+.connect > li::before { content: counter(connect); position: absolute; left: 14px; top: 13px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; display: grid; place-items: center; }
+.connect > li.connect-off { opacity: .55; }
+.connect h3 { margin: 2px 0 10px; font-size: 15px; }
+.connect-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.connect-key { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.connect-copy { border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; font-size: 13px; border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+.connect-copy:hover { border-color: var(--accent); }
+.connect-link { border: 0; background: none; color: var(--accent); font: inherit; font-size: 13px; cursor: pointer; padding: 6px 4px; }
+.connect-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
+.connect-row .connect-note { margin: 0; }
+.connect-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.connect-tabs button { border: 1px solid var(--line); background: var(--panel); color: var(--muted); font: inherit; font-size: 13px; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.connect-tabs button.active { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.connect-code { position: relative; margin-top: 8px; }
+.connect-code pre { margin: 0; background: #1f2933; color: #e6edf3; border-radius: 8px; padding: 12px 76px 12px 12px; font-size: 12.5px; line-height: 1.5; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+.connect-code .connect-copy { position: absolute; top: 8px; right: 8px; background: #2e3a46; color: #e6edf3; border-color: #46525e; }
+.connect textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: inherit; font-size: 15px; line-height: 1.45; color: var(--ink); background: var(--panel); resize: vertical; margin-bottom: 8px; }
+.connect textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }

@@ -64,6 +64,8 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api/parts': env.MCP_HTTP_URL || 'http://localhost:8000',
         '/api/design': env.MCP_HTTP_URL || 'http://localhost:8000',
+        '/api/connect': env.MCP_HTTP_URL || 'http://localhost:8000',
+        '/api/my-projects': env.MCP_HTTP_URL || 'http://localhost:8000',
       },
     },
   }

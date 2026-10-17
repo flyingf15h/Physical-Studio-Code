@@ -21,6 +21,8 @@ def top_image(part: dict, parts_dir: Path) -> Image.Image | None:
     top = (part.get("appearance") or {}).get("top")
     if not top:
         return None
+    if top.get("pil") is not None:  # a photo found online for this design (looks.py)
+        return top["pil"]
     if top.get("image"):
         path = parts_dir / top["image"]
         return Image.open(path).convert("RGB") if path.exists() else None

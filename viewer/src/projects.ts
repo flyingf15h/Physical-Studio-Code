@@ -1,6 +1,7 @@
 // Projects on screen 1: the ready-made guides that ship with the viewer (public/<folder>), and the
-// designs this browser has opened a guide for ("Your projects"). There are no accounts, so your
-// projects live in localStorage: per browser, and the page still works when storage is blocked.
+// designs this browser has opened a guide for ("Your projects"), plus the guides the visitor's own
+// AI exported with their key (GET /api/my-projects). The opened ones and the key live in
+// localStorage: per browser, and the page still works when storage is blocked.
 
 export interface Project {
   design: string // ?design= value: a public/ folder or "out/<job id>"
@@ -24,6 +25,24 @@ export const READY_MADE: Project[] = [
 ]
 
 const KEY = 'physical-studio:projects'
+const CONNECT_KEY = 'physical-studio:key' // the personal MCP key from POST /api/connect
+
+export function savedKey(): string | null {
+  try {
+    return localStorage.getItem(CONNECT_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function saveKey(key: string) {
+  try {
+    localStorage.setItem(CONNECT_KEY, key)
+  } catch {
+    // storage blocked: the key is shown once, so the visitor can copy it
+  }
+}
+
 const MAX = 30
 
 export const thumbnail = (design: string) => `/${design}/design.png`

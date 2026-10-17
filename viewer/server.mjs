@@ -59,7 +59,9 @@ function sendFile(res, file, cache) {
 }
 
 function inside(dir, urlPath) {
-  const file = path.join(dir, decodeURIComponent(urlPath))
+  const rel = decodeURIComponent(urlPath)
+  if (rel.split('/').some((part) => part.startsWith('.'))) return null // e.g. out/.accounts: never served
+  const file = path.join(dir, rel)
   return file.startsWith(dir + path.sep) && fs.existsSync(file) && fs.statSync(file).isFile() ? file : null
 }
 

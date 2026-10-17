@@ -19,6 +19,13 @@
 	handle /api/design* {
 		reverse_proxy mcp:8000
 	}
+	# Personal keys for visitors' own AI, and the guides each key exported (accounts.py).
+	handle /api/connect {
+		reverse_proxy mcp:8000
+	}
+	handle /api/my-projects {
+		reverse_proxy mcp:8000
+	}
 
 	# Circuit Studio (Streamlit). It needs websockets, which reverse_proxy passes through.
 	redir /studio /studio/

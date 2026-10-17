@@ -84,3 +84,18 @@ export const startDesign = (prompt: string, inputs: DesignInputs = {}) =>
   })
 
 export const getDesign = (id: string) => call<DesignJob>(`/api/design/${encodeURIComponent(id)}`)
+
+/** A personal key for the visitor's own AI (POST /api/connect, accounts.py) and the MCP address. */
+export const connectKey = () => call<{ key: string; mcp_url: string }>('/api/connect', { method: 'POST' })
+
+export interface ExportedProject {
+  design: string // "out/<folder>"
+  title: string
+  prompt?: string
+  steps?: number
+  at: number // seconds
+}
+
+/** Guides the visitor's AI exported with their key, newest first. */
+export const listMyProjects = (key: string) =>
+  call<ExportedProject[]>('/api/my-projects', { headers: { Authorization: `Bearer ${key}` } })

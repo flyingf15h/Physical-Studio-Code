@@ -1,26 +1,33 @@
-"""FastMCP server exposing the design tools. One design per server process.
+"""FastMCP server exposing the design tools. One design per caller (stdio: one; HTTP: one per key).
 
 Run with `uv run physical-studio-mcp` (stdio). Set PHYSICAL_STUDIO_PARTS to use another
 parts folder and PHYSICAL_STUDIO_OUT to change where exports go.
 
 Hosted (deploy/): MCP_TRANSPORT=http serves streamable HTTP on MCP_PORT (8000) at /mcp and
-requires `Authorization: Bearer $MCP_TOKEN`. MCP_ALLOWED_HOSTS lists the public host names.
+requires `Authorization: Bearer <key>`: the team's MCP_TOKEN or a personal key from POST /api/connect
+(accounts.py). MCP_ALLOWED_HOSTS lists the public host names; PUBLIC_URL is the site the guide links
+in export results point at.
 """
 
 from __future__ import annotations
 
 import os
 import re
+import time
 from pathlib import Path
 from typing import Literal
 
 import numpy as np
 
 from fastmcp import FastMCP
-from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
+from fastmcp.server.dependencies import get_access_token
 from fastmcp.utilities.types import Image
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from . import checks, library
+from .accounts import Accounts, KeyVerifier, key_hash, owner_of
+from .looks import fetch_image
 from .design import Design, EnclosureSpec, Placement, Step, Wire
 from .export import default_steps, export_design
 from .geometry import aabb, apply, build, envelope, placement_matrix, wire_piece
@@ -55,6 +62,7 @@ class Studio:
         self.parts_dir = parts_dir
         self.out_dir = out_dir
         self.design = Design()
+        self.looks: dict[str, dict] = {}  # part id -> {"appearance": {...}, "image": PIL image}, from set_part_look
 
     def library(self) -> dict[str, dict]:
         # Reloaded on every call so edits to parts/*.json show up without a restart.
@@ -64,8 +72,16 @@ class Studio:
         return library.get_part(self.library(), part_id)
 
     def parts_used(self) -> dict[str, dict]:
+        """Library entries of the parts placed, with this design's looks (set_part_look) laid over them."""
         lib = self.library()
-        return {p.part_id: library.get_part(lib, p.part_id) for p in self.design.placements.values()}
+        used = {p.part_id: library.get_part(lib, p.part_id) for p in self.design.placements.values()}
+        for pid, look in self.looks.items():
+            if pid in used:
+                appearance = {**(used[pid].get("appearance") or {}), **look["appearance"]}
+                if look.get("image") is not None:
+                    appearance["top"] = {"pil": look["image"]}
+                used[pid] = {**used[pid], "appearance": appearance}
+        return used
 
     def build(self):
         return build(self.design, self.parts_used(), self.parts_dir)
@@ -74,7 +90,45 @@ class Studio:
 
     def new_design(self, title: str, prompt: str = "") -> dict:
         self.design = Design(title=title, prompt=prompt)
+        self.looks = {}
         return {"title": title, "parts_dir": str(self.parts_dir)}
+
+    def set_part_look(
+        self,
+        part_id: str,
+        color: str | None = None,
+        metallic: float | None = None,
+        roughness: float | None = None,
+        top_image_url: str | None = None,
+        source: str | None = None,
+    ) -> dict:
+        part = self.part(part_id)
+        look = self.looks.get(part_id, {"appearance": {}, "image": None})
+        appearance = dict(look["appearance"])
+        if color is not None:
+            appearance["color"] = hex_color(color)
+        for key, value in (("metallic", metallic), ("roughness", roughness)):
+            if value is not None:
+                if not 0 <= value <= 1:
+                    raise ValueError(f"{key} must be between 0 and 1")
+                appearance[key] = float(value)
+        if source:
+            appearance["source"] = source[:300]
+        image = look.get("image")
+        if top_image_url:
+            image = fetch_image(top_image_url)
+        self.looks[part_id] = {"appearance": appearance, "image": image}
+        sx, sy = part["body"]["size"][:2]
+        out = {"part_id": part_id, "appearance": appearance, "top_image": None}
+        if image is not None:
+            ratio, want = image.size[0] / image.size[1], sx / sy
+            out["top_image"] = {"pixels": list(image.size), "aspect": round(ratio, 2), "part_aspect": round(want, 2)}
+            if abs(ratio - want) / want > 0.25:
+                out["warning"] = (
+                    f"the photo is {ratio:.2f}:1 but the part's top is {want:.2f}:1 (x:y); it will look stretched. "
+                    "Use a straight-on top view, or rotate it to match the part's x axis."
+                )
+        return out
 
     def search_parts(self, query: str = "", category: str | None = None) -> list[dict]:
         return library.search_parts(self.library(), query, category)
@@ -303,10 +357,24 @@ HTTP = os.environ.get("MCP_TRANSPORT", "stdio") == "http"
 if HTTP and not os.environ.get("MCP_TOKEN"):
     raise SystemExit("MCP_TRANSPORT=http needs MCP_TOKEN (the bearer token clients must send)")
 
-studio = Studio()
+accounts = Accounts(OUT_DIR)
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://physicalstudio.work").rstrip("/")
+_studios: dict[str, Studio] = {}
+
+
+def caller() -> str:
+    token = get_access_token()
+    return owner_of(token.client_id if token else None)
+
+
+def current() -> Studio:
+    """The calling key's own workspace, so visitors designing at the same time don't collide."""
+    return _studios.setdefault(caller(), Studio())
+
+
 mcp = FastMCP(
     "physical-studio",
-    auth=StaticTokenVerifier({os.environ["MCP_TOKEN"]: {"client_id": "physical-studio", "scopes": []}}) if HTTP else None,
+    auth=KeyVerifier(os.environ["MCP_TOKEN"], accounts) if HTTP else None,
     instructions=(
         "Design hardware projects out of real, measured parts. Never invent dimensions: look parts up "
         "with search_parts/get_part and use their numbers. Units are mm, +Z up, rotations in degrees "
@@ -324,19 +392,19 @@ mcp = FastMCP(
 @mcp.tool
 def new_design(title: str, prompt: str = "") -> dict:
     """Start a new, empty design. prompt is the user's request, kept for the assembly guide."""
-    return studio.new_design(title, prompt)
+    return current().new_design(title, prompt)
 
 
 @mcp.tool
 def search_parts(query: str = "", category: str | None = None) -> list[dict]:
     """Search the measured parts library. category: board, input, output, fastener or misc."""
-    return studio.search_parts(query, category)
+    return current().search_parts(query, category)
 
 
 @mcp.tool
 def get_part(part_id: str) -> dict:
     """Full library entry for a part: body size, envelope, mounting holes, connectors, keep-outs (mm)."""
-    return studio.get_part(part_id)
+    return current().get_part(part_id)
 
 
 @mcp.tool
@@ -355,27 +423,27 @@ def place_part(
     part its own name). color: how it renders, the same names as add_wire or #rrggbb; set it to match
     the prompt (a red button, a blue LED) or leave it out for the category default. Returns the
     placement id and its envelope in the design frame."""
-    return studio.place_part(part_id, position, rotation, id, mount, name, color)
+    return current().place_part(part_id, position, rotation, id, mount, name, color)
 
 
 @mcp.tool
 def add_fastener(part_id: str, target: str, hole: str, id: str | None = None) -> dict:
     """Put a fastener (e.g. an M3 screw) into mounting hole `hole` of placement `target`."""
-    return studio.add_fastener(part_id, target, hole, id)
+    return current().add_fastener(part_id, target, hole, id)
 
 
 @mcp.tool
 def move_part(id: str, position: Vec3 | None = None, rotation: Vec3 | None = None) -> dict:
     """Move or rotate a placed part (same frame as place_part); its screws move with it. Use it to fix
     what check_interference / check_clearance report, then check again."""
-    return studio.move_part(id, position, rotation)
+    return current().move_part(id, position, rotation)
 
 
 @mcp.tool
 def remove_part(id: str) -> dict:
     """Remove a placed part, screw or wire. Removing a part also removes its screws and wires; removed
     ids are dropped from the steps (steps left empty are deleted)."""
-    return studio.remove_part(id)
+    return current().remove_part(id)
 
 
 @mcp.tool
@@ -394,7 +462,7 @@ def add_wire(
     ground, red for power). inline: a component spliced into the wire, e.g. "220 ohm resistor" for an LED.
     Returns the wire id (use it in add_step) and its routed length in mm. Wires are drawn as curves and
     are not part of the interference checks."""
-    return studio.add_wire(from_placement, from_pin, to_placement, to_pin, color, inline, label, id)
+    return current().add_wire(from_placement, from_pin, to_placement, to_pin, color, inline, label, id)
 
 
 @mcp.tool
@@ -412,7 +480,7 @@ def create_enclosure(
     It is sized automatically from the parts' envelopes plus `margin`. Defaults: wall 2, floor 2,
     lid_thickness 2, margin 3, top_clearance 2, standoff_min 5, pilot_hole 2.5 (M3 self-tapping), lid true.
     Returns the outer and inner sizes and any warnings (e.g. a connector too far from its wall)."""
-    return studio.create_enclosure(
+    return current().create_enclosure(
         wall=wall,
         floor=floor,
         lid_thickness=lid_thickness,
@@ -440,13 +508,13 @@ def add_step(
     tools: [{name, for}]. callouts: [{text, target, at?}]. dimensions: [{from, to, label}].
     check: what a correct result looks like on camera. Format: docs/steps-format.md.
     If no steps are added, export generates a default sequence."""
-    return studio.add_step(title, text, add, motion, tools, callouts, dimensions, check)
+    return current().add_step(title, text, add, motion, tools, callouts, dimensions, check)
 
 
 @mcp.tool
 def describe_design() -> dict:
     """Current placements, enclosure size and steps."""
-    return studio.describe_design()
+    return current().describe_design()
 
 
 @mcp.tool
@@ -454,14 +522,14 @@ def check_interference() -> dict:
     """Solid-vs-solid overlap check between every pair of pieces (parts, screws, base, lid), plus screws
     that are too long for their standoff. Intended contacts (board on standoffs, screw in standoff) are
     listed under `expected`, not as problems."""
-    return studio.check_interference()
+    return current().check_interference()
 
 
 @mcp.tool
 def check_clearance(min_gap: float = 1.0, bed: Vec3 | None = None) -> dict:
     """Pairs of pieces closer than min_gap mm (without touching), connector cutouts that couldn't be made,
     and whether the case fits the print bed (default 220 x 220 x 250 mm)."""
-    return studio.check_clearance(min_gap, bed)
+    return current().check_clearance(min_gap, bed)
 
 
 @mcp.tool
@@ -474,14 +542,43 @@ def render_preview(
     """Render the design to a PNG so you can check it. Each piece is labelled with its placement id and
     there is a 10 mm scale bar. step: show the assembly as of that step (1-based) with its new parts
     highlighted. hide: placement ids to leave out, e.g. ["lid"] to look inside."""
-    return Image(data=studio.render_preview(view, step, exploded, hide), format="png")
+    return Image(data=current().render_preview(view, step, exploded, hide), format="png")
+
+
+@mcp.tool
+def set_part_look(
+    part_id: str,
+    color: str | None = None,
+    metallic: float | None = None,
+    roughness: float | None = None,
+    top_image_url: str | None = None,
+    source: str | None = None,
+) -> dict:
+    """Make a part look like the real one in the guide. Look the part up online first (manufacturer or
+    shop page) and pass what you find: color (#rrggbb, e.g. the PCB's solder mask or the metal),
+    metallic and roughness (0..1: bare steel about 0.9 / 0.3, a PCB 0 / 0.5), top_image_url (the
+    image file itself, a straight-on photo of the part's top; the background is trimmed) and source
+    (the page you took it from). Applies to every copy of the part in this design."""
+    return current().set_part_look(part_id, color, metallic, roughness, top_image_url, source)
 
 
 @mcp.tool
 def export(formats: list[Literal["glb", "stl", "step"]] = ["glb", "stl", "step"], out_dir: str | None = None) -> dict:
     """Write the design: glb + steps JSON (for the viewer), stl (base and lid, for printing), step
-    (whole assembly). Returns the file paths and any build warnings."""
-    return studio.export(list(formats), out_dir)
+    (whole assembly). Returns the file paths, any build warnings and, on the hosted server, guide_url:
+    the link to give the user, where their assembly guide opens."""
+    s, who = current(), caller()
+    if not HTTP:
+        return s.export(list(formats), out_dir)
+    # Hosted: always under the shared designs folder, one folder per key and title.
+    slug = re.sub(r"[^a-z0-9]+", "-", s.design.title.lower()).strip("-") or "design"
+    folder = slug if who == "team" else f"{slug}-{who[:6]}"
+    result = s.export(list(formats), str(OUT_DIR / folder))
+    design = f"out/{folder}"
+    accounts.record(who, {"design": design, "title": s.design.title, "prompt": s.design.prompt, "steps": len(s.design.steps)})
+    result["files"] = [Path(f).name for f in result["files"]]
+    result["guide_url"] = f"{PUBLIC_URL}/guide?design={design}"
+    return result
 
 
 # Web app backend (screen 1 parts list, screen 2 design jobs); only reachable over HTTP.
@@ -489,6 +586,31 @@ from .jobs import JobManager, register_routes  # noqa: E402
 
 jobs = JobManager(OUT_DIR, Studio, mcp.list_tools)
 register_routes(mcp, jobs, PARTS_DIR)
+
+CONNECTS_PER_HOUR = int(os.environ.get("CONNECTS_PER_HOUR", "5"))
+_connects: dict[str, list[float]] = {}
+
+
+@mcp.custom_route("/api/connect", methods=["POST"])
+async def connect(request: Request):
+    """A personal key for the visitor's own AI, plus the MCP address to use it with."""
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    now = time.time()
+    recent = [t for t in _connects.get(ip, []) if now - t < 3600]
+    if len(recent) >= CONNECTS_PER_HOUR:
+        return JSONResponse({"error": "Too many keys from this address; try again in an hour."}, status_code=429)
+    _connects[ip] = [*recent, now]
+    return JSONResponse({"key": accounts.mint(), "mcp_url": f"{PUBLIC_URL}/mcp"})
+
+
+@mcp.custom_route("/api/my-projects", methods=["GET"])
+async def my_projects(request: Request):
+    """Guides exported with the key in Authorization: Bearer <key>, newest first."""
+    auth = request.headers.get("authorization", "")
+    key = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    if not accounts.known(key):
+        return JSONResponse({"error": "Unknown key."}, status_code=401)
+    return JSONResponse(accounts.projects(key_hash(key)[:12]))
 
 
 def main() -> None:
