@@ -138,6 +138,37 @@ class Studio:
         )
         return {"id": placement_id, "position": r3(position)}
 
+    def move_part(self, id: str, position: Vec3 | None = None, rotation: Vec3 | None = None) -> dict:
+        p = self.design.placements.get(id)
+        if p is None or p.kind != "part":
+            parts = [k for k, v in self.design.placements.items() if v.kind == "part"]
+            raise ValueError(f"no placed part {id!r}; parts: {parts} (to move a screw, remove it and add it again)")
+        if position is not None:
+            p.position = tuple(float(v) for v in position)
+        if rotation is not None:
+            p.rotation = tuple(float(v) for v in rotation)
+        for f in [f for f in self.design.placements.values() if f.attached_to == id]:  # screws ride along
+            del self.design.placements[f.id]
+            self.add_fastener(f.part_id, id, f.hole, f.id)
+        lo, hi = aabb(placement_matrix(p.position, p.rotation), *envelope(self.part(p.part_id)))
+        return {"id": id, "position": r3(p.position), "rotation": r3(p.rotation), "envelope": {"min": r3(lo), "max": r3(hi)}}
+
+    def remove_part(self, id: str) -> dict:
+        if id in self.design.wires:
+            removed = [id]
+        elif id in self.design.placements:
+            removed = [id, *(k for k, v in self.design.placements.items() if v.attached_to == id)]
+            removed += [k for k, w in self.design.wires.items() if w.a[0] in removed or w.b[0] in removed]
+        else:
+            raise ValueError(f"nothing called {id!r}; ids: {self.design.all_ids()}")
+        for k in removed:
+            self.design.placements.pop(k, None)
+            self.design.wires.pop(k, None)
+        for step in self.design.steps:
+            step.add = [k for k in step.add if k not in removed]
+        self.design.steps = [st for st in self.design.steps if st.add]
+        return {"removed": removed}
+
     def pin(self, placement_id: str, pin_id: str) -> dict:
         if placement_id not in self.design.placements:
             raise ValueError(f"no placement {placement_id!r}; placed: {list(self.design.placements)}")
@@ -320,6 +351,20 @@ def place_part(
 def add_fastener(part_id: str, target: str, hole: str, id: str | None = None) -> dict:
     """Put a fastener (e.g. an M3 screw) into mounting hole `hole` of placement `target`."""
     return studio.add_fastener(part_id, target, hole, id)
+
+
+@mcp.tool
+def move_part(id: str, position: Vec3 | None = None, rotation: Vec3 | None = None) -> dict:
+    """Move or rotate a placed part (same frame as place_part); its screws move with it. Use it to fix
+    what check_interference / check_clearance report, then check again."""
+    return studio.move_part(id, position, rotation)
+
+
+@mcp.tool
+def remove_part(id: str) -> dict:
+    """Remove a placed part, screw or wire. Removing a part also removes its screws and wires; removed
+    ids are dropped from the steps (steps left empty are deleted)."""
+    return studio.remove_part(id)
 
 
 @mcp.tool

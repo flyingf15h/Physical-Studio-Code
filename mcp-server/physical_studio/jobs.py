@@ -65,13 +65,14 @@ Rules:
 - Parts that poke through the lid (buttons, LEDs) have a lid_mount: place them so their lid mounts
   are level; create_enclosure warns how far to raise any that are low.
 - Screw each board's mounting holes with add_fastener, unless check_interference shows a screw
-  head clashing with a component; then leave that hole out.
+  head clashing with a component; then remove_part that screw.
 - Wire every electrical connection with add_wire using pin ids from get_part (black for ground,
   red for power, an inline "220 ohm resistor" on LED anodes). Daisy-chain grounds when the board
   has fewer ground pins than parts need.
 - Give every placed part a clear name ("Red LED", "Start button").
 - Loop until it's clean: check_interference, check_clearance and render_preview (iso with the lid
-  hidden, and top). Fix what they report and check again.
+  hidden, and top). Fix what they report with move_part (screws move with their board) or
+  remove_part (e.g. a screw whose head clashes), and check again.
 - Then write the guide with add_step: base, board, screws, parts under the lid, wiring (one step
   per part), close the lid. Each step needs a one-sentence check line a camera can verify.
 - Finish with export(["glb", "stl", "step"]). Your final message: two sentences on what you built.

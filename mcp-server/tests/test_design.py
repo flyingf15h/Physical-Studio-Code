@@ -215,3 +215,23 @@ def test_connector_clearance_overrides_the_cutout_clearance(studio):
     # Plungers are 7 mm wide: the default 0.5 mm per side opens to 8 mm, 0.1 mm to 7.2 mm.
     assert not lid.is_inside(Vector(26 + 3.8, 26, 24.5))
     assert lid.is_inside(Vector(56 + 3.8, 26, 24.5))
+
+
+def test_move_part_takes_its_screws_and_remove_part_cleans_up(studio):
+    shutil.copy(REPO / "parts" / "led-5mm.json", studio.parts_dir)
+    studio.place_part("led-5mm", (30, 20, 20), id="led")
+    studio.add_fastener("test-m3-screw", "uno", "h1", id="screw-h1")
+    studio.add_fastener("test-m3-screw", "uno", "h2", id="screw-h2")
+    studio.add_wire("led", "anode", "uno", "d8", id="w-led")
+    studio.add_step("Board", "Drop in the Uno.", ["uno", "screw-h1", "screw-h2"])
+    studio.add_step("LED", "Add the LED.", ["led", "w-led"])
+    before = studio.design.placements["screw-h1"].position
+    studio.move_part("uno", (5, 0, 0))
+    after = studio.design.placements["screw-h1"].position
+    assert after[0] == pytest.approx(before[0] + 5) and after[1:] == before[1:]
+    assert studio.remove_part("screw-h2") == {"removed": ["screw-h2"]}
+    assert studio.design.steps[0].add == ["uno", "screw-h1"]
+    assert studio.remove_part("led")["removed"] == ["led", "w-led"]
+    assert [s.title for s in studio.design.steps] == ["Board"]  # the LED step was left empty
+    with pytest.raises(ValueError, match="remove it and add it again"):
+        studio.move_part("screw-h1", (0, 0, 0))
