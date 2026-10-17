@@ -43,6 +43,16 @@ class Placement:
 
 
 @dataclass
+class Wire:
+    id: str
+    a: tuple[str, str]  # (placement id, pin id)
+    b: tuple[str, str]
+    color: str = "#d04040"
+    inline: str | None = None  # a component spliced into the wire, e.g. "220 ohm resistor"
+    label: str | None = None
+
+
+@dataclass
 class Step:
     title: str
     text: str
@@ -60,27 +70,31 @@ class Design:
     prompt: str = ""
     enclosure: EnclosureSpec | None = None
     placements: dict[str, Placement] = field(default_factory=dict)
+    wires: dict[str, Wire] = field(default_factory=dict)
     steps: list[Step] = field(default_factory=list)
 
     def new_id(self, base: str) -> str:
         base = re.sub(r"[^a-z0-9_-]+", "-", base.lower()).strip("-") or "part"
-        if base not in self.placements and base not in RESERVED_IDS:
+        if not self.taken(base):
             return base
         n = 2
-        while f"{base}-{n}" in self.placements:
+        while self.taken(f"{base}-{n}"):
             n += 1
         return f"{base}-{n}"
+
+    def taken(self, pid: str) -> bool:
+        return pid in self.placements or pid in self.wires or pid in RESERVED_IDS
 
     def check_new_id(self, placement_id: str) -> None:
         if not ID_PATTERN.match(placement_id):
             raise ValueError(f"id {placement_id!r} must be lowercase letters, digits, '-' or '_'")
         if placement_id in RESERVED_IDS:
             raise ValueError(f"id {placement_id!r} is reserved for the enclosure")
-        if placement_id in self.placements:
-            raise ValueError(f"id {placement_id!r} is already placed")
+        if placement_id in self.placements or placement_id in self.wires:
+            raise ValueError(f"id {placement_id!r} is already used")
 
     def all_ids(self) -> list[str]:
         ids = list(self.placements)
         if self.enclosure:
             ids = ["base", *ids] + (["lid"] if self.enclosure.lid else [])
-        return ids
+        return ids + list(self.wires)

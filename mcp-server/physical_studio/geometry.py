@@ -12,10 +12,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
+import trimesh
 from build123d import Align, Box, Compound, Cylinder, Location, Part, import_step
 from OCP.gp import gp_Trsf
 
-from .design import Design, EnclosureSpec, Placement
+from .design import Design, EnclosureSpec, Placement, Wire
 
 MIN = (Align.MIN, Align.MIN, Align.MIN)
 FACE_NORMALS = {
@@ -36,6 +37,8 @@ CATEGORY_COLORS = {
     "misc": "#6a9955",
 }
 ENCLOSURE_COLORS = {"base": "#d9d9d9", "lid": "#f2f2f2"}
+WIRE_RADIUS = 0.75  # 22 AWG jumper with insulation
+INLINE_RADIUS = 1.3  # a 1/4 W resistor body spliced into the wire
 
 
 @dataclass
@@ -44,11 +47,17 @@ class BuiltPiece:
     kind: str
     part_id: str | None
     name: str
-    shape: Part  # in the piece's local frame
+    shape: Part | None  # in the piece's local frame; None for mesh-only pieces (wires)
     matrix: np.ndarray  # local frame -> design frame
     color: str
     position: tuple[float, float, float] = (0.0, 0.0, 0.0)
     rotation: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    mesh: trimesh.Trimesh | None = None  # ready-made geometry, used instead of tessellating shape
+    extra: dict = field(default_factory=dict)  # kind-specific fields for the steps JSON
+    category: str | None = None  # library category for parts
+
+    def local_mesh(self, tolerance: float = 0.05, angular: float = 0.3) -> trimesh.Trimesh:
+        return self.mesh if self.mesh is not None else mesh_of(self.shape, tolerance, angular)
 
 
 @dataclass
@@ -62,10 +71,23 @@ class BuiltDesign:
     def bounds(self) -> tuple[list[float], list[float]]:
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
         for piece in self.pieces.values():
-            bb = piece.shape.bounding_box()
-            a, b = aabb(piece.matrix, np.array(tuple(bb.min)), np.array(tuple(bb.max)))
+            if piece.shape is None:
+                bmin, bmax = piece.mesh.bounds
+            else:
+                bb = piece.shape.bounding_box()
+                bmin, bmax = np.array(tuple(bb.min)), np.array(tuple(bb.max))
+            a, b = aabb(piece.matrix, bmin, bmax)
             lo, hi = np.minimum(lo, a), np.maximum(hi, b)
         return [round(float(v), 3) for v in lo], [round(float(v), 3) for v in hi]
+
+
+def mesh_of(shape, tolerance: float = 0.05, angular: float = 0.3) -> trimesh.Trimesh:
+    vertices, triangles = shape.tessellate(tolerance, angular)
+    return trimesh.Trimesh(
+        vertices=np.array([tuple(v) for v in vertices], dtype=float),
+        faces=np.array(triangles, dtype=np.int64),
+        process=False,
+    )
 
 
 # --- transforms -------------------------------------------------------------------------
@@ -227,12 +249,14 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
             color=CATEGORY_COLORS.get(part.get("category", "misc"), "#999999"),
             position=tuple(p.position),
             rotation=tuple(p.rotation),
+            category=part.get("category"),
         )
 
     built = BuiltDesign(pieces={}, warnings=warnings)
     spec = design.enclosure
     if spec is None or not design.placements:
         built.pieces = pieces
+        add_wires(built, design, parts)
         return built
 
     cavity_lo, cavity_hi = enclosure_frame(design, parts, spec, warnings)
@@ -274,7 +298,91 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
     built.pieces.update(pieces)
     if lid is not None:
         built.pieces["lid"] = BuiltPiece("lid", "enclosure", None, "Case lid", lid, identity, ENCLOSURE_COLORS["lid"])
+    add_wires(built, design, parts)
     return built
+
+
+# --- wires ------------------------------------------------------------------------------
+
+
+def pin_frame(design: Design, parts: dict[str, dict], placement_id: str, pin_id: str):
+    """Design-frame position and outward direction of a part's pin."""
+    p = design.placements[placement_id]
+    pin = next(q for q in parts[p.part_id].get("pins", []) if q["id"] == pin_id)
+    m = placement_matrix(p.position, p.rotation)
+    direction = m[:3, :3] @ np.array(pin.get("direction", [0, 0, 1]), dtype=float)
+    return apply(m, pin["position"]), direction / (np.linalg.norm(direction) or 1)
+
+
+def wire_path(a, da, b, db, samples: int = 48) -> np.ndarray:
+    """Cubic Bezier that leaves each pin along its direction, like a jumper bent by hand."""
+    reach = float(np.clip(0.35 * np.linalg.norm(b - a), 8.0, 40.0))
+    c1, c2 = a + da * reach, b + db * reach
+    t = np.linspace(0, 1, samples)[:, None]
+    return (1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * c1 + 3 * (1 - t) * t**2 * c2 + t**3 * b
+
+
+def tube(path: np.ndarray, radii: np.ndarray, sides: int = 10) -> trimesh.Trimesh:
+    """Tube mesh along a polyline, with parallel-transported rings so it doesn't twist."""
+    tangents = np.gradient(path, axis=0)
+    tangents /= np.linalg.norm(tangents, axis=1, keepdims=True)
+    helper = np.array([0.0, 0.0, 1.0]) if abs(tangents[0][2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    normal = np.cross(tangents[0], helper)
+    normal /= np.linalg.norm(normal)
+    angles = np.linspace(0, 2 * np.pi, sides, endpoint=False)
+    rings = []
+    for i, (point, tangent) in enumerate(zip(path, tangents)):
+        if i:
+            normal = normal - tangent * (normal @ tangent)
+            normal /= np.linalg.norm(normal)
+        binormal = np.cross(tangent, normal)
+        rings.append(point + radii[i] * (np.outer(np.cos(angles), normal) + np.outer(np.sin(angles), binormal)))
+    vertices = np.concatenate(rings + [path[:1], path[-1:]])
+    faces = []
+    n = len(path)
+    for i in range(n - 1):
+        for j in range(sides):
+            a, b = i * sides + j, i * sides + (j + 1) % sides
+            c, d = a + sides, b + sides
+            faces += [[a, b, d], [a, d, c]]
+    start, end = n * sides, n * sides + 1
+    for j in range(sides):
+        faces.append([start, (j + 1) % sides, j])
+        faces.append([end, (n - 1) * sides + j, (n - 1) * sides + (j + 1) % sides])
+    return trimesh.Trimesh(vertices=vertices, faces=np.array(faces), process=False)
+
+
+def wire_piece(design: Design, parts: dict[str, dict], wire: Wire) -> BuiltPiece:
+    a, da = pin_frame(design, parts, *wire.a)
+    b, db = pin_frame(design, parts, *wire.b)
+    path = wire_path(a, da, b, db)
+    radii = np.full(len(path), WIRE_RADIUS)
+    if wire.inline:
+        middle = len(path) // 2
+        radii[middle - 3 : middle + 3] = INLINE_RADIUS
+    length = float(np.linalg.norm(np.diff(path, axis=0), axis=1).sum())
+    names = [design.placements[x].name for x, _ in (wire.a, wire.b)]
+    return BuiltPiece(
+        id=wire.id,
+        kind="wire",
+        part_id=None,
+        name=wire.label or f"Wire {names[0]} {wire.a[1]} to {names[1]} {wire.b[1]}",
+        shape=None,
+        matrix=np.eye(4),
+        color=wire.color,
+        mesh=tube(path, radii),
+        extra={
+            "from": {"placement": wire.a[0], "pin": wire.a[1]},
+            "to": {"placement": wire.b[0], "pin": wire.b[1]},
+            "length_mm": round(length, 1),
+            **({"inline": wire.inline} if wire.inline else {}),
+        },
+    )
+
+
+def add_wires(built: BuiltDesign, design: Design, parts: dict[str, dict]) -> None:
+    for wire in design.wires.values():
+        built.pieces[wire.id] = wire_piece(design, parts, wire)
 
 
 def add_standoffs(base: Part, p: Placement, part: dict, m: np.ndarray, spec: EnclosureSpec, floor_top: float, warnings):
@@ -334,6 +442,8 @@ def connector_cutout(p, conn, m, spec, cavity_lo, cavity_hi, outer_lo, outer_hi,
 def assembly(built: BuiltDesign) -> Compound:
     children = []
     for piece in built.pieces.values():
+        if piece.shape is None:
+            continue  # wires are flexible; they don't belong in the CAD assembly
         shape = piece.shape.moved(to_location(piece.matrix))
         shape.label = piece.id
         children.append(shape)

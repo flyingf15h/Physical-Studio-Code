@@ -12,7 +12,7 @@ import {
   type LiveServerMessage,
   type Session,
 } from '@google/genai'
-import type { StepsDoc } from '../steps'
+import type { Step, StepsDoc } from '../steps'
 import { MicCapture, PcmPlayer, toBase64 } from './audio'
 
 const FRAME_INTERVAL_MS = 1000 // Live API takes at most 1 frame per second
@@ -70,9 +70,23 @@ const TOOLS: FunctionDeclaration[] = [
   },
 ]
 
+/** "Arduino Uno D8 -> Red LED ANODE (220 ohm resistor inline)" for each wire a step adds. */
+function wiring(doc: StepsDoc, step: Step): string[] {
+  const byId = new Map(doc.placements.map((p) => [p.id, p]))
+  const end = (r?: { placement: string; pin: string }) =>
+    r ? `${byId.get(r.placement)?.name ?? r.placement} ${r.pin.toUpperCase()}` : '?'
+  return step.add
+    .map((id) => byId.get(id))
+    .filter((p) => p?.kind === 'wire')
+    .map((w) => `${end(w!.from)} -> ${end(w!.to)}${w!.inline ? ` (${w!.inline} inline)` : ''}`)
+}
+
 function systemPrompt(doc: StepsDoc): string {
   const steps = doc.steps
-    .map((s, i) => `${i + 1}. ${s.title}: ${s.text}${s.check ? ` (Done when: ${s.check})` : ''}`)
+    .map((s, i) => {
+      const wires = wiring(doc, s)
+      return `${i + 1}. ${s.title}: ${s.text}${wires.length ? ` Wires: ${wires.join('; ')}.` : ''}${s.check ? ` (Done when: ${s.check})` : ''}`
+    })
     .join('\n')
   return `You are the assembly coach for "${doc.title}". You watch the builder's workbench through a camera
 and compare it with the expected result of the current step. The full guide:
@@ -86,7 +100,7 @@ How to work:
 - When the current step is clearly complete and matches its "Done when" line, call step_done with that
   step number, then congratulate in a few words and say what the next step is.
 - When you see a mistake (wrong part, wrong hole, wrong orientation, reversed polarity, missing screw,
-  port not lined up with its opening), call flag_problem and say the problem and the fix in one or two
+  port not lined up with its opening, a wire on the wrong pin: count header pins from the labelled end), call flag_problem and say the problem and the fix in one or two
   short sentences.
 - When nothing changed or the step is still in progress, call no_change and say nothing.
 - If the view is unclear, ask the builder to move the camera or hold the part closer. Never guess that
@@ -190,6 +204,7 @@ export class StepTracker {
       `Now on step ${this.step + 1} of ${this.doc.steps.length}: ${s.title}. ${s.text}` +
       (s.check ? ` Done when: ${s.check}.` : '') +
       (s.tools?.length ? ` Tools: ${s.tools.map((t) => t.name).join(', ')}.` : '') +
+      (wiring(this.doc, s).length ? ` Connections to check: ${wiring(this.doc, s).join('; ')}.` : '') +
       (image ? ' The image is the expected result of this step (CAD render).' : '') +
       (speak ? ' Briefly tell the builder what to do.' : '')
     this.events.problem(null)

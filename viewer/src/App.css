@@ -67,3 +67,9 @@
 @media (max-width: 760px) {
   .tracker { top: auto; bottom: 64px; right: 8px; width: min(260px, calc(100% - 16px)); }
 }
+
+.wires { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; max-height: 180px; overflow-y: auto; }
+.wires li { display: flex; gap: 8px; align-items: baseline; }
+.wires .swatch { flex: none; width: 14px; height: 4px; border-radius: 2px; transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(0, 0, 0, .15); }
+.wires em { color: var(--warn); font-style: normal; }
+.wires small { color: var(--muted); font-size: 12px; }

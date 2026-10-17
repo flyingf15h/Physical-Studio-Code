@@ -12,7 +12,6 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from .geometry import BuiltDesign
-from .export import mesh_of
 
 VIEWS = {
     # direction from the design towards the camera, design frame (+Z up)
@@ -66,7 +65,7 @@ def render(
     tris, owners = [], []
     for k, pid in enumerate(ids):
         piece = built.pieces[pid]
-        mesh = mesh_of(piece.shape, tolerance=0.1, angular=0.5)
+        mesh = piece.local_mesh(tolerance=0.1, angular=0.5)
         v = mesh.vertices @ piece.matrix[:3, :3].T + piece.matrix[:3, 3] + offsets.get(pid, 0)
         tris.append(v[mesh.faces])
         owners.append(np.full(len(mesh.faces), k))
@@ -129,14 +128,18 @@ def render(
             mask = owner_buf == k
             image[mask] = image[mask] * 0.55 + np.array([38, 198, 218]) * 0.45
 
-    # Outlines where the part changes or the surface turns a corner.
+    # Outlines where the part changes or the surface turns a corner (not along wires: a tube's
+    # facets would all count as corners).
+    smooth = np.array([built.pieces[pid].kind == "wire" for pid in ids])
+    on_smooth = hit & smooth[np.where(hit, owner_buf, 0)]
     edges = np.zeros((H, W), dtype=bool)
     for axis in (0, 1):
         o2 = np.roll(owner_buf, -1, axis=axis)
         n2 = np.roll(normal_buf, -1, axis=axis)
         z2 = np.roll(zbuf, -1, axis=axis)
         step_edge = np.abs(np.where(hit, zbuf, 0) - np.where(o2 >= 0, z2, 0)) > 0.4  # depth jump, mm
-        crease = (owner_buf != o2) | ((normal_buf * n2).sum(axis=2) < 0.85) | step_edge
+        corner = ((normal_buf * n2).sum(axis=2) < 0.85) & ~on_smooth
+        crease = (owner_buf != o2) | corner | (step_edge & ~on_smooth)
         crease &= hit | (o2 >= 0)
         edges |= crease
     image[edges] = EDGE
@@ -147,6 +150,8 @@ def render(
 
     if labels:
         for k, pid in enumerate(ids):
+            if smooth[k]:
+                continue  # wires: colour identifies them, labels would bury the parts
             mask = owner_buf == k
             if mask.sum() < 30 * SUPERSAMPLE**2:
                 continue  # hidden or tiny

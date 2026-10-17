@@ -2,14 +2,24 @@
 
 export type Vec3 = [number, number, number]
 
+export interface PinRef {
+  placement: string
+  pin: string
+}
+
 export interface Placement {
   id: string
-  kind: 'enclosure' | 'part' | 'fastener'
+  kind: 'enclosure' | 'part' | 'fastener' | 'wire'
   part: string | null
   name: string
   position: Vec3
   rotation: Vec3
   color?: string
+  // wires only
+  from?: PinRef
+  to?: PinRef
+  length_mm?: number
+  inline?: string
 }
 
 export interface Motion {

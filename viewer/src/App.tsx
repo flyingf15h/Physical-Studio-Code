@@ -85,6 +85,10 @@ export default function App() {
   }
 
   const current = source?.doc.steps[step]
+  const byId = new Map(source?.doc.placements.map((p) => [p.id, p]) ?? [])
+  const wires = (current?.add ?? []).map((id) => byId.get(id)).filter((p) => p?.kind === 'wire')
+  const end = (ref?: { placement: string; pin: string }) =>
+    ref ? `${byId.get(ref.placement)?.name ?? ref.placement} ${ref.pin.toUpperCase()}` : '?'
 
   return (
     <div className="app" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
@@ -145,6 +149,20 @@ export default function App() {
                 ))}
               </ul>
             ) : null}
+            {wires.length > 0 && (
+              <ul className="wires">
+                {wires.map((w) => (
+                  <li key={w!.id}>
+                    <span className="swatch" style={{ background: w!.color }} />
+                    <span>
+                      {end(w!.from)} → {end(w!.to)}
+                      {w!.inline && <em> · {w!.inline} inline</em>}
+                      {w!.length_mm && <small> · {Math.ceil(w!.length_mm / 10) * 10 + 20} mm wire</small>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {current.check && (
               <p className="check">
                 <span>Camera check</span> {current.check}

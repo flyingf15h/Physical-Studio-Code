@@ -14,6 +14,7 @@ interface Node {
   baseQuat: THREE.Quaternion
   center: THREE.Vector3 // bounding-box centre in the node's local frame (mm)
   materials: THREE.MeshStandardMaterial[]
+  pulses: boolean // wires keep their colour readable instead of pulsing cyan
 }
 
 const ease = (t: number) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 3)
@@ -32,6 +33,7 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
 
   // Each placement is a direct child of the "design" node, named by its id (docs/steps-format.md).
   const { root, design, nodes } = useMemo(() => {
+    const kinds = new Map(doc.placements.map((p) => [p.id, p.kind]))
     const root = gltf.scene.clone(true)
     const design = root.getObjectByName('design') ?? root
     const nodes = new Map<string, Node>()
@@ -52,10 +54,11 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
         baseQuat: obj.quaternion.clone(),
         center: box.getCenter(new THREE.Vector3()),
         materials,
+        pulses: kinds.get(obj.name) !== 'wire',
       })
     }
     return { root, design, nodes }
-  }, [gltf])
+  }, [gltf, doc])
 
   // Refit the camera when the exploded view changes how much space the design takes.
   const bounds = useBounds()
@@ -90,7 +93,7 @@ export function Assembly({ glbUrl, doc, step, exploded }: Props) {
       const r = m?.from_rotation ?? [0, 0, 0]
       euler.set(r[0] * DEG * f, r[1] * DEG * f, r[2] * DEG * f, 'XYZ')
       node.obj.quaternion.copy(node.baseQuat).multiply(spin.setFromEuler(euler))
-      const highlight = current && !exploded
+      const highlight = current && !exploded && node.pulses
       for (const mat of node.materials) {
         if (highlight) mat.emissive.copy(HIGHLIGHT)
         else mat.emissive.setRGB(0, 0, 0)

@@ -69,8 +69,13 @@ def shapes_for(design: Design, built: BuiltDesign, a: str, b: str, shapes: dict[
     return pick(a, b), pick(b, a)
 
 
+def solids(built: BuiltDesign) -> dict[str, Part]:
+    """Placed solids; wires are flexible and left out of fit checks."""
+    return {pid: placed(piece) for pid, piece in built.pieces.items() if piece.shape is not None}
+
+
 def check_interference(design: Design, built: BuiltDesign) -> dict:
-    shapes = {pid: placed(piece) for pid, piece in built.pieces.items()}
+    shapes = solids(built)
     problems, expected = [], []
     for a, b in combinations(shapes, 2):
         sa, sb = shapes_for(design, built, a, b, shapes)
@@ -113,7 +118,7 @@ def screw_length_problems(design: Design, built: BuiltDesign) -> list[dict]:
 
 
 def check_clearance(design: Design, built: BuiltDesign, min_gap: float = 1.0, bed=DEFAULT_BED) -> dict:
-    shapes = {pid: placed(piece) for pid, piece in built.pieces.items()}
+    shapes = solids(built)
     tight = []
     for a, b in combinations(shapes, 2):
         sa, sb = shapes_for(design, built, a, b, shapes)

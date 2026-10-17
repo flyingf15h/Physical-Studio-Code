@@ -17,9 +17,9 @@ from fastmcp import FastMCP
 from fastmcp.utilities.types import Image
 
 from . import checks, library
-from .design import Design, EnclosureSpec, Placement, Step
+from .design import Design, EnclosureSpec, Placement, Step, Wire
 from .export import default_steps, export_design
-from .geometry import aabb, apply, build, envelope, placement_matrix
+from .geometry import aabb, apply, build, envelope, placement_matrix, wire_piece
 from .render import VIEWS, render
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -27,6 +27,10 @@ PARTS_DIR = Path(os.environ.get("PHYSICAL_STUDIO_PARTS", REPO_ROOT / "parts"))
 OUT_DIR = Path(os.environ.get("PHYSICAL_STUDIO_OUT", REPO_ROOT / "mcp-server" / "out"))
 
 Vec3 = tuple[float, float, float]
+WIRE_COLORS = {
+    "red": "#d03a3a", "black": "#2b2b2b", "white": "#f0f0f0", "yellow": "#e8c52e", "green": "#3a9d4f",
+    "blue": "#3a6fd0", "orange": "#e8862e", "purple": "#8a4fc0", "brown": "#7a5233", "grey": "#8a8f98",
+}
 
 
 def r3(values) -> list[float]:
@@ -74,6 +78,7 @@ class Studio:
         rotation: Vec3 = (0.0, 0.0, 0.0),
         id: str | None = None,
         mount: bool = True,
+        name: str | None = None,
     ) -> dict:
         part = self.part(part_id)
         if part.get("category") == "fastener":
@@ -84,7 +89,7 @@ class Studio:
             id=placement_id,
             kind="part",
             part_id=part_id,
-            name=part.get("name", part_id),
+            name=name or part.get("name", part_id),
             position=tuple(float(v) for v in position),
             rotation=tuple(float(v) for v in rotation),
             mount=mount,
@@ -128,6 +133,39 @@ class Studio:
             hole=hole,
         )
         return {"id": placement_id, "position": r3(position)}
+
+    def pin(self, placement_id: str, pin_id: str) -> dict:
+        if placement_id not in self.design.placements:
+            raise ValueError(f"no placement {placement_id!r}; placed: {list(self.design.placements)}")
+        part = self.part(self.design.placements[placement_id].part_id)
+        pins = {q["id"]: q for q in part.get("pins", [])}
+        if pin_id not in pins:
+            listed = ", ".join(pins) if pins else "none (add a pins list to its parts file)"
+            raise ValueError(f"{placement_id} ({part['id']}) has no pin {pin_id!r}; pins: {listed}")
+        return pins[pin_id]
+
+    def add_wire(
+        self,
+        from_placement: str,
+        from_pin: str,
+        to_placement: str,
+        to_pin: str,
+        color: str = "red",
+        inline: str | None = None,
+        label: str | None = None,
+        id: str | None = None,
+    ) -> dict:
+        self.pin(from_placement, from_pin)
+        self.pin(to_placement, to_pin)
+        hex_color = WIRE_COLORS.get(color.lower(), color)
+        if not (hex_color.startswith("#") and len(hex_color) == 7):
+            raise ValueError(f"color must be one of {sorted(WIRE_COLORS)} or #rrggbb")
+        wire_id = id or self.design.new_id(f"wire-{to_placement}-{to_pin}")
+        self.design.check_new_id(wire_id)
+        wire = Wire(wire_id, (from_placement, from_pin), (to_placement, to_pin), hex_color, inline, label)
+        self.design.wires[wire_id] = wire
+        piece = wire_piece(self.design, self.parts_used(), wire)
+        return {"id": wire_id, "length_mm": piece.extra["length_mm"]}
 
     def create_enclosure(self, **settings) -> dict:
         self.design.enclosure = EnclosureSpec(**{k: v for k, v in settings.items() if v is not None})
@@ -178,6 +216,10 @@ class Studio:
                 {"id": p.id, "kind": p.kind, "part": p.part_id, "position": r3(p.position), "rotation": r3(p.rotation)}
                 for p in self.design.placements.values()
             ],
+            "wires": [
+                {"id": w.id, "from": f"{w.a[0]}.{w.a[1]}", "to": f"{w.b[0]}.{w.b[1]}", **({"inline": w.inline} if w.inline else {})}
+                for w in self.design.wires.values()
+            ],
             "enclosure": self.describe_enclosure() if self.design.enclosure and self.design.placements else None,
             "steps": [s.title for s in self.design.steps],
         }
@@ -222,7 +264,8 @@ mcp = FastMCP(
         "Design hardware projects out of real, measured parts. Never invent dimensions: look parts up "
         "with search_parts/get_part and use their numbers. Units are mm, +Z up, rotations in degrees "
         "(Euler XYZ). Typical flow: new_design -> place_part (board first, at the origin) -> place the "
-        "other parts -> add_fastener for each board mounting hole -> create_enclosure -> add_step for each "
+        "other parts -> add_fastener for each board mounting hole -> create_enclosure -> add_wire for each connection (pins come "
+        "from get_part) -> add_step for each "
         "assembly step -> check_interference + check_clearance + render_preview (look at it, fix, repeat) -> "
         "export. Connectors that face a wall (e.g. USB on -x) get a cutout if the part "
         "is within reach of that wall; parts poking up through the lid need a '+z' connector."
@@ -255,17 +298,38 @@ def place_part(
     rotation: Vec3 = (0.0, 0.0, 0.0),
     id: str | None = None,
     mount: bool = True,
+    name: str | None = None,
 ) -> dict:
     """Place a library part. position is where the part's origin (bottom-left corner of its footprint)
     goes, in mm; rotation is degrees, Euler XYZ. Boards with mount=true get standoffs under their
-    mounting holes. Returns the placement id and its envelope in the design frame."""
-    return studio.place_part(part_id, position, rotation, id, mount)
+    mounting holes. name: what the builder calls it in the guide, e.g. "Red LED" (give each copy of a
+    part its own name). Returns the placement id and its envelope in the design frame."""
+    return studio.place_part(part_id, position, rotation, id, mount, name)
 
 
 @mcp.tool
 def add_fastener(part_id: str, target: str, hole: str, id: str | None = None) -> dict:
     """Put a fastener (e.g. an M3 screw) into mounting hole `hole` of placement `target`."""
     return studio.add_fastener(part_id, target, hole, id)
+
+
+@mcp.tool
+def add_wire(
+    from_placement: str,
+    from_pin: str,
+    to_placement: str,
+    to_pin: str,
+    color: str = "red",
+    inline: str | None = None,
+    label: str | None = None,
+    id: str | None = None,
+) -> dict:
+    """Connect two pins with a jumper wire (pin ids come from get_part's `pins`, e.g. arduino-uno d2, gnd1).
+    color: red, black, white, yellow, green, blue, orange, purple, brown, grey or #rrggbb (use black for
+    ground, red for power). inline: a component spliced into the wire, e.g. "220 ohm resistor" for an LED.
+    Returns the wire id (use it in add_step) and its routed length in mm. Wires are drawn as curves and
+    are not part of the interference checks."""
+    return studio.add_wire(from_placement, from_pin, to_placement, to_pin, color, inline, label, id)
 
 
 @mcp.tool

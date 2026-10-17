@@ -130,3 +130,40 @@ def test_render_preview_returns_png(studio):
     assert studio.render_preview("top", step=1)[:4] == b"\x89PNG"
     with pytest.raises(ValueError):
         studio.render_preview("iso", step=99)
+
+
+LED = {
+    "id": "test-led",
+    "name": "Test LED",
+    "category": "output",
+    "source": "test fixture",
+    "step_file": None,
+    "body": {"size": [5.0, 5.0, 8.6]},
+    "connectors": [{"id": "lens", "face": "+z", "center": [2.5, 2.5, 8.6], "size": [5.0, 5.0]}],
+    "pins": [
+        {"id": "anode", "label": "+", "position": [3.77, 2.5, -1.0], "direction": [0, 0, -1]},
+        {"id": "cathode", "label": "-", "position": [1.23, 2.5, -1.0], "direction": [0, 0, -1]},
+    ],
+    "verified": False,
+}
+
+
+def test_wires_route_between_pins_and_export(studio, tmp_path):
+    jsonschema = pytest.importorskip("jsonschema")
+    (studio.parts_dir / "test-led.json").write_text(json.dumps(LED))
+    studio.place_part("test-led", (30, 25, 14), id="led")
+    out = studio.add_wire("uno", "d8", "led", "anode", color="red", inline="220 ohm resistor")
+    assert out["id"] == "wire-led-anode" and out["length_mm"] > 10
+    studio.add_wire("led", "cathode", "uno", "gnd3", color="black")
+    with pytest.raises(ValueError, match="pins: anode, cathode"):
+        studio.add_wire("uno", "d9", "led", "leg")
+    studio.create_enclosure()
+    assert studio.check_interference()["ok"]  # wires are left out of fit checks
+    studio.export(["glb"], str(tmp_path / "w"))
+    steps = json.loads((tmp_path / "w" / "design.steps.json").read_text())
+    jsonschema.validate(steps, json.loads(SCHEMA.read_text()))
+    wire = next(p for p in steps["placements"] if p["id"] == "wire-led-anode")
+    assert wire["kind"] == "wire" and wire["from"] == {"placement": "uno", "pin": "d8"}
+    assert wire["inline"] == "220 ohm resistor"
+    assert any(s["title"] == "Wire the Test LED" for s in steps["steps"])
+    assert studio.render_preview("iso", hide=["lid"])[:4] == b"\x89PNG"

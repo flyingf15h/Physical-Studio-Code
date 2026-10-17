@@ -29,15 +29,6 @@ DESIGN_TO_GLTF = np.array(
 )  # scale mm -> m, rotate -90 degrees about X (+Z up becomes +Y up)
 
 
-def mesh_of(shape, tolerance: float = 0.05, angular: float = 0.3) -> trimesh.Trimesh:
-    vertices, triangles = shape.tessellate(tolerance, angular)
-    return trimesh.Trimesh(
-        vertices=np.array([tuple(v) for v in vertices], dtype=float),
-        faces=np.array(triangles, dtype=np.int64),
-        process=False,
-    )
-
-
 def hex_to_rgba(color: str) -> list[int]:
     c = color.lstrip("#")
     return [int(c[i : i + 2], 16) for i in (0, 2, 4)] + [255]
@@ -47,7 +38,7 @@ def write_glb(built: BuiltDesign, path: Path) -> None:
     scene = trimesh.Scene(base_frame="world")
     scene.graph.update(frame_from="world", frame_to="design", matrix=DESIGN_TO_GLTF)
     for piece in built.pieces.values():
-        mesh = mesh_of(piece.shape)
+        mesh = piece.local_mesh().copy()
         mesh.visual = trimesh.visual.TextureVisuals(
             material=trimesh.visual.material.PBRMaterial(
                 name=piece.id,
@@ -96,6 +87,21 @@ def default_steps(design: Design, built: BuiltDesign) -> list[Step]:
                 motion=[{"placement": i, "from_offset": [0, 0, 20], "from_rotation": [0, 0, 720]} for i in ids],
             )
         )
+    wires_by_part: dict[str, list[str]] = {}  # non-board end's placement id -> wire ids
+    for wire in design.wires.values():
+        ends = [wire.a[0], wire.b[0]]
+        other = next((pid for pid in ends if parts_category(built, pid) != "board"), ends[1])
+        wires_by_part.setdefault(other, []).append(wire.id)
+    for pid, ids in wires_by_part.items():
+        name = design.placements[pid].name
+        steps.append(
+            Step(
+                f"Wire the {name}",
+                f"Connect {len(ids)} wire{'s' if len(ids) > 1 else ''} to the {name} as shown.",
+                ids,
+                tools=[{"name": "Jumper wires", "for": name}],
+            )
+        )
     if "lid" in built.pieces:
         steps.append(
             Step(
@@ -106,6 +112,11 @@ def default_steps(design: Design, built: BuiltDesign) -> list[Step]:
             )
         )
     return steps
+
+
+def parts_category(built: BuiltDesign, pid: str) -> str | None:
+    piece = built.pieces.get(pid)
+    return piece.category if piece else None
 
 
 def steps_document(design: Design, built: BuiltDesign, model_name: str) -> dict:
@@ -127,6 +138,7 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str) -> dict:
                 "position": position,
                 "rotation": [round(float(v), 3) for v in piece.rotation],
                 "color": piece.color,
+                **piece.extra,
             }
         )
     doc_steps = []
