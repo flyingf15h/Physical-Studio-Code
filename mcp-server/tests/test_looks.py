@@ -78,3 +78,29 @@ def test_projects_are_recorded_per_owner(tmp_path):
     assert [p["title"] for p in accounts.projects("abc")] == ["A again", "B"]
     assert accounts.projects("other") == []
     json.loads((tmp_path / ".accounts" / "projects-abc.json").read_text())
+
+
+def test_find_part_looks_applies_what_the_search_found(studio, monkeypatch):
+    monkeypatch.setattr(
+        "physical_studio.server.find_look",
+        lambda part: {"color": "#11aa55", "metallic": 0.0, "roughness": 0.5, "top_image_url": "https://example.com/x.jpg", "source": "https://example.com"},
+    )
+    monkeypatch.setattr("physical_studio.server.fetch_image", lambda url: Image.new("RGB", (686, 534)))
+    out = studio.find_part_looks(["arduino-uno"])["looks"][0]
+    assert out["appearance"]["color"] == "#11aa55" and out["top_image"]
+
+
+def test_find_part_looks_keeps_the_colour_when_the_photo_fails(studio, monkeypatch):
+    monkeypatch.setattr("physical_studio.server.find_look", lambda part: {"color": "#11aa55", "top_image_url": "https://example.com/x.jpg"})
+
+    def broken(url):
+        raise looks.LookError("image download failed: HTTP 403")
+
+    monkeypatch.setattr("physical_studio.server.fetch_image", broken)
+    out = studio.find_part_looks(["arduino-uno"])["looks"][0]
+    assert out["appearance"]["color"] == "#11aa55" and "403" in out["photo_error"]
+
+
+def test_parse_look_drops_bad_fields():
+    look = looks.parse_look('Here: {"color": "green", "metallic": "2", "roughness": "x", "top_image_url": null, "source": "https://a.b"}')
+    assert look == {"metallic": 1.0, "source": "https://a.b"}

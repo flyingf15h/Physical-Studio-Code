@@ -17,7 +17,8 @@ const CLIENTS = [
     id: 'claude-code',
     label: 'Claude Code',
     hint: 'Run this in your terminal, then restart Claude Code.',
-    text: (key: string) => `claude mcp add --transport http physical-studio ${MCP_URL} --header "Authorization: Bearer ${key}"`,
+    text: (key: string) =>
+      `claude mcp add --transport http physical-studio ${MCP_URL} --header "Authorization: Bearer ${key}"`,
   },
   {
     id: 'claude-desktop',
@@ -25,7 +26,14 @@ const CLIENTS = [
     hint: 'Settings → Developer → Edit Config, add this to claude_desktop_config.json, then restart Claude Desktop. Needs Node.js.',
     text: (key: string) =>
       JSON.stringify(
-        { mcpServers: { 'physical-studio': { command: 'npx', args: ['-y', 'mcp-remote', MCP_URL, '--header', `Authorization:Bearer ${key}`] } } },
+        {
+          mcpServers: {
+            'physical-studio': {
+              command: 'npx',
+              args: ['-y', 'mcp-remote', MCP_URL, '--header', `Authorization:Bearer ${key}`],
+            },
+          },
+        },
         null,
         2,
       ),
@@ -33,9 +41,13 @@ const CLIENTS = [
   {
     id: 'cursor',
     label: 'Cursor and others',
-    hint: 'Add to ~/.cursor/mcp.json (or your client\'s MCP settings): a streamable HTTP server with a bearer header.',
+    hint: "Add to ~/.cursor/mcp.json (or your client's MCP settings): a streamable HTTP server with a bearer header.",
     text: (key: string) =>
-      JSON.stringify({ mcpServers: { 'physical-studio': { url: MCP_URL, headers: { Authorization: `Bearer ${key}` } } } }, null, 2),
+      JSON.stringify(
+        { mcpServers: { 'physical-studio': { url: MCP_URL, headers: { Authorization: `Bearer ${key}` } } } },
+        null,
+        2,
+      ),
   },
 ]
 
@@ -140,7 +152,10 @@ export function ConnectAI({ prompt, setPrompt, onKey }: Props) {
         />
         <div className="connect-row">
           <Copy text={prompt.trim() + PROMPT_SUFFIX} label="Copy prompt for your AI" />
-          <span className="connect-note">Paste it into your AI. When it finishes it gives you the guide link, and the guide shows up under Your projects.</span>
+          <span className="connect-note">
+            Paste it into your AI. When it finishes it gives you the guide link, and the guide shows up under Your
+            projects.
+          </span>
         </div>
       </li>
     </ol>

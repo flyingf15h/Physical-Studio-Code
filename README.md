@@ -29,7 +29,7 @@ Before the Build helper, the project designed 3D-printed enclosures from a promp
 |---|---|
 | [`circuit-studio/`](circuit-studio) | The Build helper (Streamlit): `app_plus.py` (entry point), `builder.py` (scan, plan, step commits, model pool), `diagram.py` (step pictures), `app.py` (photos → breadboard 3D model). |
 | [`parts/`](parts) | Parts library (JSON per part: dimensions, pins, mounting holes). |
-| [`mcp-server/`](mcp-server) | MCP server and design-job API for the enclosure pipeline. |
+| [`mcp-server/`](mcp-server) | MCP server and design-job API for the assembly guides. It has its own 3D pipeline (build123d → GLB with part photos and finishes), separate from the Build helper's breadboard renderer in `circuit-studio/`. |
 | [`viewer/`](viewer) | React + R3F assembly guide and the Gemini Live endpoints. `node scripts/gemini-smoke.mjs` tests the Gemini keys, Live and the step checker against the real API. |
 | [`schemas/`](schemas) | `steps.schema.json`, the contract between the MCP server and the viewer. |
 | [`deploy/`](deploy) | Docker Compose for one Vultr server: Caddy (HTTPS), the Build helper, the viewer and the MCP server. |

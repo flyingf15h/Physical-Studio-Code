@@ -1,17 +1,41 @@
+import type { ReactNode } from 'react'
 import { designParams, navigate, withParams } from '../router'
 import './ProgressHeader.css'
 
 const STEPS = ['Describe', 'Design', 'Guide', 'Build', 'Print'] as const
 
+const TABS = [
+  { id: 'dashboard', label: 'Dashboard', path: '/' },
+  { id: 'projects', label: 'Your projects', path: '/projects' },
+] as const
+
 interface Props {
-  active: 1 | 2 | 3 | 4 | 5
+  /** The project screen you're on; the 1-to-5 steps only show once a project has started. */
+  active?: 1 | 2 | 3 | 4 | 5
+  /** The tab you're on, outside a project. */
+  tab?: (typeof TABS)[number]['id']
   /** Overrides for links when the page knows more than the URL (e.g. the design page). */
   design?: string | null
   job?: string | null
 }
 
-/** "1 Describe ✓ · 2 Design · ..." across the top of every screen. */
-export function ProgressHeader({ active, design, job }: Props) {
+function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
+  return (
+    <a
+      className={className}
+      href={to}
+      onClick={(e) => {
+        e.preventDefault()
+        navigate(to)
+      }}
+    >
+      {children}
+    </a>
+  )
+}
+
+/** Dashboard · Your projects tabs on every screen, plus "1 Describe ✓ · 2 Design · ..." inside a project. */
+export function ProgressHeader({ active, tab, design, job }: Props) {
   const params = designParams()
   const d = design ?? params.design
   const j = job ?? params.job
@@ -25,44 +49,46 @@ export function ProgressHeader({ active, design, job }: Props) {
   }
   return (
     <header className="progress-header">
-      <a
-        className="brand"
-        href={href[1]!}
-        onClick={(e) => {
-          e.preventDefault()
-          navigate(href[1]!)
-        }}
-      >
+      <Link className="brand" to={href[1]!}>
         Physical Studio
-      </a>
-      <ol>
-        {STEPS.map((label, i) => {
-          const n = i + 1
-          const state = n < active ? 'done' : n === active ? 'active' : 'todo'
-          const to = href[n]
-          return (
-            <li key={label} className={state}>
-              {to && n !== active ? (
-                <a
-                  href={to}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    navigate(to)
-                  }}
-                >
-                  <span className="num">{state === 'done' ? '✓' : n}</span>
-                  {label}
-                </a>
-              ) : (
-                <span aria-current={n === active ? 'step' : undefined}>
-                  <span className="num">{state === 'done' ? '✓' : n}</span>
-                  {label}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ol>
+      </Link>
+      <nav className="tabs">
+        {TABS.map((t) => (
+          <Link key={t.id} to={withParams(t.path, { code })} className={t.id === tab ? 'active' : ''}>
+            {t.label}
+          </Link>
+        ))}
+      </nav>
+      {active && (
+        <ol>
+          {STEPS.map((label, i) => {
+            const n = i + 1
+            const state = n < active ? 'done' : n === active ? 'active' : 'todo'
+            const to = href[n]
+            return (
+              <li key={label} className={state}>
+                {to && n !== active ? (
+                  <a
+                    href={to}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      navigate(to)
+                    }}
+                  >
+                    <span className="num">{state === 'done' ? '✓' : n}</span>
+                    {label}
+                  </a>
+                ) : (
+                  <span aria-current={n === active ? 'step' : undefined}>
+                    <span className="num">{state === 'done' ? '✓' : n}</span>
+                    {label}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ol>
+      )}
     </header>
   )
 }

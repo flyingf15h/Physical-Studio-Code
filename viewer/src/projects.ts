@@ -45,6 +45,9 @@ export function saveKey(key: string) {
 
 const MAX = 30
 
+// Every export writes design.png (render.py's quick software render). The two ready-made guides'
+// thumbnails are screenshots of the guide instead, which look closer to the real thing; rerunning
+// their example scripts replaces them with the software render.
 export const thumbnail = (design: string) => `/${design}/design.png`
 
 export function yourProjects(): Project[] {

@@ -39,7 +39,9 @@ Environment variables: `PHYSICAL_STUDIO_PARTS` (parts folder, default `../parts`
 | `check_clearance(min_gap, bed)` | Pieces closer than `min_gap` (1 mm), connectors that got no cutout, case bigger than the print bed (220 x 220 x 250). |
 | `render_preview(view, step, exploded, hide)` | PNG of the design with every piece labelled by id and a 10 mm scale bar, so Claude can look at its own work. Views: iso, iso_back, top, front, back, left, right. |
 | `describe_design()` | Placements, enclosure size, steps. |
-| `export(formats, out_dir)` | `glb` (+ `design.steps.json`), `stl` (base and lid), `step` (whole assembly). |
+| `set_part_look(part_id, color, metallic, roughness, top_image_url, source)` | How a part looks in the guide: colour, finish and a top-view photo the server downloads (public http(s) only, 4 MB cap, background trimmed). Kept with the design, not the library. |
+| `find_part_looks(part_ids)` | The server searches the web for each part's look (OpenAI web search, then Gemini with Google Search) and applies it. For designers that can't browse, like the site's design jobs. |
+| `export(formats, out_dir)` | `glb` (+ `design.steps.json` and a `design.png` thumbnail), `stl` (base and lid), `step` (whole assembly). Hosted: always under the designs folder, and returns `guide_url`. |
 
 Geometry is rebuilt from the design state on every call, so the order of `place_part` and `create_enclosure` doesn't matter.
 
@@ -50,6 +52,10 @@ Geometry is rebuilt from the design state on every call, so the order of `place_
 - `physical_studio/geometry.py`: part proxies (or STEP files), enclosure, standoffs, cutouts.
 - `physical_studio/checks.py`: interference, clearance, screw length, print-bed fit.
 - `physical_studio/render.py`: software z-buffer renderer for `render_preview` (no OpenGL needed).
-- `physical_studio/export.py`: GLB (written with trimesh so node names are placement ids), steps JSON, STL, STEP.
+- `physical_studio/export.py`: GLB (written with trimesh so node names are placement ids), steps JSON, STL, STEP. A part's `appearance` sets its material, and its top picture is a textured child node `<id>-top`.
+- `physical_studio/textures.py`: top-face pictures (a photo, or a drawn PCB).
+- `physical_studio/looks.py`: downloading part photos safely, and the web search behind `find_part_looks`.
+- `physical_studio/accounts.py`: personal keys for visitors' own AI (`POST /api/connect`) and the guides each key exported (`GET /api/my-projects`).
+- Not to be confused with `circuit-studio/geometry.py`: that's the Build helper's own breadboard renderer (Streamlit + three.js). This one serves the assembly guides.
 - `physical_studio/server.py`: the tools (`Studio`) and their FastMCP wrappers.
 

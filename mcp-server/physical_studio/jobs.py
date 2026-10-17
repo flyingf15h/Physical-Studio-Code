@@ -107,6 +107,8 @@ Rules:
   remove_part (e.g. a screw whose head clashes), and check again.
 - Then write the guide with add_step: base, board, screws, parts under the lid, wiring (one step
   per part), close the lid. Each step needs a one-sentence check line a camera can verify.
+- Before exporting, call find_part_looks once with every placed part id that has no `appearance`
+  in get_part, so the guide shows the real parts (product photos, colours, metal finishes).
 - Finish with export(["glb", "stl", "step"]). Your final message: two sentences on what you built.
 
 The user may attach images (photos, sketches, screenshots) and links. Use them to understand what
@@ -220,6 +222,11 @@ class DesignJob:
             fits = all(a <= b for a, b in zip(sorted(size[:2]), sorted(bed[:2]))) and size[2] <= bed[2]
             self.printer = {"ok": fits, "size_mm": size}
             self.event("case", f"Built the case: {w:.0f} × {d:.0f} × {h:.0f} mm")
+        elif name == "find_part_looks" and isinstance(result, dict):
+            found = [x for x in result.get("looks", []) if "error" not in x]
+            photos = sum(1 for x in found if x.get("top_image"))
+            self.event("note", f"Looked up how {len(found)} part{'s' if len(found) != 1 else ''} really look"
+                       + (f" ({photos} with a product photo)" if photos else ""))
         elif name == "add_wire":
             n = len(s.design.wires)
             self.event("wire", f"Wired {n} connection{'s' if n != 1 else ''}")

@@ -27,7 +27,9 @@ from starlette.responses import JSONResponse
 
 from . import checks, library
 from .accounts import Accounts, KeyVerifier, key_hash, owner_of
-from .looks import fetch_image
+from concurrent.futures import ThreadPoolExecutor
+
+from .looks import LookError, fetch_image, find_look
 from .design import Design, EnclosureSpec, Placement, Step, Wire
 from .export import default_steps, export_design
 from .geometry import aabb, apply, build, envelope, placement_matrix, wire_piece
@@ -129,6 +131,27 @@ class Studio:
                     "Use a straight-on top view, or rotate it to match the part's x axis."
                 )
         return out
+
+    def find_part_looks(self, part_ids: list[str]) -> dict:
+        """Searches the web for each part's real look (looks.find_look) and applies it, in parallel."""
+        ids = list(dict.fromkeys(part_ids))[:20]
+        for pid in ids:
+            self.part(pid)  # unknown ids fail before any search
+
+        def one(pid: str) -> dict:
+            try:
+                look = find_look(self.part(pid))
+            except LookError as e:
+                return {"part_id": pid, "error": str(e)}
+            fields = {k: look.get(k) for k in ("color", "metallic", "roughness", "source")}
+            try:
+                return self.set_part_look(pid, top_image_url=look.get("top_image_url"), **fields)
+            except LookError as e:  # the photo didn't download; keep the colour and finish
+                out = self.set_part_look(pid, **fields)
+                return {**out, "photo_error": str(e)}
+
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            return {"looks": list(pool.map(one, ids))}
 
     def search_parts(self, query: str = "", category: str | None = None) -> list[dict]:
         return library.search_parts(self.library(), query, category)
@@ -560,6 +583,14 @@ def set_part_look(
     image file itself, a straight-on photo of the part's top; the background is trimmed) and source
     (the page you took it from). Applies to every copy of the part in this design."""
     return current().set_part_look(part_id, color, metallic, roughness, top_image_url, source)
+
+
+@mcp.tool
+def find_part_looks(part_ids: list[str]) -> dict:
+    """Have the server look up each part's real look on the web (a top-view product photo, colour,
+    metal finish) and apply it, several parts at once. Use it when you can't browse yourself, for
+    every placed part that has no `appearance` in get_part. Takes about 20 s."""
+    return current().find_part_looks(part_ids)
 
 
 @mcp.tool

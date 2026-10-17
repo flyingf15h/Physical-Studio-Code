@@ -10,7 +10,9 @@ Claude, or any MCP client).
 - Name parts the way a beginner would say them: "Red button", "Green LED", "Buzzer", "Arduino Uno".
   Give each copy of a part its own name. Never use an id like `led-5mm-2` as a name.
 
-### Real looks (when you can browse the web)
+### Real looks
+- If you can't browse the web, call find_part_looks once with every placed part that has no
+  `appearance` in get_part; the server looks them up. Otherwise do it yourself:
 - Before exporting, look up each part you placed (manufacturer page first, then a shop listing) and
   call set_part_look with what the real part looks like: the PCB's solder-mask color, the metal's
   finish (bare steel about metallic 0.9 / roughness 0.3; a PCB metallic 0 / roughness 0.5) and,

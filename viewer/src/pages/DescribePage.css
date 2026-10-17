@@ -1,4 +1,4 @@
-.describe-page { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; max-width: 1180px; width: 100%; margin: 0 auto; }
+.describe-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; max-width: 960px; width: 100%; margin: 0 auto; }
 .describe-main { min-width: 0; }
 .describe-page h1 { font-size: 30px; margin: 0 0 8px; }
 .describe-lede { color: var(--muted); font-size: 15px; line-height: 1.5; margin: 0 0 20px; max-width: 640px; }
@@ -30,6 +30,9 @@
 .describe-sub { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 28px 0 10px; }
 .describe-sample { font-size: 14px; color: var(--muted); margin: 20px 0 0; }
 .describe-sample a { color: var(--accent); }
+.describe-own-ai { margin-top: 28px; }
+.describe-own-ai > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+.describe-parts { margin-top: 28px; }
 @media (max-width: 760px) {
   .describe-page { grid-template-columns: 1fr; padding: 20px 16px; }
   .describe-page h1 { font-size: 24px; }

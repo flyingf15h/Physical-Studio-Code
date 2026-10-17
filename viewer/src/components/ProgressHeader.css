@@ -1,6 +1,10 @@
 .progress-header { display: flex; align-items: center; gap: 20px; padding: 0 20px; height: 52px; flex: none; background: var(--panel); border-bottom: 1px solid var(--line); }
 .progress-header .brand { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; white-space: nowrap; }
-.progress-header ol { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; overflow-x: auto; }
+.progress-header .tabs { display: flex; gap: 2px; flex: none; }
+.progress-header .tabs a { padding: 6px 12px; border-radius: 8px; font-size: 14px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.progress-header .tabs a:hover { background: var(--bg); color: var(--ink); }
+.progress-header .tabs a.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.progress-header ol { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0 0 0 16px; border-left: 1px solid var(--line); overflow-x: auto; }
 .progress-header li > a, .progress-header li > span { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 13px; color: var(--muted); text-decoration: none; white-space: nowrap; }
 .progress-header li > a:hover { background: var(--bg); color: var(--ink); }
 .progress-header .num { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; border: 1.5px solid var(--line); }
@@ -10,5 +14,7 @@
 @media (max-width: 760px) {
   .progress-header { gap: 8px; padding: 0 8px; }
   .progress-header .brand { display: none; }
+  .progress-header .tabs a { padding: 6px 8px; font-size: 13px; }
+  .progress-header ol { padding-left: 8px; }
   .progress-header li > a, .progress-header li > span { padding: 6px 6px; font-size: 12px; }
 }

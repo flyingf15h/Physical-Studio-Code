@@ -3,12 +3,15 @@ import App from './App'
 import { DescribePage } from './pages/DescribePage'
 import { DesignPage } from './pages/DesignPage'
 import { PrintPage } from './pages/PrintPage'
+import { ProjectsPage } from './pages/ProjectsPage'
 
 export default function Root() {
   const route = useRoute()
   switch (route.page) {
     case 'describe':
       return <DescribePage />
+    case 'projects':
+      return <ProjectsPage />
     case 'design':
       return <DesignPage key={route.jobId} jobId={route.jobId} />
     case 'print':

@@ -30,7 +30,9 @@ function Card({ project, onRemove }: { project: Project; onRemove?: () => void }
         <span className="projects-title">{project.title}</span>
         {project.prompt && <span className="projects-prompt">{project.prompt}</span>}
         <span className="projects-meta">
-          {[project.steps ? `${project.steps} step${project.steps === 1 ? '' : 's'}` : '', when(project.openedAt)].filter(Boolean).join(' · ')}
+          {[project.steps ? `${project.steps} step${project.steps === 1 ? '' : 's'}` : '', when(project.openedAt)]
+            .filter(Boolean)
+            .join(' · ')}
         </span>
       </a>
       {onRemove && (
@@ -73,7 +75,16 @@ export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
       const key = savedKey()
       if (!key) return
       listMyProjects(key).then(
-        (list) => setExported(list.map((p) => ({ design: p.design, title: p.title, prompt: p.prompt, steps: p.steps, openedAt: p.at * 1000 }))),
+        (list) =>
+          setExported(
+            list.map((p) => ({
+              design: p.design,
+              title: p.title,
+              prompt: p.prompt,
+              steps: p.steps,
+              openedAt: p.at * 1000,
+            })),
+          ),
         () => setExported([]),
       )
     }
@@ -100,7 +111,7 @@ export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
         </ul>
       ) : (
         <p className="projects-empty">
-          Guides you open, and the ones your AI makes with your key, show up here so you can come back to them.
+          Nothing here yet. Design something on the Dashboard, or open a ready-made guide.
         </p>
       )}
     </section>
