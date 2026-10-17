@@ -1,0 +1,5 @@
+**
+!viewer/**
+viewer/node_modules
+viewer/dist
+viewer/.env*

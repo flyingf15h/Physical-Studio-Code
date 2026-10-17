@@ -28,4 +28,6 @@ Code: `src/steps.ts` (types matching `schemas/steps.schema.json`), `src/Assembly
 
 Setup: put `GEMINI_API_KEY=...` in `viewer/.env.local` (gitignored) and restart `npm run dev`. The key stays on the dev server: `/api/gemini-token` (in `vite.config.ts`) mints a single-use token that expires in 30 minutes, and only that reaches the browser. `GEMINI_LIVE_MODEL` overrides the model (default `gemini-3.8-live`).
 
+Production: `npm run build && npm start` runs `server.mjs` (static app + the same token endpoint + `/out`), which is what `deploy/` puts on Vultr. Set `DEMO_CODE` there to require `?code=...` in the page address before the camera check can start.
+
 Code: `src/tracker/session.ts` (Live session, prompts, function calls, frame and auto-check timers), `src/tracker/audio.ts` (16 kHz mic capture, 24 kHz playback), `src/tracker/TrackerPanel.tsx` (UI, captures the expected render).

@@ -1,0 +1,57 @@
+# Deploy (Vultr)
+
+One server runs everything with Docker Compose:
+
+| Service | What it does |
+|---|---|
+| `caddy` | HTTPS on 443 (Let's Encrypt certificate for `$DOMAIN`, renewed automatically). Required: browsers only allow camera/mic access on secure pages. `/mcp*` goes to the MCP server, everything else to the viewer. |
+| `viewer` | The built React viewer, `POST /api/gemini-token` (single-use Gemini Live tokens; the key never reaches the browser; rate limited per IP; optional `DEMO_CODE`), and `/out/<design>/` from the shared `designs` volume. |
+| `mcp` | The MCP server over streamable HTTP at `https://$DOMAIN/mcp`, behind `Authorization: Bearer $MCP_TOKEN`. Its exports go to the `designs` volume, so `https://$DOMAIN/?design=out/<title>` shows them right away. |
+
+## First deploy
+
+1. **Server.** On Vultr, deploy a Cloud Compute instance from the Marketplace **Docker** image (Ubuntu with Docker preinstalled). 1 vCPU / 2 GB is enough. Allow ports 22, 80 and 443 in the firewall group.
+2. **DNS.** At GoDaddy, add an `A` record for the domain (or a subdomain) pointing at the instance's IPv4 address. Wait until `ping <domain>` shows that IP: Caddy needs it to get the certificate.
+3. **Code and settings** (on the server, over SSH):
+   ```sh
+   git clone https://github.com/flyingf15h/Physical-Studio-Code.git
+   cd Physical-Studio-Code/deploy
+   cp .env.example .env
+   nano .env          # DOMAIN, GEMINI_API_KEY, MCP_TOKEN (openssl rand -hex 24), optional DEMO_CODE
+   chmod 600 .env
+   docker compose up -d --build
+   ```
+4. **Check.**
+   - `https://<domain>/healthz` says `ok`.
+   - `https://<domain>/` shows the sample guide; "Watch my bench" asks for the camera.
+   - `docker compose logs -f` if something's off. A certificate error at first usually means DNS hasn't propagated yet.
+
+## Use the hosted MCP server from Claude Code
+
+```sh
+claude mcp add --transport http physical-studio-hosted https://<domain>/mcp \
+  --header "Authorization: Bearer <MCP_TOKEN>"
+```
+
+Exports then appear at `https://<domain>/?design=out/<design title>`. Hand out the token like a password: anyone with it can run designs on the server.
+
+## Update
+
+```sh
+cd Physical-Studio-Code && git pull && cd deploy && docker compose up -d --build
+```
+
+## Test locally
+
+`DOMAIN=localhost` makes Caddy use a local self-signed certificate (your browser will warn once). If ports 80/443 are taken, add an override file with `ports: !override ["18080:80", "18443:443"]` for `caddy`.
+
+```sh
+cd deploy && DOMAIN=localhost MCP_TOKEN=test docker compose up -d --build
+curl -k https://localhost/healthz
+```
+
+## Notes
+
+- Everyone shares one Gemini key and its quota. `TOKENS_PER_MINUTE` (default 6 per IP) and `DEMO_CODE` keep strangers from using it up.
+- The MCP server keeps a single design in memory, so it serves one designer at a time (fine for a demo).
+- `.env` is gitignored. Never commit it or paste it into chat or huddle.

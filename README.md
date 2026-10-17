@@ -22,6 +22,7 @@ Demo build: a Simon memory game in a printed case around an Arduino Uno (4 butto
 | [`schemas/`](schemas) | `steps.schema.json`, the contract between the server and the viewer, plus an example. |
 | [`viewer/`](viewer) | React + R3F step-by-step assembly viewer. |
 | [`circuit-studio/`](circuit-studio) | Senna's Streamlit prototype: photos + wiring instructions → Gemini → breadboard 3D model. |
+| [`deploy/`](deploy) | Docker Compose for one Vultr server: Caddy (HTTPS), the viewer with the Gemini token endpoint, and the MCP server over HTTP. |
 | [`firmware/`](firmware) | Arduino code for the demo (Simon game; wiring in `docs/simon-wiring.md`). |
 | [`docs/`](docs) | Plan, steps format, Simon wiring. |
 

@@ -154,7 +154,9 @@ export class StepTracker {
       this.video.muted = true
       await this.video.play()
 
-      const res = await fetch('/api/gemini-token', { method: 'POST' })
+      // ?code=... in the page address unlocks a hosted demo that sets DEMO_CODE.
+      const code = new URLSearchParams(location.search).get('code') ?? ''
+      const res = await fetch('/api/gemini-token', { method: 'POST', headers: { 'x-demo-code': code } })
       const body = await res.json()
       if (!res.ok) throw new Error(body.error ?? `token request failed (${res.status})`)
 

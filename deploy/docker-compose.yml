@@ -1,0 +1,51 @@
+# Physical Studio on one server: Caddy (HTTPS) -> viewer (app + Gemini tokens) and MCP server.
+# Designs exported through the hosted MCP server land in the shared `designs` volume and show up
+# at https://$DOMAIN/?design=out/<title>. Settings come from deploy/.env (see .env.example).
+name: physical-studio
+
+services:
+  caddy:
+    image: caddy:2.10.2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - viewer
+      - mcp
+
+  viewer:
+    build:
+      context: ..
+      dockerfile: deploy/viewer.Dockerfile
+    restart: unless-stopped
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_LIVE_MODEL: ${GEMINI_LIVE_MODEL:-gemini-3.8-live}
+      DEMO_CODE: ${DEMO_CODE:-}
+      TOKENS_PER_MINUTE: ${TOKENS_PER_MINUTE:-6}
+    volumes:
+      - designs:/data/out:ro
+
+  mcp:
+    build:
+      context: ..
+      dockerfile: deploy/mcp.Dockerfile
+    restart: unless-stopped
+    environment:
+      MCP_TOKEN: ${MCP_TOKEN:?set MCP_TOKEN in deploy/.env}
+      MCP_ALLOWED_HOSTS: ${DOMAIN}
+    volumes:
+      - designs:/data/out
+
+volumes:
+  designs:
+  caddy_data:
+  caddy_config:

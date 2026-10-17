@@ -1,0 +1,16 @@
+# HTTPS is required: browsers only give camera/microphone access to secure pages.
+# Caddy gets a Let's Encrypt certificate for $DOMAIN automatically (DOMAIN=localhost uses a
+# local self-signed one for testing).
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /mcp* {
+		reverse_proxy mcp:8000 {
+			flush_interval -1 # MCP streams responses
+		}
+	}
+
+	handle {
+		reverse_proxy viewer:8080
+	}
+}

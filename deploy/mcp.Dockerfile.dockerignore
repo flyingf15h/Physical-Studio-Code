@@ -1,0 +1,8 @@
+**
+!mcp-server/pyproject.toml
+!mcp-server/uv.lock
+!mcp-server/.python-version
+!mcp-server/README.md
+!mcp-server/physical_studio/**
+!parts/**
+**/__pycache__

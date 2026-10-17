@@ -2,6 +2,9 @@
 
 Run with `uv run physical-studio-mcp` (stdio). Set PHYSICAL_STUDIO_PARTS to use another
 parts folder and PHYSICAL_STUDIO_OUT to change where exports go.
+
+Hosted (deploy/): MCP_TRANSPORT=http serves streamable HTTP on MCP_PORT (8000) at /mcp and
+requires `Authorization: Bearer $MCP_TOKEN`. MCP_ALLOWED_HOSTS lists the public host names.
 """
 
 from __future__ import annotations
@@ -14,6 +17,7 @@ from typing import Literal
 import numpy as np
 
 from fastmcp import FastMCP
+from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
 from fastmcp.utilities.types import Image
 
 from . import checks, library
@@ -257,9 +261,14 @@ class Studio:
         return export_design(self.design, self.build(), target, formats)
 
 
+HTTP = os.environ.get("MCP_TRANSPORT", "stdio") == "http"
+if HTTP and not os.environ.get("MCP_TOKEN"):
+    raise SystemExit("MCP_TRANSPORT=http needs MCP_TOKEN (the bearer token clients must send)")
+
 studio = Studio()
 mcp = FastMCP(
     "physical-studio",
+    auth=StaticTokenVerifier({os.environ["MCP_TOKEN"]: {"client_id": "physical-studio", "scopes": []}}) if HTTP else None,
     instructions=(
         "Design hardware projects out of real, measured parts. Never invent dimensions: look parts up "
         "with search_parts/get_part and use their numbers. Units are mm, +Z up, rotations in degrees "
@@ -420,7 +429,18 @@ def export(formats: list[Literal["glb", "stl", "step"]] = ["glb", "stl", "step"]
 
 
 def main() -> None:
-    mcp.run(show_banner=False)
+    if not HTTP:
+        mcp.run(show_banner=False)
+        return
+    hosts = [h.strip() for h in os.environ.get("MCP_ALLOWED_HOSTS", "").split(",") if h.strip()]
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=int(os.environ.get("MCP_PORT", "8000")),
+        path="/mcp",
+        show_banner=False,
+        allowed_hosts=hosts or None,
+    )
 
 
 if __name__ == "__main__":
