@@ -102,4 +102,15 @@
 .step-figure { width: 100%; }
 .picture-resize { position: absolute; right: 2px; bottom: 2px; z-index: 1; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; color: var(--muted); background: rgba(255, 255, 255, 0.85); cursor: nwse-resize; touch-action: none; user-select: none; }
 .picture-resize:hover, .picture-resize:focus-visible { color: var(--accent); background: var(--accent-soft); outline: none; }
+/* Step animation: the breadboard SVG drawn inline, the hardware crossfade, and Replay + scrub below. */
+.step-svg { line-height: 0; }
+.step-svg svg.step-picture { display: block; overflow: hidden; }
+.step-picture-prev { position: absolute; inset: 0; height: 100%; object-fit: contain; pointer-events: none; }
+.step-anim { display: flex; align-items: center; gap: 10px; }
+.step-anim-replay { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 4px 12px 4px 9px; font-size: 13px; cursor: pointer; }
+.step-anim-replay:hover:not(:disabled), .step-anim-replay:focus-visible { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); outline: none; }
+.step-anim-replay:disabled { color: var(--muted); cursor: default; }
+.step-anim-replay svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.step-anim input[type='range'] { flex: 1; min-width: 80px; accent-color: var(--accent); cursor: pointer; }
+.step-anim-pct { flex: none; width: 40px; text-align: right; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .picture-resize svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }

@@ -3,7 +3,7 @@
 // need, one step at a time (numbered-hole picture, check line, a 3D model of the bench after the
 // step, and an optional photo commit the AI checks), the finished build, and the Commits tab next to
 // the build's title (hidden on ready-made guides, which nobody commits to).
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   commitStep,
   copyBuild,
@@ -511,21 +511,246 @@ function usePictureWidth() {
   return { width, handle }
 }
 
+// The step animation: what you do in this step plays once when the step opens (this step's parts slide
+// down into their holes and its wires draw from end to end over the faded earlier steps; on hardware
+// builds the previous step's picture fades into this one). Replay plays it again; the slider scrubs it.
+// With reduced motion on, the picture opens on its last frame.
+const CROSSFADE_MS = 1600
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
+const easeOut = (x: number) => 1 - (1 - x) ** 3
+const easeInOut = (x: number) => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
+
+/** Progress 0..1 of the step animation; plays from 0 whenever `key` changes and `ready` is true. */
+function useTimeline(key: string, duration: number, ready: boolean) {
+  const [t, setT] = useState(1)
+  const [playing, setPlaying] = useState(false)
+  const raf = useRef(0)
+  const play = (from = 0) => {
+    cancelAnimationFrame(raf.current)
+    const start = performance.now() - from * duration
+    setPlaying(true)
+    setT(from)
+    const tick = (now: number) => {
+      const p = clamp01((now - start) / duration)
+      setT(p)
+      if (p < 1) raf.current = requestAnimationFrame(tick)
+      else setPlaying(false)
+    }
+    raf.current = requestAnimationFrame(tick)
+  }
+  // Before paint, so a new step never flashes its last frame first.
+  useLayoutEffect(() => {
+    if (!ready) return
+    if (reducedMotion()) {
+      setT(1)
+      setPlaying(false)
+    } else play(0)
+    return () => cancelAnimationFrame(raf.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, ready])
+  const scrub = (p: number) => {
+    cancelAnimationFrame(raf.current)
+    setPlaying(false)
+    setT(clamp01(p))
+  }
+  return { t, playing, replay: () => play(0), scrub }
+}
+
+type AnimItem = { el: SVGGElement; kind: 'part' | 'wire'; paths: { el: SVGGeometryElement; len: number }[] }
+type Anim = { items: AnimItem[]; marks: SVGGElement | null }
+
+const HALO = '#26c6da'
+let svgCount = 0
+
+/** Drop anything that could run code, and give the SVG's ids (the hole pattern) a prefix of their own. */
+function cleanSvg(svg: SVGSVGElement) {
+  svg.querySelectorAll('script, foreignObject').forEach((el) => el.remove())
+  const prefix = `ps${++svgCount}-`
+  const ids = Array.from(svg.querySelectorAll('[id]'), (el) => el.id)
+  const all = [svg, ...Array.from(svg.querySelectorAll('*'))]
+  for (const el of all) {
+    for (const a of Array.from(el.attributes)) {
+      if (/^on/i.test(a.name) || (/href$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) {
+        el.removeAttribute(a.name)
+        continue
+      }
+      let v = a.value
+      for (const id of ids) {
+        v = v.split(`url(#${id})`).join(`url(#${prefix}${id})`)
+        if (v === `#${id}`) v = `#${prefix}${id}`
+      }
+      if (a.name === 'id') v = prefix + v
+      if (v !== a.value) el.setAttribute(a.name, v)
+    }
+  }
+}
+
+/** Pictures drawn before diagram.py tagged its new parts: find them after the faded group and tag them the
+ * same way (numbered markers last, wires are the curved paths, each part starts at its legs or halo). */
+function tagLegacySvg(svg: SVGSVGElement) {
+  if (svg.querySelector('.ps-new, .ps-marks')) return
+  const kids = Array.from(svg.children)
+  const faded = kids.findIndex((el) => el.tagName === 'g' && el.getAttribute('opacity') === '.35')
+  if (faded < 0) return
+  const after = kids.slice(faded + 1)
+  const wrap = (els: Element[], cls: string, kind?: string) => {
+    if (!els.length) return
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('class', cls)
+    if (kind) g.setAttribute('data-anim', kind)
+    els[0].before(g)
+    els.forEach((el) => g.appendChild(el))
+  }
+  const isMarker = (els: Element[]) =>
+    els.length === 4 &&
+    els[0].tagName === 'circle' && els[0].getAttribute('r') === '5' &&
+    els[1].tagName === 'line' &&
+    els[2].tagName === 'circle' && els[2].getAttribute('r') === '8' &&
+    els[3].tagName === 'text'
+  let m = after.length
+  while (m >= 4 && isMarker(after.slice(m - 4, m))) m -= 4
+  wrap(after.slice(m), 'ps-marks')
+  const groups: { kind: string; els: Element[] }[] = []
+  for (const el of after.slice(0, m)) {
+    const last = groups[groups.length - 1]
+    const d = el.getAttribute('d') ?? ''
+    if (el.tagName === 'path' && d.includes('C')) {
+      if (last?.kind === 'wire' && last.els[0].getAttribute('d') === d) last.els.push(el)
+      else groups.push({ kind: 'wire', els: [el] })
+      continue
+    }
+    const legs = el.tagName === 'path' && el.getAttribute('stroke') === '#8a8a8a'
+    const halo = el.getAttribute('stroke') === HALO
+    const afterLegs = last?.kind === 'part' && last.els[last.els.length - 1].getAttribute('stroke') === '#8a8a8a'
+    if (!last || last.kind !== 'part' || legs || (halo && !afterLegs)) groups.push({ kind: 'part', els: [el] })
+    else last.els.push(el)
+  }
+  groups.forEach((g) => wrap(g.els, 'ps-new', g.kind))
+}
+
+function collectAnim(svg: SVGSVGElement): Anim {
+  const items = Array.from(svg.querySelectorAll<SVGGElement>('g.ps-new')).map((el) => {
+    const kind = el.getAttribute('data-anim') === 'wire' ? 'wire' : 'part'
+    const paths =
+      kind === 'wire'
+        ? Array.from(el.querySelectorAll<SVGGeometryElement>('path, line, polyline')).map((p) => ({ el: p, len: p.getTotalLength() }))
+        : []
+    return { el, kind, paths } as AnimItem
+  })
+  // Parts go in first, then the wires between them.
+  items.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'part' ? -1 : 1))
+  return { items, marks: svg.querySelector<SVGGElement>('g.ps-marks') }
+}
+
+/** Show frame t (0..1): each new item gets its own slice of the first 85 %, the numbered markers the rest. */
+function applyAnim({ items, marks }: Anim, t: number) {
+  const span = items.length ? 0.85 : 0
+  const slot = items.length ? span / items.length : 0
+  items.forEach((it, k) => {
+    const a = k * slot
+    const u = clamp01((t - a) / (slot * 1.25))
+    if (it.kind === 'part') {
+      it.el.style.transform = u >= 1 ? '' : `translate(0px, ${(-36 * (1 - easeOut(u))).toFixed(2)}px)`
+      it.el.style.opacity = u >= 1 ? '' : String(clamp01(u * 3))
+    } else {
+      it.el.style.opacity = u > 0 ? '' : '0'
+      for (const p of it.paths) {
+        p.el.style.strokeDasharray = u >= 1 ? '' : `${p.len} ${p.len}`
+        p.el.style.strokeDashoffset = u >= 1 ? '' : String(p.len * (1 - easeInOut(u)))
+      }
+    }
+  })
+  if (marks) marks.style.opacity = t >= 1 ? '' : String(clamp01((t - span) / (1 - span)))
+}
+
+/** A breadboard step's SVG drawn inline, so its new parts and wires can move. Calls onReady with the number
+ * of things it animates, or with -1 if the SVG can't be loaded (the page then shows it as a plain image). */
+function AnimatedSvg({ src, alt, t, onReady }: { src: string; alt: string; t: number; onReady: (n: number) => void }) {
+  const box = useRef<HTMLDivElement>(null)
+  const anim = useRef<Anim | null>(null)
+  useEffect(() => {
+    let live = true
+    anim.current = null
+    fetch(src)
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+      .then((text) => {
+        if (!live || !box.current) return
+        const svg = new DOMParser().parseFromString(text, 'image/svg+xml').documentElement
+        if (!(svg instanceof SVGSVGElement)) throw new Error('not an svg')
+        cleanSvg(svg)
+        tagLegacySvg(svg)
+        svg.setAttribute('class', 'step-picture')
+        svg.setAttribute('role', 'img')
+        svg.setAttribute('aria-label', alt)
+        const node = document.importNode(svg, true)
+        box.current.replaceChildren(node)
+        anim.current = collectAnim(node)
+        applyAnim(anim.current, 0)
+        onReady(anim.current.items.length)
+      })
+      .catch(() => live && onReady(-1))
+    return () => {
+      live = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src])
+  useEffect(() => {
+    if (anim.current) applyAnim(anim.current, t)
+  }, [t])
+  return <div ref={box} className="step-svg" />
+}
+
+function AnimControls({ t, playing, onReplay, onScrub }: { t: number; playing: boolean; onReplay: () => void; onScrub: (p: number) => void }) {
+  return (
+    <div className="step-anim">
+      <button type="button" className="step-anim-replay" onClick={onReplay} disabled={playing} title="Play this step's animation again">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v2.8h2.8" />
+        </svg>
+        {playing ? 'Playing…' : 'Replay'}
+      </button>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={Math.round(t * 100)}
+        onChange={(e) => onScrub(Number(e.target.value) / 100)}
+        aria-label="Scrub through this step's animation"
+        aria-valuetext={`${Math.round(t * 100)} %`}
+      />
+      <span className="step-anim-pct">{Math.round(t * 100)} %</span>
+    </div>
+  )
+}
+
 /** A step's picture. On hardware builds every wire in it is clickable: the wire lights up and both ends
  * are tagged with the part and pin they plug into. */
 function StepPicture({
   step,
   index,
+  previous,
   wires,
   caption,
 }: {
   step: BuildStep
   index: number
+  previous?: string | null
   wires: Record<string, WireInfo>
   caption: string
 }) {
   const [picked, setPicked] = useState<string | null>(null)
   const { width, handle } = usePictureWidth()
+  const src = step.picture ?? ''
+  const alt = `Step ${index + 1}: where each part goes`
+  const isSvg = /\.svg(\?|#|$)/i.test(src)
+  // Breadboard SVGs: how many parts/wires it animates once loaded (-1: couldn't inline it, no animation).
+  const [svgItems, setSvgItems] = useState<{ src: string; n: number } | null>(null)
+  const loaded = svgItems?.src === src ? svgItems.n : null
+  const animated = isSvg ? loaded !== null && loaded >= 0 : true
+  const duration = isSvg ? Math.min(6000, 700 * Math.max(1, loaded ?? 1) + 500) : CROSSFADE_MS
+  const { t, playing, replay, scrub } = useTimeline(src, duration, isSvg ? loaded !== null : true)
   const lines = (step.picture_wires ?? []).filter((l) => wires[l.id] && l.points.length > 1)
   const line = lines.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
@@ -534,7 +759,17 @@ function StepPicture({
   return (
     <figure className="step-figure" style={{ maxWidth: width }}>
       <div className="step-picture-wrap">
-        <img className="step-picture" src={step.picture ?? ''} alt={`Step ${index + 1}: where each part goes`} />
+        {isSvg && loaded !== -1 ? (
+          <AnimatedSvg src={src} alt={alt} t={t} onReady={(n) => setSvgItems({ src, n })} />
+        ) : (
+          <>
+            <img className="step-picture" src={src} alt={alt} style={isSvg || previous ? undefined : { opacity: easeInOut(t) }} />
+            {/* Hardware builds: the previous step's picture fades into this one. */}
+            {!isSvg && previous && t < 1 && (
+              <img className="step-picture step-picture-prev" src={previous} alt="" aria-hidden="true" style={{ opacity: 1 - easeInOut(t) }} />
+            )}
+          </>
+        )}
         {lines.length > 0 && (
           <svg className="wire-overlay" viewBox={`0 0 ${PIC_W} ${PIC_H}`} preserveAspectRatio="none">
             {lines.map((l) => (
@@ -587,6 +822,7 @@ function StepPicture({
           </svg>
         </div>
       </div>
+      {animated && <AnimControls t={t} playing={playing} onReplay={replay} onScrub={scrub} />}
       {wire && (
         <p className="wire-info">
           <WireEnds wire={wire} />
@@ -629,6 +865,7 @@ function StepView({
         <StepPicture
           step={s}
           index={index}
+          previous={index > 0 ? plan.steps[index - 1].picture : null}
           wires={plan.wires ?? {}}
           caption={
             isHardware(plan)

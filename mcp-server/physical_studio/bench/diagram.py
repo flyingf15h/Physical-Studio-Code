@@ -1,4 +1,5 @@
-# Ported from circuit-studio/diagram.py at 21a4f23 (unchanged).
+# Ported from circuit-studio/diagram.py at 21a4f23; this step's parts, wires and markers are now tagged
+# (ps-new, ps-marks) for the build page's step animation.
 # IKEA-style picture of one build step, drawn as SVG (no extra packages): the breadboard and the
 # Arduino Uno to scale (the Uno's outline, headers and pin positions come from parts/arduino-uno.json),
 # everything placed in earlier steps faded, this step's parts in colour with a cyan halo, resistor
@@ -173,18 +174,20 @@ def step_svg(plan,i,uno=None):
         n=first[it['id']]
         if n>i:continue
         is_new=n==i;out=new if is_new else old
+        # This step's parts and wires each get their own group, so the build page can animate them into place.
+        tag=lambda kind,s:(f'<g class="ps-new" data-anim="{kind}" data-id="{esc(it["id"])}">{s}</g>' if is_new else s)
         if 'from_part' in it:
             a,b=end(it['from_part'],it['from_terminal']),end(it['to_part'],it['to_terminal'])
             for pid,t in ((it['from_part'],it['from_terminal']),(it['to_part'],it['to_terminal'])):
                 if parts.get(pid,{}).get('kind')=='development_board':used.add(t)
-            if a and b:out.append(('w',draw_wire(it,a,b,is_new)))
+            if a and b:out.append(('w',tag('wire',draw_wire(it,a,b,is_new))))
             continue
         holes=[h for h in (hole_xy(x) for x in it['mount_holes']) if h]
         if not holes and is_new:  # no mount holes in the model: use this step's breadboard holes
             holes=[h for h in (hole_xy(pl['hole']) for pl in steps[i]['placements']) if h]
-        if it['kind']=='led' and len(holes)>=2:out.append(('p',draw_led(it,holes[:2],is_new)))
-        elif it['kind']=='resistor' and len(holes)>=2:out.append(('p',draw_resistor(it,holes[:2],is_new)))
-        elif holes:out.append(('p',draw_generic(it,holes,is_new)))
+        if it['kind']=='led' and len(holes)>=2:out.append(('p',tag('part',draw_led(it,holes[:2],is_new))))
+        elif it['kind']=='resistor' and len(holes)>=2:out.append(('p',tag('part',draw_resistor(it,holes[:2],is_new))))
+        elif holes:out.append(('p',tag('part',draw_generic(it,holes,is_new))))
     markers=[];marks=[]
     for n,pl in enumerate(steps[i]['placements'] if i<len(steps) else [],1):
         h=pl['hole'].strip().lower();m=PIN.fullmatch(h)
@@ -195,7 +198,7 @@ def step_svg(plan,i,uno=None):
             x,y=xy;mx,my=x+11,y-13
             marks.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5" fill="none" stroke="{HALO}" stroke-width="2.5"/><line x1="{x+3:.1f}" y1="{y-4:.1f}" x2="{mx:.1f}" y2="{my:.1f}" stroke="{HALO}" stroke-width="2"/><circle cx="{mx:.1f}" cy="{my:.1f}" r="8" fill="{HALO}" stroke="#fff" stroke-width="1.5"/><text x="{mx:.1f}" y="{my+3.5:.1f}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">{n}</text>')
     layer=lambda xs,kind:''.join(s for k,s in xs if k==kind)
-    body=(draw_board(board,used) if boards else '')+draw_breadboard(rails)+f'<g opacity=".35">{layer(old,"p")}{layer(old,"w")}</g>'+layer(new,'p')+layer(new,'w')+''.join(marks)
+    body=(draw_board(board,used) if boards else '')+draw_breadboard(rails)+f'<g class="ps-old" opacity=".35">{layer(old,"p")}{layer(old,"w")}</g>'+layer(new,'p')+layer(new,'w')+f'<g class="ps-marks">{"".join(marks)}</g>'
     svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" font-family="system-ui,-apple-system,Segoe UI,sans-serif">{body}</svg>'
     page=f'<!doctype html><html><head><style>html,body{{margin:0;background:#fff}}svg{{display:block;width:100%;height:auto}}</style></head><body>{svg}</body></html>'
     return page,markers
