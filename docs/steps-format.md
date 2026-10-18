@@ -34,6 +34,8 @@ For an exploded view of the whole design, offset each placement by the `from_off
 
 `check` is a one-line description of what a correct result looks like on camera, for example "LED long leg (anode) in the hole marked +". Gemini compares the workbench against it.
 
+`picture` (written by export) is a reference render of the build after this step, `step-01.png` and so on next to the steps JSON, with the step's new parts highlighted and the lid left off until it goes on. Photo checks show it to the AI as what a correct result looks like.
+
 ## Print info
 
 `print` (when the design has a case) lists the printed pieces: `size_mm` of the closed case, and per piece its `file` (`design-base.stl`, `design-lid.stl`), `grams` of PLA and estimated `minutes` (a rough 12 g/h, shown as an estimate), plus totals and `step_file`. The Print screen reads it.

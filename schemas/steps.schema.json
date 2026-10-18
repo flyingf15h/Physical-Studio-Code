@@ -345,6 +345,10 @@
         "check": {
           "type": "string",
           "description": "What the step tracker (Gemini) should verify on camera before moving on."
+        },
+        "picture": {
+          "type": "string",
+          "description": "Reference render of the build after this step (file next to the steps JSON), with the step's new parts highlighted. Photo checks show it to the AI as what a correct result looks like."
         }
       }
     },

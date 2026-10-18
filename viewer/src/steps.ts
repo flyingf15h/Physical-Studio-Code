@@ -40,6 +40,8 @@ export interface Step {
   callouts?: { text: string; target: string; at?: Vec3 }[]
   dimensions?: { from: Vec3; to: Vec3; label: string }[]
   check?: string
+  /** Reference render after this step (file next to the steps JSON), shown to the AI by photo checks. */
+  picture?: string
 }
 
 export interface StepsDoc {

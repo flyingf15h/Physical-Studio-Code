@@ -230,6 +230,21 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str, printing
     return doc
 
 
+def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path) -> list[str]:
+    """step-01.png, step-02.png, ...: what the build looks like after each step, its new parts highlighted
+    (the lid left off until the step that adds it). Photo checks show the AI this as the correct result."""
+    written, shown = [], set()
+    for i, entry in enumerate(doc["steps"], start=1):
+        new = set(entry.get("add", []))
+        shown |= new
+        visible = shown if "lid" in new else shown - {"lid"}
+        path = out_dir / f"step-{i:02d}.png"
+        path.write_bytes(render(built, "iso", visible & set(built.pieces), None, new, size=(640, 480), labels=False))
+        entry["picture"] = path.name
+        written.append(str(path))
+    return written
+
+
 def export_design(
     design: Design,
     built: BuiltDesign,
@@ -250,7 +265,9 @@ def export_design(
         written.append(str(thumb))
         steps_path = out_dir / f"{name}.steps.json"
         printing = print_info(built, name, formats)
-        steps_path.write_text(json.dumps(steps_document(design, built, glb.name, printing), indent=2) + "\n")
+        doc = steps_document(design, built, glb.name, printing)
+        written += step_pictures(built, doc, out_dir)
+        steps_path.write_text(json.dumps(doc, indent=2) + "\n")
         written += [str(glb), str(steps_path)]
     if "stl" in formats:
         # Only the printed pieces; library parts are bought, not printed.
