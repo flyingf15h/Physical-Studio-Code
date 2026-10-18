@@ -1,0 +1,220 @@
+"""The Build helper port (physical_studio/bench): the checks on fixed scenes, per-step models, and the
+/api/build routes with the AI calls replaced by fixed answers. No network."""
+import base64
+import copy
+import io
+import json
+import time
+from pathlib import Path
+
+from fastmcp import FastMCP
+from PIL import Image
+from starlette.testclient import TestClient
+
+from physical_studio.bench import planner, routes
+from physical_studio.bench.geometry import build
+from physical_studio.bench.spec import Spec, validate
+
+REPO = Path(__file__).resolve().parents[2]
+PlanModel = planner.plan_model(Spec)
+
+
+def P(id, name, kind, holes=(), terms=()):
+    return dict(id=id, name=name, kind=kind, color="#ff0000", center_mm=[0, 0, 5], size_mm=[5, 5, 5], mount_board="bb" if holes else "",
+                mount_holes=list(holes), terminals=[dict(name=t, pin_index=i + 1) for i, t in enumerate(terms)], evidence="")
+
+
+def W(id, fp, ft, tp, tt):
+    return dict(id=id, name=id, from_part=fp, from_terminal=ft, to_part=tp, to_terminal=tt, color="#000000", connection_note="")
+
+
+def traffic_light(n_leds=3, rows=(10, 20, 30, 40), cols="eeee", span=4):
+    """GND to the ground rail, then per LED: anode e(A), cathode e(A+1), resistor d(A+1)-d(A+1+span),
+    GPIO to a(A), ground wire from a(A+1+span) up to the rail. Steps place one thing each."""
+    pins = ["d11", "d10", "d9", "d8"]
+    parts = [P("bb", "Breadboard", "breadboard"), P("esp", "ESP32", "development_board", terms=pins + ["gnd"])]
+    wires = [W("w_gnd", "esp", "gnd", "bb", "rail_1_24.14_1")]
+    steps = []
+    for n in range(n_leds):
+        a, c, r2 = rows[n], cols[n], rows[n] + 1 + span
+        parts += [P(f"led{n}", f"LED {n}", "led", [f"{c}{a}", f"{c}{a + 1}"]), P(f"r{n}", f"220 ohm resistor {n}", "resistor", [f"d{a + 1}", f"d{r2}"])]
+        wires += [W(f"w_sig{n}", "esp", pins[n], "bb", f"a{a}"), W(f"w_g{n}", "bb", f"a{r2}", "bb", f"rail_1_24.14_{r2}")]
+        for pid, holes in ((f"led{n}", [f"{c}{a}", f"{c}{a + 1}"]), (f"r{n}", [f"d{a + 1}", f"d{r2}"]),
+                           (f"w_sig{n}", [f"pin:{pins[n]}", f"a{a}"]), (f"w_g{n}", [f"a{r2}", f"rail_1_24.14_{r2}"])):
+            steps.append(dict(number=len(steps) + 1, title=f"Place {pid}", part_ids=[pid], instruction="x",
+                              placements=[dict(what="end", hole=h, where="x") for h in holes], check="x"))
+    steps.insert(0, dict(number=0, title="Ground wire", part_ids=["w_gnd"], instruction="x",
+                         placements=[dict(what="end", hole=h, where="x") for h in ("pin:gnd", "rail_1_24.14_1")], check="x"))
+    for k, s in enumerate(steps, 1):
+        s["number"] = k
+    return dict(title="Traffic light", summary="s", parts=[dict(name="5 mm LED", quantity=n_leds, why="light", user_has_it=True)],
+                scene=dict(parts=parts, wires=wires, assumptions=[]), part_guide=[dict(id="led0", what_it_is="The red LED.")],
+                steps=steps, final_result="f", code="", safety=[])
+
+
+def bench(raw, ids):
+    return Spec.model_validate(dict(parts=[p for p in raw["scene"]["parts"] if p["id"] in ids],
+                                    wires=[w for w in raw["scene"]["wires"] if w["id"] in ids], assumptions=[]))
+
+
+# ---- checks ------------------------------------------------------------------------------------------
+
+def test_a_correct_traffic_light_passes_every_check():
+    plan = PlanModel.model_validate(traffic_light())
+    assert planner.check_plan(plan) == []
+    assert planner.check_layout(plan) == []
+    assert planner.led_pins(plan.scene) == {"led0": ["d11"], "led1": ["d10"], "led2": ["d9"]}
+
+
+def test_the_circuit_check_catches_each_wiring_mistake():
+    good = PlanModel.model_validate(traffic_light()).scene
+    same_row = copy.deepcopy(good)
+    same_row.wires[2].to_terminal = "b15"  # the wire after the resistor stays in its own row
+    problems = planner.check_circuit(same_row)
+    assert any("connects nothing" in p for p in problems) and any("never reaches ground" in p for p in problems)
+    no_gnd = copy.deepcopy(good)
+    no_gnd.wires = no_gnd.wires[1:]
+    assert any("GND pin to the ground rail" in p for p in planner.check_circuit(no_gnd))
+    no_signal = copy.deepcopy(good)
+    no_signal.wires = [w for w in no_signal.wires if w.id != "w_sig2"]
+    assert any("not wired to a board pin" in p for p in planner.check_circuit(no_signal))
+
+
+def test_plans_build_on_the_bench_without_redoing_it():
+    raw = traffic_light()
+    start = bench(raw, {"bb", "esp", "w_gnd", "led0", "r0", "w_sig0", "w_g0"})
+    redo = PlanModel.model_validate(raw)  # its steps place the bench parts again
+    assert any("already on the bench" in p for p in planner.check_plan(redo, None, start))
+    ok = copy.deepcopy(raw)
+    ok["steps"] = [s for s in ok["steps"] if s["part_ids"][0] not in {p.id for p in start.parts} | {w.id for w in start.wires}]
+    assert planner.check_plan(PlanModel.model_validate(ok), None, start) == []
+    moved = copy.deepcopy(ok)
+    moved["scene"]["parts"][2]["mount_holes"] = ["e50", "e51"]
+    assert any("moved it" in p for p in planner.check_plan(PlanModel.model_validate(moved), None, start))
+    extra = copy.deepcopy(ok)
+    extra["scene"]["wires"].append(W("w_gnd2", "esp", "gnd", "bb", "rail_1_24.14_60"))
+    extra["steps"].append(dict(number=99, title="Another ground wire", part_ids=["w_gnd2"], instruction="x",
+                               placements=[dict(what="end", hole="rail_1_24.14_60", where="x")], check="x"))
+    assert any("already connected" in p for p in planner.check_plan(PlanModel.model_validate(extra), None, start))
+
+
+def test_a_requested_fourth_led_is_allowed_and_usb_steps_are_not():
+    plan = PlanModel.model_validate(traffic_light(4))
+    assert planner.check_plan(plan) == [] and len(planner.led_pins(plan.scene)) == 4
+    usb = copy.deepcopy(traffic_light())
+    usb["steps"].append(dict(number=99, title="Plug in the USB cable", part_ids=[], instruction="Plug the board into your computer and upload the code.", placements=[], check="x"))
+    assert any("not a placement" in p for p in planner.check_plan(PlanModel.model_validate(usb)))
+
+
+def test_layout_is_judged_for_looks_only():
+    messy = PlanModel.model_validate(traffic_light(rows=(10, 17, 33), cols="ece"))
+    assert planner.check_circuit(messy.scene) == []  # still works
+    assert len(planner.check_layout(messy)) >= 2  # but doesn't line up
+    assert planner.led_pins(messy.scene) == planner.led_pins(PlanModel.model_validate(traffic_light()).scene)
+
+
+def test_step_models_start_from_the_bench_and_end_with_the_whole_build():
+    raw = traffic_light()
+    have = {"bb", "esp", "w_gnd", "led0", "r0", "w_sig0", "w_g0"}
+    raw["steps"] = [s for s in raw["steps"] if s["part_ids"][0] not in have]
+    plan = PlanModel.model_validate(raw)
+    models = planner.step_models(validate(plan.scene), plan.model_dump()["steps"], validate, build, list(have))
+    first = {l["id"] for l in models[0]["labels"]}
+    assert have <= first and models[0]["new"] == ["led1"]
+    assert len(models[-1]["labels"]) == len(plan.scene.parts) + len(plan.scene.wires)
+
+
+# ---- routes ------------------------------------------------------------------------------------------
+
+def photo():
+    b = io.BytesIO()
+    Image.new("RGB", (80, 60), "gray").save(b, "JPEG")
+    return "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()
+
+
+def fake_make_plan(goal, have="", known="", photos=(), stage=lambda *a: None):
+    stage("planning", "Choosing the parts you still need and writing your steps.")
+    plan = PlanModel.model_validate(traffic_light())
+    scene = validate(plan.scene)
+    glb, labels = build(scene)
+    dumped = plan.model_dump()
+    return {"plan": dumped, "model": {"glb": glb, "labels": labels}, "steps3d": planner.step_models(scene, dumped["steps"], validate, build),
+            "problems": [], "scan": None, "start_model": None}
+
+
+def fake_commit_step(plan, i, photos, note):
+    return {"verdict": {"observation": "The yellow LED is in.", "status": "problem", "problem": "It is backwards.", "fix": "Turn it around.", "confidence": 0.8},
+            "model": fake_make_plan("x")["model"], "guide": {"led0": "The red LED."}}
+
+
+def app(tmp_path, monkeypatch):
+    monkeypatch.setattr(planner, "make_plan", fake_make_plan)
+    monkeypatch.setattr(planner, "commit_step", fake_commit_step)
+    monkeypatch.delenv("DEMO_CODE", raising=False)
+    mcp = FastMCP("bench-test")
+    routes.register_build_routes(mcp, tmp_path, REPO / "parts")
+    return TestClient(mcp.http_app(path="/mcp"))
+
+
+def wait_done(c, bid):
+    for _ in range(100):
+        b = c.get(f"/api/build/{bid}").json()
+        if b["status"] in ("done", "error"):
+            return b
+        time.sleep(0.1)
+    raise AssertionError("build never finished")
+
+
+def test_build_routes_follow_the_contract(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    assert c.post("/api/build", json={"goal": "x"}).status_code == 400
+    assert c.post("/api/build", json={"goal": "Traffic light", "photos": ["not a photo"]}).status_code == 400
+    assert c.get("/api/build/0123456789ab").status_code == 404
+    r = c.post("/api/build", json={"goal": "Traffic light with 3 LEDs", "photos": [photo()]})
+    assert r.status_code == 202
+    b = wait_done(c, r.json()["id"])
+    assert b["status"] == "done" and b["error"] is None and "internal" not in b
+    plan = b["plan"]
+    assert set(plan) >= {"title", "summary", "final_result", "code", "safety", "parts", "part_guide", "model", "steps"}
+    assert plan["parts"][0]["size"] and plan["part_guide"] == {"led0": "The red LED."}
+    assert plan["model"]["glb"] == f"/out/build-{b['id']}/final.glb"
+    s1 = plan["steps"][0]
+    assert s1["picture"] == f"/out/build-{b['id']}/step-1.svg" and s1["model"]["glb"].endswith("step-1.glb") and s1["markers"][0][0] == 1
+    folder = tmp_path / f"build-{b['id']}"
+    assert (folder / "step-1.svg").read_text().startswith("<svg") and (folder / "final.glb").stat().st_size > 1000
+    start = b["commits"][0]
+    assert start["kind"] == "start" and start["step"] is None and start["images"] == [f"/out/build-{b['id']}/img-start-1.jpg"]
+
+
+def test_step_commits_are_checked_saved_and_survive_a_restart(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    bid = c.post("/api/build", json={"goal": "Traffic light with 3 LEDs"}).json()["id"]
+    wait_done(c, bid)
+    assert c.post(f"/api/build/{bid}/commit", json={"step": 99, "photos": [photo()]}).status_code == 400
+    assert c.post(f"/api/build/{bid}/commit", json={"step": 2, "photos": []}).status_code == 400
+    r = c.post(f"/api/build/{bid}/commit", json={"step": 2, "photos": [photo()], "note": "Placed the yellow LED"})
+    assert r.status_code == 200
+    commit = r.json()
+    assert commit["kind"] == "step" and commit["step"] == 2 and commit["verdict"]["status"] == "problem"
+    assert commit["model"]["glb"] == f"/out/build-{bid}/commit-{commit['id']}.glb" and commit["parent"]
+    saved = json.loads((tmp_path / f"build-{bid}" / "build.json").read_text())
+    assert [x["kind"] for x in saved["commits"]] == ["start", "step"]
+    again = TestClient(app_again(tmp_path)).get(f"/api/build/{bid}").json()  # a fresh server reads build.json
+    assert again["status"] == "done" and len(again["commits"]) == 2
+
+
+def app_again(tmp_path):
+    mcp = FastMCP("bench-test-2")
+    routes.register_build_routes(mcp, tmp_path, REPO / "parts")
+    return mcp.http_app(path="/mcp")
+
+
+def test_a_failed_build_shows_a_plain_error(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+
+    def broken(*a, **k):
+        raise RuntimeError("model said no, key AIza-secret")
+
+    monkeypatch.setattr(planner, "make_plan", broken)
+    b = wait_done(c, c.post("/api/build", json={"goal": "Traffic light"}).json()["id"])
+    assert b["status"] == "error" and b["error"] == routes.FAILED and "secret" not in json.dumps(b)
