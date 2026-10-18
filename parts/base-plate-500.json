@@ -14,5 +14,8 @@
   "notes": "10 mm plywood or aluminium plate. Its front edge goes at the edge of the table (or on legs) so the pendulum can hang down.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "plywood"
+  }
 }

@@ -13,8 +13,7 @@
   },
   "appearance": {
     "color": "#b8bdc2",
-    "metallic": 0.9,
-    "roughness": 0.32
+    "material": "chrome"
   },
   "notes": "Cut from 10 mm rod (h7, modelled 9.9 mm so it slides in the bearings). Cart joint: through both pivot-block bearings into the lower arm.",
   "verified": false,

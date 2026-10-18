@@ -14,5 +14,8 @@
   "notes": "Holds an AS5600 board 1 mm from the magnet on the shaft end (12 mm hole for the magnet).",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "pla"
+  }
 }

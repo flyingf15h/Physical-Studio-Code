@@ -9,6 +9,7 @@ See docs/steps-format.md.
 from __future__ import annotations
 
 import json
+import functools
 import math
 from pathlib import Path
 
@@ -34,6 +35,39 @@ DESIGN_TO_GLTF = np.array(
 def hex_to_rgba(color: str) -> list[int]:
     c = color.lstrip("#")
     return [int(c[i : i + 2], 16) for i in (0, 2, 4)] + [255]
+
+
+# --- materials (parts/materials/, made by examples/make_materials.py) -----------------------------
+# A part's appearance may name a material, SketchUp style: a seamless greyscale detail texture that
+# the part's colour tints, a finish (metallic, roughness) and its real size per tile in mm.
+
+
+@functools.lru_cache(maxsize=8)
+def material_library(materials_dir: Path) -> dict[str, dict]:
+    try:
+        return json.loads((materials_dir / "materials.json").read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+@functools.lru_cache(maxsize=32)
+def material_texture(materials_dir: Path, name: str):
+    from PIL import Image
+
+    spec = material_library(materials_dir).get(name)
+    return Image.open(materials_dir / spec["file"]).convert("RGB") if spec else None
+
+
+def box_uv(mesh: trimesh.Trimesh, tile_mm: float) -> trimesh.Trimesh:
+    """Each face gets its own corners and UVs from the two axes it faces least (a box projection),
+    in millimetres / tile_mm, so a 400 mm rail repeats the texture instead of stretching one tile."""
+    corners = mesh.vertices[mesh.faces].reshape(-1, 3)
+    axis = np.repeat(np.abs(mesh.face_normals).argmax(axis=1), 3)
+    u = np.where(axis == 0, corners[:, 1], corners[:, 0])
+    v = np.where(axis == 2, corners[:, 1], corners[:, 2])
+    out = trimesh.Trimesh(vertices=corners, faces=np.arange(len(corners)).reshape(-1, 3), process=False)
+    out.visual = trimesh.visual.TextureVisuals(uv=np.column_stack([u, v]) / max(tile_mm, 0.1))
+    return out
 
 
 def top_face(piece, part: dict, parts_dir: Path) -> trimesh.Trimesh | None:
@@ -68,14 +102,26 @@ def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = No
         part = (parts or {}).get(piece.part_id) or {}
         look = part.get("appearance") or {}
         mesh = piece.local_mesh().copy()
-        mesh.visual = trimesh.visual.TextureVisuals(
-            material=trimesh.visual.material.PBRMaterial(
+        spec = material_library(parts_dir / "materials").get(look.get("material", "")) if parts_dir else None
+        texture = material_texture(parts_dir / "materials", look["material"]) if spec else None
+        if texture is not None:
+            mesh = box_uv(mesh, float(spec.get("tile_mm", 50)))
+            mesh.visual.material = trimesh.visual.material.PBRMaterial(
                 name=piece.id,
-                baseColorFactor=hex_to_rgba(piece.color),
-                metallicFactor=float(look.get("metallic", 0.6 if piece.kind == "fastener" else 0.0)),
-                roughnessFactor=float(look.get("roughness", 0.6)),
+                baseColorTexture=texture,
+                baseColorFactor=hex_to_rgba(piece.color),  # the texture is greyscale detail; the colour tints it
+                metallicFactor=float(look.get("metallic", spec.get("metallic", 0.0))),
+                roughnessFactor=float(look.get("roughness", spec.get("roughness", 0.6))),
             )
-        )
+        else:
+            mesh.visual = trimesh.visual.TextureVisuals(
+                material=trimesh.visual.material.PBRMaterial(
+                    name=piece.id,
+                    baseColorFactor=hex_to_rgba(piece.color),
+                    metallicFactor=float(look.get("metallic", 0.6 if piece.kind == "fastener" else 0.0)),
+                    roughnessFactor=float(look.get("roughness", 0.6)),
+                )
+            )
         scene.add_geometry(
             mesh,
             node_name=piece.id + suffix,

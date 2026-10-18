@@ -94,7 +94,6 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
       <div className="parts-head">
         <h2>Parts library</h2>
         {parts && <span className="parts-total">{parts.length}</span>}
-        <span className="parts-lede">Designs only use these parts, with their real dimensions.</span>
         <button
           type="button"
           className={`parts-upload${uploading ? ' active' : ''}`}

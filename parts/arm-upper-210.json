@@ -14,5 +14,8 @@
   "notes": "Clamped to the elbow shaft at the bottom (10 mm hole). Free at the top.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "pla"
+  }
 }

@@ -14,5 +14,8 @@
   "notes": "Holds a VL53L0X board at the end of the rail, facing the carriage.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "pla"
+  }
 }

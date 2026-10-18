@@ -14,5 +14,8 @@
   "notes": "Printed or aluminium spacer that lifts the rack so the pinion meshes just under the cart plate.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "brushed-aluminium"
+  }
 }

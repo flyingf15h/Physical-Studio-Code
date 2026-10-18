@@ -20,11 +20,12 @@ TYPICAL = "Typical datasheet/standard numbers for this part; the shop listing wa
 PRINTED = "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely"
 MIN = (Align.MIN, Align.MIN, Align.MIN)
 
-# Finishes, for the guide's 3D view (appearance in parts/README.md).
-STEEL = {"color": "#b8bdc2", "metallic": 0.9, "roughness": 0.32}  # ground bearing steel (rail, block, shafts)
-GEAR_STEEL = {"color": "#9aa0a6", "metallic": 0.85, "roughness": 0.45}  # C45 steel gear and rack
-CHROME = {"color": "#d6dadd", "metallic": 0.95, "roughness": 0.18}  # chrome-steel bearing with ZZ shields
-NICKEL = {"color": "#c4c7ca", "metallic": 0.9, "roughness": 0.25}  # nickel-plated NdFeB magnet
+# Finishes, for the guide's 3D view (appearance in parts/README.md): materials from parts/materials/
+# (examples/make_materials.py). The other parts' materials are set in their parts/*.json.
+STEEL = {"material": "ground-steel"}  # ground bearing steel (rail, block, shafts)
+GEAR_STEEL = {"material": "gear-steel"}  # C45 steel gear and rack
+CHROME = {"material": "chrome"}  # chrome-steel bearing with ZZ shields
+NICKEL = {"material": "chrome"}  # nickel-plated NdFeB magnet
 HIWIN = "https://www.industrybuying.com/linear-guides-hiwin-BEA.LIN.120965886"
 
 

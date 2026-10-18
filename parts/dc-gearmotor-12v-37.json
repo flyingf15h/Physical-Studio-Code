@@ -44,5 +44,8 @@
   "notes": "37 mm gearmotor: 55 mm body, 6 mm output shaft 17 mm long, pointing down (-z). If the pinion's bore is 8 mm, use a 6-to-8 mm sleeve or a 6 mm-bore pinion.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "black-anodised"
+  }
 }

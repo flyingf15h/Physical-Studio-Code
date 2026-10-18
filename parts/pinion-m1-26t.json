@@ -13,8 +13,7 @@
   },
   "appearance": {
     "color": "#9aa0a6",
-    "metallic": 0.85,
-    "roughness": 0.45
+    "material": "gear-steel"
   },
   "notes": "Module 1, 26 teeth: 26 mm pitch diameter, 28 mm outside, 10 mm face. 81.7 mm of cart travel per motor turn.",
   "verified": false,

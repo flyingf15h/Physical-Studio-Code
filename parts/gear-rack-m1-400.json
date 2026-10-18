@@ -13,8 +13,7 @@
   },
   "appearance": {
     "color": "#9aa0a6",
-    "metallic": 0.85,
-    "roughness": 0.45
+    "material": "gear-steel"
   },
   "notes": "Module 1 rack, 10 x 10 mm section, 127 teeth. The teeth face the rail (-y); pitch line 1 mm in from the tooth tips.",
   "verified": false,

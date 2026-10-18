@@ -13,9 +13,8 @@
   },
   "appearance": {
     "color": "#b8bdc2",
-    "metallic": 0.9,
-    "roughness": 0.32,
-    "source": "https://www.industrybuying.com/linear-guides-hiwin-BEA.LIN.120965886"
+    "source": "https://www.industrybuying.com/linear-guides-hiwin-BEA.LIN.120965886",
+    "material": "ground-steel"
   },
   "notes": "HIWIN-style HGR20 profile: 20 mm wide, 17.5 mm tall. M5 screws every 60 mm into the base plate.",
   "verified": false,

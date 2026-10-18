@@ -38,9 +38,9 @@ place = studio.place_part
 place("base-plate-500", (0, 15, 0), id="base-plate", name="Base plate")
 place("hgr20-rail-400", (50, 50, 10), id="rail", name="Linear rail")
 place("hgh20ca-block", (200, 38, 14.6), id="block", name="Carriage block")
-place("rack-riser-400", (50, 112, 10), id="riser", name="Rack riser", color="grey")
+place("rack-riser-400", (50, 112, 10), id="riser", name="Rack riser")
 place("gear-rack-m1-400", (50, 112, 29), id="rack", name="Gear rack")
-place("cart-plate", (170.7, 25, 40), id="cart", name="Cart plate", color="#4a7fb5")
+place("cart-plate", (170.7, 25, 40), id="cart", name="Cart plate")
 place("pinion-m1-26t", (216.7, 86, 29), id="pinion", name="Pinion gear")
 place("dc-gearmotor-12v-37", (212.2, 81.5, 29), id="motor", name="Drive motor", color="#8a8f98")
 

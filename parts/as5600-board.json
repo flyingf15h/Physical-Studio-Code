@@ -175,7 +175,8 @@
         ]
       }
     },
-    "source": "https://www.tinytronics.nl/shop/en/sensors/magnetic-field/as5600-magnetic-angle-sensor-encoder-module"
+    "source": "https://www.tinytronics.nl/shop/en/sensors/magnetic-field/as5600-magnetic-angle-sensor-encoder-module",
+    "material": "pcb"
   },
   "notes": "12-bit angle sensor, I2C address 0x36 (fixed), so each one needs its own I2C bus. Chip side faces the magnet, 0.5 to 3 mm away.",
   "verified": false,

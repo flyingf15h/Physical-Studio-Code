@@ -13,8 +13,7 @@
   },
   "appearance": {
     "color": "#d6dadd",
-    "metallic": 0.95,
-    "roughness": 0.18
+    "material": "chrome"
   },
   "notes": "10 mm bore, 19 mm outside, 5 mm wide, 21 mm flange 1 mm thick. Presses into a 19 mm pocket with the flange on the outside.",
   "verified": false,

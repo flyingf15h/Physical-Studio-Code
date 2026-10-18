@@ -29,6 +29,7 @@ FACE_NORMALS = {
 }
 # Which local axes a connector's [width, height] opening spans on each face.
 FACE_PLANE_AXES = {"x": (1, 2), "y": (0, 2), "z": (0, 1)}
+MATERIALS_DIR = Path(__file__).resolve().parents[2] / "parts" / "materials"
 CATEGORY_COLORS = {
     "board": "#1f6fb2",
     "input": "#e0b020",
@@ -137,6 +138,16 @@ def box_between(lo, hi) -> Part:
 
 
 # --- parts ------------------------------------------------------------------------------
+
+
+def material_color(part: dict) -> str | None:
+    """The colour of the material a part's appearance names (parts/materials/materials.json)."""
+    name = (part.get("appearance") or {}).get("material")
+    if not name:
+        return None
+    from .export import material_library  # here to avoid a circular import at load time
+
+    return (material_library(MATERIALS_DIR).get(name) or {}).get("color")
 
 
 def part_shape(part: dict, parts_dir: Path) -> Part:
@@ -280,6 +291,7 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
             matrix=placement_matrix(p.position, p.rotation),
             color=p.color
             or (part.get("appearance") or {}).get("color")
+            or material_color(part)
             or CATEGORY_COLORS.get(part.get("category", "misc"), "#999999"),
             position=tuple(p.position),
             rotation=tuple(p.rotation),

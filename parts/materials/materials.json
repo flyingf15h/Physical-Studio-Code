@@ -1,0 +1,90 @@
+{
+  "brushed-aluminium": {
+    "file": "brushed-aluminium.jpg",
+    "color": "#c3c8cd",
+    "metallic": 0.85,
+    "roughness": 0.42,
+    "tile_mm": 60,
+    "about": "Brushed aluminium plate or extrusion"
+  },
+  "ground-steel": {
+    "file": "ground-steel.jpg",
+    "color": "#b4b9bf",
+    "metallic": 0.9,
+    "roughness": 0.32,
+    "tile_mm": 40,
+    "about": "Ground bearing steel (linear rails, carriages)"
+  },
+  "gear-steel": {
+    "file": "gear-steel.jpg",
+    "color": "#9aa0a6",
+    "metallic": 0.85,
+    "roughness": 0.45,
+    "tile_mm": 25,
+    "about": "Machined carbon-steel gears and racks"
+  },
+  "chrome": {
+    "file": "chrome.jpg",
+    "color": "#dfe3e6",
+    "metallic": 1.0,
+    "roughness": 0.12,
+    "tile_mm": 30,
+    "about": "Chrome-plated shafts and bearings"
+  },
+  "black-anodised": {
+    "file": "black-anodised.jpg",
+    "color": "#2c2e33",
+    "metallic": 0.55,
+    "roughness": 0.5,
+    "tile_mm": 20,
+    "about": "Black anodised aluminium, motor cans"
+  },
+  "plywood": {
+    "file": "plywood.jpg",
+    "color": "#cfa878",
+    "metallic": 0.0,
+    "roughness": 0.75,
+    "tile_mm": 120,
+    "about": "Birch plywood base plate"
+  },
+  "mdf": {
+    "file": "mdf.jpg",
+    "color": "#b98d5f",
+    "metallic": 0.0,
+    "roughness": 0.85,
+    "tile_mm": 40,
+    "about": "MDF board"
+  },
+  "pla": {
+    "file": "pla.jpg",
+    "color": "#f0f0ec",
+    "metallic": 0.0,
+    "roughness": 0.6,
+    "tile_mm": 12.8,
+    "about": "3D-printed PLA (tinted by the part's colour)"
+  },
+  "rubber": {
+    "file": "rubber.jpg",
+    "color": "#232323",
+    "metallic": 0.0,
+    "roughness": 0.95,
+    "tile_mm": 15,
+    "about": "Rubber or matte black plastic"
+  },
+  "pcb": {
+    "file": "pcb.jpg",
+    "color": "#1d6b3a",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "tile_mm": 8,
+    "about": "PCB solder mask (tinted green, blue or purple)"
+  },
+  "brass": {
+    "file": "brass.jpg",
+    "color": "#c9a54f",
+    "metallic": 0.9,
+    "roughness": 0.35,
+    "tile_mm": 30,
+    "about": "Brass inserts, standoffs and terminals"
+  }
+}

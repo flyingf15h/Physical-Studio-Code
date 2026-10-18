@@ -72,5 +72,9 @@
   "notes": "Small step-down module. Powers the four sensors from the 12 V supply.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "pcb",
+    "color": "#1f4e8c"
+  }
 }

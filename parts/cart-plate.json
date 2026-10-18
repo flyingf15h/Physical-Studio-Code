@@ -14,5 +14,8 @@
   "notes": "Bolts onto the carriage block. The motor shaft drops through the 9 mm hole to the pinion underneath.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "appearance": {
+    "material": "brushed-aluminium"
+  }
 }

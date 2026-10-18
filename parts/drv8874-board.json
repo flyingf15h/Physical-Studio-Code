@@ -227,7 +227,8 @@
     "top": {
       "image": "drv8874-board.top.jpg"
     },
-    "source": "https://www.pololu.com/product/4035 (picture 0J11426)"
+    "source": "https://www.pololu.com/product/4035 (picture 0J11426)",
+    "material": "pcb"
   },
   "notes": "H-bridge, motor supply 4.5 to 37 V on VIN, 2.1 A continuous. PMODE high = IN/IN (PWM) mode; SLEEP high to run. VM is the reverse-protected motor voltage, an output.",
   "verified": false,
