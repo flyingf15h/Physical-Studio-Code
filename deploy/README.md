@@ -15,7 +15,7 @@ One server runs everything with Docker Compose:
 2. **DNS.** At GoDaddy, add an `A` record for the domain (or a subdomain) pointing at the instance's IPv4 address. Wait until `ping <domain>` shows that IP: Caddy needs it to get the certificate.
 3. **Code and settings** (on the server, over SSH):
    ```sh
-   git clone https://github.com/notkelly1/Physical-Studio-Code.git
+   git clone https://github.com/flyingf15h/Physical-Studio-Code.git
    cd Physical-Studio-Code/deploy
    cp .env.example .env
    nano .env          # DOMAIN (one name or a comma-separated list), GEMINI_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, MCP_TOKEN (openssl rand -hex 24), optional DEMO_CODE
