@@ -2,12 +2,13 @@
 // from the GLBs Senna's Build helper code writes (mcp-server/physical_studio/bench/). Each part's
 // meshes sit under a node named <id>__mesh. Click a part, or its name below, to see what it is;
 // `highlight` marks this step's new parts. Like the Build helper's viewer: reset / top view, an evenly
-// lit mode, and the GLB to download.
+// lit mode, and the GLB to download. Hardware builds also pass `wires`: clicking a wire marks both of
+// its ends in the model and names the part and pin at each one.
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { Bounds, OrbitControls, useGLTF } from '@react-three/drei'
-import type { BenchModel as Model } from '../api'
+import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
+import type { BenchModel as Model, WireInfo } from '../api'
 import './BenchModel.css'
 
 const PICKED = new THREE.Color('#26c6da')
@@ -22,6 +23,49 @@ function partOf(obj: THREE.Object3D, ids: string[]): string | null {
     if (id) return id
   }
   return null
+}
+
+/** "From Teensy 4.1 pin D2 to A4988 STEP, about 120 mm": the two ends of a clicked wire. */
+export function WireEnds({ wire }: { wire: WireInfo }) {
+  return (
+    <span className="wire-ends">
+      <span className="wire-swatch" style={{ background: wire.color }} />
+      <span className="wire-end">
+        <span className="wire-tag">A</span> {wire.from.part} <code>{wire.from.pin}</code>
+      </span>
+      <span aria-hidden="true">→</span>
+      <span className="wire-end">
+        <span className="wire-tag">B</span> {wire.to.part} <code>{wire.to.pin}</code>
+      </span>
+      {wire.inline && <span className="muted">through a {wire.inline}</span>}
+      {wire.length_mm ? <span className="muted">· about {wire.length_mm} mm</span> : null}
+    </span>
+  )
+}
+
+function WireMarkers({ wire }: { wire: WireInfo }) {
+  if (!wire.ends) return null
+  return (
+    <>
+      {wire.ends.map((p, i) => {
+        const end = i === 0 ? wire.from : wire.to
+        return (
+          <group key={i} position={p}>
+            <mesh renderOrder={10}>
+              <sphereGeometry args={[0.0028, 16, 12]} />
+              <meshBasicMaterial color={PICKED} depthTest={false} transparent opacity={0.95} />
+            </mesh>
+            <Html center={false} zIndexRange={[20, 10]} style={{ pointerEvents: 'none' }}>
+              <div className="wire-label">
+                <span className="wire-tag">{i === 0 ? 'A' : 'B'}</span>
+                {end.part} · <strong>{end.pin}</strong>
+              </div>
+            </Html>
+          </group>
+        )
+      })}
+    </>
+  )
 }
 
 function Scene({
@@ -65,7 +109,14 @@ function Scene({
         vertexColors: !!mesh.geometry.attributes.color,
         side: THREE.DoubleSide,
       }
-      mesh.userData.lit = new THREE.MeshStandardMaterial({ ...look, roughness: 0.8, metalness: 0 })
+      // CAD guides carry each part's real finish (bare steel, PCB solder mask); the breadboard GLBs have
+      // vertex colours and no finish, so they stay matte.
+      const real = !look.vertexColors && old.isMeshStandardMaterial
+      mesh.userData.lit = new THREE.MeshStandardMaterial({
+        ...look,
+        roughness: real ? old.roughness : 0.8,
+        metalness: real ? old.metalness : 0,
+      })
       mesh.userData.flat = new THREE.MeshBasicMaterial(look)
       mesh.userData.part = partOf(mesh, ids)
       meshes.push(mesh)
@@ -102,16 +153,19 @@ function Scene({
 interface Props {
   model: Model
   guide?: Record<string, string> // part id -> "what it is" note
+  wires?: Record<string, WireInfo> // hardware builds: wire id -> its two ends
   highlight?: string[]
   height?: number
 }
 
-export function BenchModel({ model, guide = {}, highlight = [], height = 420 }: Props) {
+export function BenchModel({ model, guide = {}, wires = {}, highlight = [], height = 420 }: Props) {
   const [picked, setPicked] = useState<string | null>(null)
   const [view, setView] = useState({ n: 0, top: false }) // a new n remounts the canvas at that view
   const [flat, setFlat] = useState(false)
   const label = model.labels.find((l) => l.id === picked)
+  const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
+  const wireLabels = model.labels.filter((l) => l.kind === 'wire' && wires[l.id])
 
   return (
     <div className="bench-model">
@@ -126,15 +180,22 @@ export function BenchModel({ model, guide = {}, highlight = [], height = 420 }: 
           <hemisphereLight args={['#ffffff', '#b9b4ae', 1.7]} />
           <directionalLight position={[1, 2, 1.5]} intensity={2} />
           <directionalLight position={[-1.5, 1, -1]} intensity={0.7} />
+          {/* A soft studio for metal parts to reflect (built here, nothing downloaded). */}
+          <Environment resolution={128}>
+            <Lightformer intensity={2} position={[0, 4, 0]} rotation-x={Math.PI / 2} scale={[8, 8, 1]} />
+            <Lightformer intensity={1} position={[-4, 1, 2]} rotation-y={Math.PI / 2} scale={[6, 3, 1]} />
+            <Lightformer intensity={0.6} position={[4, 1, -2]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} />
+          </Environment>
           <Suspense fallback={null}>
             <Bounds fit clip observe margin={1.15}>
               <Scene model={model} picked={picked} highlight={highlight} flat={flat} onPick={setPicked} />
             </Bounds>
+            {wire && <WireMarkers wire={wire} />}
           </Suspense>
           <OrbitControls makeDefault />
         </Canvas>
         <div className="bench-tools">
-          <span>Drag to rotate · scroll to zoom · click a part</span>
+          <span>Drag to rotate · scroll to zoom · click a part or wire</span>
           <button type="button" onClick={() => setView((v) => ({ n: v.n + 1, top: false }))}>
             Reset view
           </button>
@@ -155,7 +216,9 @@ export function BenchModel({ model, guide = {}, highlight = [], height = 420 }: 
         </div>
       </div>
       <p className="bench-info" aria-live="polite">
-        {label ? (
+        {wire ? (
+          <WireEnds wire={wire} />
+        ) : label ? (
           <>
             <strong>{label.name}</strong>
             {guide[label.id] ? ` · ${guide[label.id]}` : ''}
@@ -174,6 +237,21 @@ export function BenchModel({ model, guide = {}, highlight = [], height = 420 }: 
               onClick={() => setPicked(l.id === picked ? null : l.id)}
             >
               {l.name}
+            </button>
+          ))}
+        </div>
+      )}
+      {wireLabels.length > 0 && (
+        <div className="bench-parts bench-wires" aria-label="Wires">
+          {wireLabels.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              className={[l.id === picked ? 'picked' : '', highlight.includes(l.id) ? 'new' : ''].join(' ')}
+              onClick={() => setPicked(l.id === picked ? null : l.id)}
+            >
+              <span className="wire-swatch" style={{ background: wires[l.id].color }} />
+              {wires[l.id].from.pin} → {wires[l.id].to.pin}
             </button>
           ))}
         </div>

@@ -253,3 +253,33 @@ def test_place_part_color_reaches_the_build_and_steps(studio, tmp_path):
     doc = json.loads((out / "design.steps.json").read_text())
     colors = {p["id"]: p["color"] for p in doc["placements"]}
     assert colors["led-blue"] == "#3a6fd0"
+
+
+def test_render_draws_board_top_photos_and_keeps_big_designs_readable(studio):
+    import io
+
+    import numpy as np
+    import trimesh
+    from PIL import Image
+
+    from physical_studio.render import render
+
+    built = studio.build()
+    plain = np.asarray(Image.open(io.BytesIO(render(built, "top", labels=False, size=(320, 240)))).convert("RGB"), dtype=float)
+    # a striped "photo" on the board's top
+    sx, sy, sz = (float(v) for v in studio.library()["arduino-uno"]["body"]["size"])
+    quad = trimesh.Trimesh(vertices=[[0, 0, sz + 0.03], [sx, 0, sz + 0.03], [sx, sy, sz + 0.03], [0, sy, sz + 0.03]],
+                           faces=[[0, 1, 2], [0, 2, 3]], process=False)
+    stripes = np.zeros((32, 32, 3), dtype=np.uint8)
+    stripes[:, ::4] = 255
+    quad.visual = trimesh.visual.TextureVisuals(uv=[[0, 0], [1, 0], [1, 1], [0, 1]], material=trimesh.visual.material.PBRMaterial(baseColorTexture=Image.fromarray(stripes)))
+    stats: dict = {}
+    photo = np.asarray(Image.open(io.BytesIO(render(built, "top", labels=False, size=(320, 240), textures={"uno": quad}, stats=stats))).convert("RGB"), dtype=float)
+    assert photo.std() > plain.std() + 5  # the stripes show
+    assert stats["wires"] == {}
+
+    # half a metre wide: sloped faces must stay their colour, not turn into outline
+    studio.place_part("arduino-uno", (500, 0, 0), id="uno2")
+    big = np.asarray(Image.open(io.BytesIO(render(studio.build(), "iso", labels=False, size=(640, 480)))).convert("RGB"), dtype=float)
+    board = big[(np.abs(big - [236, 233, 228]).sum(axis=2) > 30)]
+    assert (np.abs(board - [40, 44, 52]).sum(axis=1) < 20).mean() < 0.5

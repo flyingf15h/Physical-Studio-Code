@@ -135,6 +135,25 @@ export interface BuildStep {
   model: BenchModel | null
   section?: string | null // hardware builds: the group this step belongs to ("Cart and drive motor")
   tools?: string[] // hardware builds: tools this step needs
+  picture_view?: string // hardware builds: the angle of the step picture (iso, iso_right, iso_back, iso_left_back, below)
+  picture_wires?: { id: string; points: [number, number][] }[] // hardware builds: each wire in the picture, in fractions of its width and height
+}
+
+/** One end of a wire: the part and the pin label printed on it. */
+export interface WireEnd {
+  part: string
+  pin: string
+}
+
+/** Hardware builds: what the page shows when a wire is clicked in the step picture or the 3D model. */
+export interface WireInfo {
+  name: string
+  color: string
+  from: WireEnd
+  to: WireEnd
+  length_mm: number | null
+  inline?: string // a component spliced into the wire ("220 ohm resistor")
+  ends: [number, number, number][] | null // where each end sits in the GLB (metres, +Y up)
 }
 
 export interface BuildPlan {
@@ -146,6 +165,7 @@ export interface BuildPlan {
   safety: string[]
   parts: { name: string; quantity: number; why: string; user_has_it: boolean; size: string }[]
   part_guide: Record<string, string>
+  wires?: Record<string, WireInfo> // hardware builds: wire id -> its two ends
   model: BenchModel | null
   steps: BuildStep[]
 }

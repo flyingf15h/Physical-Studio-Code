@@ -55,6 +55,7 @@ class BuiltPiece:
     mesh: trimesh.Trimesh | None = None  # ready-made geometry, used instead of tessellating shape
     extra: dict = field(default_factory=dict)  # kind-specific fields for the steps JSON
     category: str | None = None  # library category for parts
+    path: np.ndarray | None = None  # wires: the centre line, pin to pin (design frame, mm)
 
     def local_mesh(self, tolerance: float = 0.05, angular: float = 0.3) -> trimesh.Trimesh:
         return self.mesh if self.mesh is not None else mesh_of(self.shape, tolerance, angular)
@@ -408,6 +409,7 @@ def wire_piece(design: Design, parts: dict[str, dict], wire: Wire) -> BuiltPiece
         matrix=np.eye(4),
         color=wire.color,
         mesh=tube(path, radii),
+        path=path,
         extra={
             "from": {"placement": wire.a[0], "pin": wire.a[1]},
             "to": {"placement": wire.b[0], "pin": wire.b[1]},

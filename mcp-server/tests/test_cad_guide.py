@@ -63,3 +63,16 @@ def test_cad_builds_are_checked_against_their_reference_picture_and_take_a_new_s
     assert r.status_code == 200 and r.json() == {"summary": "My light for the front window."}
     assert c.get(f"/api/build/{bid}").json()["plan"]["summary"] == "My light for the front window."
     assert json.loads((tmp_path / f"build-{bid}" / "build.json").read_text())["plan"]["summary"] == "My light for the front window."
+
+
+def test_every_wire_can_be_clicked_in_the_picture_and_the_3d_model(ready_dir):
+    plan = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]
+    wires = plan["wires"]
+    assert wires
+    for w in wires.values():
+        assert w["from"]["part"] and w["from"]["pin"] and w["to"]["part"] and w["to"]["pin"]
+        assert len(w["ends"]) == 2 and all(len(p) == 3 for p in w["ends"])
+    drawn = [l for s in plan["steps"] for l in s["picture_wires"]]
+    assert drawn and {l["id"] for l in drawn} <= set(wires)
+    assert all(len(l["points"]) > 2 and all(-0.5 < c < 1.5 for p in l["points"] for c in p) for l in drawn)
+    assert all(s["picture_view"] for s in plan["steps"])

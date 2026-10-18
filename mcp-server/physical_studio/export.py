@@ -237,17 +237,52 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str, printing
     return doc
 
 
-def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path) -> list[str]:
+# Angles a step picture may use. iso unless another one shows the new part clearly better (a pinion under
+# the cart, a sensor on the back of an arm).
+PICTURE_VIEWS = ("iso", "iso_right", "iso_back", "iso_left_back", "below")
+
+
+def best_view(built: BuiltDesign, visible: set[str], new: set[str]) -> str:
+    seen = {}
+    for view in PICTURE_VIEWS:
+        stats: dict = {}
+        render(built, view, visible, None, new, size=(200, 150), labels=False, stats=stats)
+        seen[view] = stats["highlight_px"]
+    best = max(seen, key=seen.get)
+    return best if seen[best] > 1.5 * seen["iso"] + 20 else "iso"
+
+
+def top_textures(built: BuiltDesign, parts: dict[str, dict], parts_dir: Path) -> dict:
+    """Piece id -> its textured top quad (top_face), for render's textures."""
+    out = {}
+    for piece in built.pieces.values():
+        part = parts.get(piece.part_id) or {}
+        quad = top_face(piece, part, parts_dir) if piece.kind == "part" and part.get("body") else None
+        if quad is not None:
+            out[piece.id] = quad
+    return out
+
+
+def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict | None = None) -> list[str]:
     """step-01.png, step-02.png, ...: what the build looks like after each step, its new parts highlighted
-    (the lid left off until the step that adds it). Photo checks show the AI this as the correct result."""
+    (the lid left off until the step that adds it), from the angle that shows the new parts best. Photo
+    checks show the AI this as the correct result. Each entry also gets picture_wires: every wire in the
+    picture as a line in fractions of the picture's width and height, so the page can make wires clickable."""
     written, shown = [], set()
+    size = (640, 480)
     for i, entry in enumerate(doc["steps"], start=1):
         new = set(entry.get("add", []))
         shown |= new
-        visible = shown if "lid" in new else shown - {"lid"}
+        visible = (shown if "lid" in new else shown - {"lid"}) & set(built.pieces)
+        lit = new & visible
+        view = best_view(built, visible, lit) if lit and len(visible) > 1 else "iso"
         path = out_dir / f"step-{i:02d}.png"
-        path.write_bytes(render(built, "iso", visible & set(built.pieces), None, new, size=(640, 480), labels=False))
+        stats: dict = {}
+        path.write_bytes(render(built, view, visible, None, lit, size=size, labels=False, stats=stats, textures=textures))
         entry["picture"] = path.name
+        entry["picture_view"] = view
+        entry["picture_wires"] = [{"id": wid, "points": [[round(x / size[0], 4), round(y / size[1], 4)] for x, y in pts]}
+                                  for wid, pts in stats["wires"].items()]
         written.append(str(path))
     return written
 
@@ -268,12 +303,13 @@ def export_design(
         write_glb(built, glb, parts, parts_dir)
         # Thumbnail for the projects list on screen 1: the finished design, no labels.
         thumb = out_dir / f"{name}.png"
-        thumb.write_bytes(render(built, "iso", size=(480, 360), labels=False))
+        textures = top_textures(built, parts, parts_dir) if parts and parts_dir else None
+        thumb.write_bytes(render(built, "iso", size=(480, 360), labels=False, textures=textures))
         written.append(str(thumb))
         steps_path = out_dir / f"{name}.steps.json"
         printing = print_info(built, name, formats)
         doc = steps_document(design, built, glb.name, printing)
-        written += step_pictures(built, doc, out_dir)
+        written += step_pictures(built, doc, out_dir, textures)
         steps_path.write_text(json.dumps(doc, indent=2) + "\n")
         written += [str(glb), str(steps_path)]
     if "stl" in formats:

@@ -11,3 +11,9 @@
 .bench-parts button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
 .bench-parts button.new { border-color: var(--accent); color: var(--accent); }
 .bench-parts button.picked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bench-wires button { display: inline-flex; align-items: center; gap: 6px; }
+.wire-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.25); flex: none; }
+.wire-ends { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.wire-end { display: inline-flex; align-items: center; gap: 5px; }
+.wire-tag { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #26c6da; color: #06343a; font-size: 11px; font-weight: 700; flex: none; }
+.wire-label { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; transform: translate(8px, -50%); background: rgba(255, 255, 255, 0.94); color: #1f2933; border: 1px solid #26c6da; border-radius: 999px; padding: 2px 9px 2px 3px; font-size: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }

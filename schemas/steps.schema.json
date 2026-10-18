@@ -346,6 +346,22 @@
           "type": "string",
           "description": "What the step tracker (Gemini) should verify on camera before moving on."
         },
+        "picture_view": {
+          "type": "string",
+          "description": "The angle the step picture was rendered from (iso, iso_right, iso_back, iso_left_back, below)."
+        },
+        "picture_wires": {
+          "type": "array",
+          "description": "Every wire in the step picture as a line through its centre, [x, y] in fractions of the picture's width and height, so a page can make each wire clickable.",
+          "items": {
+            "type": "object",
+            "required": ["id", "points"],
+            "properties": {
+              "id": { "type": "string" },
+              "points": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } }
+            }
+          }
+        },
         "section": {
           "type": "string",
           "description": "The group this step belongs to (\"Frame\", \"Cart and drive\", \"Wiring\"). The build page folds the step list by section."

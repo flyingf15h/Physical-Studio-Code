@@ -14,8 +14,9 @@ import {
   type BuildPlan,
   type BuildStep,
   type Verdict,
+  type WireInfo,
 } from '../api'
-import { BenchModel } from '../components/BenchModel'
+import { BenchModel, WireEnds } from '../components/BenchModel'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { ShareButton } from '../components/ShareButton'
 import { shrink } from '../images'
@@ -49,6 +50,14 @@ function sectionsOf(steps: BuildStep[]) {
     else groups.push({ name, start: i, end: i })
   })
   return groups
+}
+
+// How each step picture angle reads in its caption (iso, the default, needs no words).
+const VIEW_WORDS: Record<string, string> = {
+  iso_right: ', seen from the front right',
+  iso_back: ', seen from the back',
+  iso_left_back: ', seen from the back left',
+  below: ', seen from underneath',
 }
 
 const SUMMARY_MAX = 280
@@ -323,8 +332,8 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
   return (
     <div className="build-section">
       <p className="lede">{plan.summary}</p>
-      <h2>Your bench now (commit #0)</h2>
-      {start?.model ? (
+      {isHardware(plan) ? null : <h2>Your bench now (commit #0)</h2>}
+      {isHardware(plan) ? null : start?.model ? (
         <BenchModel model={start.model} guide={start.guide} />
       ) : (
         <p className="muted">
@@ -429,6 +438,83 @@ function CopyBuild({ build }: { build: Build }) {
   )
 }
 
+// Step pictures are rendered at 640 × 480 (export.step_pictures); wire lines come in fractions of that.
+const PIC_W = 640
+const PIC_H = 480
+
+/** A step's picture. On hardware builds every wire in it is clickable: the wire lights up and both ends
+ * are tagged with the part and pin they plug into. */
+function StepPicture({
+  step,
+  index,
+  wires,
+  caption,
+}: {
+  step: BuildStep
+  index: number
+  wires: Record<string, WireInfo>
+  caption: string
+}) {
+  const [picked, setPicked] = useState<string | null>(null)
+  const lines = (step.picture_wires ?? []).filter((l) => wires[l.id] && l.points.length > 1)
+  const line = lines.find((l) => l.id === picked)
+  const wire = picked ? wires[picked] : undefined
+  const at = (p: [number, number]) => [p[0] * PIC_W, p[1] * PIC_H] as const
+  const pts = (l: { points: [number, number][] }) => l.points.map((p) => at(p).join(',')).join(' ')
+  return (
+    <figure className="step-figure">
+      <div className="step-picture-wrap">
+        <img className="step-picture" src={step.picture ?? ''} alt={`Step ${index + 1}: where each part goes`} />
+        {lines.length > 0 && (
+          <svg className="wire-overlay" viewBox={`0 0 ${PIC_W} ${PIC_H}`} preserveAspectRatio="none">
+            {lines.map((l) => (
+              <polyline
+                key={l.id}
+                points={pts(l)}
+                className="wire-hit"
+                onClick={() => setPicked(l.id === picked ? null : l.id)}
+              >
+                <title>{`${wires[l.id].from.part} ${wires[l.id].from.pin} → ${wires[l.id].to.part} ${wires[l.id].to.pin}`}</title>
+              </polyline>
+            ))}
+            {line && wire && (
+              <g className="wire-picked" pointerEvents="none">
+                <polyline points={pts(line)} className="wire-glow" />
+                <polyline points={pts(line)} style={{ stroke: wire.color }} className="wire-core" />
+                {[line.points[0], line.points[line.points.length - 1]].map((p, i) => {
+                  const [x, y] = at(p)
+                  const end = i === 0 ? wire.from : wire.to
+                  const right = x < PIC_W * 0.62
+                  return (
+                    <g key={i} transform={`translate(${x},${y})`}>
+                      <circle r={9} className="wire-dot" />
+                      <text className="wire-dot-tag" textAnchor="middle" dy="4">
+                        {i === 0 ? 'A' : 'B'}
+                      </text>
+                      <text className="wire-pin-label" x={right ? 14 : -14} dy="5" textAnchor={right ? 'start' : 'end'}>
+                        {`${end.part} · ${end.pin}`}
+                      </text>
+                    </g>
+                  )
+                })}
+              </g>
+            )}
+          </svg>
+        )}
+      </div>
+      {wire && (
+        <p className="wire-info">
+          <WireEnds wire={wire} />
+        </p>
+      )}
+      <figcaption className="muted">
+        {caption}
+        {lines.length > 0 && !wire ? ' Click a wire to see the pin at each end.' : ''}
+      </figcaption>
+    </figure>
+  )
+}
+
 function StepView({
   build,
   plan,
@@ -454,14 +540,16 @@ function StepView({
       </div>
       <h2 className="step-title">{s.title}</h2>
       {s.picture && (
-        <figure className="step-figure">
-          <img className="step-picture" src={s.picture} alt={`Step ${index + 1}: where each part goes`} />
-          <figcaption className="muted">
-            {isHardware(plan)
-              ? 'The build after this step. Cyan is the part you add now; the AI compares your photos with this picture.'
-              : 'Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.'}
-          </figcaption>
-        </figure>
+        <StepPicture
+          step={s}
+          index={index}
+          wires={plan.wires ?? {}}
+          caption={
+            isHardware(plan)
+              ? `The build after this step${VIEW_WORDS[s.picture_view ?? 'iso'] ?? ''}. Cyan is the part you add now; the AI compares your photos with this picture.`
+              : 'Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.'
+          }
+        />
       )}
       <p className="step-text">{s.instruction}</p>
       {!!s.tools?.length && (
@@ -488,7 +576,7 @@ function StepView({
         <>
           <h3>Your bench after step {index + 1}</h3>
           <p className="muted">Your starting bench plus everything added so far, with this step's parts highlighted.</p>
-          <BenchModel model={s.model} guide={plan.part_guide} highlight={fresh} />
+          <BenchModel model={s.model} guide={plan.part_guide} wires={plan.wires} highlight={fresh} />
           {freshNames.length > 0 && (
             <ul className="new-parts">
               {freshNames.map((l) => (
@@ -532,7 +620,7 @@ function Finished({ plan }: { plan: BuildPlan }) {
     <div className="build-section">
       <h2>What it looks like when it's finished</h2>
       <p className="muted">A reference made from the plan, not one of your commits.</p>
-      {plan.model && <BenchModel model={plan.model} guide={plan.part_guide} />}
+      {plan.model && <BenchModel model={plan.model} guide={plan.part_guide} wires={plan.wires} />}
       <p className="lede">{plan.final_result}</p>
       {plan.code && (
         <details className="build-fold" open>
@@ -724,7 +812,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
             <ShareButton />
           </header>
           <ol className="steps">
-            {item(-1, 'Your bench and parts')}
+            {item(-1, isHardware(plan) ? 'Parts list' : 'Your bench and parts')}
             {groups
               ? groups.map((g, gi) => {
                   const here = at >= g.start && at <= g.end

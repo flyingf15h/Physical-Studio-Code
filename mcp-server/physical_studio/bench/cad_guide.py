@@ -12,7 +12,7 @@ from pathlib import Path
 from google.genai import types
 from pydantic import BaseModel, Field
 
-from ..export import step_pictures, steps_document, write_glb
+from ..export import DESIGN_TO_GLTF, step_pictures, steps_document, top_textures, write_glb
 from . import planner
 from .pool import pooled_generate
 from .reference import NOTE
@@ -31,10 +31,25 @@ def size_text(part):
     return " × ".join(f"{v:g}" for v in size) + " mm" if size else ""
 
 
-def pin_text(by_id, library, end):
+def pin_end(by_id, library, end):
+    """One end of a wire: {"part": "Teensy 4.1", "pin": "GND"}."""
     p = by_id.get(end.get("placement"), {})
     pin = next((q for q in library.get(p.get("part") or "", {}).get("pins", []) if q.get("id") == end.get("pin")), {})
-    return f"{p.get('name', end.get('placement'))} {pin.get('label') or end.get('pin')}"
+    return {"part": p.get("name", end.get("placement")), "pin": pin.get("label") or end.get("pin")}
+
+
+def pin_text(by_id, library, end):
+    e = pin_end(by_id, library, end)
+    return f"{e['part']} {e['pin']}"
+
+
+def wire_info(piece, p, by_id, library):
+    """What the page shows when a wire is clicked: both ends (part and pin) and, for the 3D model, where
+    each end sits in the GLB's frame (metres, +Y up)."""
+    ends = [(DESIGN_TO_GLTF @ [*piece.path[i], 1.0])[:3].round(5).tolist() for i in (0, -1)] if piece.path is not None else None
+    return {"name": p["name"], "color": piece.color, "from": pin_end(by_id, library, p["from"]),
+            "to": pin_end(by_id, library, p["to"]), "length_mm": round(p["length_mm"]) if p.get("length_mm") else None,
+            **({"inline": p["inline"]} if p.get("inline") else {}), "ends": ends}
 
 
 def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created: str) -> dict:
@@ -43,7 +58,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
     folder.mkdir(parents=True, exist_ok=True)
     built, lib = studio.build(), studio.library()
     doc = steps_document(studio.design, built, "final.glb", None)
-    step_pictures(built, doc, folder)
+    step_pictures(built, doc, folder, top_textures(built, studio.parts_used(), studio.parts_dir))
     url = lambda name: f"/out/build-{bid}/{name}"  # noqa: E731
     by_id = {p["id"]: p for p in doc["placements"]}
     labels = [{"id": p["id"], "name": p["name"], "kind": kind_of(p, lib)} for p in doc["placements"] if p["id"] in built.pieces]
@@ -63,6 +78,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         if p["kind"] != "wire" and p.get("part"):
             counts[p["part"]] = counts.get(p["part"], 0) + 1
     wires = [p for p in doc["placements"] if p["kind"] == "wire"]
+    wire_infos = {p["id"]: wire_info(built.pieces[p["id"]], p, by_id, lib) for p in wires if p["id"] in built.pieces}
     parts = [{"name": lib.get(pid, {}).get("name", pid), "quantity": n, "user_has_it": False, "size": size_text(lib.get(pid, {})),
               "why": (lib.get(pid, {}).get("notes") or "").split(". ")[0][:160]} for pid, n in counts.items()]
     if wires:
@@ -89,7 +105,8 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         tools = [t.get("name", "") + (f" ({t['for']})" if t.get("for") else "") for t in s.get("tools", [])]
         step = {"number": n, "title": s["title"], "instruction": s.get("text", ""), "check": s.get("check", ""),
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
-                "picture": url(s["picture"]), "markers": markers, "section": s.get("section"), "tools": tools,
+                "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
+                "picture_wires": s.get("picture_wires", []), "markers": markers, "section": s.get("section"), "tools": tools,
                 "model": {"glb": url(glb), "labels": [l for l in labels if l["id"] in shown], "new": new}}
         steps.append(step)
         internal_steps.append({**{k: step[k] for k in ("number", "title", "instruction", "check", "placements", "section")},
@@ -101,7 +118,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
             "final_result": f"The finished {title.lower()}, every part in place and every wire connected.",
             "code": "", "safety": ["Keep the power supply unplugged until the last wire is in.",
                                    "Keep fingers clear of moving parts (gears, belts, rails) when it runs."],
-            "parts": parts, "part_guide": guide, "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps}
+            "parts": parts, "part_guide": guide, "wires": wire_infos, "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps}
     build = {"id": bid, "status": "done", "stage": "Your build is ready.", "error": None, "goal": goal, "have": "", "known": "",
              "created": created, "plan": plan, "internal": {"plan": {"kind": "cad", "title": title, "summary": summary, "steps": internal_steps}},
              "commits": [{"id": planner.new_id(bid), "kind": "start", "step": None, "message": "Starting from the parts list",
