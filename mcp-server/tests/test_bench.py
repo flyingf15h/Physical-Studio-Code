@@ -448,3 +448,29 @@ def test_led_steps_say_where_the_longer_and_shorter_legs_go():
 
 def test_scans_list_jumper_wires():
     assert "jumper wires included" in planner.SCAN_RULES and "every plugged-in jumper wire" in planner.SCAN_RULES
+
+
+def test_awkward_wires_are_repaired_not_allowed_to_sink_the_model():
+    parts = [P("bb", "Breadboard", "breadboard"), P("uno", "Arduino Uno", "development_board", terms=["gnd"]), P("led0", "red LED", "led", ["e10", "e11"])]
+    wires = [W("w1", "uno", "D9", "bb", "A10"),            # undeclared board pin, upper-case hole
+             W("w2", "led0", "short leg", "bb", "rail_1_24.14_11"),  # leg name the builder doesn't know
+             W("w3", "ghost", "1", "bb", "a20"),           # a part that isn't in the scene
+             W("w4", "bb", "z99", "bb", "a12")]            # not a real hole
+    scene = Spec.model_validate(dict(parts=parts, wires=wires, assumptions=[]))
+    fixed = planner.fix_wires(scene)
+    assert [w.id for w in fixed.wires] == ["w1", "w2"]
+    assert fixed.wires[0].to_terminal == "a10" and fixed.wires[1].from_terminal == "cathode"
+    assert "d9" in {t.name for t in fixed.parts[1].terminals}
+    assert planner.model_of(Spec.model_validate(dict(parts=parts, wires=wires, assumptions=[])), validate, build) is not None
+
+
+def test_the_scan_takes_a_second_look_for_jumper_wires(monkeypatch):
+    from types import SimpleNamespace as NS
+    first = {"summary": "s", "detected": [{"name": "red jumper wire", "quantity": 2, "where": "placed", "scene_id": ""}],
+             "scene": dict(parts=[P("bb", "Breadboard", "breadboard"), P("led0", "red LED", "led", ["e10", "e11"])], wires=[], assumptions=[]),
+             "part_guide": [], "uncertain": []}
+    wires_only = dict(parts=[], wires=[W("wa", "bb", "a10", "bb", "rail_1_24.14_10"), W("wb", "bb", "a11", "bb", "rail_-1_24.14_11")], assumptions=[])
+    answers = iter([json.dumps(first), json.dumps(wires_only)])
+    monkeypatch.setattr(planner, "ask", lambda contents, schema: NS(text=next(answers)))
+    scan = planner.scan_bench("traffic light", [b"jpeg"], "")
+    assert len(scan.scene.wires) == 2 and scan.detected[0].name == "red jumper wire"
