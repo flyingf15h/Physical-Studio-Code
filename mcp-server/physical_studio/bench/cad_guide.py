@@ -43,6 +43,49 @@ def pin_text(by_id, library, end):
     return f"{e['part']} {e['pin']}"
 
 
+def pin_name(label):
+    """A printed pin label as a builder says it: "18 / SDA" -> "pin 18 / SDA", "GND" stays "GND"."""
+    return f"pin {label}" if str(label)[:1].isdigit() else str(label)
+
+
+def colour_name(color):
+    """"#d03a3a" -> "red" (the add_wire colour names), else the colour as given."""
+    from ..server import WIRE_COLORS  # here, not at the top: server imports the build routes
+
+    c = str(color or "").lower()
+    return next((name for name, hex_ in WIRE_COLORS.items() if hex_ == c), c)
+
+
+def connection_lines(wires, by_id, library):
+    """One line per wire, pin to pin with the boards' printed labels and the wire colour, e.g.
+    "Cart encoder SDA → Teensy 4.1 pin 18 / SDA (green wire)". The part most of the step's wires go to
+    (the one being wired) comes first; a wire between two pins of one board says "on the same board"."""
+    count = {}
+    for w in wires:
+        for end in (w["from"], w["to"]):
+            count[end.get("placement")] = count.get(end.get("placement"), 0) + 1
+    lines = []
+    for w in wires:
+        a, b = w["from"], w["to"]
+        if count[b.get("placement")] > count[a.get("placement")]:
+            a, b = b, a
+        ea, eb = pin_end(by_id, library, a), pin_end(by_id, library, b)
+        far = f"{pin_name(eb['pin'])} on the same board" if a.get("placement") == b.get("placement") else f"{eb['part']} {pin_name(eb['pin'])}"
+        through = f" through a {w['inline']}" if w.get("inline") else ""
+        lines.append(f"{ea['part']} {pin_name(ea['pin'])} → {far}{through} ({colour_name(w.get('color'))} wire)")
+    return lines
+
+
+def wiring_text(text, lines):
+    """A wiring step's text: its own sentences, then every connection on its own line. Lines the
+    designer wrote with an arrow are replaced by the ones made from the design's wires, so they always
+    match the model."""
+    if not lines:
+        return text
+    prose = [line for line in str(text or "").splitlines() if line.strip() and "→" not in line and "->" not in line]
+    return "\n".join(prose + lines)
+
+
 def wire_info(piece, p, by_id, library):
     """What the page shows when a wire is clicked: both ends (part and pin) and, for the 3D model, where
     each end sits in the GLB's frame (metres, +Y up)."""
@@ -103,7 +146,9 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
                 hole = size_text(lib.get(p.get("part") or "", {}))
             markers.append([k, p.get("name", pid), where, hole])
         tools = [t.get("name", "") + (f" ({t['for']})" if t.get("for") else "") for t in s.get("tools", [])]
-        step = {"number": n, "title": s["title"], "instruction": s.get("text", ""), "check": s.get("check", ""),
+        step_wires = [by_id[pid] for pid in new if by_id.get(pid, {}).get("kind") == "wire"]
+        text = wiring_text(s.get("text", ""), connection_lines(step_wires, by_id, lib))
+        step = {"number": n, "title": s["title"], "instruction": text, "check": s.get("check", ""),
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
                 "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "tools": tools,

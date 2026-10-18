@@ -119,6 +119,9 @@ Rules:
   place; every screw, set screw or press-fit names its tool in tools; every place a beginner could
   get it backwards (LED legs, gear teeth meshing, a chip facing a magnet, a flange side) gets a
   callout. Wiring goes in its own steps grouped by part ("Wire the motor"), at most 8 wires each.
+  A wiring step's text names every connection pin to pin, one per line, with the boards' printed
+  pin labels and the wire colour ("Cart encoder SDA → Teensy 4.1 pin 18 / SDA (green wire)"),
+  never just "wire the encoder".
   Each step's check line says what a camera sees when it's right: where the part is and which way
   it faces.
 - Call check_guide and fix every problem it lists before you export.

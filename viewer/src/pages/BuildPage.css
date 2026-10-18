@@ -15,7 +15,7 @@
 .step-figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .new-parts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.45; }
 .glance { margin: 10px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; }
-.step-text { font-size: 15px; line-height: 1.5; margin: 0; }
+.step-text { font-size: 15px; line-height: 1.5; margin: 0; white-space: pre-line; } /* wiring steps: one connection per line */
 .markers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .markers li { display: flex; gap: 10px; align-items: baseline; }
 .marker-n { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; display: grid; place-items: center; }

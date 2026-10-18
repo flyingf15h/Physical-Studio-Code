@@ -51,9 +51,12 @@ add_step(title="Fit the pinion gear", text="From underneath, push the pinion ont
          tools=[{"name": "2 mm hex key", "for": "the pinion's set screw"}],
          callouts=[{"text": "Teeth in the rack", "target": "pinion"}],
          check="The pinion is on the motor shaft under the cart and its teeth sit in the rack.")
-add_step(title="Wire the motor", text="Connect the motor's two terminals to the driver's OUT1 and OUT2. Leave slack so the cart can travel.",
+add_step(title="Wire the motor", text="Connect the motor to the driver. Leave slack so the cart can travel.\nDrive motor M+ → Motor driver OUT1 (orange wire)\nDrive motor M- → Motor driver OUT2 (brown wire)",
          add=["w-motor-1", "w-motor-2"], callouts=[{"text": "Leave slack", "target": "w-motor-1"}],
          check="Orange and brown wires run from the motor to OUT1 and OUT2.")
+add_step(title="Wire the cart encoder", text="Connect the cart encoder.\nCart encoder VCC → 3.3 V regulator OUT+ 3.3 V (red wire)\nCart encoder GND → 3.3 V regulator OUT- (black wire)\nCart encoder SDA → Teensy 4.1 pin 18 / SDA (green wire)\nCart encoder SCL → Teensy 4.1 pin 19 / SCL (yellow wire)\nCart encoder DIR → GND on the same board (black wire)",
+         add=["w-enc-3v3", "w-enc-gnd", "w-enc-sda", "w-enc-scl", "w-enc-dir"],
+         check="Five wires leave the cart encoder: red, black, green to pin 18, yellow to pin 19, and a black loop from DIR to GND.")
 ```
 
 ### The check-and-fix loop
@@ -72,6 +75,11 @@ add_step(title="Wire the motor", text="Connect the motor's two terminals to the 
   then wire them. Don't show them hanging in the base.
 - One step per part. Wiring gets its own steps, a few wires each, grouped by part ("Wire the red
   button").
+- A wiring step never just says "wire the encoder". Its text is one short sentence, then every
+  connection pin to pin on its own line, with the labels printed on the boards (the `label` from
+  get_part, not the pin id) and the wire colour: `Cart encoder SDA → Teensy 4.1 pin 18 / SDA (green wire)`.
+  One connection per line, the part being wired first. (The build page rewrites these lines from
+  the design's add_wire calls, so wire every connection you name.)
 - Each step's text is one or two short sentences in plain words. Name the tool if one is needed.
 - Each step's check line is something a camera can see: "The red button sits in the top-left hole of
   the lid", not "The circuit works".

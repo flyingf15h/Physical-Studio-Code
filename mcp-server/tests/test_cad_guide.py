@@ -39,6 +39,35 @@ def test_a_cad_design_becomes_a_build_with_sections_pictures_and_models(ready_di
     assert any(s["tools"] for s in steps) and plan["parts"] and plan["part_guide"]
 
 
+def test_wiring_steps_name_every_connection_pin_to_pin(ready_dir):
+    steps = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]["steps"]
+    wired = [s for s in steps if any(m[2].startswith("from ") for m in s["markers"])]
+    assert wired
+    for s in wired:
+        lines = [line for line in s["instruction"].splitlines() if "→" in line]
+        assert len(lines) == sum(m[2].startswith("from ") for m in s["markers"])  # one line per wire
+        assert all(line.endswith(" wire)") and " → " in line for line in lines)
+        assert not any(" d13" in line or "_" in line for line in lines)  # printed labels, not pin ids
+
+
+def test_connection_lines_use_printed_labels_and_colours_with_the_wired_part_first():
+    lib = {"as5600-board": {"pins": [{"id": "sda", "label": "SDA"}, {"id": "dir", "label": "DIR"}, {"id": "gnd", "label": "GND"}]},
+           "teensy-41": {"pins": [{"id": "d18", "label": "18 / SDA"}]},
+           "buck-12v-3v3": {"pins": [{"id": "out_n", "label": "OUT-"}]}}
+    by_id = {"enc": {"name": "Cart encoder", "part": "as5600-board"}, "teensy": {"name": "Teensy 4.1", "part": "teensy-41"},
+             "reg": {"name": "3.3 V regulator", "part": "buck-12v-3v3"}}
+    wires = [{"from": {"placement": "teensy", "pin": "d18"}, "to": {"placement": "enc", "pin": "sda"}, "color": "#3a9d4f"},
+             {"from": {"placement": "reg", "pin": "out_n"}, "to": {"placement": "enc", "pin": "gnd"}, "color": "#2b2b2b"},
+             {"from": {"placement": "enc", "pin": "dir"}, "to": {"placement": "enc", "pin": "gnd"}, "color": "#2b2b2b"}]
+    lines = cad_guide.connection_lines(wires, by_id, lib)
+    assert lines == ["Cart encoder SDA → Teensy 4.1 pin 18 / SDA (green wire)",
+                     "Cart encoder GND → 3.3 V regulator OUT- (black wire)",
+                     "Cart encoder DIR → GND on the same board (black wire)"]
+    # the designer's own arrow lines are replaced by the ones from the wires; the sentence stays
+    assert cad_guide.wiring_text("Connect the cart encoder.\nSDA → pin 18", lines) == "\n".join(["Connect the cart encoder.", *lines])
+    assert cad_guide.wiring_text("Fit the rail.", []) == "Fit the rail."
+
+
 def test_cad_builds_are_checked_against_their_reference_picture_and_take_a_new_summary(ready_dir, tmp_path, monkeypatch):
     seen = {}
 
