@@ -60,6 +60,8 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       DESIGN_MODEL: ${DESIGN_MODEL:-claude-opus-5-5}
       DESIGNS_PER_HOUR: ${DESIGNS_PER_HOUR:-4}
+      # Breadboard builds per client IP an hour (physical_studio/bench). A venue shares one IP.
+      BUILDS_PER_HOUR: ${BUILDS_PER_HOUR:-12}
       DEMO_CODE: ${DEMO_CODE:-}
     volumes:
       - designs:/data/out
