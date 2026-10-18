@@ -1,7 +1,8 @@
 // A breadboard build (/build/<id>): Senna's Build helper flow in the main site's layout. While the
 // server plans it shows the stages; then the guide: your bench now (commit #0) and the parts you
 // need, one step at a time (numbered-hole picture, check line, a 3D model of the bench after the
-// step, and an optional photo commit the AI checks), the finished build, and the Commits tab.
+// step, and an optional photo commit the AI checks), the finished build, and the Commits tab next to
+// the build's title (hidden on ready-made guides, which nobody commits to).
 import { useEffect, useRef, useState } from 'react'
 import { commitStep, copyBuild, getBuild, type Build, type BuildCommit, type BuildPlan, type Verdict } from '../api'
 import { BenchModel } from '../components/BenchModel'
@@ -461,7 +462,20 @@ export function BuildPage({ buildId }: { buildId: string }) {
         <aside className="sidebar">
           <header>
             <div className="eyebrow">Breadboard build</div>
-            <h1>{plan.title}</h1>
+            <div className="build-title">
+              <h1>{plan.title}</h1>
+              {!build!.ready && (
+                <button
+                  type="button"
+                  className={tab === 'commits' ? 'active' : ''}
+                  aria-pressed={tab === 'commits'}
+                  title={tab === 'commits' ? 'Back to the guide' : `This build's commits`}
+                  onClick={() => setTab(tab === 'commits' ? 'guide' : 'commits')}
+                >
+                  Commits <span className="count">{build!.commits.length}</span>
+                </button>
+              )}
+            </div>
             <p className="prompt">“{build!.goal}”</p>
             <ShareButton />
           </header>
@@ -472,26 +486,15 @@ export function BuildPage({ buildId }: { buildId: string }) {
           </ol>
         </aside>
         <main className="build-main">
-          <div className="build-tabs" role="tablist">
-            <button
-              role="tab"
-              aria-selected={tab === 'guide'}
-              className={tab === 'guide' ? 'active' : ''}
-              onClick={() => setTab('guide')}
-            >
-              Guide
-            </button>
-            <button
-              role="tab"
-              aria-selected={tab === 'commits'}
-              className={tab === 'commits' ? 'active' : ''}
-              onClick={() => setTab('commits')}
-            >
-              Commits <span className="count">{build!.commits.length}</span>
-            </button>
-          </div>
           {tab === 'commits' ? (
-            <Commits build={build!} plan={plan} />
+            <>
+              <div className="build-nav">
+                <button type="button" className="tool" onClick={() => setTab('guide')}>
+                  ← Back to the guide
+                </button>
+              </div>
+              <Commits build={build!} plan={plan} />
+            </>
           ) : at < 0 ? (
             <Overview build={build!} plan={plan} />
           ) : at >= n ? (

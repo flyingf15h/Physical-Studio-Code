@@ -1,7 +1,6 @@
 // Tiny history-API router; the app has five screens, not worth a dependency.
 //   /                         Dashboard (1 Describe)
 //   /projects                 Your projects
-//   /commits                  every commit of your builds
 //   /build/<build id>         a breadboard build from bench photos (2 Design, 3 Guide, 4 Build)
 //   /design/<job id>          2 the AI designs it
 //   /guide?design=out/<id>    3 Guide + 4 Build (the tracker panel); /?design=... still works
@@ -12,7 +11,6 @@ import { useEffect, useState } from 'react'
 export type Route =
   | { page: 'describe' }
   | { page: 'projects' }
-  | { page: 'commits' }
   | { page: 'build'; buildId: string }
   | { page: 'design'; jobId: string }
   | { page: 'guide' }
@@ -24,7 +22,6 @@ export function parseRoute(path = location.pathname, search = location.search): 
   const job = path.match(/^\/design\/([\w-]+)\/?$/)
   if (job) return { page: 'design', jobId: job[1] }
   if (path.startsWith('/projects')) return { page: 'projects' }
-  if (path.startsWith('/commits')) return { page: 'commits' }
   if (path.startsWith('/guide')) return { page: 'guide' }
   if (path.startsWith('/print')) return { page: 'print' }
   if (new URLSearchParams(search).has('design')) return { page: 'guide' } // old /?design=... links

@@ -13,6 +13,7 @@ export interface Project {
   prompt?: string
   steps?: number
   openedAt?: number // ms; your projects only
+  thumb?: string // a picture of the project for its card, instead of thumbnail()
 }
 
 // The ready-made guides are finished breadboard builds shipped with the server
@@ -30,6 +31,7 @@ export const READY_MADE: Project[] = [
     title: 'Double inverted pendulum',
     prompt: 'Teensy 4.1, DRV8874 motor driver, two AS5600 encoders and two VL53L0X distance sensors on a breadboard.',
     steps: PENDULUM_STEPS,
+    thumb: '/double-pendulum/design.png', // the CAD render (cart, rail and two arms), not the breadboard
   },
 ]
 

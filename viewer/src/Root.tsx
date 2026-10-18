@@ -2,7 +2,6 @@ import { useRoute } from './router'
 import App from './App'
 import { NetworkBanner } from './components/NetworkBanner'
 import { BuildPage } from './pages/BuildPage'
-import { CommitsPage } from './pages/CommitsPage'
 import { DescribePage } from './pages/DescribePage'
 import { DesignPage } from './pages/DesignPage'
 import { PrintPage } from './pages/PrintPage'
@@ -24,8 +23,6 @@ function Page() {
       return <DescribePage />
     case 'build':
       return <BuildPage key={route.buildId} buildId={route.buildId} />
-    case 'commits':
-      return <CommitsPage />
     case 'projects':
       return <ProjectsPage />
     case 'design':

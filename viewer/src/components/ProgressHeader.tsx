@@ -8,7 +8,6 @@ const STEPS = ['Describe', 'Design', 'Guide', 'Build', 'Print'] as const
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', path: '/' },
   { id: 'projects', label: 'Your projects', path: '/projects' },
-  { id: 'commits', label: 'Commits', path: '/commits' },
 ] as const
 
 interface Props {
