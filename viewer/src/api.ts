@@ -273,3 +273,24 @@ export const saveProject = (p: { design: string; title: string; prompt?: string;
 
 export const forgetSaved = (design: string) =>
   call<object>('/api/projects/forget', { method: 'POST', headers: headers(true), body: JSON.stringify({ design }) })
+
+// --- BOM uploads (mcp-server/physical_studio/boms.py): rows the library has are used as they are,
+// the others are looked up online and added to your own parts.
+
+export interface BomRow {
+  name: string
+  link: string
+  price: string
+  quantity: number
+  status: 'looking' | 'in_library' | 'added' | 'failed'
+  part_id?: string
+  part_name?: string
+  size?: string
+  error?: string
+}
+
+export const uploadBom = (text: string) =>
+  call<{ id: string }>('/api/bom', { method: 'POST', headers: headers(true), body: JSON.stringify({ text }) })
+
+export const getBom = (id: string) =>
+  call<{ id: string; status: 'working' | 'done'; rows: BomRow[] }>(`/api/bom/${encodeURIComponent(id)}`, { headers: headers() })

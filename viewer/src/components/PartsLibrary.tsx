@@ -4,8 +4,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listParts, type PartSummary } from '../api'
 import { authToken, useUser } from '../auth'
-import { BomUpload } from './BomUpload'
 import { searchParts } from '../partSearch'
+import { PARTS_CHANGED } from '../bom'
 import './PartsLibrary.css'
 
 const fmt = (mm: number) => String(Math.round(mm * 10) / 10)
@@ -35,7 +35,6 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<Category | null>(null)
   const [attempt, setAttempt] = useState(0)
-  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     let live = true
@@ -51,11 +50,15 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
     }
   }, [attempt, userId])
 
-  // after a BOM upload finishes: fetch again without blanking the list
-  const refresh = () => {
-    setError(null)
-    setAttempt((n) => n + 1)
-  }
+  // After a BOM upload in Parts I have (BomImport) adds parts: fetch again without blanking the list.
+  useEffect(() => {
+    const refresh = () => {
+      setError(null)
+      setAttempt((n) => n + 1)
+    }
+    window.addEventListener(PARTS_CHANGED, refresh)
+    return () => window.removeEventListener(PARTS_CHANGED, refresh)
+  }, [])
 
   const counts = useMemo(() => {
     const c: Partial<Record<Category, number>> = {}
@@ -94,16 +97,7 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
       <div className="parts-head">
         <h2>Parts library</h2>
         {parts && <span className="parts-total">{parts.length}</span>}
-        <button
-          type="button"
-          className={`parts-upload${uploading ? ' active' : ''}`}
-          aria-expanded={uploading}
-          onClick={() => setUploading((u) => !u)}
-        >
-          Upload BOM
-        </button>
       </div>
-      {uploading && <BomUpload onDone={refresh} onClose={() => setUploading(false)} />}
       <div className="parts-tools">
         <input
           className="parts-search"

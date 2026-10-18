@@ -41,3 +41,6 @@
 .custom-part-actions button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .custom-part-actions button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 520px) { .custom-part-grid { grid-template-columns: 1fr; } }
+
+.parts-input-bom { margin-left: auto; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; color: var(--ink); white-space: nowrap; }
+.parts-input-bom:hover, .parts-input-bom.active { border-color: var(--accent); color: var(--accent); }

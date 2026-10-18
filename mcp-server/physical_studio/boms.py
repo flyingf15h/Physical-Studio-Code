@@ -1,5 +1,8 @@
 """BOM upload: a signed-in user's bill of materials becomes parts in their own library.
 
+Rows the shared parts library already has are used as they are ("in_library"); only the others are
+looked up and added ("added"). The Dashboard's "Parts I have" box uploads BOMs here.
+
 POST /api/bom {text} takes a CSV/TSV file's text or a pasted table ("Name  Link  Price" rows, the
 way a shop basket or a spreadsheet copies). Each row is looked up on the web (the same searches as
 find_part_looks: OpenAI web search, then Gemini with Google Search on each team key) for its size,
@@ -171,15 +174,45 @@ def user_parts(user_id: str) -> list[dict]:
     return out
 
 
+def in_library(name: str) -> dict | None:
+    """The shared library part a BOM row names (the breadboard planner's matcher), or None."""
+    try:
+        from .bench import planner
+
+        return planner.library_part(name)
+    except Exception:
+        return None
+
+
+def own_part(user_id: str, name: str) -> dict | None:
+    """One of the user's BOM parts that a typed name means: same name, or the BOM row it came from."""
+    key = re.sub(r"[^a-z0-9]+", " ", name.lower()).strip()
+    key = re.sub(r"^\d+\s*(x\s+)?", "", key)  # "2 x VL53L0X" -> "vl53l0x"
+    if not key:
+        return None
+    for p in user_parts(user_id):
+        names = [p["name"], (p.get("bom") or {}).get("name", "")]
+        for n in names:
+            n = re.sub(r"[^a-z0-9]+", " ", n.lower()).strip()
+            if n and (n == key or key in n or n in key):
+                return p
+    return None
+
+
 def _run(job: dict, user_id: str) -> None:
     folder = _parts_dir(user_id)
     folder.mkdir(parents=True, exist_ok=True)
 
     def one(row: dict) -> None:
+        known = in_library(row["name"])
+        if known:  # already in the parts library: use it, no lookup
+            row.update(status="in_library", part_id=known["id"], part_name=known["name"],
+                       size=" × ".join(f"{v:g}" for v in known["body"]["size"]) + " mm")
+            return
         try:
             part = find_part(row)
             (folder / f"{part['id']}.json").write_text(json.dumps(part, indent=2))
-            row.update(status="added", part_id=part["id"], size=" × ".join(f"{v:g}" for v in part["body"]["size"]) + " mm")
+            row.update(status="added", part_id=part["id"], part_name=part["name"], size=" × ".join(f"{v:g}" for v in part["body"]["size"]) + " mm")
         except Exception as e:
             row.update(status="failed", error=str(e)[:200])
 

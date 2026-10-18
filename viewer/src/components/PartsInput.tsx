@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { listParts, matchParts, type MatchedPart, type PartSummary } from '../api'
 import { searchParts, splitCount } from '../partSearch'
+import { BomImport } from './BomImport'
 import './PartsInput.css'
 
 const MAX_PARTS = 40
@@ -117,6 +118,7 @@ export function PartsInput({ parts, onChange }: { parts: string[]; onChange: (pa
   const [library, setLibrary] = useState<PartSummary[]>([])
   const [focus, setFocus] = useState(0) // highlighted suggestion; the best match until you move
   const [custom, setCustom] = useState<string | null>(null) // the custom-part form, started from this text
+  const [bom, setBom] = useState(false) // the Upload BOM panel
   const field = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -170,6 +172,17 @@ export function PartsInput({ parts, onChange }: { parts: string[]; onChange: (pa
       <div className="parts-input-head">
         <span className="parts-input-label">Parts I have</span>
         <span className="parts-input-hint">Optional. Start typing to pick from the library, or add your own part.</span>
+        <button
+          type="button"
+          className={`parts-input-bom${bom ? ' active' : ''}`}
+          aria-expanded={bom}
+          onClick={(e) => {
+            e.stopPropagation()
+            setBom(!bom)
+          }}
+        >
+          Upload BOM
+        </button>
       </div>
       <ul className="parts-input-chips">
         {parts.map((part) => {
@@ -295,6 +308,15 @@ export function PartsInput({ parts, onChange }: { parts: string[]; onChange: (pa
           )}
         </li>
       </ul>
+      {bom && (
+        <BomImport
+          onParts={(chips) => {
+            setFound({}) // look the chips up again: parts just added to your library now match
+            add(chips)
+          }}
+          onClose={() => setBom(false)}
+        />
+      )}
       {custom !== null && (
         <CustomPartForm
           start={custom}

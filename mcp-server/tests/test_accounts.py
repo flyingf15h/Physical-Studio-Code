@@ -63,3 +63,20 @@ def test_guest_mode_and_upgrading_a_guest_keeps_its_projects(tmp_path):
     assert account["id"] == guest["id"] and not account["guest"]
     assert [p["title"] for p in users.projects(account["id"])] == ["Guest build"]
     assert users.user_for(token) is None  # the guest session ends with the upgrade
+
+
+def test_bom_rows_already_in_the_library_are_not_looked_up(tmp_path, monkeypatch):
+    import physical_studio.boms as boms
+
+    monkeypatch.setattr(boms, "_dir", tmp_path)
+    monkeypatch.setattr(boms, "in_library", lambda name: {"id": "teensy-41", "name": "Teensy 4.1", "body": {"size": [61, 18, 1.6]}} if "teensy" in name.lower() else None)
+    looked_up = []
+    monkeypatch.setattr(boms, "find_part", lambda row: looked_up.append(row["name"]) or {"id": "gy-530-abc123", "name": "GY-530 VL53L0X", "body": {"size": [13.3, 10.5, 3]}, "bom": {"name": row["name"]}})
+    job = {"rows": [{**r, "status": "looking"} for r in parse_bom("Teensy 4.1\thttps://pjrc.com\n2x VL53L0X TOF Sensor\thttps://x.y/z\n")], "status": "working"}
+    boms._run(job, "0123456789abcdef")
+    assert [r["status"] for r in job["rows"]] == ["in_library", "added"] and looked_up == ["VL53L0X TOF Sensor"]
+    assert job["rows"][0]["part_name"] == "Teensy 4.1"
+    # The added part now answers to its BOM name and its own name.
+    assert boms.own_part("0123456789abcdef", "2 x VL53L0X TOF Sensor")["id"] == "gy-530-abc123"
+    assert boms.own_part("0123456789abcdef", "gy-530 vl53l0x")["id"] == "gy-530-abc123"
+    assert boms.own_part("0123456789abcdef", "Arduino Uno") is None

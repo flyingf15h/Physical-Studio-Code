@@ -1,0 +1,16 @@
+.bom-import { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.bom-import-head { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.bom-import-head .muted { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.bom-import textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1.45; background: var(--panel); color: var(--ink); resize: vertical; }
+.bom-import textarea:focus { outline: none; border-color: var(--accent); }
+.bom-import-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bom-import-actions .spacer { flex: 1; }
+.bom-import-actions button { border: 0; background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.bom-import-actions button.ghost { background: var(--panel); color: var(--ink); border: 1px solid var(--line); font-weight: 500; }
+.bom-import-actions button:disabled { opacity: .5; cursor: default; }
+.bom-import-error { margin: 0; color: #9b1c1c; font-size: 13px; }
+.bom-import-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; max-height: 220px; overflow-y: auto; }
+.bom-import-rows li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+.bom-import-rows .bom-status { color: var(--muted); text-align: right; }
+.bom-import-rows li.in_library .bom-status, .bom-import-rows li.added .bom-status { color: #1d7a3e; }
+.bom-import-rows li.failed .bom-status { color: #9b1c1c; }

@@ -90,6 +90,16 @@ def parse_photos(items, required=False):
         raise BadRequest("A photo couldn't be read as an image.")
 
 
+def own_part(user_id, name):
+    """One of the user's BOM parts by name (None when boms.py isn't there)."""
+    try:
+        from ..boms import own_part as find
+
+        return find(user_id, name)
+    except Exception:
+        return None
+
+
 def owner_parts(user_id):
     """The owner's uploaded BOM parts for the planner ([] when anonymous or boms.py isn't there)."""
     if not user_id:
@@ -359,14 +369,18 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
         """The "Parts I have" chips: {items: [text]} -> each item's library part (the same lookup the planner
         uses for sizes and the parts brief), or null when the library doesn't have it."""
         items = (await body_of(request)).get("items")
+        user = user_from_request(request)
         if not isinstance(items, list) or len(items) > 60:
             return JSONResponse({"error": "items must be a list of up to 60 part names."}, status_code=400)
         out = []
         for item in items:
             text = str(item).strip()[:120]
             p = planner.library_part(text) if text else None
+            if not p and text and user:  # the caller's own parts, added from their BOM
+                p = own_part(user["id"], text)
             out.append({"text": text, "part": p and {"id": p["id"], "name": p["name"], "category": p["category"],
-                                                     "size": " × ".join(f"{v:g}" for v in p["body"]["size"]) + " mm", "verified": bool(p.get("verified"))}})
+                                                     "size": " × ".join(f"{v:g}" for v in p["body"]["size"]) + " mm", "verified": bool(p.get("verified")),
+                                                     "mine": bool(p.get("bom"))}})
         return JSONResponse({"items": out})
 
     @mcp.custom_route("/api/build/{build_id}", methods=["GET"])
