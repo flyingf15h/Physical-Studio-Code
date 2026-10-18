@@ -7,6 +7,7 @@
 #   write_build(studio, folder, bid, goal, summary)  -> build.json + step files in folder
 #   commit_step(plan, i, photos, note, folder)       -> the AI's verdict on a photo of step i
 import json
+import re
 from pathlib import Path
 
 from google.genai import types
@@ -44,9 +45,13 @@ def pin_text(by_id, library, end):
     return f"{e['part']} {e['pin']}"
 
 
+VOLTAGE = re.compile(r"\d+(\.\d+)?\s*V(\d|\b)", re.I)  # "5V", "3.3V", "3V3": a supply pin, not a numbered one
+
+
 def pin_name(label):
-    """A printed pin label as a builder says it: "18 / SDA" -> "pin 18 / SDA", "GND" stays "GND"."""
-    return f"pin {label}" if str(label)[:1].isdigit() else str(label)
+    """A printed pin label as a builder says it: "18 / SDA" -> "pin 18 / SDA"; "GND" and "3.3V" stay as they are."""
+    label = str(label)
+    return f"pin {label}" if label[:1].isdigit() and not VOLTAGE.match(label) else label
 
 
 def colour_name(color):

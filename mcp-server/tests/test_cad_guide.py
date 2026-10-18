@@ -60,6 +60,11 @@ def test_screws_say_which_mounting_hole_they_go_in(ready_dir):
         "A screw head sits flat in Uno's front-left mounting hole."
 
 
+def test_numbered_pins_say_pin_but_supply_pins_do_not():
+    assert [cad_guide.pin_name(l) for l in ("18 / SDA", "2 (PWM)", "13", "3.3V", "5V", "3V3", "GND")] == \
+        ["pin 18 / SDA", "pin 2 (PWM)", "pin 13", "3.3V", "5V", "3V3", "GND"]
+
+
 def test_connection_lines_use_printed_labels_and_colours_with_the_wired_part_first():
     lib = {"as5600-board": {"pins": [{"id": "sda", "label": "SDA"}, {"id": "dir", "label": "DIR"}, {"id": "gnd", "label": "GND"}]},
            "teensy-41": {"pins": [{"id": "d18", "label": "18 / SDA"}]},
