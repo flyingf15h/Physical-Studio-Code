@@ -13,6 +13,7 @@ from google.genai import types
 from pydantic import BaseModel, Field
 
 from ..export import DESIGN_TO_GLTF, step_pictures, steps_document, top_textures, write_glb
+from ..geometry import apply, placement_matrix
 from . import planner
 from .pool import pooled_generate
 from .reference import NOTE
@@ -86,10 +87,13 @@ def wiring_text(text, lines):
     return "\n".join(prose + lines)
 
 
-def default_check(parts, wires):
+def default_check(parts, wires, holes=None):
     """A step's "Done when" if the designer left it empty, so every step has something to check against:
-    the parts sitting where the model shows them, and each wire on the pins its line names."""
-    bits = []
+    the parts sitting where the model shows them (a screw: its head in the hole it goes in, from
+    `holes` {placement id: hole_where}), and each wire on the pins its line names."""
+    holes = holes or {}
+    bits = [f"A screw head sits flat in {holes[p['id']]}." for p in parts if holes.get(p.get("id"))]
+    parts = [p for p in parts if not holes.get(p.get("id"))]
     if parts:
         names = [p.get("name", p.get("id", "part")) for p in parts]
         what = ", ".join(names[:-1]) + " and " + names[-1] if len(names) > 1 else names[0]
@@ -98,6 +102,23 @@ def default_check(parts, wires):
         bits.append(f"{'Each of the ' + str(len(wires)) + ' wires goes' if len(wires) > 1 else 'The wire goes'} pin to pin as listed above "
                     "(match the printed labels), and a gentle tug doesn't pull it out.")
     return " ".join(bits)
+
+
+def hole_where(design, library, fid):
+    """Where a screw goes, as a builder finds it: "Arduino Uno's front-left mounting hole". The corner is
+    the hole's side of the part's centre in the design frame (-Y is the front)."""
+    f = design.placements.get(fid)
+    host = design.placements.get(f.attached_to) if f and f.attached_to else None
+    part = library.get(host.part_id, {}) if host else {}
+    hole = next((h for h in part.get("mounting_holes", []) if h.get("id") == f.hole), None) if part else None
+    size = (part.get("body") or {}).get("size")
+    if not hole or not size:
+        return ""
+    m = placement_matrix(host.position, host.rotation)
+    dx, dy = (apply(m, hole["position"]) - apply(m, [size[0] / 2, size[1] / 2, 0]))[:2]
+    tol = 0.15 * max(size[0], size[1])
+    corner = "-".join(w for w in ("front" if dy < -tol else "back" if dy > tol else "", "left" if dx < -tol else "right" if dx > tol else "") if w)
+    return f"{host.name}'s {corner + ' ' if corner else 'middle '}mounting hole"
 
 
 def wire_info(piece, p, by_id, library):
@@ -150,20 +171,21 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         write_glb(built, folder / glb, studio.parts_used(), studio.parts_dir, only=shown, suffix="__mesh")
         callouts = {c.get("target"): c.get("text") for c in s.get("callouts", [])}
         markers = []
+        holes = {pid: hole_where(studio.design, lib, pid) for pid in new if by_id.get(pid, {}).get("kind") == "fastener"}
         for k, pid in enumerate(new, 1):
             p = by_id.get(pid, {"name": pid, "kind": "part"})
             if p.get("kind") == "wire":
                 where = f"from {pin_text(by_id, lib, p['from'])} to {pin_text(by_id, lib, p['to'])}"
                 hole = f"~{round(p['length_mm'])} mm" if p.get("length_mm") else ""
             else:
-                where = callouts.get(pid) or "the highlighted part in the 3D model"
+                where = callouts.get(pid) or holes.get(pid) or "the highlighted part in the 3D model"
                 hole = size_text(lib.get(p.get("part") or "", {}))
             markers.append([k, p.get("name", pid), where, hole])
         tools = [t.get("name", "") + (f" ({t['for']})" if t.get("for") else "") for t in s.get("tools", [])]
         step_wires = [by_id[pid] for pid in new if by_id.get(pid, {}).get("kind") == "wire"]
         text = wiring_text(s.get("text", ""), connection_lines(step_wires, by_id, lib))
         step_parts = [by_id[pid] for pid in new if pid in by_id and by_id[pid].get("kind") != "wire"]
-        check = s.get("check") or default_check(step_parts, step_wires)
+        check = s.get("check") or default_check(step_parts, step_wires, holes)
         step = {"number": n, "title": s["title"], "instruction": text, "check": check,
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),

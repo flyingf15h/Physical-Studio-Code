@@ -408,10 +408,10 @@ def test_a_hardware_prompt_is_designed_in_cad_and_written_as_a_build(tmp_path, m
     assert b["status"] == "done" and b["plan"]["kind"] == "cad" and "Teensy 4.1" in jobs.prompts[0]
 
 
-def test_a_failed_cad_job_falls_back_to_the_breadboard_planner(tmp_path, monkeypatch):
+def test_a_failed_cad_job_is_an_error_not_a_breadboard_build(tmp_path, monkeypatch):
     c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("error"))
     b = wait_done(c, c.post("/api/build", json={"goal": "A robot arm with a servo on a bracket"}).json()["id"])
-    assert b["status"] == "done" and b["plan"].get("kind", "breadboard") != "cad" and jobs.prompts
+    assert b["status"] == "error" and b["error"] == routes.CAD_FAILED and not b.get("plan") and jobs.prompts
     c2, jobs2 = jobs_app(tmp_path, monkeypatch, FakeJob("done"))
     wait_done(c2, c2.post("/api/build", json={"goal": "A traffic light with three LEDs"}).json()["id"])
     assert jobs2.prompts == []  # circuits never start a CAD job

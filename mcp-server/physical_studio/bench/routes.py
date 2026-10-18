@@ -44,7 +44,7 @@ READY_NOTE = "This is a ready-made guide. Make your own copy to commit photos of
 # design pipeline (jobs.py) instead of the breadboard planner; when it finishes, cad_guide.write_build turns
 # the design into the build (sections, tools, reference pictures, a 3D model per step). The route depends on
 # the prompt alone: a hardware prompt never quietly becomes a breadboard build because the design slot was
-# busy or the hour's designs were used up (that's an error to try again); only a server with no CAD pipeline
+# busy, the hour's designs were used up or the design failed (that's an error to try again); only a server with no CAD pipeline
 # (no JobManager or no design key) plans hardware prompts on the breadboard.
 CAD_WORDS = ("rack and pinion", "rack-and-pinion", "pinion", "gear", "linear rail", "rail", "carriage", "cart", "pendulum", "robot arm",
              "chassis", "enclosure", "case", "box", "housing", "shell", "3d print", "3d-print", "printed", "printable", "mount", "bracket",
@@ -63,6 +63,7 @@ def needs_cad(goal: str) -> bool:
 
 
 CAD_BUSY = "This needs a CAD design (a case, motors or mechanical parts) and the designer is busy. Try again in a minute."
+CAD_FAILED = "This needs a CAD design (a case, motors or mechanical parts) and the design didn't work out."  # the page adds "try again"
 
 
 def cad_available(jobs) -> bool:
@@ -265,6 +266,9 @@ class BuildStore:
         try:
             if job:
                 if self.cad_build(build, job, imported):
+                    return
+                if not imported:  # a hardware prompt: a failed design is an error, never a breadboard guide for a case
+                    self.update(build, status="error", stage="", error=CAD_FAILED)
                     return
                 self.update(build, status="planning", stage="Planning it as a breadboard circuit instead.")
             result = planner.make_plan(build["goal"], build["have"], build["known"], photos,
@@ -495,4 +499,3 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
         if build is None or build["status"] != "done" or not build.get("plan"):
             return JSONResponse({"error": "No finished build to copy."}, status_code=404)
         return JSONResponse({"id": store.copy(build, user_from_request(request))}, status_code=201)
-

@@ -97,8 +97,14 @@ There are two kinds of build. Pick one from the request:
 
 Rules:
 - Never invent a dimension. Find parts with search_parts and read every number you use from
-  get_part. Use only parts in the library; if the request needs a part that isn't there, design
-  without it and say so in your final message.
+  get_part. Use only parts in the library. Before deciding a part is missing, search_parts for
+  what does its job (frame corners: bracket-2020-corner; shaft to shaft: a coupler; a belt return:
+  an idler; a sensor on a rail: its bracket). If it still isn't there, design without it and say so
+  in your final message only: steps never "stage" parts loose, never say "not attached", "not
+  included" or "layout only", and never tell the builder to drill, file or glue what the model
+  lacks. Every step fits a real part for good.
+- Lid controls are parts with a lid_mount in get_part (tactile-button-12mm, not push-button-6mm),
+  so create_enclosure cuts their holes.
 - Units are mm, +Z up. Place the main board at the origin first.
 - Parts that poke through the lid (buttons, LEDs) have a lid_mount: place them so their lid mounts
   are level; create_enclosure warns how far to raise any that are low.

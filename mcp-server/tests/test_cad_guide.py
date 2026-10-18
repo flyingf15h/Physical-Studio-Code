@@ -50,6 +50,16 @@ def test_wiring_steps_name_every_connection_pin_to_pin(ready_dir):
         assert not any(" d13" in line or "_" in line for line in lines)  # printed labels, not pin ids
 
 
+def test_screws_say_which_mounting_hole_they_go_in(ready_dir):
+    steps = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]["steps"]
+    screws = [m for s in steps for m in s["markers"] if "screw" in m[1].lower()]
+    assert screws and all(m[2] != "the highlighted part in the 3D model" for m in screws)
+    holes = [m[2] for m in screws if m[2].endswith("mounting hole")]
+    assert holes and len(set(holes)) == len(holes)  # each screw its own corner
+    assert cad_guide.default_check([{"id": "s1", "name": "M3 screw"}], [], {"s1": "Uno's front-left mounting hole"}) == \
+        "A screw head sits flat in Uno's front-left mounting hole."
+
+
 def test_connection_lines_use_printed_labels_and_colours_with_the_wired_part_first():
     lib = {"as5600-board": {"pins": [{"id": "sda", "label": "SDA"}, {"id": "dir", "label": "DIR"}, {"id": "gnd", "label": "GND"}]},
            "teensy-41": {"pins": [{"id": "d18", "label": "18 / SDA"}]},

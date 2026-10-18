@@ -18,6 +18,12 @@ SCREW_WORDS = re.compile(r"\b(screw|bolt|tighten|set screw|nut|hex|allen)", re.I
 ORIENTATION_WORDS = re.compile(r"\b(facing|faces|upside|flange|teeth|polarity|longer leg|flat side|stripe|chip side|pin 1|arrow|towards?)\b", re.I)
 ID_LIKE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 POWER_PARTS = re.compile(r"psu|adapter|battery|buck|supply", re.I)
+# Steps that stand in for a design the job didn't finish ("Stage the X motor... it is not attached: the
+# library has no suitable motor mount"), or that send the builder off to make what the model lacks.
+PLACEHOLDER = re.compile(r"\b(stage (the|an?|it|them|both)|staged|staging|layout only|incomplete (layout|design|build)|(is|are) not (attached|included|fitted|mounted|fastened|secured)"
+                         r"|not yet (fastened|attached|mounted|secured)|(no|without) (suitable|supporting) \w+|the library (has|had) no|(not|isn't) in the library"
+                         r"|not (supplied|modell?ed|generated)|unmodell?ed|still (needed|required)|missing (mechanics|parts?|mounts?|hardware)"
+                         r"|drill (and file )?(an?|the) (hole|opening)|hand-finish\w*|manual (finishing|mount)|not (yet )?designed)\b", re.I)
 MAX_WIRES_PER_STEP = 8
 MAX_TEXT = 240
 
@@ -63,6 +69,13 @@ def check_guide(design: Design) -> dict:
             problems.append(f"{where} has no check line. Say what the camera should see when it's right.")
         elif VAGUE_CHECKS.search(s.check) and not wires:
             problems.append(f"{where}'s check {s.check!r} can't be seen in a photo. Describe where the part sits and which way it faces.")
+        named = " ".join([s.title, s.text, s.check or ""] + [p.name for p in parts] + [str(c.get("text", "")) for c in s.callouts])
+        placeholder = PLACEHOLDER.search(named)
+        if placeholder:
+            problems.append(f"{where} reads like a placeholder ({placeholder.group(0)!r}): every step fits real parts for good. If the "
+                            "library lacks a part the mechanism needs, search_parts for one that does the job (corner brackets, mounts, "
+                            "couplers, idlers), give the step a part that fixes it in place, or leave it out of the steps and say so only "
+                            "in your final message.")
         if len(s.text) > MAX_TEXT or sentences(s.text) > 3:
             problems.append(f"{where}'s text is too long ({sentences(s.text)} sentences, {len(s.text)} characters). Keep it to one or two short sentences, or split the step.")
         elif sentences(s.text) == 3:

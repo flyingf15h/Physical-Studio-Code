@@ -78,6 +78,22 @@ def test_part_with_its_own_wires_is_fine_but_others_are_not():
     assert any("aren't theirs" in p for p in check_guide(d)["problems"])
 
 
+def test_placeholder_steps_are_problems():
+    # From the live pen-plotter run: the designer laid parts out loose instead of fitting them.
+    for text in ("Stand the X motor in front of the frame. It is not attached: the library has no suitable motor mount.",
+                 "Put the front extrusion down. This is an incomplete layout: belts and gantry are not included.",
+                 "Drill an opening for the button with the actuator as a template.", "Keep it unplugged until the missing mechanics are done."):
+        d = good_steps(cart())
+        d.steps[1].text = text
+        assert any("placeholder" in p for p in check_guide(d)["problems"]), text
+    d = good_steps(cart())
+    d.steps[2].title = "Stage the driver"
+    assert any("placeholder" in p for p in check_guide(d)["problems"])
+    d = good_steps(cart())
+    d.steps[1].text = "Screw the motor to the base so it's not loose. Do not run it until the stage is level."
+    assert check_guide(d)["ok"], check_guide(d)["problems"]
+
+
 def test_reference_traffic_light_passes(tmp_path):
     sys.argv = ["traffic_light.py", str(tmp_path)]
     g = runpy.run_path("examples/traffic_light.py", run_name="__main__")

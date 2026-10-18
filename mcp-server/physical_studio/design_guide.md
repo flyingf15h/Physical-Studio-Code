@@ -81,6 +81,10 @@ add_step(title="Wire the cart encoder", text="Connect the cart encoder.\nCart en
   One connection per line, the part being wired first. (The build page rewrites these lines from
   the design's add_wire calls, so wire every connection you name.)
 - Each step's text is one or two short sentences in plain words. Name the tool if one is needed.
+- Every step fits a real part for good. No "stage the motor beside the frame", "not attached",
+  "layout only" or "drill a hole for the button" steps: search_parts for the bracket, mount or
+  lid_mount part that does the job, and if the library has none, leave that part out of the steps and
+  say what's missing in your final message. check_guide flags placeholder steps.
 - Each step's check line is something a camera can see: "The red button sits in the top-left hole of
   the lid", not "The circuit works".
 - Builds over about 12 steps: give every step a `section` ("Frame", "Cart and drive motor", "Wiring"), 3 to 8
