@@ -23,6 +23,16 @@
 	handle /api/build* {
 		reverse_proxy mcp:8000
 	}
+	# Accounts, saved projects and BOM uploads (users.py, boms.py).
+	handle /api/auth/* {
+		reverse_proxy mcp:8000
+	}
+	handle /api/projects* {
+		reverse_proxy mcp:8000
+	}
+	handle /api/bom* {
+		reverse_proxy mcp:8000
+	}
 	# Personal keys for visitors' own AI, and the guides each key exported (accounts.py).
 	handle /api/connect {
 		reverse_proxy mcp:8000

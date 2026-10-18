@@ -1,6 +1,7 @@
 // Client for the design backend (mcp-server/physical_studio/jobs.py, served by the MCP server's
 // HTTP app; Caddy and the Vite dev server route /api/parts and /api/design* to it).
 
+import { authToken, type User } from './auth'
 import { designParams } from './router'
 
 export interface PartSummary {
@@ -10,6 +11,7 @@ export interface PartSummary {
   body_size: [number, number, number]
   verified: boolean
   source?: string
+  mine?: boolean // from the signed-in user's BOM
 }
 
 export type JobEventKind =
@@ -56,8 +58,10 @@ export interface Provider {
 }
 
 function headers(json = false): Record<string, string> {
+  const token = authToken()
   return {
     'x-demo-code': designParams().code ?? '',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(json ? { 'Content-Type': 'application/json' } : {}),
   }
 }
@@ -71,7 +75,7 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T
 }
 
-export const listParts = () => call<PartSummary[]>('/api/parts')
+export const listParts = () => call<PartSummary[]>('/api/parts', { headers: headers() })
 
 /** The server's design models, its default first. */
 export const listProviders = () => call<Provider[]>('/api/design/providers')
@@ -157,6 +161,8 @@ export interface BuildCommit {
 
 export interface Build {
   id: string
+  mine?: boolean // false: someone else's build shared by link (only its owner can commit)
+  owner_name?: string | null
   status: 'scanning' | 'planning' | 'checking' | 'modelling' | 'done' | 'error'
   stage: string
   error: string | null
@@ -177,3 +183,37 @@ export const commitStep = (id: string, step: number, photos: string[], note: str
     headers: headers(true),
     body: JSON.stringify({ step, photos, note }),
   })
+
+// --- Accounts (mcp-server/physical_studio/users.py) ---------------------------------------------------
+
+export const signUp = (email: string, password: string, name: string) =>
+  call<{ token: string; user: User }>('/api/auth/signup', {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ email, password, name }),
+  })
+
+export const logIn = (email: string, password: string) =>
+  call<{ token: string; user: User }>('/api/auth/login', {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ email, password }),
+  })
+
+export const logOut = () => call<object>('/api/auth/logout', { method: 'POST', headers: headers() })
+
+export interface SavedProject {
+  design: string
+  title: string
+  prompt: string
+  steps: number
+  updated: number // seconds
+}
+
+export const listSaved = () => call<SavedProject[]>('/api/projects', { headers: headers() })
+
+export const saveProject = (p: { design: string; title: string; prompt?: string; steps?: number }) =>
+  call<SavedProject>('/api/projects', { method: 'POST', headers: headers(true), body: JSON.stringify(p) })
+
+export const forgetSaved = (design: string) =>
+  call<object>('/api/projects/forget', { method: 'POST', headers: headers(true), body: JSON.stringify({ design }) })

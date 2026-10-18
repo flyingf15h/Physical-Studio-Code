@@ -529,8 +529,13 @@ def register_routes(mcp, manager: JobManager, parts_dir: Path):
 
     @mcp.custom_route("/api/parts", methods=["GET"])
     async def parts(request: Request):
+        from .boms import user_parts
+        from .users import user_from_request
+
         lib = library.load_library(parts_dir)
-        return JSONResponse([{**library.summary(p), "source": p.get("source", "")} for p in lib.values()])
+        user = user_from_request(request)
+        mine = [{**library.summary(p), "source": p.get("source", ""), "mine": True} for p in user_parts(user["id"])] if user else []
+        return JSONResponse(mine + [{**library.summary(p), "source": p.get("source", "")} for p in lib.values()])
 
     @mcp.custom_route("/api/design", methods=["POST"])
     async def start(request: Request):

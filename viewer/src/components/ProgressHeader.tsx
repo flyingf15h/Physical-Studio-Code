@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { designParams, navigate, withParams } from '../router'
+import { Account } from './Account'
 import './ProgressHeader.css'
 
 const STEPS = ['Describe', 'Design', 'Guide', 'Build', 'Print'] as const
@@ -94,6 +95,7 @@ export function ProgressHeader({ active, tab, design, job, build }: Props) {
           })}
         </ol>
       )}
+      <Account />
     </header>
   )
 }

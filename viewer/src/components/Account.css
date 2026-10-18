@@ -1,0 +1,22 @@
+.account { margin-left: auto; position: relative; flex: none; }
+.account-login { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
+.account-login:hover { border-color: var(--accent); }
+.account-me { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+.account-me:hover { background: var(--bg); }
+.account-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 600; font-size: 13px; display: grid; place-items: center; }
+.account-menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(31, 41, 51, .12); padding: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 200px; z-index: 20; font-size: 13px; }
+.account-menu span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.account-menu button { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 10px; cursor: pointer; text-align: left; }
+.account-backdrop { position: fixed; inset: 0; background: rgba(31, 41, 51, .4); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.account-dialog { background: var(--panel); border-radius: 14px; padding: 22px 24px; width: min(400px, 100%); display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 60px rgba(31, 41, 51, .25); }
+.account-dialog h2 { margin: 0; font-size: 20px; }
+.account-lede { margin: -4px 0 4px; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.account-dialog label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
+.account-dialog input { border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font: inherit; font-size: 15px; font-weight: 400; }
+.account-dialog input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.account-hint { font-size: 12px; color: var(--muted); margin-top: -6px; }
+.account-error { margin: 0; background: #fde8e8; color: #9b1c1c; border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+.account-go { border: 0; background: var(--accent); color: #fff; font-weight: 600; font-size: 15px; border-radius: 8px; padding: 10px; cursor: pointer; }
+.account-go:disabled { opacity: .5; cursor: default; }
+.account-switch { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.account-switch button { border: 0; background: none; color: var(--accent); font-weight: 600; cursor: pointer; padding: 0; }

@@ -6,6 +6,7 @@ import { loadSteps, type StepsDoc } from './steps'
 import { TrackerPanel } from './tracker/TrackerPanel'
 import type { Problem } from './tracker/session'
 import { ProgressHeader } from './components/ProgressHeader'
+import { ShareButton } from './components/ShareButton'
 import { rememberProject } from './projects'
 import './App.css'
 
@@ -113,6 +114,7 @@ export default function App() {
             <div className="eyebrow">Physical Studio</div>
             <h1>{source?.doc.title ?? 'Loading…'}</h1>
             {source?.doc.prompt && <p className="prompt">“{source.doc.prompt}”</p>}
+            {source && <ShareButton />}
           </header>
           <ol className="steps">
             {source?.doc.steps.map((s, i) => (

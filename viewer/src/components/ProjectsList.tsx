@@ -1,6 +1,7 @@
 // Projects on screen 1: the ready-made guides, and your own (opened here or exported by your AI; src/projects.ts).
 import { useEffect, useState } from 'react'
-import { listMyProjects } from '../api'
+import { listMyProjects, listSaved } from '../api'
+import { useUser } from '../auth'
 import { forgetProject, projectHref, READY_MADE, savedKey, thumbnail, yourProjects, type Project } from '../projects'
 import { designParams, navigate } from '../router'
 import './ProjectsList.css'
@@ -67,11 +68,28 @@ export function ReadyMadeGuides() {
 /** keyVersion: bump it when a new key is saved, so its projects are fetched. Also refetched when
  * the tab gets focus again, since the visitor's AI exports while they're in another window. */
 export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
+  const user = useUser()
   const [opened, setOpened] = useState(yourProjects)
   const [exported, setExported] = useState<Project[]>([])
+  const [saved, setSaved] = useState<Project[]>([])
   useEffect(() => {
     const load = () => {
       setOpened(yourProjects())
+      if (user)
+        listSaved().then(
+          (list) =>
+            setSaved(
+              list.map((p) => ({
+                design: p.design,
+                title: p.title,
+                prompt: p.prompt,
+                steps: p.steps,
+                openedAt: p.updated * 1000,
+              })),
+            ),
+          () => setSaved([]),
+        )
+      else setSaved([])
       const key = savedKey()
       if (!key) return
       listMyProjects(key).then(
@@ -91,8 +109,8 @@ export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
     load()
     window.addEventListener('focus', load)
     return () => window.removeEventListener('focus', load)
-  }, [keyVersion])
-  const mine = merge(opened, exported)
+  }, [keyVersion, user])
+  const mine = merge([...opened, ...saved], exported)
   return (
     <section className="projects" id="projects">
       {mine.length ? (
@@ -105,6 +123,7 @@ export function YourProjects({ keyVersion = 0 }: { keyVersion?: number }) {
                 forgetProject(p.design)
                 setOpened(yourProjects())
                 setExported(exported.filter((q) => q.design !== p.design))
+                setSaved(saved.filter((q) => q.design !== p.design))
               }}
             />
           ))}

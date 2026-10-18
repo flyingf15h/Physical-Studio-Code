@@ -3,6 +3,8 @@
 // AI exported with their key (GET /api/my-projects). The opened ones and the key live in
 // localStorage: per browser, and the page still works when storage is blocked.
 
+import { forgetSaved, saveProject } from './api'
+import { authToken } from './auth'
 import { withParams } from './router'
 
 export interface Project {
@@ -78,8 +80,12 @@ function save(list: Project[]) {
 export function rememberProject(p: Project) {
   if (p.design === 'sample' || READY_MADE.some((r) => r.design === p.design)) return
   save([{ ...p, openedAt: Date.now() }, ...yourProjects().filter((q) => q.design !== p.design)])
+  // Logged in: keep it with the account too, so it follows you to other browsers.
+  if (authToken())
+    void saveProject({ design: p.design, title: p.title, prompt: p.prompt, steps: p.steps }).catch(() => {})
 }
 
 export function forgetProject(design: string) {
   save(yourProjects().filter((p) => p.design !== design))
+  if (authToken()) void forgetSaved(design).catch(() => {})
 }

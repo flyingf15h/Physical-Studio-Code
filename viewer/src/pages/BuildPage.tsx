@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { commitStep, getBuild, type Build, type BuildCommit, type BuildPlan, type Verdict } from '../api'
 import { BenchModel } from '../components/BenchModel'
 import { ProgressHeader } from '../components/ProgressHeader'
+import { ShareButton } from '../components/ShareButton'
 import { shrink } from '../images'
 import { rememberProject } from '../projects'
 import './BuildPage.css'
@@ -248,7 +249,14 @@ function StepView({
           <BenchModel model={s.model} guide={plan.part_guide} highlight={s.model.new ?? s.part_ids} />
         </>
       )}
-      <CommitBox build={build} step={index} onCommit={onCommit} />
+      {build.mine === false ? (
+        <p className="muted shared-note">
+          {build.owner_name ? `${build.owner_name} shared this build with you.` : 'This build was shared with you.'}{' '}
+          Only the person who started it can commit photos to it.
+        </p>
+      ) : (
+        <CommitBox build={build} step={index} onCommit={onCommit} />
+      )}
       {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} />}
       {mine.length > 1 && (
         <p className="muted">{mine.length} commits for this step. See them all in the Commits tab.</p>
@@ -418,6 +426,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
             <div className="eyebrow">Breadboard build</div>
             <h1>{plan.title}</h1>
             <p className="prompt">“{build!.goal}”</p>
+            <ShareButton />
           </header>
           <ol className="steps">
             {item(-1, 'Your bench and parts')}

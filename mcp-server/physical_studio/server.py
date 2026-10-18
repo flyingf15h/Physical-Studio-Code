@@ -628,6 +628,14 @@ from .jobs import JobManager, register_routes  # noqa: E402
 jobs = JobManager(OUT_DIR, Studio, mcp.list_tools)
 register_routes(mcp, jobs, PARTS_DIR)
 
+# Accounts: email + password login, sessions and saved projects (users.py). Before the build
+# routes, which use users.user_from_request to know who started a build.
+from .boms import register_bom_routes  # noqa: E402
+from .users import register_user_routes  # noqa: E402
+
+register_user_routes(mcp, OUT_DIR)
+register_bom_routes(mcp, OUT_DIR)
+
 # Breadboard builds from bench photos (screen 1's "Design it"): Senna's Build helper, ported from
 # circuit-studio/ into physical_studio/bench/. Optional until that package lands.
 try:
