@@ -1,0 +1,24 @@
+{
+  "id": "gt2-idler-20t-5mm",
+  "name": "GT2 toothless idler, 5 mm bore",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      18,
+      18,
+      8.5
+    ]
+  },
+  "notes": "Smooth idler for 6 mm GT2 belt, 5 mm bore with a bearing inside, 18 mm flanges, 8.5 mm wide. Axis along z.",
+  "appearance": {
+    "color": "#c9cdd1",
+    "metallic": 0.8,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

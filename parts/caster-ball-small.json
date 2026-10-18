@@ -1,0 +1,24 @@
+{
+  "id": "caster-ball-small",
+  "name": "Ball caster (small)",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      31,
+      20,
+      16
+    ]
+  },
+  "notes": "Steel ball caster, 31 x 20 mm plate with two M3 holes 24 mm apart, 16 mm tall: the third wheel on a two-wheel rover.",
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

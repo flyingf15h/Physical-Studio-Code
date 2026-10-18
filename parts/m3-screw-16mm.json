@@ -1,0 +1,38 @@
+{
+  "id": "m3-screw-16mm",
+  "name": "M3 x 16 mm socket head screw",
+  "category": "fastener",
+  "source": "ISO 4762 M3 socket head cap screw (head 5.5 mm, 3.0 mm tall, hex 2.5mm); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      5.5,
+      5.5,
+      19.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      -2.75,
+      -2.75,
+      -16
+    ],
+    "max": [
+      2.75,
+      2.75,
+      3.0
+    ]
+  },
+  "fastener": {
+    "thread": "M3",
+    "length": 16,
+    "head_diameter": 5.5,
+    "head_height": 3.0,
+    "head": "socket",
+    "drive": "hex 2.5mm"
+  },
+  "notes": "Origin is the centre of the underside of the head; the shaft runs along -Z and the head sits from z=0 to z=3.0. Length is measured under the head.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

@@ -1,0 +1,68 @@
+{
+  "id": "limit-switch-kw12",
+  "name": "Limit switch (KW12 lever)",
+  "category": "input",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      20,
+      6.4,
+      10
+    ]
+  },
+  "pins": [
+    {
+      "id": "com",
+      "label": "COM",
+      "position": [
+        3,
+        3.2,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "no",
+      "label": "NO",
+      "position": [
+        10,
+        3.2,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "nc",
+      "label": "NC",
+      "position": [
+        17,
+        3.2,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Micro switch with a lever, 20 x 6.4 x 10 mm body, two 2.3 mm mounting holes 9.5 mm apart. Wire COM to GND and NO to an input with INPUT_PULLUP: reads LOW when pressed.",
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

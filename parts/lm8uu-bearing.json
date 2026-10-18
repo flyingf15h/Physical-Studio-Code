@@ -1,0 +1,24 @@
+{
+  "id": "lm8uu-bearing",
+  "name": "LM8UU linear bearing",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      24,
+      15,
+      15
+    ]
+  },
+  "notes": "Linear ball bearing for 8 mm rod: 15 mm outside, 24 mm long along x.",
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

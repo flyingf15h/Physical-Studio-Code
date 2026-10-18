@@ -37,6 +37,24 @@ Claude, or any MCP client).
   through two bearings) get a callout and a check line about exactly that.
 - Leave cable slack for anything that moves, and say so in the wiring step.
 - The power supply stays unplugged until the last wire is in; the last wiring step's check says so.
+- Stepper builds: driver current limit set before the motor runs, a 100 uF capacitor across the
+  driver's motor supply, limit switches at the ends of each axis (COM to GND, NO to an input).
+
+Good mechanism steps look like this (from the double inverted pendulum guide):
+```
+add_step(title="Slide on the carriage block", text="Slide the carriage block onto the rail from one end. Keep it level so the balls stay in.",
+         add=["block"], motion=[{"placement": "block", "from_offset": [-260, 0, 0]}],
+         callouts=[{"text": "Keep it level", "target": "block"}],
+         check="The block sits on the rail and slides end to end smoothly.")
+add_step(title="Fit the pinion gear", text="From underneath, push the pinion onto the motor shaft so it meshes with the rack, then tighten its set screw.",
+         add=["pinion"], motion=[{"placement": "pinion", "from_offset": [0, 0, -30]}],
+         tools=[{"name": "2 mm hex key", "for": "the pinion's set screw"}],
+         callouts=[{"text": "Teeth in the rack", "target": "pinion"}],
+         check="The pinion is on the motor shaft under the cart and its teeth sit in the rack.")
+add_step(title="Wire the motor", text="Connect the motor's two terminals to the driver's OUT1 and OUT2. Leave slack so the cart can travel.",
+         add=["w-motor-1", "w-motor-2"], callouts=[{"text": "Leave slack", "target": "w-motor-1"}],
+         check="Orange and brown wires run from the motor to OUT1 and OUT2.")
+```
 
 ### The check-and-fix loop
 - After every placement change: check_interference, check_clearance, then render_preview twice:

@@ -1,0 +1,24 @@
+{
+  "id": "wheel-65mm-tt",
+  "name": "65 mm wheel for TT motor",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      65,
+      65,
+      26
+    ]
+  },
+  "notes": "Rubber tyre on a plastic hub, 65 mm diameter, 26 mm wide, pushes onto the TT motor's D shaft (an M2 screw holds it). Axis along z.",
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

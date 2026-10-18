@@ -1,0 +1,24 @@
+{
+  "id": "t8-leadscrew-300",
+  "name": "T8 lead screw (300 mm) with brass nut",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      300,
+      22,
+      22
+    ]
+  },
+  "notes": "8 mm trapezoidal lead screw, 8 mm lead (8 mm of travel per turn), 300 mm long along x. Brass nut: 10.2 mm body, 22 mm flange with four 3.5 mm holes on a 16 mm circle, 15 mm long.",
+  "appearance": {
+    "color": "#c8a24a",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

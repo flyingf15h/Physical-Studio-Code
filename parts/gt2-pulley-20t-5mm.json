@@ -1,0 +1,24 @@
+{
+  "id": "gt2-pulley-20t-5mm",
+  "name": "GT2 pulley, 20 teeth, 5 mm bore",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      18,
+      18,
+      16
+    ]
+  },
+  "notes": "Fits a 6 mm GT2 belt. 12.7 mm pitch diameter (40 mm of belt per turn), 16 mm flanges, 16 mm long including the hub with two M3 set screws (2 mm hex key; tighten one onto the motor shaft's flat). Axis along z.",
+  "appearance": {
+    "color": "#c9cdd1",
+    "metallic": 0.8,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

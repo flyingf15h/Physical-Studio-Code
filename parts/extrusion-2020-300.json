@@ -1,0 +1,24 @@
+{
+  "id": "extrusion-2020-300",
+  "name": "2020 aluminium extrusion (300 mm)",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      300,
+      20,
+      20
+    ]
+  },
+  "notes": "20 x 20 mm profile, 300 mm long along x, a 6 mm T-slot centred on each of the four faces and a 4.2 mm centre hole (tap M5 at the ends). Fixes with M5 T-nuts and corner brackets.",
+  "appearance": {
+    "color": "#c9cdd1",
+    "metallic": 0.8,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

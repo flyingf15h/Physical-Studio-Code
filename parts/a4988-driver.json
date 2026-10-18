@@ -1,0 +1,262 @@
+{
+  "id": "a4988-driver",
+  "name": "A4988 stepper driver board",
+  "category": "board",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      15.24,
+      20.32,
+      1.6
+    ]
+  },
+  "pins": [
+    {
+      "id": "en",
+      "label": "EN",
+      "position": [
+        1.27,
+        19.05,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "ms1",
+      "label": "MS1",
+      "position": [
+        1.27,
+        16.51,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "ms2",
+      "label": "MS2",
+      "position": [
+        1.27,
+        13.97,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "ms3",
+      "label": "MS3",
+      "position": [
+        1.27,
+        11.43,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "reset",
+      "label": "RESET",
+      "position": [
+        1.27,
+        8.89,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sleep",
+      "label": "SLEEP",
+      "position": [
+        1.27,
+        6.35,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "step",
+      "label": "STEP",
+      "position": [
+        1.27,
+        3.81,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dir",
+      "label": "DIR",
+      "position": [
+        1.27,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vmot",
+      "label": "VMOT",
+      "position": [
+        13.97,
+        19.05,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        13.97,
+        16.51,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "2b",
+      "label": "2B",
+      "position": [
+        13.97,
+        13.97,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "2a",
+      "label": "2A",
+      "position": [
+        13.97,
+        11.43,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "1a",
+      "label": "1A",
+      "position": [
+        13.97,
+        8.89,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "1b",
+      "label": "1B",
+      "position": [
+        13.97,
+        6.35,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vdd",
+      "label": "VDD",
+      "position": [
+        13.97,
+        3.81,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd_2",
+      "label": "GND",
+      "position": [
+        13.97,
+        1.27,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -8.5
+    ],
+    "max": [
+      15.24,
+      20.32,
+      12
+    ]
+  },
+  "notes": "Pololu A4988 carrier. Joins RESET to SLEEP for normal use. VMOT 8-35 V with a 100 uF capacitor across VMOT/GND; VDD 3-5.5 V logic. 1A/1B to one motor coil, 2A/2B to the other. Set the current limit on the trim pot before running. Never unplug the motor while VMOT is on.",
+  "appearance": {
+    "color": "#1e6b3a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

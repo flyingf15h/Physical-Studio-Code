@@ -1,0 +1,38 @@
+{
+  "id": "m5-screw-10mm",
+  "name": "M5 x 10 mm socket head screw",
+  "category": "fastener",
+  "source": "ISO 4762 M5 socket head cap screw (head 8.5 mm, 5.0 mm tall, hex 4mm); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      8.5,
+      8.5,
+      15.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      -4.25,
+      -4.25,
+      -10
+    ],
+    "max": [
+      4.25,
+      4.25,
+      5.0
+    ]
+  },
+  "fastener": {
+    "thread": "M5",
+    "length": 10,
+    "head_diameter": 8.5,
+    "head_height": 5.0,
+    "head": "socket",
+    "drive": "hex 4mm"
+  },
+  "notes": "Origin is the centre of the underside of the head; the shaft runs along -Z and the head sits from z=0 to z=5.0. Length is measured under the head.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

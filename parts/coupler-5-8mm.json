@@ -1,0 +1,24 @@
+{
+  "id": "coupler-5-8mm",
+  "name": "Shaft coupler, 5 mm to 8 mm",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      19,
+      19,
+      25
+    ]
+  },
+  "notes": "Flexible aluminium coupler, 19 mm diameter, 25 mm long, 5 mm bore at the bottom for a stepper shaft and 8 mm at the top for a T8 lead screw, two M3 set screws at each end. Axis along z.",
+  "appearance": {
+    "color": "#c9cdd1",
+    "metallic": 0.8,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

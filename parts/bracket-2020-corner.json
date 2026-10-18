@@ -1,0 +1,24 @@
+{
+  "id": "bracket-2020-corner",
+  "name": "2020 corner bracket",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      20,
+      20,
+      20
+    ]
+  },
+  "notes": "Cast L bracket for 2020 extrusion: two 20 x 20 mm legs at 90 degrees, each with a 5.5 mm slot for an M5 x 10 screw and a T-nut.",
+  "appearance": {
+    "color": "#c9cdd1",
+    "metallic": 0.8,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

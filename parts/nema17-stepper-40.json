@@ -1,0 +1,108 @@
+{
+  "id": "nema17-stepper-40",
+  "name": "NEMA 17 stepper motor (40 mm)",
+  "category": "output",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      42.3,
+      42.3,
+      40
+    ]
+  },
+  "pins": [
+    {
+      "id": "a_plus",
+      "label": "A+ (black)",
+      "position": [
+        0,
+        15,
+        10
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "a_minus",
+      "label": "A- (green)",
+      "position": [
+        0,
+        18,
+        10
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "b_plus",
+      "label": "B+ (red)",
+      "position": [
+        0,
+        24,
+        10
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "b_minus",
+      "label": "B- (blue)",
+      "position": [
+        0,
+        27,
+        10
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      42.3,
+      42.3,
+      66
+    ]
+  },
+  "keep_out": [
+    {
+      "min": [
+        10.149999999999999,
+        10.149999999999999,
+        40
+      ],
+      "max": [
+        32.15,
+        32.15,
+        66
+      ]
+    }
+  ],
+  "notes": "42.3 mm square face, 40 mm long body. Shaft 5 mm (D-cut) sticks 24 mm out of the top face (+z) from a 22 mm x 2 mm boss at the centre. Four M3 tapped holes on a 31 mm square in the top face (centres 5.65 mm in from each edge), 4.5 mm deep. Bipolar, 4 wires: coil A = black/green, coil B = red/blue (check the datasheet; pairs read a few ohms across).",
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.5,
+    "roughness": 0.45,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

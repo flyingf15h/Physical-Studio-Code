@@ -1,0 +1,54 @@
+{
+  "id": "tt-gearmotor",
+  "name": "TT gearmotor (yellow, 1:48)",
+  "category": "output",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      70,
+      22.5,
+      18.8
+    ]
+  },
+  "pins": [
+    {
+      "id": "m_pos",
+      "label": "Motor +",
+      "position": [
+        66,
+        6,
+        9.4
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "m_neg",
+      "label": "Motor -",
+      "position": [
+        66,
+        16.5,
+        9.4
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "The yellow hobby rover motor: 3-6 V, about 200 rpm at 6 V. 70 mm long along x including the motor can; the double-sided 5.4 mm D shaft runs along y, 11 mm from the gearbox end. Two M3 holes through the gearbox for mounting. Two solder tabs.",
+  "appearance": {
+    "color": "#e8b923",
+    "metallic": 0.0,
+    "roughness": 0.6,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}

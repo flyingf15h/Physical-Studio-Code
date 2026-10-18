@@ -1,0 +1,24 @@
+{
+  "id": "linear-rod-8-300",
+  "name": "8 mm smooth rod (300 mm)",
+  "category": "misc",
+  "source": "Standard numbers for this part (datasheet / ISO / NEMA); not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      300,
+      8,
+      8
+    ]
+  },
+  "notes": "Hardened steel rod, 8 mm diameter, 300 mm long along x, for LM8UU bearings.",
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "typical look of this part"
+  },
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null
+}
