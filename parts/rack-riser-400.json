@@ -3,7 +3,7 @@
   "name": "Rack riser, 400 mm",
   "category": "misc",
   "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
-  "step_file": null,
+  "step_file": "rack-riser-400.step",
   "body": {
     "size": [
       400,

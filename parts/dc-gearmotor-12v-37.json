@@ -46,6 +46,16 @@
   "verified_by": null,
   "verified_on": null,
   "appearance": {
-    "material": "black-anodised"
+    "material": "black-anodised",
+    "accents": [
+      {
+        "step_file": "dc-gearmotor-12v-37.accent-0.step",
+        "material": "black-anodised"
+      },
+      {
+        "step_file": "dc-gearmotor-12v-37.accent-1.step",
+        "material": "brass"
+      }
+    ]
   }
 }

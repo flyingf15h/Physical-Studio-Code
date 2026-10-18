@@ -3,7 +3,7 @@
   "name": "Distance sensor bracket",
   "category": "misc",
   "source": "Our own size for a 3D-printed (or cut) part of the double inverted pendulum; change freely",
-  "step_file": null,
+  "step_file": "tof-bracket.step",
   "body": {
     "size": [
       10,

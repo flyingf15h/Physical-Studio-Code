@@ -3,7 +3,7 @@
   "name": "HGR20 linear rail, 400 mm",
   "category": "misc",
   "source": "Typical datasheet/standard numbers for this part; the shop listing wasn't checked and it is not yet measured",
-  "step_file": null,
+  "step_file": "hgr20-rail-400.step",
   "body": {
     "size": [
       400,

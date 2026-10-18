@@ -2,40 +2,40 @@
   "brushed-aluminium": {
     "file": "brushed-aluminium.jpg",
     "color": "#c3c8cd",
-    "metallic": 0.85,
-    "roughness": 0.42,
+    "metallic": 0.55,
+    "roughness": 0.45,
     "tile_mm": 60,
     "about": "Brushed aluminium plate or extrusion"
   },
   "ground-steel": {
     "file": "ground-steel.jpg",
     "color": "#b4b9bf",
-    "metallic": 0.9,
-    "roughness": 0.32,
+    "metallic": 0.6,
+    "roughness": 0.38,
     "tile_mm": 40,
     "about": "Ground bearing steel (linear rails, carriages)"
   },
   "gear-steel": {
     "file": "gear-steel.jpg",
     "color": "#9aa0a6",
-    "metallic": 0.85,
-    "roughness": 0.45,
+    "metallic": 0.55,
+    "roughness": 0.48,
     "tile_mm": 25,
     "about": "Machined carbon-steel gears and racks"
   },
   "chrome": {
     "file": "chrome.jpg",
     "color": "#dfe3e6",
-    "metallic": 1.0,
-    "roughness": 0.12,
+    "metallic": 0.8,
+    "roughness": 0.2,
     "tile_mm": 30,
     "about": "Chrome-plated shafts and bearings"
   },
   "black-anodised": {
     "file": "black-anodised.jpg",
     "color": "#2c2e33",
-    "metallic": 0.55,
-    "roughness": 0.5,
+    "metallic": 0.35,
+    "roughness": 0.45,
     "tile_mm": 20,
     "about": "Black anodised aluminium, motor cans"
   },
@@ -82,7 +82,7 @@
   "brass": {
     "file": "brass.jpg",
     "color": "#c9a54f",
-    "metallic": 0.9,
+    "metallic": 0.7,
     "roughness": 0.35,
     "tile_mm": 30,
     "about": "Brass inserts, standoffs and terminals"

@@ -70,6 +70,53 @@ def box_uv(mesh: trimesh.Trimesh, tile_mm: float) -> trimesh.Trimesh:
     return out
 
 
+def textured(mesh: trimesh.Trimesh, name: str, color: str, look: dict, parts_dir: Path | None, kind: str = "part"):
+    """A mesh with its material: a tiled texture when look names one, else a plain colour and finish."""
+    spec = material_library(parts_dir / "materials").get(look.get("material", "")) if parts_dir else None
+    texture = material_texture(parts_dir / "materials", look["material"]) if spec else None
+    if texture is not None:
+        mesh = box_uv(mesh, float(spec.get("tile_mm", 50)))
+        mesh.visual.material = trimesh.visual.material.PBRMaterial(
+            name=name,
+            baseColorTexture=texture,
+            baseColorFactor=hex_to_rgba(color),  # the texture is greyscale detail; the colour tints it
+            metallicFactor=float(look.get("metallic", spec.get("metallic", 0.0))),
+            roughnessFactor=float(look.get("roughness", spec.get("roughness", 0.6))),
+        )
+        return mesh
+    mesh.visual = trimesh.visual.TextureVisuals(
+        material=trimesh.visual.material.PBRMaterial(
+            name=name,
+            baseColorFactor=hex_to_rgba(color),
+            metallicFactor=float(look.get("metallic", 0.6 if kind == "fastener" else 0.0)),
+            roughnessFactor=float(look.get("roughness", 0.6)),
+        )
+    )
+    return mesh
+
+
+def accent_meshes(part: dict, parts_dir: Path | None) -> list[tuple[trimesh.Trimesh, str, dict]]:
+    """A part's accents: extra pieces in another material (a carriage's black end caps, a motor's can),
+    each a STEP file next to the part's JSON: appearance.accents = [{step_file, material, color?}]."""
+    out = []
+    for i, accent in enumerate((part.get("appearance") or {}).get("accents") or []):
+        path = parts_dir / accent.get("step_file", "") if parts_dir else None
+        if not path or not path.is_file():
+            continue
+        spec = material_library(parts_dir / "materials").get(accent.get("material", ""), {})
+        out.append((accent_mesh(path), accent.get("color") or spec.get("color", "#888888"), accent))
+    return out
+
+
+@functools.lru_cache(maxsize=64)
+def accent_mesh(path: Path) -> trimesh.Trimesh:
+    from build123d import import_step
+
+    from .geometry import mesh_of
+
+    return mesh_of(import_step(path))
+
+
 def top_face(piece, part: dict, parts_dir: Path) -> trimesh.Trimesh | None:
     """A quad just above the body's top face, textured with the part's top picture (textures.py)."""
     image = top_image(part, parts_dir)
@@ -101,27 +148,7 @@ def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = No
             continue
         part = (parts or {}).get(piece.part_id) or {}
         look = part.get("appearance") or {}
-        mesh = piece.local_mesh().copy()
-        spec = material_library(parts_dir / "materials").get(look.get("material", "")) if parts_dir else None
-        texture = material_texture(parts_dir / "materials", look["material"]) if spec else None
-        if texture is not None:
-            mesh = box_uv(mesh, float(spec.get("tile_mm", 50)))
-            mesh.visual.material = trimesh.visual.material.PBRMaterial(
-                name=piece.id,
-                baseColorTexture=texture,
-                baseColorFactor=hex_to_rgba(piece.color),  # the texture is greyscale detail; the colour tints it
-                metallicFactor=float(look.get("metallic", spec.get("metallic", 0.0))),
-                roughnessFactor=float(look.get("roughness", spec.get("roughness", 0.6))),
-            )
-        else:
-            mesh.visual = trimesh.visual.TextureVisuals(
-                material=trimesh.visual.material.PBRMaterial(
-                    name=piece.id,
-                    baseColorFactor=hex_to_rgba(piece.color),
-                    metallicFactor=float(look.get("metallic", 0.6 if piece.kind == "fastener" else 0.0)),
-                    roughnessFactor=float(look.get("roughness", 0.6)),
-                )
-            )
+        mesh = textured(piece.local_mesh().copy(), piece.id, piece.color, look, parts_dir, piece.kind)
         scene.add_geometry(
             mesh,
             node_name=piece.id + suffix,
@@ -129,6 +156,10 @@ def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = No
             parent_node_name="design",
             transform=piece.matrix,
         )
+        for i, (accent, color, accent_look) in enumerate(accent_meshes(part, parts_dir) if piece.kind == "part" else []):
+            name = f"{piece.id}{suffix}-accent-{i}"  # a child, so clicking it still picks the part
+            scene.add_geometry(textured(accent.copy(), name, color, accent_look, parts_dir), node_name=name, geom_name=name,
+                               parent_node_name=piece.id + suffix)
         quad = top_face(piece, part, parts_dir) if parts_dir and piece.kind == "part" else None
         if quad is not None:
             scene.add_geometry(quad, node_name=f"{piece.id}{suffix}-top", geom_name=f"{piece.id}{suffix}-top", parent_node_name=piece.id + suffix)

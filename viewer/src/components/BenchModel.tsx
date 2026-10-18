@@ -4,7 +4,7 @@
 // `highlight` marks this step's new parts. Like the Build helper's viewer: reset / top view, an evenly
 // lit mode, and the GLB to download. Hardware builds also pass `wires`: clicking a wire marks both of
 // its ends in the model and names the part and pin at each one.
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
@@ -166,10 +166,20 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
   const wireLabels = model.labels.filter((l) => l.kind === 'wire' && wires[l.id])
+  // Scroll over the model zooms it, not the page: React's wheel handlers are passive, so stop the
+  // page scroll with a native listener (the orbit controls still get the event).
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const stop = (e: WheelEvent) => e.preventDefault()
+    el.addEventListener('wheel', stop, { passive: false })
+    return () => el.removeEventListener('wheel', stop)
+  }, [])
 
   return (
     <div className="bench-model">
-      <div className="bench-canvas" style={{ height }}>
+      <div className="bench-canvas" style={{ height }} ref={box}>
         <Canvas
           key={view.n}
           camera={{ fov: 35, near: 0.001, far: 50, position: view.top ? [0, 0.34, 0.001] : [0.05, 0.22, 0.24] }}
@@ -187,12 +197,12 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
             <Lightformer intensity={0.6} position={[4, 1, -2]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} />
           </Environment>
           <Suspense fallback={null}>
-            <Bounds fit clip observe margin={1.15}>
+            <Bounds fit observe margin={1.15}>
               <Scene model={model} picked={picked} highlight={highlight} flat={flat} onPick={setPicked} />
             </Bounds>
             {wire && <WireMarkers wire={wire} />}
           </Suspense>
-          <OrbitControls makeDefault />
+          <OrbitControls makeDefault minDistance={0.01} maxDistance={5} zoomSpeed={0.8} />
         </Canvas>
         <div className="bench-tools">
           <span>Drag to rotate · scroll to zoom · click a part or wire</span>

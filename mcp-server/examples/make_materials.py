@@ -72,17 +72,17 @@ def polished():  # chrome: almost smooth, a few soft highlights
 
 # name: (maker, brightness range, colour, metallic, roughness, mm per tile, what it is)
 MATERIALS = {
-    "brushed-aluminium": (brushed, (0.66, 1.0), "#c3c8cd", 0.85, 0.42, 60, "Brushed aluminium plate or extrusion"),
-    "ground-steel": (ground, (0.66, 1.0), "#b4b9bf", 0.9, 0.32, 40, "Ground bearing steel (linear rails, carriages)"),
-    "gear-steel": (ground, (0.6, 1.0), "#9aa0a6", 0.85, 0.45, 25, "Machined carbon-steel gears and racks"),
-    "chrome": (polished, (0.9, 1.0), "#dfe3e6", 1.0, 0.12, 30, "Chrome-plated shafts and bearings"),
-    "black-anodised": (lambda: speckle(12), (0.62, 1.0), "#2c2e33", 0.55, 0.5, 20, "Black anodised aluminium, motor cans"),
+    "brushed-aluminium": (brushed, (0.5, 1.0), "#c3c8cd", 0.55, 0.45, 60, "Brushed aluminium plate or extrusion"),
+    "ground-steel": (ground, (0.5, 1.0), "#b4b9bf", 0.6, 0.38, 40, "Ground bearing steel (linear rails, carriages)"),
+    "gear-steel": (ground, (0.45, 1.0), "#9aa0a6", 0.55, 0.48, 25, "Machined carbon-steel gears and racks"),
+    "chrome": (polished, (0.8, 1.0), "#dfe3e6", 0.8, 0.2, 30, "Chrome-plated shafts and bearings"),
+    "black-anodised": (lambda: speckle(12), (0.62, 1.0), "#2c2e33", 0.35, 0.45, 20, "Black anodised aluminium, motor cans"),
     "plywood": (wood, (0.55, 1.0), "#cfa878", 0.0, 0.75, 120, "Birch plywood base plate"),
     "mdf": (lambda: speckle(14), (0.74, 1.0), "#b98d5f", 0.0, 0.85, 40, "MDF board"),
     "pla": (layers, (0.7, 1.0), "#f0f0ec", 0.0, 0.6, 12.8, "3D-printed PLA (tinted by the part's colour)"),
     "rubber": (lambda: speckle(16), (0.8, 1.0), "#232323", 0.0, 0.95, 15, "Rubber or matte black plastic"),
     "pcb": (weave, (0.72, 1.0), "#1d6b3a", 0.0, 0.5, 8, "PCB solder mask (tinted green, blue or purple)"),
-    "brass": (brushed, (0.8, 1.0), "#c9a54f", 0.9, 0.35, 30, "Brass inserts, standoffs and terminals"),
+    "brass": (brushed, (0.7, 1.0), "#c9a54f", 0.7, 0.35, 30, "Brass inserts, standoffs and terminals"),
 }
 
 
