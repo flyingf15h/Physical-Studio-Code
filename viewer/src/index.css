@@ -7,9 +7,18 @@
   --accent: #0f9fb3;
   --accent-soft: #d8f3f6;
   --warn: #ff7a45;
+  --shadow-sm: 0 1px 2px rgba(31, 41, 51, .05), 0 2px 8px rgba(31, 41, 51, .04);
+  --shadow-md: 0 4px 14px rgba(31, 41, 51, .08), 0 12px 32px rgba(31, 41, 51, .06);
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--ink);
   background: var(--bg);
+}
+/* A product feel rather than a blueprint: a warm page with a faint teal glow, soft cards. */
+body {
+  background:
+    radial-gradient(1100px 520px at 8% -8%, #e2f5f7 0%, transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, #fbefe4 0%, transparent 55%),
+    var(--bg);
 }
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; }
@@ -18,5 +27,8 @@ button { font: inherit; color: inherit; }
 .page { display: flex; flex-direction: column; height: 100%; }
 .page-body { flex: 1; min-height: 0; overflow-y: auto; padding: 32px 24px; }
 
+.projects-card, .describe-form, .parts-library, .parts-input, .commit-box, .build-section .build-table, .build-wait-card, .connect > li, .examples-card { box-shadow: var(--shadow-sm); }
+.projects-card { transition: transform .15s ease, box-shadow .15s ease; }
+.projects-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .share-button { margin-top: 10px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 5px 12px; font-size: 13px; cursor: pointer; }
 .share-button:hover { border-color: var(--accent); color: var(--accent); }

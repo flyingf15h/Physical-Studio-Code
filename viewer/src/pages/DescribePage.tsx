@@ -96,12 +96,20 @@ export function DescribePage() {
       <main className="page-body">
         <div className="describe-page">
           <section className="describe-main">
-            <h1>What do you want to build?</h1>
-            <p className="describe-lede">
-              Say what you want to build and add photos of your bench if you have them. Physical Studio works out what's
-              already plugged in, adds the parts you still need, and writes step-by-step instructions with a picture and
-              a 3D model for every step. Photograph each step and it checks your work.
-            </p>
+            <header className="hero">
+              <span className="hero-eyebrow">Hardware guides, made for your bench</span>
+              <h1>What do you want to build?</h1>
+              <p className="describe-lede">
+                Say what you want to build and add photos of your bench if you have them. Physical Studio works out
+                what's already plugged in, adds the parts you still need, and writes step-by-step instructions with a
+                picture and a 3D model for every step. Photograph each step and it checks your work.
+              </p>
+              <ul className="hero-points">
+                <li>Real parts, real sizes</li>
+                <li>Step-by-step in 3D</li>
+                <li>Photo checks with Gemini</li>
+              </ul>
+            </header>
             <form
               className={`describe-form${dragging ? ' dragging' : ''}`}
               onSubmit={(e) => {
@@ -255,6 +263,9 @@ export function DescribePage() {
               <summary>Add your own API key</summary>
               <ConnectAI prompt={prompt} setPrompt={fill} onKey={() => {}} />
             </details>
+            <footer className="site-footer">
+              Physical Studio · real parts, real dimensions, step-by-step guides · built at Hack the Valley
+            </footer>
           </section>
         </div>
       </main>

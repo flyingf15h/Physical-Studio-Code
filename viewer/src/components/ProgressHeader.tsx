@@ -56,6 +56,19 @@ export function ProgressHeader({ active, tab, design, job, build }: Props) {
   return (
     <header className="progress-header">
       <Link className="brand" to={href[1]!}>
+        <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 3 28 9.5v13L16 29 4 22.5v-13Z" fill="#0b7f8f" />
+          <path d="M16 3 28 9.5 16 16 4 9.5Z" fill="#3cc4d4" />
+          <path d="M16 16v13L4 22.5v-13Z" fill="#0f9fb3" />
+          <path
+            d="m10 12.7 6 3.3 6-3.3"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            opacity=".85"
+          />
+        </svg>
         Physical Studio
       </Link>
       <nav className="tabs">
