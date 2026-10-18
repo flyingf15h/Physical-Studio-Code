@@ -86,6 +86,20 @@ def wiring_text(text, lines):
     return "\n".join(prose + lines)
 
 
+def default_check(parts, wires):
+    """A step's "Done when" if the designer left it empty, so every step has something to check against:
+    the parts sitting where the model shows them, and each wire on the pins its line names."""
+    bits = []
+    if parts:
+        names = [p.get("name", p.get("id", "part")) for p in parts]
+        what = ", ".join(names[:-1]) + " and " + names[-1] if len(names) > 1 else names[0]
+        bits.append(f"{what} {'sit' if len(names) > 1 else 'sits'} where the highlighted parts are in the 3D model, the right way round and firmly fixed.")
+    if wires:
+        bits.append(f"{'Each of the ' + str(len(wires)) + ' wires goes' if len(wires) > 1 else 'The wire goes'} pin to pin as listed above "
+                    "(match the printed labels), and a gentle tug doesn't pull it out.")
+    return " ".join(bits)
+
+
 def wire_info(piece, p, by_id, library):
     """What the page shows when a wire is clicked: both ends (part and pin) and, for the 3D model, where
     each end sits in the GLB's frame (metres, +Y up)."""
@@ -148,7 +162,9 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         tools = [t.get("name", "") + (f" ({t['for']})" if t.get("for") else "") for t in s.get("tools", [])]
         step_wires = [by_id[pid] for pid in new if by_id.get(pid, {}).get("kind") == "wire"]
         text = wiring_text(s.get("text", ""), connection_lines(step_wires, by_id, lib))
-        step = {"number": n, "title": s["title"], "instruction": text, "check": s.get("check", ""),
+        step_parts = [by_id[pid] for pid in new if pid in by_id and by_id[pid].get("kind") != "wire"]
+        check = s.get("check") or default_check(step_parts, step_wires)
+        step = {"number": n, "title": s["title"], "instruction": text, "check": check,
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
                 "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "tools": tools,

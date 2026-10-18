@@ -68,6 +68,15 @@ def test_connection_lines_use_printed_labels_and_colours_with_the_wired_part_fir
     assert cad_guide.wiring_text("Fit the rail.", []) == "Fit the rail."
 
 
+def test_steps_without_a_check_get_one_from_their_parts_and_wires():
+    rail, block = {"id": "rail", "name": "MGN12 rail"}, {"id": "block", "name": "MGN12H block"}
+    assert cad_guide.default_check([rail], []).startswith("MGN12 rail sits where the highlighted parts are")
+    assert cad_guide.default_check([rail, block], []).startswith("MGN12 rail and MGN12H block sit where")
+    assert "Each of the 3 wires goes pin to pin" in cad_guide.default_check([], [{}, {}, {}])
+    assert cad_guide.default_check([], [{}]).startswith("The wire goes pin to pin")
+    assert cad_guide.default_check([], []) == ""
+
+
 def test_cad_builds_are_checked_against_their_reference_picture_and_take_a_new_summary(ready_dir, tmp_path, monkeypatch):
     seen = {}
 

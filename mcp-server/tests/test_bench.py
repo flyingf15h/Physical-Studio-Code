@@ -358,6 +358,20 @@ def test_hardware_prompts_go_to_cad_and_circuits_stay_on_the_breadboard():
     assert not routes.needs_cad("A traffic light with red, yellow and green LEDs and a crosswalk button")
 
 
+def test_enclosures_cases_and_motors_always_route_to_cad():
+    # The "case with a lid" prompt from Kelly's demo run went to the breadboard once and to CAD once: the
+    # route must come from the prompt alone, every time.
+    for goal in ("Traffic light on an Arduino Uno in a printed case with a lid",
+                 "A traffic light in a case with a lid", "Put my traffic light in a box", "An enclosure for an ESP32 weather station",
+                 "A housing for the Uno with a hinged lid", "A fan controller with a 12V DC motor", "Two SG90 servos waving a flag",
+                 "A night light with mounting holes and M3 screws", "A turntable driven by a gearmotor"):
+        assert all(routes.needs_cad(goal) for _ in range(3)), goal
+    for goal in ("Blink an LED on pin 13", "A showcase of RGB LED colours on an ESP32", "A fancy LED chaser with 8 LEDs",
+                 "Add a pull-down resistor just in case the button floats",
+                 json.loads((routes.READY_DIR / "traffic-light" / "build.json").read_text())["goal"]):
+        assert not routes.needs_cad(goal), goal
+
+
 class FakeJob:
     def __init__(self, status, steps=()):
         from types import SimpleNamespace as NS
@@ -401,6 +415,21 @@ def test_a_failed_cad_job_falls_back_to_the_breadboard_planner(tmp_path, monkeyp
     c2, jobs2 = jobs_app(tmp_path, monkeypatch, FakeJob("done"))
     wait_done(c2, c2.post("/api/build", json={"goal": "A traffic light with three LEDs"}).json()["id"])
     assert jobs2.prompts == []  # circuits never start a CAD job
+
+
+def test_a_busy_designer_is_an_error_not_a_breadboard_build(tmp_path, monkeypatch):
+    c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("done"))
+
+    async def busy(prompt, ip, *a, **k):
+        jobs.prompts.append(prompt)
+        raise RuntimeError("Another design is running; try again in a minute.")
+    jobs.start = busy
+    r = c.post("/api/build", json={"goal": "A traffic light in a printed case with a lid"})
+    assert r.status_code == 503 and r.json()["error"] == routes.CAD_BUSY and jobs.prompts
+    # A server with no design key has no CAD pipeline: hardware prompts are planned on the breadboard there.
+    jobs.providers = lambda first=None: []
+    b = wait_done(c, c.post("/api/build", json={"goal": "A traffic light in a printed case with a lid"}).json()["id"])
+    assert b["status"] == "done" and len(jobs.prompts) == 1
 
 
 def test_photo_checks_forgive_small_hole_offsets_but_not_real_mistakes():

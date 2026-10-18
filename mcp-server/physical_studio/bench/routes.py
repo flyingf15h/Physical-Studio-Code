@@ -42,18 +42,35 @@ READY_NOTE = "This is a ready-made guide. Make your own copy to commit photos of
 
 # Live hardware builds: prompts that need real mechanics (motors, rails, gears, mounts, a case) run the CAD
 # design pipeline (jobs.py) instead of the breadboard planner; when it finishes, cad_guide.write_build turns
-# the design into the build (sections, tools, reference pictures, a 3D model per step). If no CAD job can
-# run, or it fails, the build falls back to the breadboard planner.
+# the design into the build (sections, tools, reference pictures, a 3D model per step). The route depends on
+# the prompt alone: a hardware prompt never quietly becomes a breadboard build because the design slot was
+# busy or the hour's designs were used up (that's an error to try again); only a server with no CAD pipeline
+# (no JobManager or no design key) plans hardware prompts on the breadboard.
 CAD_WORDS = ("rack and pinion", "rack-and-pinion", "pinion", "gear", "linear rail", "rail", "carriage", "cart", "pendulum", "robot arm",
-             "chassis", "enclosure", "case for", "a case", "3d print", "3d-print", "printed", "mount", "bracket", "frame", "bearing", "shaft",
-             "motor driver", "gearmotor", "stepper", "nema", "belt", "pulley", "wheel", "caster", "drone", "rover", "cnc", "plotter",
-             "turntable", "lid", "lead screw", "leadscrew", "extrusion", "2020", "linear rod", "slider", "limit switch")
+             "chassis", "enclosure", "case", "box", "housing", "shell", "3d print", "3d-print", "printed", "printable", "mount", "bracket",
+             "frame", "bearing", "shaft", "motor", "gearmotor", "servo", "stepper", "nema", "belt", "pulley", "wheel", "caster", "drone",
+             "rover", "cnc", "plotter", "turntable", "lid", "hinge", "lead screw", "leadscrew", "extrusion", "2020", "linear rod", "slider",
+             "limit switch", "propeller", "fan", "actuator", "solenoid", "screw", "standoff", "casing", "mounting")
+# Whole words (plus -s/-es/-ed/-ing), so substrings like "showcase" or "fancy" can't flip the route by accident.
+CAD_PATTERN = re.compile(r"\b(?:" + "|".join(re.escape(w) for w in sorted(CAD_WORDS, key=len, reverse=True)) + r")(?:s|es|ed|d|ing)?\b")
+NOT_CAD = re.compile(r"\b(?:just )?in case\b|\bjust in case\b")
 
 
 def needs_cad(goal: str) -> bool:
-    """True for builds that are mechanical as well as electronic, False for breadboard circuits."""
-    text = goal.lower()
-    return any(w in text for w in CAD_WORDS)
+    """True for builds that are mechanical as well as electronic (an enclosure, case, lid, motors, mechanical
+    parts), False for breadboard circuits. Deterministic: the same prompt always takes the same route."""
+    return bool(CAD_PATTERN.search(NOT_CAD.sub(" ", goal.lower())))
+
+
+CAD_BUSY = "This needs a CAD design (a case, motors or mechanical parts) and the designer is busy. Try again in a minute."
+
+
+def cad_available(jobs) -> bool:
+    """Can this server run the CAD design pipeline at all (a JobManager with a design key)?"""
+    if jobs is None:
+        return False
+    providers = getattr(jobs, "providers", None)
+    return providers is None or bool(providers())
 
 
 class BadRequest(Exception):
@@ -366,12 +383,13 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
         if not store.allow(ip):
             return JSONResponse({"error": "You've started a lot of builds; try again in a while."}, status_code=429)
         job = None
-        if store.jobs is not None and needs_cad(goal):  # a hardware build: design it in CAD from real parts
+        if cad_available(store.jobs) and needs_cad(goal):  # a hardware build: design it in CAD from real parts
             prompt = goal + (f"\nParts I have: {have}" if have else "") + (f"\nConnections I already know: {known}" if known else "")
             try:
                 job = await store.jobs.start(prompt[:1000], ip)
-            except Exception as e:  # no design key, too many designs, another design running: breadboard planner instead
-                print("[bench] no CAD job, planning a breadboard build instead:", hide(str(e))[:300], flush=True)
+            except Exception as e:  # another design running, too many designs: try again, not a breadboard build
+                print("[bench] no CAD job for a hardware build:", hide(str(e))[:300], flush=True)
+                return JSONResponse({"error": CAD_BUSY}, status_code=503)
         return JSONResponse({"id": store.start(goal, have, known, photos, user_from_request(request), job)}, status_code=202)
 
     @mcp.custom_route("/api/build/match", methods=["POST"])
