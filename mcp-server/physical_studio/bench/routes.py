@@ -6,6 +6,7 @@
 #   POST /api/build                {goal, have?, known?, photos?: [data URL]}  -> 202 {id}
 #   GET  /api/build/<id>           status, stage, plan, commits (see snapshot())
 #   POST /api/build/<id>/commit    {step, photos: [data URL], note?}           -> 200 the new commit
+#   POST /api/build/import         {url}  a link to an existing project        -> 202 {id} (importer.py)
 #
 # A build started while logged in has an owner: only they can commit to it (others get 403), GET says
 # `mine` and `owner_name` (never the owner's id or email), and the planner also gets their BOM parts.
@@ -20,7 +21,7 @@ from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from ..users import user_from_request
-from . import cad_guide, diagram, planner
+from . import cad_guide, diagram, importer, planner
 from .pool import hide
 
 BUILDS_PER_HOUR = int(os.environ.get("BUILDS_PER_HOUR", "4"))
@@ -203,7 +204,8 @@ class BuildStore:
             self.recent[ip].append(now)
             return True
 
-    def start(self, goal, have, known, photos, user=None, job=None):
+    def start(self, goal, have, known, photos, user=None, job=None, imported=None):
+        """imported: an importer.Project, for builds made with "Import a project"."""
         bid = uuid.uuid4().hex[:12]
         build = {"id": bid, "status": "scanning" if photos or known.strip() else "planning", "stage": "Starting your build.",
                  "error": None, "goal": goal, "have": have, "known": known, "created": now_iso(), "plan": None, "commits": [], "internal": {},
@@ -211,10 +213,10 @@ class BuildStore:
         with self.lock:
             self.builds[bid] = build
         self.save(build)
-        threading.Thread(target=self.run, args=(build, photos, job), daemon=True).start()
+        threading.Thread(target=self.run, args=(build, photos, job, imported), daemon=True).start()
         return bid
 
-    def cad_build(self, build, job):
+    def cad_build(self, build, job, imported=None):
         """Wait for the CAD design job, then write its design out as this build. False if it didn't work."""
         self.update(build, status="planning", stage="Designing it in CAD from real parts: placing each part, checking the fit and planning the steps.")
         seen = 0
@@ -229,21 +231,29 @@ class BuildStore:
             print("[bench] CAD job", job.id, "for build", build["id"], "ended as", job.status, hide(job.error or "")[:300], flush=True)
             return False
         self.update(build, status="modelling", stage="Turning the CAD design into your step-by-step guide.")
-        done = cad_guide.write_build(job.studio, self.folder(build["id"]), build["id"], build["goal"], build["goal"][:SUMMARY_MAX], build["created"])
-        self.update(build, plan=done["plan"], internal=done["internal"], commits=done["commits"], status="done", stage="Your build is ready.")
+        done = cad_guide.write_build(job.studio, self.folder(build["id"]), build["id"], build["goal"], build["goal"].split("\n")[0][:SUMMARY_MAX], build["created"])
+        plan = self.with_import(build, done["plan"], imported)
+        self.update(build, plan=plan, internal=done["internal"], commits=done["commits"], status="done", stage="Your build is ready.")
         return True
 
-    def run(self, build, photos, job=None):
+    def with_import(self, build, plan, imported):
+        """An imported project's own CAD files and parts list added to the finished plan."""
+        if not imported:
+            return plan
+        self.update(build, stage="Adding the project's own CAD files and parts list.")
+        return importer.attach(imported, self.folder(build["id"]), build["id"], plan)
+
+    def run(self, build, photos, job=None, imported=None):
         bid = build["id"]
         try:
             if job:
-                if self.cad_build(build, job):
+                if self.cad_build(build, job, imported):
                     return
                 self.update(build, status="planning", stage="Planning it as a breadboard circuit instead.")
             result = planner.make_plan(build["goal"], build["have"], build["known"], photos,
                                        stage=lambda status, text: self.update(build, status=status, stage=text),
                                        own_parts=owner_parts(build.get("owner")))
-            self.update(build, plan=self.publish(bid, result), commits=[self.start_commit(bid, build, result, photos)],
+            self.update(build, plan=self.with_import(build, self.publish(bid, result), imported), commits=[self.start_commit(bid, build, result, photos)],
                         internal={"plan": result["plan"], "problems": result["problems"]}, status="done", stage="Your build is ready.")
         except Exception as e:
             print("[bench] build", bid, "failed:", hide(str(e))[:900], flush=True)  # details in the log, not the page
@@ -382,6 +392,35 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
                                                      "size": " × ".join(f"{v:g}" for v in p["body"]["size"]) + " mm", "verified": bool(p.get("verified")),
                                                      "mine": bool(p.get("bom"))}})
         return JSONResponse({"items": out})
+
+    @mcp.custom_route("/api/build/import", methods=["POST"])
+    async def import_project(request: Request):
+        """"Import a project": {url} of a GitHub repository or a project page -> a build guide made from what
+        the project already has (importer.py), opened at /build/<id> like Design it."""
+        if not code_ok(request):
+            return JSONResponse({"error": "Wrong or missing demo code."}, status_code=401)
+        url = str((await body_of(request)).get("url") or "").strip()
+        ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+        if not store.allow(ip):
+            return JSONResponse({"error": "You've started a lot of builds; try again in a while."}, status_code=429)
+        try:
+            project = await asyncio.to_thread(importer.gather, url)
+        except importer.ProjectError as e:
+            return JSONResponse({"error": str(e)}, status_code=400)
+        user = user_from_request(request)
+        importer.match_parts(project)
+        importer.add_missing(project, user)
+        job = None
+        if store.jobs is not None:
+            try:
+                job = await store.jobs.start(importer.prompt(project), ip, context=importer.context(project))
+            except Exception as e:  # no design key, too many designs: the breadboard planner instead
+                print("[bench] no CAD job for the import, planning a breadboard build instead:", hide(str(e))[:300], flush=True)
+        # The project's wiring is what to build, not what's on the bench already (`known`), so it goes in the goal.
+        wiring = "\n".join(project.wiring + project.pins)
+        goal = (importer.goal(project) + (f"\nThe project's own wiring and pin assignments:\n{wiring}" if wiring else ""))[:4000]
+        bid = store.start(goal, importer.have_text(project), "", [], user, job, project)
+        return JSONResponse({"id": bid}, status_code=202)
 
     @mcp.custom_route("/api/build/{build_id}", methods=["GET"])
     async def status(request: Request):

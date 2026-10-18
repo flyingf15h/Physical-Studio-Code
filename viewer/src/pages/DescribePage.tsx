@@ -8,6 +8,7 @@ import { useRef, useState } from 'react'
 import { startBuild } from '../api'
 import { ConnectAI } from '../components/ConnectAI'
 import { ExamplePrompts } from '../components/ExamplePrompts'
+import { ImportProject } from '../components/ImportProject'
 import { PartsInput } from '../components/PartsInput'
 import { PartsLibrary } from '../components/PartsLibrary'
 import { ReadyMadeGuides } from '../components/ProjectsList'
@@ -252,6 +253,7 @@ export function DescribePage() {
               </div>
               {error && <p className="describe-error">{error}</p>}
             </form>
+            <ImportProject code={code} />
             <h2 className="describe-sub">Ready-made guides</h2>
             <ReadyMadeGuides />
             <h2 className="describe-sub">Try one</h2>

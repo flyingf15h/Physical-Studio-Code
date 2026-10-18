@@ -1,0 +1,8 @@
+.import-project { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 10px; margin-top: 12px; }
+.import-project-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.import-project-hint { font-size: 12px; color: var(--muted); }
+.import-project-row { grid-column: 1 / -1; display: flex; gap: 8px; }
+.import-project-row input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); }
+.import-project-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.import-project .describe-error { grid-column: 1 / -1; margin-top: 4px; }
+@media (max-width: 760px) { .import-project { grid-template-columns: 1fr; } }

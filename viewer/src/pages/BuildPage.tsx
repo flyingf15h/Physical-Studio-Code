@@ -945,6 +945,29 @@ function Finished({ plan }: { plan: BuildPlan }) {
       <p className="muted">A reference made from the plan, not one of your commits.</p>
       {plan.model && <BenchModel model={plan.model} guide={plan.part_guide} wires={plan.wires} />}
       <p className="lede">{plan.final_result}</p>
+      {plan.imported && (
+        <details className="build-fold" open={!!plan.imported.model}>
+          <summary>
+            CAD from the project you imported{' '}
+            <a href={plan.imported.url} target="_blank" rel="noreferrer">
+              ({plan.imported.title})
+            </a>
+          </summary>
+          {plan.imported.model && <BenchModel model={plan.imported.model} height={320} />}
+          {plan.imported.files.length > 0 && (
+            <ul>
+              {plan.imported.files.map((f) => (
+                <li key={f.url}>
+                  <a href={f.url} target="_blank" rel="noreferrer">
+                    {f.name}
+                  </a>
+                  {f.note ? <span className="muted"> · {f.note}</span> : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </details>
+      )}
       {plan.code && (
         <details className="build-fold" open>
           <summary>Arduino code</summary>

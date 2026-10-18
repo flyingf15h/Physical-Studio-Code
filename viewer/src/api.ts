@@ -169,6 +169,15 @@ export interface BuildPlan {
   wires?: Record<string, WireInfo> // hardware builds: wire id -> its two ends
   model: BenchModel | null
   steps: BuildStep[]
+  imported?: ImportedProject // builds made with "Import a project"
+}
+
+/** Where an imported build came from, and the project's own CAD files placed side by side in one model. */
+export interface ImportedProject {
+  url: string
+  title: string
+  model: BenchModel | null
+  files: { name: string; url: string; note?: string }[]
 }
 
 export interface BuildCommit {
@@ -200,6 +209,11 @@ export interface Build {
 
 export const startBuild = (inputs: { goal: string; have?: string; known?: string; photos?: string[] }) =>
   call<{ id: string }>('/api/build', { method: 'POST', headers: headers(true), body: JSON.stringify(inputs) })
+
+/** "Import a project": a link to an existing project (a GitHub repository, or a Printables, Thingiverse or
+ * Instructables page) becomes a build guide from what's there (bench/importer.py). */
+export const importProject = (url: string) =>
+  call<{ id: string }>('/api/build/import', { method: 'POST', headers: headers(true), body: JSON.stringify({ url }) })
 
 export const getBuild = (id: string) => call<Build>(`/api/build/${encodeURIComponent(id)}`, { headers: headers() })
 

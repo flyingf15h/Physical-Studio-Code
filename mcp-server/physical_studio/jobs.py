@@ -144,9 +144,10 @@ class JobError(Exception):
 
 
 class DesignJob:
-    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory, images=(), links=()):
+    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory, images=(), links=(), context: str = ""):
         self.id = job_id
         self.prompt = prompt
+        self.context = context  # more material for the designer, e.g. an imported project's README and parts list
         self.images: list[attachments.Image] = list(images)
         self.link_urls: list[str] = list(links)
         self.links: list[attachments.Link] = []
@@ -338,6 +339,8 @@ class DesignJob:
 
     def opening(self, resume: bool) -> str:
         text = f"Design this project: {self.prompt}"
+        if self.context:
+            text += f"\n\n{self.context}"
         if self.images:
             text += f"\n\nThe user attached {len(self.images)} image{'s' if len(self.images) != 1 else ''} (below)."
         for k in self.links:
@@ -529,7 +532,7 @@ class JobManager:
     def running(self) -> int:
         return sum(1 for j in self.jobs.values() if j.status in ("queued", "running"))
 
-    async def start(self, prompt: str, ip: str, images=(), links=(), model: str | None = None) -> DesignJob:
+    async def start(self, prompt: str, ip: str, images=(), links=(), model: str | None = None, context: str = "") -> DesignJob:
         providers = self.providers(model)
         if not providers:
             raise JobError(
@@ -543,7 +546,7 @@ class JobManager:
             raise JobError("Another design is running; try again in a minute.")
         self.recent[ip].append(now)
         job_id = uuid.uuid4().hex[:10]
-        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory, images, links)
+        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory, images, links, context)
         self.jobs[job_id] = job
         tools = await self.tool_defs()
         threading.Thread(target=job.run, args=(tools, providers), daemon=True).start()
