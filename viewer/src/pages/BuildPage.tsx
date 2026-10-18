@@ -22,7 +22,13 @@ const STAGES: { status: Build['status']; label: string }[] = [
   { status: 'modelling', label: 'Building a 3D model for every step' },
 ]
 
-function VerdictCard({ verdict, image }: { verdict: Verdict; image?: string }) {
+// Hardware (CAD) builds come from the design pipeline (bench/cad.py sets plan.kind = 'cad'): photos from the
+// front and side instead of a breadboard from straight above.
+function isHardware(plan: BuildPlan | null) {
+  return (plan as { kind?: string } | null)?.kind === 'cad'
+}
+
+function VerdictCard({ verdict, image, hardware }: { verdict: Verdict; image?: string; hardware?: boolean }) {
   const tone = { done: 'ok', problem: 'bad', in_progress: 'wait', unclear: 'warn', error: 'warn' }[verdict.status]
   const head = {
     done: 'Looks right.',
@@ -41,8 +47,14 @@ function VerdictCard({ verdict, image }: { verdict: Verdict; image?: string }) {
             <span>How to fix it</span> {verdict.fix}
           </p>
         )}
+        {verdict.status === 'problem' && <p className="verdict-next">Fix it, then take a new photo and check again.</p>}
+        {verdict.status === 'in_progress' && <p className="verdict-next">Finish the step, then check again.</p>}
         {verdict.status === 'unclear' && (
-          <p className="verdict-fix">Take a sharper photo from straight above, close enough to read the row numbers.</p>
+          <p className="verdict-fix">
+            {hardware
+              ? 'Take a sharper photo closer to the new part, with good light, from the front and from the side.'
+              : 'Take a sharper photo from straight above, close enough to read the row numbers.'}
+          </p>
         )}
         {verdict.status === 'error' && (
           <p className="verdict-fix">{verdict.problem || 'Wait a moment and commit again.'}</p>
@@ -57,10 +69,14 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
   const picker = useRef<HTMLInputElement>(null)
+  const camera = useRef<HTMLInputElement>(null)
+  const hardware = isHardware(build.plan)
 
-  const add = async (files: FileList | null) => {
+  const add = async (files: FileList | File[] | null) => {
     const picked = [...(files ?? [])].filter((f) => f.type.startsWith('image/')).slice(0, MAX_PHOTOS - photos.length)
+    if (!picked.length) return
     try {
       const shrunk = await Promise.all(picked.map(shrink))
       setPhotos((now) => [...now, ...shrunk].slice(0, MAX_PHOTOS))
@@ -83,20 +99,63 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
   }
 
   return (
-    <div className="commit-box">
-      <h3>Commit this step</h3>
+    <div
+      className={`commit-box${dragging ? ' dragging' : ''}`}
+      onDragOver={(e) => {
+        if (busy || ![...e.dataTransfer.types].includes('Files')) return
+        e.preventDefault()
+        setDragging(true)
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false)
+      }}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDragging(false)
+        if (!busy) void add(e.dataTransfer.files)
+      }}
+      onPaste={(e) => {
+        const files = [...e.clipboardData.files].filter((f) => f.type.startsWith('image/'))
+        if (files.length && !busy) {
+          e.preventDefault()
+          void add(files)
+        }
+      }}
+    >
+      <h3>Check this step with a photo</h3>
       <p className="muted">
-        Take a photo of your bench after this step, from straight above. The AI checks it against the step and builds a
-        3D model of what you built. It shows up in the Commits tab.
+        {hardware
+          ? 'Take 1 to 3 photos after this step: one from the front and one from the side that shows the new part. The AI compares them with the step and tells you what is wrong and how to fix it.'
+          : 'Take a photo of your bench after this step, from straight above. The AI checks it against the step and builds a 3D model of what you built.'}{' '}
+        Drop photos here, paste them, or use the buttons. Each check shows up in the Commits tab.
       </p>
       <div className="commit-row">
+        <button
+          type="button"
+          className="tool"
+          onClick={() => camera.current?.click()}
+          disabled={busy || photos.length >= MAX_PHOTOS}
+        >
+          Take photo
+        </button>
+        <input
+          ref={camera}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={(e) => {
+            void add(e.target.files)
+            e.target.value = ''
+          }}
+        />
         <button
           type="button"
           className="tool"
           onClick={() => picker.current?.click()}
           disabled={busy || photos.length >= MAX_PHOTOS}
         >
-          Add photos
+          Upload photos
         </button>
         <input
           ref={picker}
@@ -113,7 +172,11 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
           className="commit-note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Message or question (optional), e.g. Is the red LED the right way round?"
+          placeholder={
+            hardware
+              ? 'Message or question (optional), e.g. Is the pinion meshing with the rack?'
+              : 'Message or question (optional), e.g. Is the red LED the right way round?'
+          }
           aria-label="Commit message"
         />
         <button type="button" className="primary" disabled={busy || !photos.length} onClick={() => void send()}>
@@ -137,7 +200,11 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
         </ul>
       )}
       {busy && (
-        <p className="muted">Checking your photos against this step and building a 3D model (up to a minute)…</p>
+        <p className="muted">
+          {hardware
+            ? 'Comparing your photos with this step (up to a minute)…'
+            : 'Checking your photos against this step and building a 3D model (up to a minute)…'}
+        </p>
       )}
       {error && <p className="error-text">{error}</p>}
     </div>
@@ -331,7 +398,7 @@ function StepView({
       ) : (
         <CommitBox build={build} step={index} onCommit={onCommit} />
       )}
-      {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} />}
+      {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} hardware={isHardware(plan)} />}
       {last?.verdict?.status === 'done' && (
         <div className="commit-row">
           <button type="button" className="primary" onClick={onNext}>
@@ -420,7 +487,7 @@ export function Commits({ build, plan }: { build: Build; plan: BuildPlan }) {
                 ))}
               </div>
             )}
-            {c.verdict && <VerdictCard verdict={c.verdict} />}
+            {c.verdict && <VerdictCard verdict={c.verdict} hardware={isHardware(plan)} />}
             {!!c.detected?.length && (
               <p className="muted">
                 Parts spotted: {c.detected.map((d) => `${d.quantity}× ${d.name} (${d.where})`).join(', ')}
