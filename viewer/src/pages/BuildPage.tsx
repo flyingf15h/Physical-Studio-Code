@@ -3,7 +3,7 @@
 // need, one step at a time (numbered-hole picture, check line, a 3D model of the bench after the
 // step, and an optional photo commit the AI checks), the finished build, and the Commits tab next to
 // the build's title (hidden on ready-made guides, which nobody commits to).
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   commitStep,
   copyBuild,
@@ -442,6 +442,75 @@ function CopyBuild({ build }: { build: Build }) {
 const PIC_W = 640
 const PIC_H = 480
 
+// The step picture's on-screen width: small by default, resized with the handle in its corner, remembered
+// per browser.
+const PIC_SIZE_KEY = 'ps.stepPictureWidth'
+const PIC_DEFAULT = 460
+const PIC_MIN = 240
+const PIC_MAX = 900
+const clampWidth = (w: number) => Math.round(Math.min(PIC_MAX, Math.max(PIC_MIN, w)))
+
+function loadPictureWidth(): number {
+  try {
+    const w = Number(localStorage.getItem(PIC_SIZE_KEY))
+    return w ? clampWidth(w) : PIC_DEFAULT
+  } catch {
+    return PIC_DEFAULT
+  }
+}
+
+function savePictureWidth(w: number) {
+  try {
+    localStorage.setItem(PIC_SIZE_KEY, String(w))
+  } catch {
+    // private mode or storage full: the size just isn't remembered
+  }
+}
+
+/** Drag (mouse or touch) or arrow keys on the corner handle to resize the picture; the height follows. */
+function usePictureWidth() {
+  const [width, setWidth] = useState(loadPictureWidth)
+  const latest = useRef(width)
+  const drag = useRef<{ id: number; x: number; y: number; w: number } | null>(null)
+  const resize = (w: number) => {
+    latest.current = clampWidth(w)
+    setWidth(latest.current)
+  }
+  const end = (e: ReactPointerEvent<HTMLElement>) => {
+    if (drag.current?.id !== e.pointerId) return
+    drag.current = null
+    savePictureWidth(latest.current)
+  }
+  const handle = {
+    onPointerDown: (e: ReactPointerEvent<HTMLElement>) => {
+      e.preventDefault()
+      e.currentTarget.setPointerCapture(e.pointerId)
+      // Start from the width actually shown (a narrow screen may be showing less than the saved width).
+      const shown = e.currentTarget.parentElement?.getBoundingClientRect().width ?? width
+      drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, w: shown }
+    },
+    onPointerMove: (e: ReactPointerEvent<HTMLElement>) => {
+      const d = drag.current
+      if (!d || d.id !== e.pointerId) return
+      // Follow the pointer along the picture's diagonal, so dragging right or down both make it bigger.
+      const dx = e.clientX - d.x
+      const dy = (e.clientY - d.y) * (PIC_W / PIC_H)
+      resize(d.w + (dx + dy) / 2)
+    },
+    onPointerUp: end,
+    onPointerCancel: end,
+    onKeyDown: (e: ReactKeyboardEvent<HTMLElement>) => {
+      const step = e.shiftKey ? 80 : 20
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') resize(width + step)
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') resize(width - step)
+      else return
+      e.preventDefault()
+      savePictureWidth(latest.current)
+    },
+  }
+  return { width, handle }
+}
+
 /** A step's picture. On hardware builds every wire in it is clickable: the wire lights up and both ends
  * are tagged with the part and pin they plug into. */
 function StepPicture({
@@ -456,13 +525,14 @@ function StepPicture({
   caption: string
 }) {
   const [picked, setPicked] = useState<string | null>(null)
+  const { width, handle } = usePictureWidth()
   const lines = (step.picture_wires ?? []).filter((l) => wires[l.id] && l.points.length > 1)
   const line = lines.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const at = (p: [number, number]) => [p[0] * PIC_W, p[1] * PIC_H] as const
   const pts = (l: { points: [number, number][] }) => l.points.map((p) => at(p).join(',')).join(' ')
   return (
-    <figure className="step-figure">
+    <figure className="step-figure" style={{ maxWidth: width }}>
       <div className="step-picture-wrap">
         <img className="step-picture" src={step.picture ?? ''} alt={`Step ${index + 1}: where each part goes`} />
         {lines.length > 0 && (
@@ -501,6 +571,21 @@ function StepPicture({
             )}
           </svg>
         )}
+        <div
+          className="picture-resize"
+          role="slider"
+          tabIndex={0}
+          aria-label="Picture size: drag or use the arrow keys"
+          aria-valuemin={PIC_MIN}
+          aria-valuemax={PIC_MAX}
+          aria-valuenow={width}
+          title="Drag to resize the picture"
+          {...handle}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M15 6 6 15M15 11l-4 4" />
+          </svg>
+        </div>
       </div>
       {wire && (
         <p className="wire-info">

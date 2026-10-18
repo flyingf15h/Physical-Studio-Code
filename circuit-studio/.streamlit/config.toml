@@ -1,8 +1,8 @@
-# Assembly-manual theme for the Build helper (same palette as the main site's viewer/src/assembly.css).
+# Build helper theme: the main site's teal palette (viewer/src/index.css).
 [theme]
 base = "light"
-primaryColor = "#0058a3"
-backgroundColor = "#f4f3ef"
+primaryColor = "#0f9fb3"
+backgroundColor = "#f6f4f1"
 secondaryBackgroundColor = "#ffffff"
-textColor = "#111111"
+textColor = "#1f2933"
 font = "sans serif"
