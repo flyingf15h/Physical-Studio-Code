@@ -349,3 +349,54 @@ def test_the_parts_brief_details_what_the_build_mentions():
     brief = planner.library_brief((), "ESP32, SG90 servo and an OLED")
     assert "Micro servo SG90" in brief and "ESP32 DevKit" in brief and "ALSO IN THE LIBRARY" in brief
     assert planner.split_items("Arduino Uno, 3 LEDs and a breadboard") == ["Arduino Uno", "3 LEDs", "a breadboard"]
+
+
+def test_hardware_prompts_go_to_cad_and_circuits_stay_on_the_breadboard():
+    assert routes.needs_cad("A double inverted pendulum on a rack and pinion cart")
+    assert routes.needs_cad("A pen plotter with two NEMA 17 steppers on 2020 extrusion")
+    assert not routes.needs_cad("A traffic light with red, yellow and green LEDs and a crosswalk button")
+
+
+class FakeJob:
+    def __init__(self, status, steps=()):
+        from types import SimpleNamespace as NS
+        self.id, self.status, self.error, self.events = "job1", status, "nope" if status == "error" else None, [{"text": "Placing the rail"}]
+        self.studio = NS(design=NS(steps=list(steps)))
+
+
+class FakeJobs:
+    def __init__(self, job):
+        self.job, self.prompts = job, []
+
+    async def start(self, prompt, ip, *a, **k):
+        self.prompts.append(prompt)
+        return self.job
+
+
+def jobs_app(tmp_path, monkeypatch, job):
+    monkeypatch.setattr(planner, "make_plan", fake_make_plan)
+    monkeypatch.delenv("DEMO_CODE", raising=False)
+    jobs = FakeJobs(job)
+    mcp = FastMCP("bench-cad-test")
+    routes.register_build_routes(mcp, tmp_path, REPO / "parts", jobs=jobs)
+    return TestClient(mcp.http_app(path="/mcp")), jobs
+
+
+def test_a_hardware_prompt_is_designed_in_cad_and_written_as_a_build(tmp_path, monkeypatch):
+    def fake_write_build(studio, folder, bid, goal, summary, created):
+        return {"plan": {"kind": "cad", "title": "Pendulum cart", "summary": summary, "steps": [], "parts": [], "part_guide": {},
+                         "model": {"glb": f"/out/build-{bid}/final.glb", "labels": []}, "final_result": "", "code": "", "safety": []},
+                "internal": {"plan": {"kind": "cad", "title": "Pendulum cart", "steps": []}}, "commits": [{"kind": "start", "id": "c0"}]}
+    monkeypatch.setattr(routes.cad_guide, "write_build", fake_write_build)
+    c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("done", steps=["one"]))
+    b = wait_done(c, c.post("/api/build", json={"goal": "A cart on a linear rail driven by a rack and pinion", "have": "Teensy 4.1"}).json()["id"])
+    assert b["status"] == "done" and b["plan"]["kind"] == "cad" and "Teensy 4.1" in jobs.prompts[0]
+
+
+def test_a_failed_cad_job_falls_back_to_the_breadboard_planner(tmp_path, monkeypatch):
+    c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("error"))
+    b = wait_done(c, c.post("/api/build", json={"goal": "A robot arm with a servo on a bracket"}).json()["id"])
+    assert b["status"] == "done" and b["plan"].get("kind", "breadboard") != "cad" and jobs.prompts
+    c2, jobs2 = jobs_app(tmp_path, monkeypatch, FakeJob("done"))
+    wait_done(c2, c2.post("/api/build", json={"goal": "A traffic light with three LEDs"}).json()["id"])
+    assert jobs2.prompts == []  # circuits never start a CAD job

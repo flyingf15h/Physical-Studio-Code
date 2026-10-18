@@ -661,7 +661,7 @@ try:
 except ImportError:
     register_build_routes = None
 if register_build_routes:
-    register_build_routes(mcp, OUT_DIR, PARTS_DIR)
+    register_build_routes(mcp, OUT_DIR, PARTS_DIR, jobs=jobs)  # jobs: hardware prompts run the CAD design pipeline
 
 CONNECTS_PER_HOUR = int(os.environ.get("CONNECTS_PER_HOUR", "5"))
 _connects: dict[str, list[float]] = {}

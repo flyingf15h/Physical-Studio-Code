@@ -39,6 +39,22 @@ READY_ID = re.compile(r"[a-z][a-z0-9-]{2,39}")
 READY_NOTE = "This is a ready-made guide. Make your own copy to commit photos of your build."
 
 
+# Live hardware builds: prompts that need real mechanics (motors, rails, gears, mounts, a case) run the CAD
+# design pipeline (jobs.py) instead of the breadboard planner; when it finishes, cad_guide.write_build turns
+# the design into the build (sections, tools, reference pictures, a 3D model per step). If no CAD job can
+# run, or it fails, the build falls back to the breadboard planner.
+CAD_WORDS = ("rack and pinion", "rack-and-pinion", "pinion", "gear", "linear rail", "rail", "carriage", "cart", "pendulum", "robot arm",
+             "chassis", "enclosure", "case for", "a case", "3d print", "3d-print", "printed", "mount", "bracket", "frame", "bearing", "shaft",
+             "motor driver", "gearmotor", "stepper", "nema", "belt", "pulley", "wheel", "caster", "drone", "rover", "cnc", "plotter",
+             "turntable", "lid", "lead screw", "leadscrew", "extrusion", "2020", "linear rod", "slider", "limit switch")
+
+
+def needs_cad(goal: str) -> bool:
+    """True for builds that are mechanical as well as electronic, False for breadboard circuits."""
+    text = goal.lower()
+    return any(w in text for w in CAD_WORDS)
+
+
 class BadRequest(Exception):
     pass
 
@@ -90,8 +106,9 @@ def owner_parts(user_id):
 
 
 class BuildStore:
-    def __init__(self, out_dir: Path):
+    def __init__(self, out_dir: Path, jobs=None):
         self.out_dir = Path(out_dir)
+        self.jobs = jobs  # jobs.JobManager for live hardware builds (None: breadboard planner only)
         self.builds = {}  # id -> build dict (public fields + "internal")
         self.lock = threading.Lock()
         self.commit_locks = defaultdict(threading.Lock)
@@ -176,7 +193,7 @@ class BuildStore:
             self.recent[ip].append(now)
             return True
 
-    def start(self, goal, have, known, photos, user=None):
+    def start(self, goal, have, known, photos, user=None, job=None):
         bid = uuid.uuid4().hex[:12]
         build = {"id": bid, "status": "scanning" if photos or known.strip() else "planning", "stage": "Starting your build.",
                  "error": None, "goal": goal, "have": have, "known": known, "created": now_iso(), "plan": None, "commits": [], "internal": {},
@@ -184,12 +201,35 @@ class BuildStore:
         with self.lock:
             self.builds[bid] = build
         self.save(build)
-        threading.Thread(target=self.run, args=(build, photos), daemon=True).start()
+        threading.Thread(target=self.run, args=(build, photos, job), daemon=True).start()
         return bid
 
-    def run(self, build, photos):
+    def cad_build(self, build, job):
+        """Wait for the CAD design job, then write its design out as this build. False if it didn't work."""
+        self.update(build, status="planning", stage="Designing it in CAD from real parts: placing each part, checking the fit and planning the steps.")
+        seen = 0
+        while job.status in ("queued", "running"):
+            if len(job.events) > seen:  # pass the design job's progress on as the stage sentence
+                seen = len(job.events)
+                text = str(job.events[-1].get("text") or "")
+                if text:
+                    self.update(build, stage="Designing it in CAD: " + text[:160])
+            time.sleep(2)
+        if job.status != "done" or not job.studio.design or not job.studio.design.steps:
+            print("[bench] CAD job", job.id, "for build", build["id"], "ended as", job.status, hide(job.error or "")[:300], flush=True)
+            return False
+        self.update(build, status="modelling", stage="Turning the CAD design into your step-by-step guide.")
+        done = cad_guide.write_build(job.studio, self.folder(build["id"]), build["id"], build["goal"], build["goal"][:SUMMARY_MAX], build["created"])
+        self.update(build, plan=done["plan"], internal=done["internal"], commits=done["commits"], status="done", stage="Your build is ready.")
+        return True
+
+    def run(self, build, photos, job=None):
         bid = build["id"]
         try:
+            if job:
+                if self.cad_build(build, job):
+                    return
+                self.update(build, status="planning", stage="Planning it as a breadboard circuit instead.")
             result = planner.make_plan(build["goal"], build["have"], build["known"], photos,
                                        stage=lambda status, text: self.update(build, status=status, stage=text),
                                        own_parts=owner_parts(build.get("owner")))
@@ -273,9 +313,10 @@ def snapshot(build, user=None):
     return data
 
 
-def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
+def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
+    """jobs: the server's jobs.JobManager, so hardware prompts can run the CAD design pipeline."""
     planner.configure(parts_dir)
-    store = BuildStore(out_dir)
+    store = BuildStore(out_dir, jobs)
 
     def code_ok(request: Request) -> bool:
         code = os.environ.get("DEMO_CODE")
@@ -304,7 +345,14 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
         if not store.allow(ip):
             return JSONResponse({"error": "You've started a lot of builds; try again in a while."}, status_code=429)
-        return JSONResponse({"id": store.start(goal, have, known, photos, user_from_request(request))}, status_code=202)
+        job = None
+        if store.jobs is not None and needs_cad(goal):  # a hardware build: design it in CAD from real parts
+            prompt = goal + (f"\nParts I have: {have}" if have else "") + (f"\nConnections I already know: {known}" if known else "")
+            try:
+                job = await store.jobs.start(prompt[:1000], ip)
+            except Exception as e:  # no design key, too many designs, another design running: breadboard planner instead
+                print("[bench] no CAD job, planning a breadboard build instead:", hide(str(e))[:300], flush=True)
+        return JSONResponse({"id": store.start(goal, have, known, photos, user_from_request(request), job)}, status_code=202)
 
     @mcp.custom_route("/api/build/match", methods=["POST"])
     async def match(request: Request):
