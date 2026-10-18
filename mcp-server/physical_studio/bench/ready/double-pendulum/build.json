@@ -1,0 +1,2640 @@
+{
+ "id": "double-pendulum",
+ "status": "done",
+ "stage": "Your build is ready.",
+ "error": null,
+ "goal": "Electronics for a double inverted pendulum on a rack-and-pinion cart, laid out on a breadboard: a Teensy 4.1 drives a 12 V DC gearmotor through a DRV8874 H-bridge (IN1 on pin 2, IN2 on pin 3, PMODE and SLEEP to 3.3 V). Two AS5600 magnetic encoders read the two joint angles over I2C (one on Wire: SDA 18 / SCL 19, one on Wire1: SDA 17 / SCL 16). Two VL53L0X distance sensors measure the cart position (one on each I2C bus). A 12 V supply feeds the DRV8874 VIN; a 12 V to 3.3 V regulator powers the four sensors.",
+ "have": "",
+ "known": "",
+ "created": "2026-10-18T00:47:50+00:00",
+ "plan": {
+  "title": "Double Inverted Pendulum Cart Controller with Teensy 4.1",
+  "summary": "This circuit controls a balancing double inverted pendulum on a moving cart. A Teensy 4.1 reads joint angles from two magnetic encoders and cart distance from two optical sensors across two separate I2C buses, then commands a 12 V gearmotor through a DRV8874 motor driver.",
+  "final_result": "A compact, noise-isolated dual-bus control circuit. The Teensy 4.1 concurrently polls the pivot encoder and primary distance sensor on Wire (pins 18/19) and the elbow encoder and secondary distance sensor on Wire1 (pins 17/16). It calculates the balancing state space matrix and produces PWM commands on pins 2 and 3 to drive the cart via the DRV8874 H-bridge.",
+  "code": "#include <Wire.h>\n\nconst int PIN_IN1 = 2;\nconst int PIN_IN2 = 3;\n\nconst uint8_t AS5600_ADDR = 0x36;\nconst uint8_t VL53L0X_ADDR = 0x29;\n\nvoid setMotorSpeed(int speed) {\n  speed = constrain(speed, -255, 255);\n  if (speed > 0) {\n    analogWrite(PIN_IN1, speed);\n    analogWrite(PIN_IN2, 0);\n  } else if (speed < 0) {\n    analogWrite(PIN_IN1, 0);\n    analogWrite(PIN_IN2, -speed);\n  } else {\n    analogWrite(PIN_IN1, 0);\n    analogWrite(PIN_IN2, 0);\n  }\n}\n\nuint16_t readAngle(TwoWire &bus) {\n  bus.beginTransmission(AS5600_ADDR);\n  bus.write(0x0C);\n  bus.endTransmission(false);\n  bus.requestFrom((int)AS5600_ADDR, 2);\n  if (bus.available() >= 2) {\n    uint16_t high = bus.read();\n    uint16_t low = bus.read();\n    return ((high & 0x0F) << 8) | low;\n  }\n  return 0;\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(PIN_IN1, OUTPUT);\n  pinMode(PIN_IN2, OUTPUT);\n  setMotorSpeed(0);\n\n  Wire.begin();\n  Wire.setClock(400000);\n\n  Wire1.begin();\n  Wire1.setClock(400000);\n}\n\nvoid loop() {\n  uint16_t angle1 = readAngle(Wire);\n  uint16_t angle2 = readAngle(Wire1);\n\n  Serial.print(\"Pivot Angle: \");\n  Serial.print(angle1);\n  Serial.print(\" | Elbow Angle: \");\n  Serial.println(angle2);\n\n  delay(10);\n}",
+  "safety": [
+   "Always disconnect the 12 V power adapter before modifying any breadboard wire or module connection.",
+   "Do not connect 12 V directly to any Teensy pin or sensor board; all Teensy I/O pins are 3.3 V tolerant only.",
+   "Keep hands, loose wires, and tools clear of the gear rack and swinging pendulum arms when power is applied."
+  ],
+  "parts": [
+   {
+    "name": "Teensy 4.1 development board",
+    "quantity": 1,
+    "why": "Runs the real-time balance control algorithm and reads all sensors over dual I2C buses.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "DRV8874 motor driver board",
+    "quantity": 1,
+    "why": "Drives the 12 V cart gearmotor bidirectionally using PWM signals from the microcontroller.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "12 V DC gearmotor",
+    "quantity": 1,
+    "why": "Powers the rack-and-pinion drive to translate the cart along the linear rail.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "AS5600 magnetic encoder board",
+    "quantity": 2,
+    "why": "Measures the continuous rotation angles of the two pendulum elbow and pivot joints contactless.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "VL53L0X distance sensor board",
+    "quantity": 2,
+    "why": "Measures the precise position and limit clearance of the cart along the linear rail.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "12 V to 3.3 V step-down regulator module",
+    "quantity": 1,
+    "why": "Steps down the 12 V power to a clean 3.3 V power rail to run all four sensor modules.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "12 V 2 A DC power supply",
+    "quantity": 1,
+    "why": "Supplies power to the motor driver for the motor and to the 3.3 V regulator module.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "Full-size solderless breadboard",
+    "quantity": 1,
+    "why": "Provides solderless connection points and power distribution rails for the entire control circuit.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "Jumper wire pack",
+    "quantity": 1,
+    "why": "Connects digital control lines, power lines, and dual I2C sensor buses across the bench.",
+    "user_has_it": true,
+    "size": ""
+   }
+  ],
+  "part_guide": {
+   "bb1": "Solderless breadboard. Holes connect horizontally in numbered rows across the center groove; top and bottom rows form continuous power rails.",
+   "teensy1": "Teensy 4.1 micro-controller. High-speed 600 MHz board that runs the pendulum balancing control equations.",
+   "drv1": "DRV8874 H-bridge motor driver. Takes logic signals from the Teensy and delivers up to 2.1 A to the 12 V drive motor.",
+   "reg1": "12 V to 3.3 V step-down buck regulator. Drops high-voltage motor supply down to clean 3.3 V for the sensors.",
+   "as5600_1": "AS5600 12-bit magnetic angle sensor. Sits above the diametric magnet at the pendulum cart pivot joint to measure rod angle.",
+   "vl53_1": "VL53L0X time-of-flight laser distance sensor. Measures cart distance from the rail end on I2C bus 0.",
+   "as5600_2": "Second AS5600 magnetic angle sensor. Measures the angle of the second elbow joint on I2C bus 1.",
+   "vl53_2": "Second VL53L0X distance sensor. Measures cart clearance on the opposing rail limit on I2C bus 1.",
+   "w_teensy_gnd": "Black wire connecting Teensy GND pin to the breadboard top ground rail.",
+   "w_teensy_3v3": "Orange wire connecting Teensy 3.3 V to DRV8874 mode/sleep pull-up row 13.",
+   "w_teensy_in1": "Yellow wire transmitting PWM motor command 1 from Teensy pin 2 to DRV8874 IN1 on row 11.",
+   "w_teensy_in2": "Green wire transmitting PWM motor command 2 from Teensy pin 3 to DRV8874 IN2 on row 12.",
+   "w_drv_gnd": "Black ground jumper from DRV8874 GND pin row 10 up to the top ground rail.",
+   "w_reg_gnd": "Black ground wire connecting the regulator common ground row 25 up to the top ground rail.",
+   "w_reg_out_rail": "Red wire connecting regulator 3.3 V output on row 26 down to the bottom red power rail.",
+   "w_bottom_gnd_link": "Black jumper tying the top ground rail to the bottom blue ground rail.",
+   "w_teensy_sda0": "Blue wire carrying Wire (I2C Bus 0) data from Teensy pin 18 to row 39.",
+   "w_teensy_scl0": "White wire carrying Wire (I2C Bus 0) clock from Teensy pin 19 to row 40.",
+   "w_bus0_sda_bridge": "Blue jumper bridging I2C Bus 0 data across the center gap from encoder 1 to distance sensor 1.",
+   "w_bus0_scl_bridge": "White jumper bridging I2C Bus 0 clock across the center gap from encoder 1 to distance sensor 1.",
+   "w_teensy_sda1": "Blue wire carrying Wire1 (I2C Bus 1) data from Teensy pin 17 to row 53.",
+   "w_teensy_scl1": "White wire carrying Wire1 (I2C Bus 1) clock from Teensy pin 16 to row 54.",
+   "w_bus1_sda_bridge": "Blue jumper bridging I2C Bus 1 data across the center gap from encoder 2 to distance sensor 2.",
+   "w_bus1_scl_bridge": "White jumper bridging I2C Bus 1 clock across the center gap from encoder 2 to distance sensor 2."
+  },
+  "model": {
+   "glb": "/out/build-double-pendulum/final.glb",
+   "labels": [
+    {
+     "id": "bb1",
+     "name": "Full-size solderless breadboard",
+     "kind": "breadboard"
+    },
+    {
+     "id": "teensy1",
+     "name": "Teensy 4.1",
+     "kind": "development_board"
+    },
+    {
+     "id": "drv1",
+     "name": "DRV8874 motor driver module",
+     "kind": "generic"
+    },
+    {
+     "id": "reg1",
+     "name": "12 V to 3.3 V regulator module",
+     "kind": "generic"
+    },
+    {
+     "id": "as5600_1",
+     "name": "AS5600 encoder 1 (pivot joint)",
+     "kind": "generic"
+    },
+    {
+     "id": "vl53_1",
+     "name": "VL53L0X sensor 1 (cart distance)",
+     "kind": "generic"
+    },
+    {
+     "id": "as5600_2",
+     "name": "AS5600 encoder 2 (elbow joint)",
+     "kind": "generic"
+    },
+    {
+     "id": "vl53_2",
+     "name": "VL53L0X sensor 2 (rail limit)",
+     "kind": "generic"
+    },
+    {
+     "id": "w_teensy_gnd",
+     "name": "Teensy GND to top ground rail",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_3v3",
+     "name": "Teensy 3.3V to DRV8874 logic enable",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_in1",
+     "name": "Teensy Pin 2 to DRV8874 IN1",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_in2",
+     "name": "Teensy Pin 3 to DRV8874 IN2",
+     "kind": "wire"
+    },
+    {
+     "id": "w_drv_gnd",
+     "name": "DRV8874 GND to top ground rail",
+     "kind": "wire"
+    },
+    {
+     "id": "w_reg_gnd",
+     "name": "Regulator GND to top ground rail",
+     "kind": "wire"
+    },
+    {
+     "id": "w_reg_out_rail",
+     "name": "Regulator 3.3V out to bottom rail",
+     "kind": "wire"
+    },
+    {
+     "id": "w_bottom_gnd_link",
+     "name": "Top ground rail to bottom ground rail link",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_sda0",
+     "name": "Teensy Pin 18 (SDA0) to Bus 0 data row",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_scl0",
+     "name": "Teensy Pin 19 (SCL0) to Bus 0 clock row",
+     "kind": "wire"
+    },
+    {
+     "id": "w_bus0_sda_bridge",
+     "name": "Bus 0 SDA cross-trough link",
+     "kind": "wire"
+    },
+    {
+     "id": "w_bus0_scl_bridge",
+     "name": "Bus 0 SCL cross-trough link",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_sda1",
+     "name": "Teensy Pin 17 (SDA1) to Bus 1 data row",
+     "kind": "wire"
+    },
+    {
+     "id": "w_teensy_scl1",
+     "name": "Teensy Pin 16 (SCL1) to Bus 1 clock row",
+     "kind": "wire"
+    },
+    {
+     "id": "w_bus1_sda_bridge",
+     "name": "Bus 1 SDA cross-trough link",
+     "kind": "wire"
+    },
+    {
+     "id": "w_bus1_scl_bridge",
+     "name": "Bus 1 SCL cross-trough link",
+     "kind": "wire"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "number": 1,
+    "title": "Insert the DRV8874 motor driver module",
+    "instruction": "Place the DRV8874 breakout module so it straddles the center divider groove across rows 10 to 13. On the left side, insert the four module pins into row 10, column e; row 11, column e; row 12, column e; and row 13, column e. On the right side, insert the opposite four pins into row 10, column f; row 11, column f; row 12, column f; and row 13, column f.",
+    "check": "The DRV8874 module sits squarely across the center trough from row 10 to row 13 with all eight pins seated in columns e and f.",
+    "part_ids": [
+     "drv1"
+    ],
+    "placements": [
+     {
+      "what": "DRV8874 pin in row 10 left",
+      "hole": "e10",
+      "where": "row 10, column e (left of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 11 left",
+      "hole": "e11",
+      "where": "row 11, column e (left of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 12 left",
+      "hole": "e12",
+      "where": "row 12, column e (left of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 13 left",
+      "hole": "e13",
+      "where": "row 13, column e (left of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 10 right",
+      "hole": "f10",
+      "where": "row 10, column f (right of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 11 right",
+      "hole": "f11",
+      "where": "row 11, column f (right of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 12 right",
+      "hole": "f12",
+      "where": "row 12, column f (right of center divider)"
+     },
+     {
+      "what": "DRV8874 pin in row 13 right",
+      "hole": "f13",
+      "where": "row 13, column f (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-1.svg",
+    "markers": [
+     [
+      1,
+      "DRV8874 pin in row 10 left",
+      "row 10, column e (left of center divider)",
+      "e10"
+     ],
+     [
+      2,
+      "DRV8874 pin in row 11 left",
+      "row 11, column e (left of center divider)",
+      "e11"
+     ],
+     [
+      3,
+      "DRV8874 pin in row 12 left",
+      "row 12, column e (left of center divider)",
+      "e12"
+     ],
+     [
+      4,
+      "DRV8874 pin in row 13 left",
+      "row 13, column e (left of center divider)",
+      "e13"
+     ],
+     [
+      5,
+      "DRV8874 pin in row 10 right",
+      "row 10, column f (right of center divider)",
+      "f10"
+     ],
+     [
+      6,
+      "DRV8874 pin in row 11 right",
+      "row 11, column f (right of center divider)",
+      "f11"
+     ],
+     [
+      7,
+      "DRV8874 pin in row 12 right",
+      "row 12, column f (right of center divider)",
+      "f12"
+     ],
+     [
+      8,
+      "DRV8874 pin in row 13 right",
+      "row 13, column f (right of center divider)",
+      "f13"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-1.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      }
+     ],
+     "new": [
+      "drv1"
+     ]
+    }
+   },
+   {
+    "number": 2,
+    "title": "Insert the 12 V to 3.3 V step-down regulator",
+    "instruction": "Insert the 3.3 V buck regulator module straddling the center divider across rows 25 and 26. Insert its left input pins into row 25, column e and row 26, column e; insert its right output pins into row 25, column f and row 26, column f.",
+    "check": "The regulator module is firmly seated across the center trough on rows 25 and 26, occupying holes e25, e26, f25, and f26.",
+    "part_ids": [
+     "reg1"
+    ],
+    "placements": [
+     {
+      "what": "regulator module pin in row 25 left",
+      "hole": "e25",
+      "where": "row 25, column e (left of center divider)"
+     },
+     {
+      "what": "regulator module pin in row 26 left",
+      "hole": "e26",
+      "where": "row 26, column e (left of center divider)"
+     },
+     {
+      "what": "regulator module pin in row 25 right",
+      "hole": "f25",
+      "where": "row 25, column f (right of center divider)"
+     },
+     {
+      "what": "regulator module pin in row 26 right",
+      "hole": "f26",
+      "where": "row 26, column f (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-2.svg",
+    "markers": [
+     [
+      1,
+      "regulator module pin in row 25 left",
+      "row 25, column e (left of center divider)",
+      "e25"
+     ],
+     [
+      2,
+      "regulator module pin in row 26 left",
+      "row 26, column e (left of center divider)",
+      "e26"
+     ],
+     [
+      3,
+      "regulator module pin in row 25 right",
+      "row 25, column f (right of center divider)",
+      "f25"
+     ],
+     [
+      4,
+      "regulator module pin in row 26 right",
+      "row 26, column f (right of center divider)",
+      "f26"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-2.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      }
+     ],
+     "new": [
+      "reg1"
+     ]
+    }
+   },
+   {
+    "number": 3,
+    "title": "Insert Bus 0 sensors: AS5600 encoder 1 and VL53L0X sensor 1",
+    "instruction": "Insert the first AS5600 encoder breakout into column b on the left half of the breadboard with its four pins in row 37, column b; row 38, column b; row 39, column b; and row 40, column b. Then insert the first VL53L0X distance sensor into column i on the right half with its four pins in row 37, column i; row 38, column i; row 39, column i; and row 40, column i.",
+    "check": "Both Bus 0 sensor modules sit aligned on rows 37 through 40 with the encoder in column b and the distance sensor in column i.",
+    "part_ids": [
+     "as5600_1",
+     "vl53_1"
+    ],
+    "placements": [
+     {
+      "what": "encoder 1 pin 1",
+      "hole": "b37",
+      "where": "row 37, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 1 pin 2",
+      "hole": "b38",
+      "where": "row 38, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 1 pin 3",
+      "hole": "b39",
+      "where": "row 39, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 1 pin 4",
+      "hole": "b40",
+      "where": "row 40, column b (left of center divider)"
+     },
+     {
+      "what": "distance sensor 1 pin 1",
+      "hole": "i37",
+      "where": "row 37, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 1 pin 2",
+      "hole": "i38",
+      "where": "row 38, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 1 pin 3",
+      "hole": "i39",
+      "where": "row 39, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 1 pin 4",
+      "hole": "i40",
+      "where": "row 40, column i (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-3.svg",
+    "markers": [
+     [
+      1,
+      "encoder 1 pin 1",
+      "row 37, column b (left of center divider)",
+      "b37"
+     ],
+     [
+      2,
+      "encoder 1 pin 2",
+      "row 38, column b (left of center divider)",
+      "b38"
+     ],
+     [
+      3,
+      "encoder 1 pin 3",
+      "row 39, column b (left of center divider)",
+      "b39"
+     ],
+     [
+      4,
+      "encoder 1 pin 4",
+      "row 40, column b (left of center divider)",
+      "b40"
+     ],
+     [
+      5,
+      "distance sensor 1 pin 1",
+      "row 37, column i (right of center divider)",
+      "i37"
+     ],
+     [
+      6,
+      "distance sensor 1 pin 2",
+      "row 38, column i (right of center divider)",
+      "i38"
+     ],
+     [
+      7,
+      "distance sensor 1 pin 3",
+      "row 39, column i (right of center divider)",
+      "i39"
+     ],
+     [
+      8,
+      "distance sensor 1 pin 4",
+      "row 40, column i (right of center divider)",
+      "i40"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-3.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      }
+     ],
+     "new": [
+      "as5600_1",
+      "vl53_1"
+     ]
+    }
+   },
+   {
+    "number": 4,
+    "title": "Insert Bus 1 sensors: AS5600 encoder 2 and VL53L0X sensor 2",
+    "instruction": "Insert the second AS5600 encoder into column b on the left half with its four pins in row 51, column b; row 52, column b; row 53, column b; and row 54, column b. Then insert the second VL53L0X distance sensor into column i on the right half with its four pins in row 51, column i; row 52, column i; row 53, column i; and row 54, column i.",
+    "check": "Both Bus 1 sensor modules sit aligned on rows 51 through 54 with the encoder in column b and the distance sensor in column i.",
+    "part_ids": [
+     "as5600_2",
+     "vl53_2"
+    ],
+    "placements": [
+     {
+      "what": "encoder 2 pin 1",
+      "hole": "b51",
+      "where": "row 51, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 2 pin 2",
+      "hole": "b52",
+      "where": "row 52, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 2 pin 3",
+      "hole": "b53",
+      "where": "row 53, column b (left of center divider)"
+     },
+     {
+      "what": "encoder 2 pin 4",
+      "hole": "b54",
+      "where": "row 54, column b (left of center divider)"
+     },
+     {
+      "what": "distance sensor 2 pin 1",
+      "hole": "i51",
+      "where": "row 51, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 2 pin 2",
+      "hole": "i52",
+      "where": "row 52, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 2 pin 3",
+      "hole": "i53",
+      "where": "row 53, column i (right of center divider)"
+     },
+     {
+      "what": "distance sensor 2 pin 4",
+      "hole": "i54",
+      "where": "row 54, column i (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-4.svg",
+    "markers": [
+     [
+      1,
+      "encoder 2 pin 1",
+      "row 51, column b (left of center divider)",
+      "b51"
+     ],
+     [
+      2,
+      "encoder 2 pin 2",
+      "row 52, column b (left of center divider)",
+      "b52"
+     ],
+     [
+      3,
+      "encoder 2 pin 3",
+      "row 53, column b (left of center divider)",
+      "b53"
+     ],
+     [
+      4,
+      "encoder 2 pin 4",
+      "row 54, column b (left of center divider)",
+      "b54"
+     ],
+     [
+      5,
+      "distance sensor 2 pin 1",
+      "row 51, column i (right of center divider)",
+      "i51"
+     ],
+     [
+      6,
+      "distance sensor 2 pin 2",
+      "row 52, column i (right of center divider)",
+      "i52"
+     ],
+     [
+      7,
+      "distance sensor 2 pin 3",
+      "row 53, column i (right of center divider)",
+      "i53"
+     ],
+     [
+      8,
+      "distance sensor 2 pin 4",
+      "row 54, column i (right of center divider)",
+      "i54"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-4.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      }
+     ],
+     "new": [
+      "as5600_2",
+      "vl53_2"
+     ]
+    }
+   },
+   {
+    "number": 5,
+    "title": "Connect main Teensy ground and DRV8874 ground",
+    "instruction": "Connect a black wire from Teensy header pin labeled GND to the ground rail along the top edge next to row 1. Then run a black wire from row 10, column a (DRV8874 GND) straight up to the ground rail along the top edge next to row 10.",
+    "check": "Black ground wires establish a common ground between the Teensy, the motor driver, and the top ground rail.",
+    "part_ids": [
+     "w_teensy_gnd",
+     "w_drv_gnd"
+    ],
+    "placements": [
+     {
+      "what": "black wire end A",
+      "hole": "pin:gnd",
+      "where": "Teensy header pin labelled GND"
+     },
+     {
+      "what": "black wire end B",
+      "hole": "rail_1_24.14_1",
+      "where": "the ground rail along the top edge, next to row 1"
+     },
+     {
+      "what": "driver ground wire end A",
+      "hole": "a10",
+      "where": "row 10, column a (left half)"
+     },
+     {
+      "what": "driver ground wire end B",
+      "hole": "rail_1_24.14_10",
+      "where": "the ground rail along the top edge, next to row 10"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-5.svg",
+    "markers": [
+     [
+      1,
+      "black wire end A",
+      "Teensy header pin labelled GND",
+      "pin:gnd"
+     ],
+     [
+      2,
+      "black wire end B",
+      "the ground rail along the top edge, next to row 1",
+      "rail_1_24.14_1"
+     ],
+     [
+      3,
+      "driver ground wire end A",
+      "row 10, column a (left half)",
+      "a10"
+     ],
+     [
+      4,
+      "driver ground wire end B",
+      "the ground rail along the top edge, next to row 10",
+      "rail_1_24.14_10"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-5.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      },
+      {
+       "id": "w_teensy_gnd",
+       "name": "Teensy GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_drv_gnd",
+       "name": "DRV8874 GND to top ground rail",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "w_teensy_gnd",
+      "w_drv_gnd"
+     ]
+    }
+   },
+   {
+    "number": 6,
+    "title": "Wire DRV8874 PWM control and logic enable signals",
+    "instruction": "Connect an orange wire from Teensy header pin 3.3V to row 13, column a (DRV8874 PMODE and SLEEP pull-up). Connect a yellow wire from Teensy digital pin 2 to row 11, column a (IN1). Connect a green wire from Teensy digital pin 3 to row 12, column a (IN2).",
+    "check": "Orange wire runs to row 13, yellow wire runs from pin 2 to row 11, and green wire runs from pin 3 to row 12.",
+    "part_ids": [
+     "w_teensy_3v3",
+     "w_teensy_in1",
+     "w_teensy_in2"
+    ],
+    "placements": [
+     {
+      "what": "orange wire end A",
+      "hole": "pin:3v3",
+      "where": "Teensy header pin labelled 3V3"
+     },
+     {
+      "what": "orange wire end B",
+      "hole": "a13",
+      "where": "row 13, column a (left half)"
+     },
+     {
+      "what": "yellow wire end A",
+      "hole": "pin:d2",
+      "where": "Teensy header pin labelled 2"
+     },
+     {
+      "what": "yellow wire end B",
+      "hole": "a11",
+      "where": "row 11, column a (left half)"
+     },
+     {
+      "what": "green wire end A",
+      "hole": "pin:d3",
+      "where": "Teensy header pin labelled 3"
+     },
+     {
+      "what": "green wire end B",
+      "hole": "a12",
+      "where": "row 12, column a (left half)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-6.svg",
+    "markers": [
+     [
+      1,
+      "orange wire end A",
+      "Teensy header pin labelled 3V3",
+      "pin:3v3"
+     ],
+     [
+      2,
+      "orange wire end B",
+      "row 13, column a (left half)",
+      "a13"
+     ],
+     [
+      3,
+      "yellow wire end A",
+      "Teensy header pin labelled 2",
+      "pin:d2"
+     ],
+     [
+      4,
+      "yellow wire end B",
+      "row 11, column a (left half)",
+      "a11"
+     ],
+     [
+      5,
+      "green wire end A",
+      "Teensy header pin labelled 3",
+      "pin:d3"
+     ],
+     [
+      6,
+      "green wire end B",
+      "row 12, column a (left half)",
+      "a12"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-6.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      },
+      {
+       "id": "w_teensy_gnd",
+       "name": "Teensy GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_3v3",
+       "name": "Teensy 3.3V to DRV8874 logic enable",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in1",
+       "name": "Teensy Pin 2 to DRV8874 IN1",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in2",
+       "name": "Teensy Pin 3 to DRV8874 IN2",
+       "kind": "wire"
+      },
+      {
+       "id": "w_drv_gnd",
+       "name": "DRV8874 GND to top ground rail",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "w_teensy_3v3",
+      "w_teensy_in1",
+      "w_teensy_in2"
+     ]
+    }
+   },
+   {
+    "number": 7,
+    "title": "Wire the 3.3 V sensor power rail and ground link",
+    "instruction": "Connect a black wire from row 25, column a up to the top ground rail next to row 25. Connect a red wire from row 26, column j down to the red positive rail along the bottom edge next to row 26. Connect a black wire from the top ground rail next to row 30 to the bottom blue ground rail next to row 30.",
+    "check": "The regulator feeds 3.3 V to the bottom red rail, with both ground rails tied together.",
+    "part_ids": [
+     "w_reg_gnd",
+     "w_reg_out_rail",
+     "w_bottom_gnd_link"
+    ],
+    "placements": [
+     {
+      "what": "regulator ground wire end A",
+      "hole": "a25",
+      "where": "row 25, column a (left half)"
+     },
+     {
+      "what": "regulator ground wire end B",
+      "hole": "rail_1_24.14_25",
+      "where": "the ground rail along the top edge, next to row 25"
+     },
+     {
+      "what": "red 3.3V power wire end A",
+      "hole": "j26",
+      "where": "row 26, column j (right half)"
+     },
+     {
+      "what": "red 3.3V power wire end B",
+      "hole": "rail_-1_21.6_26",
+      "where": "the red (+) rail along the bottom edge, next to row 26"
+     },
+     {
+      "what": "ground link wire end A",
+      "hole": "rail_1_24.14_30",
+      "where": "the ground rail along the top edge, next to row 30"
+     },
+     {
+      "what": "ground link wire end B",
+      "hole": "rail_-1_24.14_30",
+      "where": "the blue (-) rail along the bottom edge, next to row 30"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-7.svg",
+    "markers": [
+     [
+      1,
+      "regulator ground wire end A",
+      "row 25, column a (left half)",
+      "a25"
+     ],
+     [
+      2,
+      "regulator ground wire end B",
+      "the ground rail along the top edge, next to row 25",
+      "rail_1_24.14_25"
+     ],
+     [
+      3,
+      "red 3.3V power wire end A",
+      "row 26, column j (right half)",
+      "j26"
+     ],
+     [
+      4,
+      "red 3.3V power wire end B",
+      "the red (+) rail along the bottom edge, next to row 26",
+      "rail_-1_21.6_26"
+     ],
+     [
+      5,
+      "ground link wire end A",
+      "the ground rail along the top edge, next to row 30",
+      "rail_1_24.14_30"
+     ],
+     [
+      6,
+      "ground link wire end B",
+      "the blue (-) rail along the bottom edge, next to row 30",
+      "rail_-1_24.14_30"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-7.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      },
+      {
+       "id": "w_teensy_gnd",
+       "name": "Teensy GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_3v3",
+       "name": "Teensy 3.3V to DRV8874 logic enable",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in1",
+       "name": "Teensy Pin 2 to DRV8874 IN1",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in2",
+       "name": "Teensy Pin 3 to DRV8874 IN2",
+       "kind": "wire"
+      },
+      {
+       "id": "w_drv_gnd",
+       "name": "DRV8874 GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_gnd",
+       "name": "Regulator GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_out_rail",
+       "name": "Regulator 3.3V out to bottom rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bottom_gnd_link",
+       "name": "Top ground rail to bottom ground rail link",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "w_reg_gnd",
+      "w_reg_out_rail",
+      "w_bottom_gnd_link"
+     ]
+    }
+   },
+   {
+    "number": 8,
+    "title": "Wire I2C Bus 0 to encoder 1 and distance sensor 1",
+    "instruction": "Connect a blue wire from Teensy pin 18 (SDA0) to row 39, column a. Connect a white wire from Teensy pin 19 (SCL0) to row 40, column a. Bridge Bus 0 across the center trough by connecting a blue wire from row 39, column e to row 39, column f, and a white wire from row 40, column e to row 40, column f.",
+    "check": "Rows 39 and 40 receive blue and white wires from Teensy pins 18 and 19, connected across the divider to both Bus 0 sensors.",
+    "part_ids": [
+     "w_teensy_sda0",
+     "w_teensy_scl0",
+     "w_bus0_sda_bridge",
+     "w_bus0_scl_bridge"
+    ],
+    "placements": [
+     {
+      "what": "blue SDA0 wire end A",
+      "hole": "pin:d18",
+      "where": "Teensy header pin labelled 18"
+     },
+     {
+      "what": "blue SDA0 wire end B",
+      "hole": "a39",
+      "where": "row 39, column a (left half)"
+     },
+     {
+      "what": "white SCL0 wire end A",
+      "hole": "pin:d19",
+      "where": "Teensy header pin labelled 19"
+     },
+     {
+      "what": "white SCL0 wire end B",
+      "hole": "a40",
+      "where": "row 40, column a (left half)"
+     },
+     {
+      "what": "SDA0 bridge wire end A",
+      "hole": "e39",
+      "where": "row 39, column e (left of center divider)"
+     },
+     {
+      "what": "SDA0 bridge wire end B",
+      "hole": "f39",
+      "where": "row 39, column f (right of center divider)"
+     },
+     {
+      "what": "SCL0 bridge wire end A",
+      "hole": "e40",
+      "where": "row 40, column e (left of center divider)"
+     },
+     {
+      "what": "SCL0 bridge wire end B",
+      "hole": "f40",
+      "where": "row 40, column f (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-8.svg",
+    "markers": [
+     [
+      1,
+      "blue SDA0 wire end A",
+      "Teensy header pin labelled 18",
+      "pin:d18"
+     ],
+     [
+      2,
+      "blue SDA0 wire end B",
+      "row 39, column a (left half)",
+      "a39"
+     ],
+     [
+      3,
+      "white SCL0 wire end A",
+      "Teensy header pin labelled 19",
+      "pin:d19"
+     ],
+     [
+      4,
+      "white SCL0 wire end B",
+      "row 40, column a (left half)",
+      "a40"
+     ],
+     [
+      5,
+      "SDA0 bridge wire end A",
+      "row 39, column e (left of center divider)",
+      "e39"
+     ],
+     [
+      6,
+      "SDA0 bridge wire end B",
+      "row 39, column f (right of center divider)",
+      "f39"
+     ],
+     [
+      7,
+      "SCL0 bridge wire end A",
+      "row 40, column e (left of center divider)",
+      "e40"
+     ],
+     [
+      8,
+      "SCL0 bridge wire end B",
+      "row 40, column f (right of center divider)",
+      "f40"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-8.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      },
+      {
+       "id": "w_teensy_gnd",
+       "name": "Teensy GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_3v3",
+       "name": "Teensy 3.3V to DRV8874 logic enable",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in1",
+       "name": "Teensy Pin 2 to DRV8874 IN1",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in2",
+       "name": "Teensy Pin 3 to DRV8874 IN2",
+       "kind": "wire"
+      },
+      {
+       "id": "w_drv_gnd",
+       "name": "DRV8874 GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_gnd",
+       "name": "Regulator GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_out_rail",
+       "name": "Regulator 3.3V out to bottom rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bottom_gnd_link",
+       "name": "Top ground rail to bottom ground rail link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_sda0",
+       "name": "Teensy Pin 18 (SDA0) to Bus 0 data row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_scl0",
+       "name": "Teensy Pin 19 (SCL0) to Bus 0 clock row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus0_sda_bridge",
+       "name": "Bus 0 SDA cross-trough link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus0_scl_bridge",
+       "name": "Bus 0 SCL cross-trough link",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "w_teensy_sda0",
+      "w_teensy_scl0",
+      "w_bus0_sda_bridge",
+      "w_bus0_scl_bridge"
+     ]
+    }
+   },
+   {
+    "number": 9,
+    "title": "Wire I2C Bus 1 to encoder 2 and distance sensor 2",
+    "instruction": "Connect a blue wire from Teensy pin 17 (SDA1) to row 53, column a. Connect a white wire from Teensy pin 16 (SCL1) to row 54, column a. Bridge Bus 1 across the center trough by connecting a blue wire from row 53, column e to row 53, column f, and a white wire from row 54, column e to row 54, column f.",
+    "check": "Rows 53 and 54 receive blue and white wires from Teensy pins 17 and 16, connected across the divider to both Bus 1 sensors.",
+    "part_ids": [
+     "w_teensy_sda1",
+     "w_teensy_scl1",
+     "w_bus1_sda_bridge",
+     "w_bus1_scl_bridge"
+    ],
+    "placements": [
+     {
+      "what": "blue SDA1 wire end A",
+      "hole": "pin:d17",
+      "where": "Teensy header pin labelled 17"
+     },
+     {
+      "what": "blue SDA1 wire end B",
+      "hole": "a53",
+      "where": "row 53, column a (left half)"
+     },
+     {
+      "what": "white SCL1 wire end A",
+      "hole": "pin:d16",
+      "where": "Teensy header pin labelled 16"
+     },
+     {
+      "what": "white SCL1 wire end B",
+      "hole": "a54",
+      "where": "row 54, column a (left half)"
+     },
+     {
+      "what": "SDA1 bridge wire end A",
+      "hole": "e53",
+      "where": "row 53, column e (left of center divider)"
+     },
+     {
+      "what": "SDA1 bridge wire end B",
+      "hole": "f53",
+      "where": "row 53, column f (right of center divider)"
+     },
+     {
+      "what": "SCL1 bridge wire end A",
+      "hole": "e54",
+      "where": "row 54, column e (left of center divider)"
+     },
+     {
+      "what": "SCL1 bridge wire end B",
+      "hole": "f54",
+      "where": "row 54, column f (right of center divider)"
+     }
+    ],
+    "picture": "/out/build-double-pendulum/step-9.svg",
+    "markers": [
+     [
+      1,
+      "blue SDA1 wire end A",
+      "Teensy header pin labelled 17",
+      "pin:d17"
+     ],
+     [
+      2,
+      "blue SDA1 wire end B",
+      "row 53, column a (left half)",
+      "a53"
+     ],
+     [
+      3,
+      "white SCL1 wire end A",
+      "Teensy header pin labelled 16",
+      "pin:d16"
+     ],
+     [
+      4,
+      "white SCL1 wire end B",
+      "row 54, column a (left half)",
+      "a54"
+     ],
+     [
+      5,
+      "SDA1 bridge wire end A",
+      "row 53, column e (left of center divider)",
+      "e53"
+     ],
+     [
+      6,
+      "SDA1 bridge wire end B",
+      "row 53, column f (right of center divider)",
+      "f53"
+     ],
+     [
+      7,
+      "SCL1 bridge wire end A",
+      "row 54, column e (left of center divider)",
+      "e54"
+     ],
+     [
+      8,
+      "SCL1 bridge wire end B",
+      "row 54, column f (right of center divider)",
+      "f54"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-double-pendulum/step-9.glb",
+     "labels": [
+      {
+       "id": "bb1",
+       "name": "Full-size solderless breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "teensy1",
+       "name": "Teensy 4.1",
+       "kind": "development_board"
+      },
+      {
+       "id": "drv1",
+       "name": "DRV8874 motor driver module",
+       "kind": "generic"
+      },
+      {
+       "id": "reg1",
+       "name": "12 V to 3.3 V regulator module",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_1",
+       "name": "AS5600 encoder 1 (pivot joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_1",
+       "name": "VL53L0X sensor 1 (cart distance)",
+       "kind": "generic"
+      },
+      {
+       "id": "as5600_2",
+       "name": "AS5600 encoder 2 (elbow joint)",
+       "kind": "generic"
+      },
+      {
+       "id": "vl53_2",
+       "name": "VL53L0X sensor 2 (rail limit)",
+       "kind": "generic"
+      },
+      {
+       "id": "w_teensy_gnd",
+       "name": "Teensy GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_3v3",
+       "name": "Teensy 3.3V to DRV8874 logic enable",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in1",
+       "name": "Teensy Pin 2 to DRV8874 IN1",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_in2",
+       "name": "Teensy Pin 3 to DRV8874 IN2",
+       "kind": "wire"
+      },
+      {
+       "id": "w_drv_gnd",
+       "name": "DRV8874 GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_gnd",
+       "name": "Regulator GND to top ground rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_reg_out_rail",
+       "name": "Regulator 3.3V out to bottom rail",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bottom_gnd_link",
+       "name": "Top ground rail to bottom ground rail link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_sda0",
+       "name": "Teensy Pin 18 (SDA0) to Bus 0 data row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_scl0",
+       "name": "Teensy Pin 19 (SCL0) to Bus 0 clock row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus0_sda_bridge",
+       "name": "Bus 0 SDA cross-trough link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus0_scl_bridge",
+       "name": "Bus 0 SCL cross-trough link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_sda1",
+       "name": "Teensy Pin 17 (SDA1) to Bus 1 data row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_teensy_scl1",
+       "name": "Teensy Pin 16 (SCL1) to Bus 1 clock row",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus1_sda_bridge",
+       "name": "Bus 1 SDA cross-trough link",
+       "kind": "wire"
+      },
+      {
+       "id": "w_bus1_scl_bridge",
+       "name": "Bus 1 SCL cross-trough link",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "w_teensy_sda1",
+      "w_teensy_scl1",
+      "w_bus1_sda_bridge",
+      "w_bus1_scl_bridge"
+     ]
+    }
+   }
+  ]
+ },
+ "commits": [
+  {
+   "id": "80878b6",
+   "kind": "start",
+   "step": null,
+   "message": "What I have: no photos, starting from scratch",
+   "time": "2026-10-18T00:50:34+00:00",
+   "images": [],
+   "model": null,
+   "guide": {},
+   "detected": [],
+   "known": ""
+  }
+ ],
+ "internal": {
+  "plan": {
+   "title": "Double Inverted Pendulum Cart Controller with Teensy 4.1",
+   "summary": "This circuit controls a balancing double inverted pendulum on a moving cart. A Teensy 4.1 reads joint angles from two magnetic encoders and cart distance from two optical sensors across two separate I2C buses, then commands a 12 V gearmotor through a DRV8874 motor driver.",
+   "parts": [
+    {
+     "name": "Teensy 4.1 development board",
+     "quantity": 1,
+     "why": "Runs the real-time balance control algorithm and reads all sensors over dual I2C buses.",
+     "user_has_it": true
+    },
+    {
+     "name": "DRV8874 motor driver board",
+     "quantity": 1,
+     "why": "Drives the 12 V cart gearmotor bidirectionally using PWM signals from the microcontroller.",
+     "user_has_it": true
+    },
+    {
+     "name": "12 V DC gearmotor",
+     "quantity": 1,
+     "why": "Powers the rack-and-pinion drive to translate the cart along the linear rail.",
+     "user_has_it": true
+    },
+    {
+     "name": "AS5600 magnetic encoder board",
+     "quantity": 2,
+     "why": "Measures the continuous rotation angles of the two pendulum elbow and pivot joints contactless.",
+     "user_has_it": true
+    },
+    {
+     "name": "VL53L0X distance sensor board",
+     "quantity": 2,
+     "why": "Measures the precise position and limit clearance of the cart along the linear rail.",
+     "user_has_it": true
+    },
+    {
+     "name": "12 V to 3.3 V step-down regulator module",
+     "quantity": 1,
+     "why": "Steps down the 12 V power to a clean 3.3 V power rail to run all four sensor modules.",
+     "user_has_it": true
+    },
+    {
+     "name": "12 V 2 A DC power supply",
+     "quantity": 1,
+     "why": "Supplies power to the motor driver for the motor and to the 3.3 V regulator module.",
+     "user_has_it": true
+    },
+    {
+     "name": "Full-size solderless breadboard",
+     "quantity": 1,
+     "why": "Provides solderless connection points and power distribution rails for the entire control circuit.",
+     "user_has_it": true
+    },
+    {
+     "name": "Jumper wire pack",
+     "quantity": 1,
+     "why": "Connects digital control lines, power lines, and dual I2C sensor buses across the bench.",
+     "user_has_it": true
+    }
+   ],
+   "scene": {
+    "parts": [
+     {
+      "id": "bb1",
+      "name": "Full-size solderless breadboard",
+      "kind": "breadboard",
+      "color": "#FFFFFF",
+      "center_mm": [
+       0.0,
+       0.0,
+       4.0
+      ],
+      "size_mm": [
+       165.0,
+       55.0,
+       8.0
+      ],
+      "mount_board": "",
+      "mount_holes": [],
+      "terminals": [],
+      "evidence": "Standard 830-point breadboard template"
+     },
+     {
+      "id": "teensy1",
+      "name": "Teensy 4.1",
+      "kind": "development_board",
+      "color": "#005500",
+      "center_mm": [
+       0.0,
+       65.0,
+       3.5
+      ],
+      "size_mm": [
+       55.0,
+       28.0,
+       7.0
+      ],
+      "mount_board": "",
+      "mount_holes": [],
+      "terminals": [
+       {
+        "name": "gnd",
+        "pin_index": 1
+       },
+       {
+        "name": "d2",
+        "pin_index": 3
+       },
+       {
+        "name": "d3",
+        "pin_index": 4
+       },
+       {
+        "name": "d16",
+        "pin_index": 17
+       },
+       {
+        "name": "d17",
+        "pin_index": 18
+       },
+       {
+        "name": "d18",
+        "pin_index": 19
+       },
+       {
+        "name": "d19",
+        "pin_index": 20
+       },
+       {
+        "name": "3v3",
+        "pin_index": 38
+       }
+      ],
+      "evidence": "Teensy 4.1 development board"
+     },
+     {
+      "id": "drv1",
+      "name": "DRV8874 motor driver module",
+      "kind": "generic",
+      "color": "#202020",
+      "center_mm": [
+       -50.0,
+       0.0,
+       8.0
+      ],
+      "size_mm": [
+       18.0,
+       16.0,
+       4.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "e10",
+       "e11",
+       "e12",
+       "e13",
+       "f10",
+       "f11",
+       "f12",
+       "f13"
+      ],
+      "terminals": [],
+      "evidence": "DRV8874 carrier breakout straddling the breadboard center trough"
+     },
+     {
+      "id": "reg1",
+      "name": "12 V to 3.3 V regulator module",
+      "kind": "generic",
+      "color": "#003388",
+      "center_mm": [
+       -15.0,
+       0.0,
+       8.0
+      ],
+      "size_mm": [
+       22.0,
+       17.0,
+       5.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "e25",
+       "e26",
+       "f25",
+       "f26"
+      ],
+      "terminals": [],
+      "evidence": "Step-down regulator module on rows 25 and 26"
+     },
+     {
+      "id": "as5600_1",
+      "name": "AS5600 encoder 1 (pivot joint)",
+      "kind": "generic",
+      "color": "#1A5276",
+      "center_mm": [
+       20.0,
+       10.0,
+       8.0
+      ],
+      "size_mm": [
+       23.0,
+       23.0,
+       3.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "b37",
+       "b38",
+       "b39",
+       "b40"
+      ],
+      "terminals": [],
+      "evidence": "AS5600 magnetic angle sensor breakout on rows 37 to 40"
+     },
+     {
+      "id": "vl53_1",
+      "name": "VL53L0X sensor 1 (cart distance)",
+      "kind": "generic",
+      "color": "#6C3483",
+      "center_mm": [
+       20.0,
+       -10.0,
+       8.0
+      ],
+      "size_mm": [
+       25.0,
+       11.0,
+       4.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "i37",
+       "i38",
+       "i39",
+       "i40"
+      ],
+      "terminals": [],
+      "evidence": "VL53L0X distance sensor breakout on rows 37 to 40"
+     },
+     {
+      "id": "as5600_2",
+      "name": "AS5600 encoder 2 (elbow joint)",
+      "kind": "generic",
+      "color": "#1A5276",
+      "center_mm": [
+       55.0,
+       10.0,
+       8.0
+      ],
+      "size_mm": [
+       23.0,
+       23.0,
+       3.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "b51",
+       "b52",
+       "b53",
+       "b54"
+      ],
+      "terminals": [],
+      "evidence": "Second AS5600 magnetic angle sensor breakout on rows 51 to 54"
+     },
+     {
+      "id": "vl53_2",
+      "name": "VL53L0X sensor 2 (rail limit)",
+      "kind": "generic",
+      "color": "#6C3483",
+      "center_mm": [
+       55.0,
+       -10.0,
+       8.0
+      ],
+      "size_mm": [
+       25.0,
+       11.0,
+       4.0
+      ],
+      "mount_board": "bb1",
+      "mount_holes": [
+       "i51",
+       "i52",
+       "i53",
+       "i54"
+      ],
+      "terminals": [],
+      "evidence": "Second VL53L0X distance sensor breakout on rows 51 to 54"
+     }
+    ],
+    "wires": [
+     {
+      "id": "w_teensy_gnd",
+      "name": "Teensy GND to top ground rail",
+      "from_part": "teensy1",
+      "from_terminal": "gnd",
+      "to_part": "bb1",
+      "to_terminal": "rail_1_24.14_1",
+      "color": "#000000",
+      "connection_note": "Connects Teensy ground reference to the breadboard common ground rail"
+     },
+     {
+      "id": "w_teensy_3v3",
+      "name": "Teensy 3.3V to DRV8874 logic enable",
+      "from_part": "teensy1",
+      "from_terminal": "3v3",
+      "to_part": "bb1",
+      "to_terminal": "a13",
+      "color": "#FF8800",
+      "connection_note": "Pulls DRV8874 PMODE and SLEEP pins high to 3.3V logic"
+     },
+     {
+      "id": "w_teensy_in1",
+      "name": "Teensy Pin 2 to DRV8874 IN1",
+      "from_part": "teensy1",
+      "from_terminal": "d2",
+      "to_part": "bb1",
+      "to_terminal": "a11",
+      "color": "#FFFF00",
+      "connection_note": "PWM control signal 1 for motor direction and speed"
+     },
+     {
+      "id": "w_teensy_in2",
+      "name": "Teensy Pin 3 to DRV8874 IN2",
+      "from_part": "teensy1",
+      "from_terminal": "d3",
+      "to_part": "bb1",
+      "to_terminal": "a12",
+      "color": "#00AA00",
+      "connection_note": "PWM control signal 2 for motor direction and speed"
+     },
+     {
+      "id": "w_drv_gnd",
+      "name": "DRV8874 GND to top ground rail",
+      "from_part": "bb1",
+      "from_terminal": "a10",
+      "to_part": "bb1",
+      "to_terminal": "rail_1_24.14_10",
+      "color": "#000000",
+      "connection_note": "Connects DRV8874 power and signal ground to the ground rail"
+     },
+     {
+      "id": "w_reg_gnd",
+      "name": "Regulator GND to top ground rail",
+      "from_part": "bb1",
+      "from_terminal": "a25",
+      "to_part": "bb1",
+      "to_terminal": "rail_1_24.14_25",
+      "color": "#000000",
+      "connection_note": "Connects step-down regulator common ground to main ground rail"
+     },
+     {
+      "id": "w_reg_out_rail",
+      "name": "Regulator 3.3V out to bottom rail",
+      "from_part": "bb1",
+      "from_terminal": "j26",
+      "to_part": "bb1",
+      "to_terminal": "rail_-1_21.6_26",
+      "color": "#FF0000",
+      "connection_note": "Supplies regulated 3.3V power to the bottom red rail for all four sensors"
+     },
+     {
+      "id": "w_bottom_gnd_link",
+      "name": "Top ground rail to bottom ground rail link",
+      "from_part": "bb1",
+      "from_terminal": "rail_1_24.14_30",
+      "to_part": "bb1",
+      "to_terminal": "rail_-1_24.14_30",
+      "color": "#000000",
+      "connection_note": "Connects top ground rail to bottom blue ground rail"
+     },
+     {
+      "id": "w_teensy_sda0",
+      "name": "Teensy Pin 18 (SDA0) to Bus 0 data row",
+      "from_part": "teensy1",
+      "from_terminal": "d18",
+      "to_part": "bb1",
+      "to_terminal": "a39",
+      "color": "#0088FF",
+      "connection_note": "Connects primary I2C SDA line to row 39"
+     },
+     {
+      "id": "w_teensy_scl0",
+      "name": "Teensy Pin 19 (SCL0) to Bus 0 clock row",
+      "from_part": "teensy1",
+      "from_terminal": "d19",
+      "to_part": "bb1",
+      "to_terminal": "a40",
+      "color": "#FFFFFF",
+      "connection_note": "Connects primary I2C SCL line to row 40"
+     },
+     {
+      "id": "w_bus0_sda_bridge",
+      "name": "Bus 0 SDA cross-trough link",
+      "from_part": "bb1",
+      "from_terminal": "e39",
+      "to_part": "bb1",
+      "to_terminal": "f39",
+      "color": "#0088FF",
+      "connection_note": "Bridges Bus 0 SDA between encoder 1 and VL53L0X 1"
+     },
+     {
+      "id": "w_bus0_scl_bridge",
+      "name": "Bus 0 SCL cross-trough link",
+      "from_part": "bb1",
+      "from_terminal": "e40",
+      "to_part": "bb1",
+      "to_terminal": "f40",
+      "color": "#FFFFFF",
+      "connection_note": "Bridges Bus 0 SCL between encoder 1 and VL53L0X 1"
+     },
+     {
+      "id": "w_teensy_sda1",
+      "name": "Teensy Pin 17 (SDA1) to Bus 1 data row",
+      "from_part": "teensy1",
+      "from_terminal": "d17",
+      "to_part": "bb1",
+      "to_terminal": "a53",
+      "color": "#0088FF",
+      "connection_note": "Connects secondary I2C SDA1 line to row 53"
+     },
+     {
+      "id": "w_teensy_scl1",
+      "name": "Teensy Pin 16 (SCL1) to Bus 1 clock row",
+      "from_part": "teensy1",
+      "from_terminal": "d16",
+      "to_part": "bb1",
+      "to_terminal": "a54",
+      "color": "#FFFFFF",
+      "connection_note": "Connects secondary I2C SCL1 line to row 54"
+     },
+     {
+      "id": "w_bus1_sda_bridge",
+      "name": "Bus 1 SDA cross-trough link",
+      "from_part": "bb1",
+      "from_terminal": "e53",
+      "to_part": "bb1",
+      "to_terminal": "f53",
+      "color": "#0088FF",
+      "connection_note": "Bridges Bus 1 SDA1 between encoder 2 and VL53L0X 2"
+     },
+     {
+      "id": "w_bus1_scl_bridge",
+      "name": "Bus 1 SCL cross-trough link",
+      "from_part": "bb1",
+      "from_terminal": "e54",
+      "to_part": "bb1",
+      "to_terminal": "f54",
+      "color": "#FFFFFF",
+      "connection_note": "Bridges Bus 1 SCL1 between encoder 2 and VL53L0X 2"
+     }
+    ],
+    "assumptions": [
+     "The 12 V power adapter connects positive 12 V to DRV8874 VIN (row 10) and regulator IN+, and negative to common ground.",
+     "The 12 V DC gearmotor leads connect to DRV8874 OUT1 and OUT2 screw terminals or header pins.",
+     "Both AS5600 encoders share the fixed address 0x36 but are split across Wire (pins 18/19) and Wire1 (pins 17/16).",
+     "Both VL53L0X sensors share the fixed address 0x29 but reside on separate I2C buses alongside their respective encoder."
+    ]
+   },
+   "part_guide": [
+    {
+     "id": "bb1",
+     "what_it_is": "Solderless breadboard. Holes connect horizontally in numbered rows across the center groove; top and bottom rows form continuous power rails."
+    },
+    {
+     "id": "teensy1",
+     "what_it_is": "Teensy 4.1 micro-controller. High-speed 600 MHz board that runs the pendulum balancing control equations."
+    },
+    {
+     "id": "drv1",
+     "what_it_is": "DRV8874 H-bridge motor driver. Takes logic signals from the Teensy and delivers up to 2.1 A to the 12 V drive motor."
+    },
+    {
+     "id": "reg1",
+     "what_it_is": "12 V to 3.3 V step-down buck regulator. Drops high-voltage motor supply down to clean 3.3 V for the sensors."
+    },
+    {
+     "id": "as5600_1",
+     "what_it_is": "AS5600 12-bit magnetic angle sensor. Sits above the diametric magnet at the pendulum cart pivot joint to measure rod angle."
+    },
+    {
+     "id": "vl53_1",
+     "what_it_is": "VL53L0X time-of-flight laser distance sensor. Measures cart distance from the rail end on I2C bus 0."
+    },
+    {
+     "id": "as5600_2",
+     "what_it_is": "Second AS5600 magnetic angle sensor. Measures the angle of the second elbow joint on I2C bus 1."
+    },
+    {
+     "id": "vl53_2",
+     "what_it_is": "Second VL53L0X distance sensor. Measures cart clearance on the opposing rail limit on I2C bus 1."
+    },
+    {
+     "id": "w_teensy_gnd",
+     "what_it_is": "Black wire connecting Teensy GND pin to the breadboard top ground rail."
+    },
+    {
+     "id": "w_teensy_3v3",
+     "what_it_is": "Orange wire connecting Teensy 3.3 V to DRV8874 mode/sleep pull-up row 13."
+    },
+    {
+     "id": "w_teensy_in1",
+     "what_it_is": "Yellow wire transmitting PWM motor command 1 from Teensy pin 2 to DRV8874 IN1 on row 11."
+    },
+    {
+     "id": "w_teensy_in2",
+     "what_it_is": "Green wire transmitting PWM motor command 2 from Teensy pin 3 to DRV8874 IN2 on row 12."
+    },
+    {
+     "id": "w_drv_gnd",
+     "what_it_is": "Black ground jumper from DRV8874 GND pin row 10 up to the top ground rail."
+    },
+    {
+     "id": "w_reg_gnd",
+     "what_it_is": "Black ground wire connecting the regulator common ground row 25 up to the top ground rail."
+    },
+    {
+     "id": "w_reg_out_rail",
+     "what_it_is": "Red wire connecting regulator 3.3 V output on row 26 down to the bottom red power rail."
+    },
+    {
+     "id": "w_bottom_gnd_link",
+     "what_it_is": "Black jumper tying the top ground rail to the bottom blue ground rail."
+    },
+    {
+     "id": "w_teensy_sda0",
+     "what_it_is": "Blue wire carrying Wire (I2C Bus 0) data from Teensy pin 18 to row 39."
+    },
+    {
+     "id": "w_teensy_scl0",
+     "what_it_is": "White wire carrying Wire (I2C Bus 0) clock from Teensy pin 19 to row 40."
+    },
+    {
+     "id": "w_bus0_sda_bridge",
+     "what_it_is": "Blue jumper bridging I2C Bus 0 data across the center gap from encoder 1 to distance sensor 1."
+    },
+    {
+     "id": "w_bus0_scl_bridge",
+     "what_it_is": "White jumper bridging I2C Bus 0 clock across the center gap from encoder 1 to distance sensor 1."
+    },
+    {
+     "id": "w_teensy_sda1",
+     "what_it_is": "Blue wire carrying Wire1 (I2C Bus 1) data from Teensy pin 17 to row 53."
+    },
+    {
+     "id": "w_teensy_scl1",
+     "what_it_is": "White wire carrying Wire1 (I2C Bus 1) clock from Teensy pin 16 to row 54."
+    },
+    {
+     "id": "w_bus1_sda_bridge",
+     "what_it_is": "Blue jumper bridging I2C Bus 1 data across the center gap from encoder 2 to distance sensor 2."
+    },
+    {
+     "id": "w_bus1_scl_bridge",
+     "what_it_is": "White jumper bridging I2C Bus 1 clock across the center gap from encoder 2 to distance sensor 2."
+    }
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "title": "Insert the DRV8874 motor driver module",
+     "part_ids": [
+      "drv1"
+     ],
+     "instruction": "Place the DRV8874 breakout module so it straddles the center divider groove across rows 10 to 13. On the left side, insert the four module pins into row 10, column e; row 11, column e; row 12, column e; and row 13, column e. On the right side, insert the opposite four pins into row 10, column f; row 11, column f; row 12, column f; and row 13, column f.",
+     "placements": [
+      {
+       "what": "DRV8874 pin in row 10 left",
+       "hole": "e10",
+       "where": "row 10, column e (left of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 11 left",
+       "hole": "e11",
+       "where": "row 11, column e (left of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 12 left",
+       "hole": "e12",
+       "where": "row 12, column e (left of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 13 left",
+       "hole": "e13",
+       "where": "row 13, column e (left of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 10 right",
+       "hole": "f10",
+       "where": "row 10, column f (right of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 11 right",
+       "hole": "f11",
+       "where": "row 11, column f (right of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 12 right",
+       "hole": "f12",
+       "where": "row 12, column f (right of center divider)"
+      },
+      {
+       "what": "DRV8874 pin in row 13 right",
+       "hole": "f13",
+       "where": "row 13, column f (right of center divider)"
+      }
+     ],
+     "check": "The DRV8874 module sits squarely across the center trough from row 10 to row 13 with all eight pins seated in columns e and f."
+    },
+    {
+     "number": 2,
+     "title": "Insert the 12 V to 3.3 V step-down regulator",
+     "part_ids": [
+      "reg1"
+     ],
+     "instruction": "Insert the 3.3 V buck regulator module straddling the center divider across rows 25 and 26. Insert its left input pins into row 25, column e and row 26, column e; insert its right output pins into row 25, column f and row 26, column f.",
+     "placements": [
+      {
+       "what": "regulator module pin in row 25 left",
+       "hole": "e25",
+       "where": "row 25, column e (left of center divider)"
+      },
+      {
+       "what": "regulator module pin in row 26 left",
+       "hole": "e26",
+       "where": "row 26, column e (left of center divider)"
+      },
+      {
+       "what": "regulator module pin in row 25 right",
+       "hole": "f25",
+       "where": "row 25, column f (right of center divider)"
+      },
+      {
+       "what": "regulator module pin in row 26 right",
+       "hole": "f26",
+       "where": "row 26, column f (right of center divider)"
+      }
+     ],
+     "check": "The regulator module is firmly seated across the center trough on rows 25 and 26, occupying holes e25, e26, f25, and f26."
+    },
+    {
+     "number": 3,
+     "title": "Insert Bus 0 sensors: AS5600 encoder 1 and VL53L0X sensor 1",
+     "part_ids": [
+      "as5600_1",
+      "vl53_1"
+     ],
+     "instruction": "Insert the first AS5600 encoder breakout into column b on the left half of the breadboard with its four pins in row 37, column b; row 38, column b; row 39, column b; and row 40, column b. Then insert the first VL53L0X distance sensor into column i on the right half with its four pins in row 37, column i; row 38, column i; row 39, column i; and row 40, column i.",
+     "placements": [
+      {
+       "what": "encoder 1 pin 1",
+       "hole": "b37",
+       "where": "row 37, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 1 pin 2",
+       "hole": "b38",
+       "where": "row 38, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 1 pin 3",
+       "hole": "b39",
+       "where": "row 39, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 1 pin 4",
+       "hole": "b40",
+       "where": "row 40, column b (left of center divider)"
+      },
+      {
+       "what": "distance sensor 1 pin 1",
+       "hole": "i37",
+       "where": "row 37, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 1 pin 2",
+       "hole": "i38",
+       "where": "row 38, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 1 pin 3",
+       "hole": "i39",
+       "where": "row 39, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 1 pin 4",
+       "hole": "i40",
+       "where": "row 40, column i (right of center divider)"
+      }
+     ],
+     "check": "Both Bus 0 sensor modules sit aligned on rows 37 through 40 with the encoder in column b and the distance sensor in column i."
+    },
+    {
+     "number": 4,
+     "title": "Insert Bus 1 sensors: AS5600 encoder 2 and VL53L0X sensor 2",
+     "part_ids": [
+      "as5600_2",
+      "vl53_2"
+     ],
+     "instruction": "Insert the second AS5600 encoder into column b on the left half with its four pins in row 51, column b; row 52, column b; row 53, column b; and row 54, column b. Then insert the second VL53L0X distance sensor into column i on the right half with its four pins in row 51, column i; row 52, column i; row 53, column i; and row 54, column i.",
+     "placements": [
+      {
+       "what": "encoder 2 pin 1",
+       "hole": "b51",
+       "where": "row 51, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 2 pin 2",
+       "hole": "b52",
+       "where": "row 52, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 2 pin 3",
+       "hole": "b53",
+       "where": "row 53, column b (left of center divider)"
+      },
+      {
+       "what": "encoder 2 pin 4",
+       "hole": "b54",
+       "where": "row 54, column b (left of center divider)"
+      },
+      {
+       "what": "distance sensor 2 pin 1",
+       "hole": "i51",
+       "where": "row 51, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 2 pin 2",
+       "hole": "i52",
+       "where": "row 52, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 2 pin 3",
+       "hole": "i53",
+       "where": "row 53, column i (right of center divider)"
+      },
+      {
+       "what": "distance sensor 2 pin 4",
+       "hole": "i54",
+       "where": "row 54, column i (right of center divider)"
+      }
+     ],
+     "check": "Both Bus 1 sensor modules sit aligned on rows 51 through 54 with the encoder in column b and the distance sensor in column i."
+    },
+    {
+     "number": 5,
+     "title": "Connect main Teensy ground and DRV8874 ground",
+     "part_ids": [
+      "w_teensy_gnd",
+      "w_drv_gnd"
+     ],
+     "instruction": "Connect a black wire from Teensy header pin labeled GND to the ground rail along the top edge next to row 1. Then run a black wire from row 10, column a (DRV8874 GND) straight up to the ground rail along the top edge next to row 10.",
+     "placements": [
+      {
+       "what": "black wire end A",
+       "hole": "pin:gnd",
+       "where": "Teensy header pin labelled GND"
+      },
+      {
+       "what": "black wire end B",
+       "hole": "rail_1_24.14_1",
+       "where": "the ground rail along the top edge, next to row 1"
+      },
+      {
+       "what": "driver ground wire end A",
+       "hole": "a10",
+       "where": "row 10, column a (left half)"
+      },
+      {
+       "what": "driver ground wire end B",
+       "hole": "rail_1_24.14_10",
+       "where": "the ground rail along the top edge, next to row 10"
+      }
+     ],
+     "check": "Black ground wires establish a common ground between the Teensy, the motor driver, and the top ground rail."
+    },
+    {
+     "number": 6,
+     "title": "Wire DRV8874 PWM control and logic enable signals",
+     "part_ids": [
+      "w_teensy_3v3",
+      "w_teensy_in1",
+      "w_teensy_in2"
+     ],
+     "instruction": "Connect an orange wire from Teensy header pin 3.3V to row 13, column a (DRV8874 PMODE and SLEEP pull-up). Connect a yellow wire from Teensy digital pin 2 to row 11, column a (IN1). Connect a green wire from Teensy digital pin 3 to row 12, column a (IN2).",
+     "placements": [
+      {
+       "what": "orange wire end A",
+       "hole": "pin:3v3",
+       "where": "Teensy header pin labelled 3V3"
+      },
+      {
+       "what": "orange wire end B",
+       "hole": "a13",
+       "where": "row 13, column a (left half)"
+      },
+      {
+       "what": "yellow wire end A",
+       "hole": "pin:d2",
+       "where": "Teensy header pin labelled 2"
+      },
+      {
+       "what": "yellow wire end B",
+       "hole": "a11",
+       "where": "row 11, column a (left half)"
+      },
+      {
+       "what": "green wire end A",
+       "hole": "pin:d3",
+       "where": "Teensy header pin labelled 3"
+      },
+      {
+       "what": "green wire end B",
+       "hole": "a12",
+       "where": "row 12, column a (left half)"
+      }
+     ],
+     "check": "Orange wire runs to row 13, yellow wire runs from pin 2 to row 11, and green wire runs from pin 3 to row 12."
+    },
+    {
+     "number": 7,
+     "title": "Wire the 3.3 V sensor power rail and ground link",
+     "part_ids": [
+      "w_reg_gnd",
+      "w_reg_out_rail",
+      "w_bottom_gnd_link"
+     ],
+     "instruction": "Connect a black wire from row 25, column a up to the top ground rail next to row 25. Connect a red wire from row 26, column j down to the red positive rail along the bottom edge next to row 26. Connect a black wire from the top ground rail next to row 30 to the bottom blue ground rail next to row 30.",
+     "placements": [
+      {
+       "what": "regulator ground wire end A",
+       "hole": "a25",
+       "where": "row 25, column a (left half)"
+      },
+      {
+       "what": "regulator ground wire end B",
+       "hole": "rail_1_24.14_25",
+       "where": "the ground rail along the top edge, next to row 25"
+      },
+      {
+       "what": "red 3.3V power wire end A",
+       "hole": "j26",
+       "where": "row 26, column j (right half)"
+      },
+      {
+       "what": "red 3.3V power wire end B",
+       "hole": "rail_-1_21.6_26",
+       "where": "the red (+) rail along the bottom edge, next to row 26"
+      },
+      {
+       "what": "ground link wire end A",
+       "hole": "rail_1_24.14_30",
+       "where": "the ground rail along the top edge, next to row 30"
+      },
+      {
+       "what": "ground link wire end B",
+       "hole": "rail_-1_24.14_30",
+       "where": "the blue (-) rail along the bottom edge, next to row 30"
+      }
+     ],
+     "check": "The regulator feeds 3.3 V to the bottom red rail, with both ground rails tied together."
+    },
+    {
+     "number": 8,
+     "title": "Wire I2C Bus 0 to encoder 1 and distance sensor 1",
+     "part_ids": [
+      "w_teensy_sda0",
+      "w_teensy_scl0",
+      "w_bus0_sda_bridge",
+      "w_bus0_scl_bridge"
+     ],
+     "instruction": "Connect a blue wire from Teensy pin 18 (SDA0) to row 39, column a. Connect a white wire from Teensy pin 19 (SCL0) to row 40, column a. Bridge Bus 0 across the center trough by connecting a blue wire from row 39, column e to row 39, column f, and a white wire from row 40, column e to row 40, column f.",
+     "placements": [
+      {
+       "what": "blue SDA0 wire end A",
+       "hole": "pin:d18",
+       "where": "Teensy header pin labelled 18"
+      },
+      {
+       "what": "blue SDA0 wire end B",
+       "hole": "a39",
+       "where": "row 39, column a (left half)"
+      },
+      {
+       "what": "white SCL0 wire end A",
+       "hole": "pin:d19",
+       "where": "Teensy header pin labelled 19"
+      },
+      {
+       "what": "white SCL0 wire end B",
+       "hole": "a40",
+       "where": "row 40, column a (left half)"
+      },
+      {
+       "what": "SDA0 bridge wire end A",
+       "hole": "e39",
+       "where": "row 39, column e (left of center divider)"
+      },
+      {
+       "what": "SDA0 bridge wire end B",
+       "hole": "f39",
+       "where": "row 39, column f (right of center divider)"
+      },
+      {
+       "what": "SCL0 bridge wire end A",
+       "hole": "e40",
+       "where": "row 40, column e (left of center divider)"
+      },
+      {
+       "what": "SCL0 bridge wire end B",
+       "hole": "f40",
+       "where": "row 40, column f (right of center divider)"
+      }
+     ],
+     "check": "Rows 39 and 40 receive blue and white wires from Teensy pins 18 and 19, connected across the divider to both Bus 0 sensors."
+    },
+    {
+     "number": 9,
+     "title": "Wire I2C Bus 1 to encoder 2 and distance sensor 2",
+     "part_ids": [
+      "w_teensy_sda1",
+      "w_teensy_scl1",
+      "w_bus1_sda_bridge",
+      "w_bus1_scl_bridge"
+     ],
+     "instruction": "Connect a blue wire from Teensy pin 17 (SDA1) to row 53, column a. Connect a white wire from Teensy pin 16 (SCL1) to row 54, column a. Bridge Bus 1 across the center trough by connecting a blue wire from row 53, column e to row 53, column f, and a white wire from row 54, column e to row 54, column f.",
+     "placements": [
+      {
+       "what": "blue SDA1 wire end A",
+       "hole": "pin:d17",
+       "where": "Teensy header pin labelled 17"
+      },
+      {
+       "what": "blue SDA1 wire end B",
+       "hole": "a53",
+       "where": "row 53, column a (left half)"
+      },
+      {
+       "what": "white SCL1 wire end A",
+       "hole": "pin:d16",
+       "where": "Teensy header pin labelled 16"
+      },
+      {
+       "what": "white SCL1 wire end B",
+       "hole": "a54",
+       "where": "row 54, column a (left half)"
+      },
+      {
+       "what": "SDA1 bridge wire end A",
+       "hole": "e53",
+       "where": "row 53, column e (left of center divider)"
+      },
+      {
+       "what": "SDA1 bridge wire end B",
+       "hole": "f53",
+       "where": "row 53, column f (right of center divider)"
+      },
+      {
+       "what": "SCL1 bridge wire end A",
+       "hole": "e54",
+       "where": "row 54, column e (left of center divider)"
+      },
+      {
+       "what": "SCL1 bridge wire end B",
+       "hole": "f54",
+       "where": "row 54, column f (right of center divider)"
+      }
+     ],
+     "check": "Rows 53 and 54 receive blue and white wires from Teensy pins 17 and 16, connected across the divider to both Bus 1 sensors."
+    }
+   ],
+   "final_result": "A compact, noise-isolated dual-bus control circuit. The Teensy 4.1 concurrently polls the pivot encoder and primary distance sensor on Wire (pins 18/19) and the elbow encoder and secondary distance sensor on Wire1 (pins 17/16). It calculates the balancing state space matrix and produces PWM commands on pins 2 and 3 to drive the cart via the DRV8874 H-bridge.",
+   "code": "#include <Wire.h>\n\nconst int PIN_IN1 = 2;\nconst int PIN_IN2 = 3;\n\nconst uint8_t AS5600_ADDR = 0x36;\nconst uint8_t VL53L0X_ADDR = 0x29;\n\nvoid setMotorSpeed(int speed) {\n  speed = constrain(speed, -255, 255);\n  if (speed > 0) {\n    analogWrite(PIN_IN1, speed);\n    analogWrite(PIN_IN2, 0);\n  } else if (speed < 0) {\n    analogWrite(PIN_IN1, 0);\n    analogWrite(PIN_IN2, -speed);\n  } else {\n    analogWrite(PIN_IN1, 0);\n    analogWrite(PIN_IN2, 0);\n  }\n}\n\nuint16_t readAngle(TwoWire &bus) {\n  bus.beginTransmission(AS5600_ADDR);\n  bus.write(0x0C);\n  bus.endTransmission(false);\n  bus.requestFrom((int)AS5600_ADDR, 2);\n  if (bus.available() >= 2) {\n    uint16_t high = bus.read();\n    uint16_t low = bus.read();\n    return ((high & 0x0F) << 8) | low;\n  }\n  return 0;\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(PIN_IN1, OUTPUT);\n  pinMode(PIN_IN2, OUTPUT);\n  setMotorSpeed(0);\n\n  Wire.begin();\n  Wire.setClock(400000);\n\n  Wire1.begin();\n  Wire1.setClock(400000);\n}\n\nvoid loop() {\n  uint16_t angle1 = readAngle(Wire);\n  uint16_t angle2 = readAngle(Wire1);\n\n  Serial.print(\"Pivot Angle: \");\n  Serial.print(angle1);\n  Serial.print(\" | Elbow Angle: \");\n  Serial.println(angle2);\n\n  delay(10);\n}",
+   "safety": [
+    "Always disconnect the 12 V power adapter before modifying any breadboard wire or module connection.",
+    "Do not connect 12 V directly to any Teensy pin or sensor board; all Teensy I/O pins are 3.3 V tolerant only.",
+    "Keep hands, loose wires, and tools clear of the gear rack and swinging pendulum arms when power is applied."
+   ]
+  },
+  "problems": []
+ },
+ "owner": null,
+ "owner_name": "Physical Studio"
+}

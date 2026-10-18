@@ -13,7 +13,7 @@
 #
 # Files go to <out_dir>/build-<id>/ and are served by the viewer at /out/build-<id>/<file>. build.json is
 # rewritten after every change, so a build and its commits survive a reload or a restart.
-import asyncio, base64, binascii, json, os, re, threading, time, uuid
+import asyncio, base64, binascii, json, os, re, shutil, threading, time, uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +30,12 @@ BUILD_ID = re.compile(r"[0-9a-f]{12}")
 DATA_URL = re.compile(r"data:image/(jpeg|jpg|png|webp);base64,(.+)", re.S)
 FAILED = "Something went wrong while planning. Wait a minute and try again."
 NOT_OWNER = "Only the person who started this build can commit to it."
+# Ready-made guides (screen 1): finished builds kept in the repo under bench/ready/<name>/ (build.json
+# with /out/build-<name>/ URLs, plus its files). They're copied into out_dir at startup, can't be
+# committed to, and POST /api/build/<name>/copy gives a visitor their own copy to commit photos to.
+READY_DIR = Path(__file__).with_name("ready")
+READY_ID = re.compile(r"[a-z][a-z0-9-]{2,39}")
+READY_NOTE = "This is a ready-made guide. Make your own copy to commit photos of your build."
 
 
 class BadRequest(Exception):
@@ -89,6 +95,38 @@ class BuildStore:
         self.lock = threading.Lock()
         self.commit_locks = defaultdict(threading.Lock)
         self.recent = defaultdict(list)
+        self.ready = set()
+        self.seed_ready()
+
+    def seed_ready(self):
+        for src in sorted(READY_DIR.glob("*/build.json")) if READY_DIR.is_dir() else []:
+            name = src.parent.name
+            if not READY_ID.fullmatch(name):
+                continue
+            shutil.copytree(src.parent, self.folder(name), dirs_exist_ok=True)
+            build = json.loads(src.read_text())
+            build.update(id=name, ready=True, owner=None, owner_name="Physical Studio")
+            self.ready.add(name)
+            self.builds[name] = build
+
+    def copy(self, build, user=None):
+        """A visitor's own copy of a finished build: same plan and files, a fresh commit #0, no AI call."""
+        old, bid = build["id"], uuid.uuid4().hex[:12]
+        src, dst = self.folder(old), self.folder(bid)
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in src.iterdir():
+            if f.is_file() and f.name != "build.json" and not f.name.startswith("commit-") and not (f.name.startswith("img-") and not f.name.startswith("img-start-")):
+                shutil.copy2(f, dst / f.name)
+        moved = lambda data: json.loads(json.dumps(data).replace(f"/out/build-{old}/", f"/out/build-{bid}/"))  # noqa: E731
+        start = moved(next((c for c in build["commits"] if c["kind"] == "start"), None)) or {"kind": "start", "step": None, "images": [], "model": None, "guide": {}, "detected": []}
+        start.update(id=planner.new_id(bid), time=now_iso(), message=f"Started from the ready-made guide: {build['plan']['title']}", parent=None)
+        copy = {"id": bid, "status": "done", "stage": "Your build is ready.", "error": None, "goal": build["goal"], "have": "", "known": "",
+                "created": now_iso(), "plan": moved(build["plan"]), "commits": [start], "internal": build["internal"],
+                "owner": user["id"] if user else None, "owner_name": user["name"] if user else None, "copied_from": old}
+        with self.lock:
+            self.builds[bid] = copy
+        self.save(copy)
+        return bid
 
     def folder(self, bid):
         return self.out_dir / f"build-{bid}"
@@ -109,7 +147,7 @@ class BuildStore:
         tmp.replace(folder / "build.json")
 
     def get(self, bid):
-        if not BUILD_ID.fullmatch(bid or ""):
+        if not BUILD_ID.fullmatch(bid or "") and bid not in self.ready:
             return None
         with self.lock:
             if bid in self.builds:
@@ -217,7 +255,10 @@ class BuildStore:
 
 
 def may_commit(build, user):
-    """Anonymous builds are open to anyone with the link; owned ones only to their owner."""
+    """Anonymous builds are open to anyone with the link; owned ones only to their owner; ready-made
+    guides to nobody (make a copy)."""
+    if build.get("ready"):
+        return False
     return not build.get("owner") or bool(user and user["id"] == build["owner"])
 
 
@@ -277,7 +318,7 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         if build is None:
             return JSONResponse({"error": "No such build."}, status_code=404)
         if not may_commit(build, user_from_request(request)):
-            return JSONResponse({"error": NOT_OWNER}, status_code=403)
+            return JSONResponse({"error": READY_NOTE if build.get("ready") else NOT_OWNER}, status_code=403)
         if build["status"] != "done":
             return JSONResponse({"error": "This build isn't ready for commits yet."}, status_code=409)
         body = await body_of(request)
@@ -294,3 +335,11 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         except Exception as e:
             print("[bench] commit on build", build["id"], "failed:", hide(str(e))[:900], flush=True)
             return JSONResponse({"error": "Something went wrong while checking. Wait a minute and commit again."}, status_code=502)
+
+    @mcp.custom_route("/api/build/{build_id}/copy", methods=["POST"])
+    async def copy(request: Request):
+        build = store.get(request.path_params["build_id"])
+        if build is None or build["status"] != "done" or not build.get("plan"):
+            return JSONResponse({"error": "No finished build to copy."}, status_code=404)
+        return JSONResponse({"id": store.copy(build, user_from_request(request))}, status_code=201)
+

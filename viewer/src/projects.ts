@@ -15,16 +15,21 @@ export interface Project {
   openedAt?: number // ms; your projects only
 }
 
+// The ready-made guides are finished breadboard builds shipped with the server
+// (mcp-server/physical_studio/bench/ready/<name>/), opened at /build/<name>.
+const PENDULUM_STEPS = 9
 export const READY_MADE: Project[] = [
   {
-    design: 'traffic-light',
+    design: 'build/traffic-light',
     title: 'Traffic light',
-    prompt: 'Arduino Uno with red, yellow and green LEDs in a column and a crosswalk button.',
+    prompt: 'Arduino Uno with red, yellow and green LEDs on D11, D10 and D9 and a crosswalk button on D2.',
+    steps: 18,
   },
   {
-    design: 'double-pendulum',
+    design: 'build/double-pendulum',
     title: 'Double inverted pendulum',
-    prompt: 'Rack-and-pinion cart on a linear rail, two arms with magnetic encoders, Teensy 4.1.',
+    prompt: 'Teensy 4.1, DRV8874 motor driver, two AS5600 encoders and two VL53L0X distance sensors on a breadboard.',
+    steps: PENDULUM_STEPS,
   },
 ]
 
@@ -52,8 +57,9 @@ const MAX = 30
 // Every export writes design.png (render.py's quick software render). The two ready-made guides'
 // thumbnails are screenshots of the guide instead, which look closer to the real thing; rerunning
 // their example scripts replaces them with the software render.
-export const thumbnail = (design: string) =>
-  design.startsWith('build/') ? `/out/build-${design.slice(6)}/step-1.svg` : `/${design}/design.png`
+/** A build's thumbnail is its last step's picture (the whole circuit) when the step count is known. */
+export const thumbnail = (design: string, steps?: number) =>
+  design.startsWith('build/') ? `/out/build-${design.slice(6)}/step-${steps || 1}.svg` : `/${design}/design.png`
 
 /** Where a project opens: a build's own page, or the guide. */
 export const projectHref = (design: string, code: string | null) =>

@@ -8,14 +8,13 @@ export function ProjectsPage() {
   return (
     <div className="page">
       <ProgressHeader tab="projects" />
-      <main className="page-body describe-page">
-        <section className="describe-main">
-          <h1>Your projects</h1>
-          <p className="describe-lede">
-            Every guide you designed or opened in this browser, plus the ones your own AI exported with your key.
-          </p>
-          <YourProjects />
-        </section>
+      <main className="page-body">
+        <div className="describe-page">
+          <section className="describe-main">
+            <h1>Your projects</h1>
+            <YourProjects />
+          </section>
+        </div>
       </main>
     </div>
   )

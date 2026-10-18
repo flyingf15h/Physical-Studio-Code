@@ -280,3 +280,30 @@ def test_a_failed_build_shows_a_plain_error(tmp_path, monkeypatch):
     monkeypatch.setattr(planner, "make_plan", broken)
     b = wait_done(c, c.post("/api/build", json={"goal": "Traffic light"}).json()["id"])
     assert b["status"] == "error" and b["error"] == routes.FAILED and "secret" not in json.dumps(b)
+
+
+def test_ready_made_guides_are_view_only_and_can_be_copied(tmp_path, monkeypatch):
+    c = app(tmp_path / "first", monkeypatch)
+    bid = c.post("/api/build", json={"goal": "Traffic light with 3 LEDs"}).json()["id"]
+    wait_done(c, bid)
+    # Turn that finished build into a ready-made guide, the way bench/ready/<name>/ ships one.
+    ready = tmp_path / "ready" / "traffic-light"
+    ready.mkdir(parents=True)
+    for f in (tmp_path / "first" / f"build-{bid}").iterdir():
+        data = f.read_bytes()
+        (ready / f.name).write_bytes(data.replace(f"/out/build-{bid}/".encode(), b"/out/build-traffic-light/") if f.suffix == ".json" else data)
+    monkeypatch.setattr(routes, "READY_DIR", tmp_path / "ready")
+    c = app(tmp_path / "site", monkeypatch)
+    b = c.get("/api/build/traffic-light").json()
+    assert b["ready"] and not b["mine"] and b["owner_name"] == "Physical Studio"
+    assert b["plan"]["steps"][0]["picture"] == "/out/build-traffic-light/step-1.svg"
+    assert (tmp_path / "site" / "build-traffic-light" / "step-1.svg").exists()
+    r = c.post("/api/build/traffic-light/commit", json={"step": 0, "photos": [photo()]})
+    assert r.status_code == 403 and "ready-made" in r.json()["error"]
+    new = c.post("/api/build/traffic-light/copy").json()["id"]
+    mine = c.get(f"/api/build/{new}").json()
+    assert mine["mine"] and not mine.get("ready") and mine["plan"]["title"] == b["plan"]["title"]
+    assert mine["plan"]["steps"][0]["picture"] == f"/out/build-{new}/step-1.svg"
+    assert (tmp_path / "site" / f"build-{new}" / "step-1.svg").exists()
+    assert len(mine["commits"]) == 1 and mine["commits"][0]["kind"] == "start"
+    assert c.post(f"/api/build/{new}/commit", json={"step": 0, "photos": [photo()]}).status_code == 200

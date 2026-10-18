@@ -9,3 +9,4 @@
 .projects-meta:empty { display: none; }
 .projects-remove { position: absolute; top: 8px; right: 8px; border: 0; background: rgba(31, 41, 51, .75); color: #fff; width: 24px; height: 24px; border-radius: 50%; font-size: 16px; line-height: 1; cursor: pointer; padding: 0; }
 .projects-empty { font-size: 14px; color: var(--muted); margin: 0; }
+.projects-card img[src$=".svg"] { object-fit: contain; background: #fff; padding: 8px; box-sizing: border-box; }

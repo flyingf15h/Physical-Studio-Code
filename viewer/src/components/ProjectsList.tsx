@@ -23,7 +23,7 @@ function Card({ project, onRemove }: { project: Project; onRemove?: () => void }
         }}
       >
         <img
-          src={thumbnail(project.design)}
+          src={thumbnail(project.design, project.steps)}
           alt=""
           loading="lazy"
           onError={(e) => (e.currentTarget.style.visibility = 'hidden')}

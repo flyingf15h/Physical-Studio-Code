@@ -3,11 +3,12 @@
 // need, one step at a time (numbered-hole picture, check line, a 3D model of the bench after the
 // step, and an optional photo commit the AI checks), the finished build, and the Commits tab.
 import { useEffect, useRef, useState } from 'react'
-import { commitStep, getBuild, type Build, type BuildCommit, type BuildPlan, type Verdict } from '../api'
+import { commitStep, copyBuild, getBuild, type Build, type BuildCommit, type BuildPlan, type Verdict } from '../api'
 import { BenchModel } from '../components/BenchModel'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { ShareButton } from '../components/ShareButton'
 import { shrink } from '../images'
+import { designParams, navigate, withParams } from '../router'
 import { rememberProject } from '../projects'
 import './BuildPage.css'
 
@@ -206,6 +207,40 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
   )
 }
 
+function CopyBuild({ build }: { build: Build }) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div className="commit-box">
+      <h3>Build this yourself</h3>
+      <p className="muted">
+        This is a ready-made guide. Make your own copy to photograph each step: the AI checks your work, and your
+        commits are saved with your copy.
+      </p>
+      <div className="commit-row">
+        <button
+          type="button"
+          className="primary"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true)
+            copyBuild(build.id).then(
+              ({ id }) => navigate(withParams(`/build/${id}`, { code: designParams().code })),
+              (e) => {
+                setError(e instanceof Error ? e.message : String(e))
+                setBusy(false)
+              },
+            )
+          }}
+        >
+          {busy ? 'Copying…' : 'Make my own copy'}
+        </button>
+      </div>
+      {error && <p className="error-text">{error}</p>}
+    </div>
+  )
+}
+
 function StepView({
   build,
   plan,
@@ -249,7 +284,9 @@ function StepView({
           <BenchModel model={s.model} guide={plan.part_guide} highlight={s.model.new ?? s.part_ids} />
         </>
       )}
-      {build.mine === false ? (
+      {build.ready ? (
+        <CopyBuild build={build} />
+      ) : build.mine === false ? (
         <p className="muted shared-note">
           {build.owner_name ? `${build.owner_name} shared this build with you.` : 'This build was shared with you.'}{' '}
           Only the person who started it can commit photos to it.
@@ -292,7 +329,7 @@ function Finished({ plan }: { plan: BuildPlan }) {
   )
 }
 
-function Commits({ build, plan }: { build: Build; plan: BuildPlan }) {
+export function Commits({ build, plan }: { build: Build; plan: BuildPlan }) {
   const [open, setOpen] = useState<string | null>(null)
   const title = (c: BuildCommit) =>
     c.kind === 'start'
@@ -359,7 +396,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
         if (stop) return
         setBuild(b)
         setError(null)
-        if (b.status === 'done' && b.plan) {
+        if (b.status === 'done' && b.plan && !b.ready) {
           rememberProject({ design: `build/${b.id}`, title: b.plan.title, prompt: b.goal, steps: b.plan.steps.length })
         }
         if (b.status === 'done' || b.status === 'error') return

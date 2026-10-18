@@ -1,0 +1,2691 @@
+{
+ "id": "traffic-light",
+ "status": "done",
+ "stage": "Your build is ready.",
+ "error": null,
+ "goal": "Traffic light on an Arduino Uno: a red LED on pin D11, a yellow LED on D10 and a green LED on D9, each through a 220 ohm resistor, in a column like a real traffic light, plus a crosswalk push button on D2 (wired to GND, using INPUT_PULLUP) that starts a walk cycle.",
+ "have": "",
+ "known": "",
+ "created": "2026-10-18T00:41:06+00:00",
+ "plan": {
+  "title": "Arduino traffic light with crosswalk request button",
+  "summary": "Build a red, yellow and green traffic light controlled by an Arduino Uno. Pressing the crosswalk button changes green to yellow for 2 seconds, then red for a 5-second crossing interval, before returning to green; the red light is the crossing cue, with no separate walk LED.",
+  "final_result": "The LEDs form one evenly spaced line: red at row 10, yellow at row 20 and green at row 30. With row 1 facing upward, they appear in a vertical traffic-light column. Once the sketch is loaded and USB power is present, only green lights initially. A button press gives 2 seconds of yellow, then 5 seconds of red as the crossing cue, then green again. Presses during a cycle are ignored; release and press again after green returns to request another cycle.",
+  "code": "const byte RED_PIN = 11;\nconst byte YELLOW_PIN = 10;\nconst byte GREEN_PIN = 9;\nconst byte BUTTON_PIN = 2;\n\nconst unsigned long DEBOUNCE_MS = 30;\nconst unsigned long YELLOW_MS = 2000;\nconst unsigned long WALK_MS = 5000;\n\nenum Phase { TRAFFIC_GREEN, TRAFFIC_YELLOW, WALK_RED };\nPhase phase = TRAFFIC_GREEN;\nunsigned long phaseStarted = 0;\nunsigned long lastChange = 0;\nint lastReading = HIGH;\nint stableReading = HIGH;\n\nvoid showPhase() {\n  digitalWrite(RED_PIN, phase == WALK_RED ? HIGH : LOW);\n  digitalWrite(YELLOW_PIN, phase == TRAFFIC_YELLOW ? HIGH : LOW);\n  digitalWrite(GREEN_PIN, phase == TRAFFIC_GREEN ? HIGH : LOW);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(YELLOW_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BUTTON_PIN, INPUT_PULLUP);\n  showPhase();\n}\n\nvoid loop() {\n  unsigned long now = millis();\n  int reading = digitalRead(BUTTON_PIN);\n\n  if (reading != lastReading) {\n    lastReading = reading;\n    lastChange = now;\n  }\n\n  if (now - lastChange >= DEBOUNCE_MS && reading != stableReading) {\n    stableReading = reading;\n    if (stableReading == LOW && phase == TRAFFIC_GREEN) {\n      phase = TRAFFIC_YELLOW;\n      phaseStarted = now;\n      showPhase();\n    }\n  }\n\n  if (phase == TRAFFIC_YELLOW && now - phaseStarted >= YELLOW_MS) {\n    phase = WALK_RED;\n    phaseStarted = now;\n    showPhase();\n  } else if (phase == WALK_RED && now - phaseStarted >= WALK_MS) {\n    phase = TRAFFIC_GREEN;\n    phaseStarted = now;\n    showPhase();\n  }\n}\n",
+  "safety": [
+   "Keep the Uno disconnected from USB and other power while inserting or changing components.",
+   "Use USB power for this project; do not connect mains electricity or a 12 V supply to breadboard holes or Arduino GPIO pins.",
+   "Each LED must retain its own 220 ohm series resistor. Never replace a resistor with a jumper.",
+   "Keep exposed LED and resistor leads from touching adjacent leads, and never force the button into incompatible holes.",
+   "The button needs no external pull-up resistor because the sketch enables INPUT_PULLUP. Do not connect the button to 5 V.",
+   "This is a tabletop demonstration, not a real road or pedestrian safety controller."
+  ],
+  "parts": [
+   {
+    "name": "Arduino Uno",
+    "quantity": 1,
+    "why": "Controls the lights and reads the crosswalk button.",
+    "user_has_it": true,
+    "size": "68.6 \u00d7 53.4 \u00d7 1.6 mm"
+   },
+   {
+    "name": "Full-size solderless breadboard",
+    "quantity": 1,
+    "why": "Holds the components and joins their leads without soldering.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "5 mm red LED",
+    "quantity": 1,
+    "why": "Shows the stop and crossing interval.",
+    "user_has_it": true,
+    "size": "5.8 \u00d7 5.8 \u00d7 8.6 mm"
+   },
+   {
+    "name": "5 mm yellow LED",
+    "quantity": 1,
+    "why": "Shows the warning interval before red.",
+    "user_has_it": true,
+    "size": "5.8 \u00d7 5.8 \u00d7 8.6 mm"
+   },
+   {
+    "name": "5 mm green LED",
+    "quantity": 1,
+    "why": "Shows the normal traffic-go state.",
+    "user_has_it": true,
+    "size": "5.8 \u00d7 5.8 \u00d7 8.6 mm"
+   },
+   {
+    "name": "220 ohm resistor",
+    "quantity": 3,
+    "why": "Each LED needs its own resistor to limit current.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "12 mm four-leg tactile push button",
+    "quantity": 1,
+    "why": "Requests a crossing cycle when pressed.",
+    "user_has_it": true,
+    "size": "12 \u00d7 12 \u00d7 7.3 mm"
+   },
+   {
+    "name": "Male-to-male jumper wires",
+    "quantity": 9,
+    "why": "Connect the Arduino, LEDs, button and shared ground rail.",
+    "user_has_it": true,
+    "size": ""
+   },
+   {
+    "name": "USB data cable matching your Uno and computer",
+    "quantity": 1,
+    "why": "Loads the sketch and supplies USB power; a standard Uno Rev3 uses a USB-B connector.",
+    "user_has_it": false,
+    "size": ""
+   }
+  ],
+  "part_guide": {
+   "breadboard": "The white board with numbered rows holds the circuit without solder. Holes a through e in one row connect together; f through j form a separate group.",
+   "uno": "The Arduino Uno is the controller board with USB and labelled headers. It runs the traffic-light timing and reads the button.",
+   "led_red": "The red round LED shows stop during the crossing interval. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
+   "res_red": "This small banded 220 ohm resistor limits the red LED's current. A common four-band marking is red-red-brown-gold; either end can go first.",
+   "led_yellow": "The yellow round LED warns before red. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
+   "res_yellow": "This banded 220 ohm resistor limits the yellow LED's current. It has no positive or negative end.",
+   "led_green": "The green round LED shows the normal traffic-go state. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
+   "res_green": "This banded 220 ohm resistor limits the green LED's current. It has no positive or negative end.",
+   "button": "The square 12 mm button has four metal legs and a central plunger. Pressing it connects D2 to ground; the Arduino's internal pull-up keeps D2 HIGH when released.",
+   "wire_ground": "The black wire from an Uno GND header to the first top-edge ground-rail hole establishes shared ground.",
+   "wire_red_signal": "The red wire connects the Uno header labelled 11 to the red LED's anode row.",
+   "wire_red_ground": "This black wire runs from row 15 up to the ground rail, completing the red LED's path through its resistor.",
+   "wire_yellow_signal": "The yellow wire connects the Uno header labelled 10 to the yellow LED's anode row.",
+   "wire_yellow_ground": "This black wire runs from row 25 up to the ground rail, completing the yellow LED's path through its resistor.",
+   "wire_green_signal": "The green wire connects the Uno header labelled 9 to the green LED's anode row.",
+   "wire_green_ground": "This black wire runs from row 35 up to the ground rail, completing the green LED's path through its resistor.",
+   "wire_button_signal": "The blue wire connects the Uno header labelled 2 to the button's row 44 contact.",
+   "wire_button_ground": "This black wire grounds the button's row 46 contact, so a press sends a LOW signal to D2."
+  },
+  "model": {
+   "glb": "/out/build-traffic-light/final.glb",
+   "labels": [
+    {
+     "id": "breadboard",
+     "name": "Full-size breadboard",
+     "kind": "breadboard"
+    },
+    {
+     "id": "uno",
+     "name": "Arduino Uno",
+     "kind": "development_board"
+    },
+    {
+     "id": "led_red",
+     "name": "5 mm red LED",
+     "kind": "led"
+    },
+    {
+     "id": "res_red",
+     "name": "220 ohm resistor (red LED)",
+     "kind": "resistor"
+    },
+    {
+     "id": "led_yellow",
+     "name": "5 mm yellow LED",
+     "kind": "led"
+    },
+    {
+     "id": "res_yellow",
+     "name": "220 ohm resistor (yellow LED)",
+     "kind": "resistor"
+    },
+    {
+     "id": "led_green",
+     "name": "5 mm green LED",
+     "kind": "led"
+    },
+    {
+     "id": "res_green",
+     "name": "220 ohm resistor (green LED)",
+     "kind": "resistor"
+    },
+    {
+     "id": "button",
+     "name": "12 mm crosswalk push button",
+     "kind": "generic"
+    },
+    {
+     "id": "wire_ground",
+     "name": "Black shared ground wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_red_signal",
+     "name": "Red D11 signal wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_red_ground",
+     "name": "Black red-LED return wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_yellow_signal",
+     "name": "Yellow D10 signal wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_yellow_ground",
+     "name": "Black yellow-LED return wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_green_signal",
+     "name": "Green D9 signal wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_green_ground",
+     "name": "Black green-LED return wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_button_signal",
+     "name": "Blue D2 button wire",
+     "kind": "wire"
+    },
+    {
+     "id": "wire_button_ground",
+     "name": "Black button ground wire",
+     "kind": "wire"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "number": 1,
+    "title": "Place the breadboard",
+    "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line.",
+    "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap.",
+    "part_ids": [
+     "breadboard"
+    ],
+    "placements": [],
+    "picture": "/out/build-traffic-light/step-1.svg",
+    "markers": [],
+    "model": {
+     "glb": "/out/build-traffic-light/step-1.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      }
+     ],
+     "new": []
+    }
+   },
+   {
+    "number": 2,
+    "title": "Place the Uno beside the breadboard",
+    "instruction": "Place the disconnected Uno outside the breadboard on the ground-rail side, roughly opposite row twenty, leaving its underside clear of loose metal.",
+    "check": "The Uno is outside the breadboard above the top-edge ground rail, near the future LED groups, with no USB cable connected.",
+    "part_ids": [
+     "uno"
+    ],
+    "placements": [],
+    "picture": "/out/build-traffic-light/step-2.svg",
+    "markers": [],
+    "model": {
+     "glb": "/out/build-traffic-light/step-2.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      }
+     ],
+     "new": []
+    }
+   },
+   {
+    "number": 3,
+    "title": "Insert the red LED",
+    "instruction": "Insert the red LED's long leg (anode, +) into row ten, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row eleven, column e, left of the centre gap.",
+    "check": "The red LED straddles rows 10 and 11 in column e, with its anode at row 10 and flat-side cathode at row 11.",
+    "part_ids": [
+     "led_red"
+    ],
+    "placements": [
+     {
+      "what": "Red LED long leg (anode, +)",
+      "hole": "e10",
+      "where": "Row 10, column e (left of the centre gap)."
+     },
+     {
+      "what": "Red LED short leg / flat side (cathode, -)",
+      "hole": "e11",
+      "where": "Row 11, column e (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-3.svg",
+    "markers": [
+     [
+      1,
+      "Red LED long leg (anode, +)",
+      "Row 10, column e (left of the centre gap).",
+      "e10"
+     ],
+     [
+      2,
+      "Red LED short leg / flat side (cathode, -)",
+      "Row 11, column e (left of the centre gap).",
+      "e11"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-3.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      }
+     ],
+     "new": [
+      "led_red"
+     ]
+    }
+   },
+   {
+    "number": 4,
+    "title": "Insert the red LED resistor",
+    "instruction": "Insert one leg of a 220 ohm resistor into row eleven, column d, left of the centre gap, and its other leg into row fifteen, column d, left of the centre gap. Either resistor orientation is correct.",
+    "check": "A 220 ohm resistor runs along column d from row 11 to row 15, sharing row 11 with the red LED's cathode in column e.",
+    "part_ids": [
+     "res_red"
+    ],
+    "placements": [
+     {
+      "what": "Red LED resistor leg 1",
+      "hole": "d11",
+      "where": "Row 11, column d (left of the centre gap)."
+     },
+     {
+      "what": "Red LED resistor leg 2",
+      "hole": "d15",
+      "where": "Row 15, column d (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-4.svg",
+    "markers": [
+     [
+      1,
+      "Red LED resistor leg 1",
+      "Row 11, column d (left of the centre gap).",
+      "d11"
+     ],
+     [
+      2,
+      "Red LED resistor leg 2",
+      "Row 15, column d (left of the centre gap).",
+      "d15"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-4.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      }
+     ],
+     "new": [
+      "res_red"
+     ]
+    }
+   },
+   {
+    "number": 5,
+    "title": "Insert the yellow LED",
+    "instruction": "Insert the yellow LED's long leg (anode, +) into row twenty, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row twenty-one, column e, left of the centre gap.",
+    "check": "The yellow LED occupies column e, rows 20 and 21, oriented the same way as the red LED.",
+    "part_ids": [
+     "led_yellow"
+    ],
+    "placements": [
+     {
+      "what": "Yellow LED long leg (anode, +)",
+      "hole": "e20",
+      "where": "Row 20, column e (left of the centre gap)."
+     },
+     {
+      "what": "Yellow LED short leg / flat side (cathode, -)",
+      "hole": "e21",
+      "where": "Row 21, column e (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-5.svg",
+    "markers": [
+     [
+      1,
+      "Yellow LED long leg (anode, +)",
+      "Row 20, column e (left of the centre gap).",
+      "e20"
+     ],
+     [
+      2,
+      "Yellow LED short leg / flat side (cathode, -)",
+      "Row 21, column e (left of the centre gap).",
+      "e21"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-5.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      }
+     ],
+     "new": [
+      "led_yellow"
+     ]
+    }
+   },
+   {
+    "number": 6,
+    "title": "Insert the yellow LED resistor",
+    "instruction": "Insert one leg of a 220 ohm resistor into row twenty-one, column d, left of the centre gap, and its other leg into row twenty-five, column d, left of the centre gap.",
+    "check": "A 220 ohm resistor runs along column d from row 21 to row 25, beside the yellow LED's cathode row.",
+    "part_ids": [
+     "res_yellow"
+    ],
+    "placements": [
+     {
+      "what": "Yellow LED resistor leg 1",
+      "hole": "d21",
+      "where": "Row 21, column d (left of the centre gap)."
+     },
+     {
+      "what": "Yellow LED resistor leg 2",
+      "hole": "d25",
+      "where": "Row 25, column d (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-6.svg",
+    "markers": [
+     [
+      1,
+      "Yellow LED resistor leg 1",
+      "Row 21, column d (left of the centre gap).",
+      "d21"
+     ],
+     [
+      2,
+      "Yellow LED resistor leg 2",
+      "Row 25, column d (left of the centre gap).",
+      "d25"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-6.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      }
+     ],
+     "new": [
+      "res_yellow"
+     ]
+    }
+   },
+   {
+    "number": 7,
+    "title": "Insert the green LED",
+    "instruction": "Insert the green LED's long leg (anode, +) into row thirty, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row thirty-one, column e, left of the centre gap.",
+    "check": "The green LED occupies column e, rows 30 and 31; all three LEDs line up with identical polarity.",
+    "part_ids": [
+     "led_green"
+    ],
+    "placements": [
+     {
+      "what": "Green LED long leg (anode, +)",
+      "hole": "e30",
+      "where": "Row 30, column e (left of the centre gap)."
+     },
+     {
+      "what": "Green LED short leg / flat side (cathode, -)",
+      "hole": "e31",
+      "where": "Row 31, column e (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-7.svg",
+    "markers": [
+     [
+      1,
+      "Green LED long leg (anode, +)",
+      "Row 30, column e (left of the centre gap).",
+      "e30"
+     ],
+     [
+      2,
+      "Green LED short leg / flat side (cathode, -)",
+      "Row 31, column e (left of the centre gap).",
+      "e31"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-7.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      }
+     ],
+     "new": [
+      "led_green"
+     ]
+    }
+   },
+   {
+    "number": 8,
+    "title": "Insert the green LED resistor",
+    "instruction": "Insert one leg of a 220 ohm resistor into row thirty-one, column d, left of the centre gap, and its other leg into row thirty-five, column d, left of the centre gap.",
+    "check": "A 220 ohm resistor runs along column d from row 31 to row 35; all three resistors span four row intervals.",
+    "part_ids": [
+     "res_green"
+    ],
+    "placements": [
+     {
+      "what": "Green LED resistor leg 1",
+      "hole": "d31",
+      "where": "Row 31, column d (left of the centre gap)."
+     },
+     {
+      "what": "Green LED resistor leg 2",
+      "hole": "d35",
+      "where": "Row 35, column d (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-8.svg",
+    "markers": [
+     [
+      1,
+      "Green LED resistor leg 1",
+      "Row 31, column d (left of the centre gap).",
+      "d31"
+     ],
+     [
+      2,
+      "Green LED resistor leg 2",
+      "Row 35, column d (left of the centre gap).",
+      "d35"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-8.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      }
+     ],
+     "new": [
+      "res_green"
+     ]
+    }
+   },
+   {
+    "number": 9,
+    "title": "Insert the crosswalk button",
+    "instruction": "Place the button across the centre gap with one across-body, permanently connected leg pair in row forty-four, columns e and f, and the other across-body, permanently connected leg pair in row forty-six, columns e and f. The two legs on each side of the gap must be the normally open pair that connects only when pressed; do not force a button with a different footprint.",
+    "check": "The square button bridges the centre gap with four legs in e44, f44, e46 and f46, beyond the three LED groups.",
+    "part_ids": [
+     "button"
+    ],
+    "placements": [
+     {
+      "what": "Button first connected-pair left leg",
+      "hole": "e44",
+      "where": "Row 44, column e (left of the centre gap)."
+     },
+     {
+      "what": "Button first connected-pair right leg",
+      "hole": "f44",
+      "where": "Row 44, column f (right of the centre gap)."
+     },
+     {
+      "what": "Button second connected-pair left leg",
+      "hole": "e46",
+      "where": "Row 46, column e (left of the centre gap)."
+     },
+     {
+      "what": "Button second connected-pair right leg",
+      "hole": "f46",
+      "where": "Row 46, column f (right of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-9.svg",
+    "markers": [
+     [
+      1,
+      "Button first connected-pair left leg",
+      "Row 44, column e (left of the centre gap).",
+      "e44"
+     ],
+     [
+      2,
+      "Button first connected-pair right leg",
+      "Row 44, column f (right of the centre gap).",
+      "f44"
+     ],
+     [
+      3,
+      "Button second connected-pair left leg",
+      "Row 46, column e (left of the centre gap).",
+      "e46"
+     ],
+     [
+      4,
+      "Button second connected-pair right leg",
+      "Row 46, column f (right of the centre gap).",
+      "f46"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-9.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      }
+     ],
+     "new": [
+      "button"
+     ]
+    }
+   },
+   {
+    "number": 10,
+    "title": "Connect the shared ground",
+    "instruction": "Connect a black jumper from the Uno header pin labelled GND to the very first hole of the ground rail along the top edge, next to row one. This outer rail is the negative (-), blue-line rail, not a positive rail.",
+    "check": "One black jumper connects the Uno GND header to the outer top-edge ground rail beside row 1.",
+    "part_ids": [
+     "wire_ground"
+    ],
+    "placements": [
+     {
+      "what": "Black shared ground wire Uno end",
+      "hole": "pin:gnd1",
+      "where": "Uno power-header pin labelled GND."
+     },
+     {
+      "what": "Black shared ground wire rail end",
+      "hole": "rail_1_24.14_1",
+      "where": "First hole of the ground rail along the top edge, the outer negative (-), blue-line rail next to row 1."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-10.svg",
+    "markers": [
+     [
+      1,
+      "Black shared ground wire Uno end",
+      "Uno power-header pin labelled GND.",
+      "pin:gnd1"
+     ],
+     [
+      2,
+      "Black shared ground wire rail end",
+      "First hole of the ground rail along the top edge, the outer negative (-), blue-line rail next to row 1.",
+      "rail_1_24.14_1"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-10.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_ground"
+     ]
+    }
+   },
+   {
+    "number": 11,
+    "title": "Connect red to D11",
+    "instruction": "Connect a red jumper from the Uno digital header pin labelled 11 to row ten, column a, left of the centre gap.",
+    "check": "The red jumper runs from Uno pin 11 to a10, in the same connected row as the red LED's long leg at e10.",
+    "part_ids": [
+     "wire_red_signal"
+    ],
+    "placements": [
+     {
+      "what": "Red signal wire Uno end",
+      "hole": "pin:d11",
+      "where": "Uno digital header pin labelled 11, also marked with a PWM tilde."
+     },
+     {
+      "what": "Red signal wire breadboard end",
+      "hole": "a10",
+      "where": "Row 10, column a (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-11.svg",
+    "markers": [
+     [
+      1,
+      "Red signal wire Uno end",
+      "Uno digital header pin labelled 11, also marked with a PWM tilde.",
+      "pin:d11"
+     ],
+     [
+      2,
+      "Red signal wire breadboard end",
+      "Row 10, column a (left of the centre gap).",
+      "a10"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-11.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_red_signal"
+     ]
+    }
+   },
+   {
+    "number": 12,
+    "title": "Ground the red resistor",
+    "instruction": "Connect a black jumper from row fifteen, column a, left of the centre gap, straight up to the ground rail along the top edge next to row fifteen, using the outer negative (-), blue-line rail.",
+    "check": "A black jumper rises from a15 to the outer top-edge ground rail beside row 15; the resistor ends at d15.",
+    "part_ids": [
+     "wire_red_ground"
+    ],
+    "placements": [
+     {
+      "what": "Red LED black return wire resistor-row end",
+      "hole": "a15",
+      "where": "Row 15, column a (left of the centre gap)."
+     },
+     {
+      "what": "Red LED black return wire rail end",
+      "hole": "rail_1_24.14_15",
+      "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 15."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-12.svg",
+    "markers": [
+     [
+      1,
+      "Red LED black return wire resistor-row end",
+      "Row 15, column a (left of the centre gap).",
+      "a15"
+     ],
+     [
+      2,
+      "Red LED black return wire rail end",
+      "The ground rail along the top edge, outer negative (-), blue-line rail next to row 15.",
+      "rail_1_24.14_15"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-12.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_red_ground"
+     ]
+    }
+   },
+   {
+    "number": 13,
+    "title": "Connect yellow to D10",
+    "instruction": "Connect a yellow jumper from the Uno digital header pin labelled 10 to row twenty, column a, left of the centre gap.",
+    "check": "The yellow jumper runs from Uno pin 10 to a20, sharing the yellow LED's anode row.",
+    "part_ids": [
+     "wire_yellow_signal"
+    ],
+    "placements": [
+     {
+      "what": "Yellow signal wire Uno end",
+      "hole": "pin:d10",
+      "where": "Uno digital header pin labelled 10, also marked with a PWM tilde."
+     },
+     {
+      "what": "Yellow signal wire breadboard end",
+      "hole": "a20",
+      "where": "Row 20, column a (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-13.svg",
+    "markers": [
+     [
+      1,
+      "Yellow signal wire Uno end",
+      "Uno digital header pin labelled 10, also marked with a PWM tilde.",
+      "pin:d10"
+     ],
+     [
+      2,
+      "Yellow signal wire breadboard end",
+      "Row 20, column a (left of the centre gap).",
+      "a20"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-13.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_yellow_signal"
+     ]
+    }
+   },
+   {
+    "number": 14,
+    "title": "Ground the yellow resistor",
+    "instruction": "Connect a black jumper from row twenty-five, column a, left of the centre gap, straight up to the ground rail along the top edge next to row twenty-five, using the outer negative (-), blue-line rail.",
+    "check": "A black jumper rises from a25 to the outer top-edge ground rail beside row 25; the resistor ends at d25.",
+    "part_ids": [
+     "wire_yellow_ground"
+    ],
+    "placements": [
+     {
+      "what": "Yellow LED black return wire resistor-row end",
+      "hole": "a25",
+      "where": "Row 25, column a (left of the centre gap)."
+     },
+     {
+      "what": "Yellow LED black return wire rail end",
+      "hole": "rail_1_24.14_25",
+      "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 25."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-14.svg",
+    "markers": [
+     [
+      1,
+      "Yellow LED black return wire resistor-row end",
+      "Row 25, column a (left of the centre gap).",
+      "a25"
+     ],
+     [
+      2,
+      "Yellow LED black return wire rail end",
+      "The ground rail along the top edge, outer negative (-), blue-line rail next to row 25.",
+      "rail_1_24.14_25"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-14.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_ground",
+       "name": "Black yellow-LED return wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_yellow_ground"
+     ]
+    }
+   },
+   {
+    "number": 15,
+    "title": "Connect green to D9",
+    "instruction": "Connect a green jumper from the Uno digital header pin labelled 9 to row thirty, column a, left of the centre gap.",
+    "check": "The green jumper runs from Uno pin 9 to a30, sharing the green LED's anode row.",
+    "part_ids": [
+     "wire_green_signal"
+    ],
+    "placements": [
+     {
+      "what": "Green signal wire Uno end",
+      "hole": "pin:d9",
+      "where": "Uno digital header pin labelled 9, also marked with a PWM tilde."
+     },
+     {
+      "what": "Green signal wire breadboard end",
+      "hole": "a30",
+      "where": "Row 30, column a (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-15.svg",
+    "markers": [
+     [
+      1,
+      "Green signal wire Uno end",
+      "Uno digital header pin labelled 9, also marked with a PWM tilde.",
+      "pin:d9"
+     ],
+     [
+      2,
+      "Green signal wire breadboard end",
+      "Row 30, column a (left of the centre gap).",
+      "a30"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-15.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_ground",
+       "name": "Black yellow-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_signal",
+       "name": "Green D9 signal wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_green_signal"
+     ]
+    }
+   },
+   {
+    "number": 16,
+    "title": "Ground the green resistor",
+    "instruction": "Connect a black jumper from row thirty-five, column a, left of the centre gap, straight up to the ground rail along the top edge next to row thirty-five, using the outer negative (-), blue-line rail.",
+    "check": "A black jumper rises from a35 to the outer top-edge ground rail beside row 35; the resistor ends at d35.",
+    "part_ids": [
+     "wire_green_ground"
+    ],
+    "placements": [
+     {
+      "what": "Green LED black return wire resistor-row end",
+      "hole": "a35",
+      "where": "Row 35, column a (left of the centre gap)."
+     },
+     {
+      "what": "Green LED black return wire rail end",
+      "hole": "rail_1_24.14_35",
+      "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 35."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-16.svg",
+    "markers": [
+     [
+      1,
+      "Green LED black return wire resistor-row end",
+      "Row 35, column a (left of the centre gap).",
+      "a35"
+     ],
+     [
+      2,
+      "Green LED black return wire rail end",
+      "The ground rail along the top edge, outer negative (-), blue-line rail next to row 35.",
+      "rail_1_24.14_35"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-16.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_ground",
+       "name": "Black yellow-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_signal",
+       "name": "Green D9 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_ground",
+       "name": "Black green-LED return wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_green_ground"
+     ]
+    }
+   },
+   {
+    "number": 17,
+    "title": "Connect the button to D2",
+    "instruction": "Connect a blue jumper from the Uno digital header pin labelled 2 to row forty-four, column a, left of the centre gap.",
+    "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at e44.",
+    "part_ids": [
+     "wire_button_signal"
+    ],
+    "placements": [
+     {
+      "what": "Blue button wire Uno end",
+      "hole": "pin:d2",
+      "where": "Uno digital header pin labelled 2."
+     },
+     {
+      "what": "Blue button wire breadboard end",
+      "hole": "a44",
+      "where": "Row 44, column a (left of the centre gap)."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-17.svg",
+    "markers": [
+     [
+      1,
+      "Blue button wire Uno end",
+      "Uno digital header pin labelled 2.",
+      "pin:d2"
+     ],
+     [
+      2,
+      "Blue button wire breadboard end",
+      "Row 44, column a (left of the centre gap).",
+      "a44"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-17.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_ground",
+       "name": "Black yellow-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_signal",
+       "name": "Green D9 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_ground",
+       "name": "Black green-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_button_signal",
+       "name": "Blue D2 button wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_button_signal"
+     ]
+    }
+   },
+   {
+    "number": 18,
+    "title": "Ground the button",
+    "instruction": "Connect a black jumper from row forty-six, column a, left of the centre gap, up to the ground rail along the top edge next to row forty-six, using the outer negative (-), blue-line rail.",
+    "check": "A black jumper connects a46 to the outer top-edge ground rail beside row 46. The finished circuit has three LEDs, three resistors, one button and nine jumper wires.",
+    "part_ids": [
+     "wire_button_ground"
+    ],
+    "placements": [
+     {
+      "what": "Black button ground wire button-row end",
+      "hole": "a46",
+      "where": "Row 46, column a (left of the centre gap)."
+     },
+     {
+      "what": "Black button ground wire rail end",
+      "hole": "rail_1_24.14_46",
+      "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 46."
+     }
+    ],
+    "picture": "/out/build-traffic-light/step-18.svg",
+    "markers": [
+     [
+      1,
+      "Black button ground wire button-row end",
+      "Row 46, column a (left of the centre gap).",
+      "a46"
+     ],
+     [
+      2,
+      "Black button ground wire rail end",
+      "The ground rail along the top edge, outer negative (-), blue-line rail next to row 46.",
+      "rail_1_24.14_46"
+     ]
+    ],
+    "model": {
+     "glb": "/out/build-traffic-light/step-18.glb",
+     "labels": [
+      {
+       "id": "breadboard",
+       "name": "Full-size breadboard",
+       "kind": "breadboard"
+      },
+      {
+       "id": "uno",
+       "name": "Arduino Uno",
+       "kind": "development_board"
+      },
+      {
+       "id": "led_red",
+       "name": "5 mm red LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_red",
+       "name": "220 ohm resistor (red LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_yellow",
+       "name": "5 mm yellow LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_yellow",
+       "name": "220 ohm resistor (yellow LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "led_green",
+       "name": "5 mm green LED",
+       "kind": "led"
+      },
+      {
+       "id": "res_green",
+       "name": "220 ohm resistor (green LED)",
+       "kind": "resistor"
+      },
+      {
+       "id": "button",
+       "name": "12 mm crosswalk push button",
+       "kind": "generic"
+      },
+      {
+       "id": "wire_ground",
+       "name": "Black shared ground wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_signal",
+       "name": "Red D11 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_red_ground",
+       "name": "Black red-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_signal",
+       "name": "Yellow D10 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_yellow_ground",
+       "name": "Black yellow-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_signal",
+       "name": "Green D9 signal wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_green_ground",
+       "name": "Black green-LED return wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_button_signal",
+       "name": "Blue D2 button wire",
+       "kind": "wire"
+      },
+      {
+       "id": "wire_button_ground",
+       "name": "Black button ground wire",
+       "kind": "wire"
+      }
+     ],
+     "new": [
+      "wire_button_ground"
+     ]
+    }
+   }
+  ]
+ },
+ "commits": [
+  {
+   "id": "dcb32e3",
+   "kind": "start",
+   "step": null,
+   "message": "What I have: no photos, starting from scratch",
+   "time": "2026-10-18T00:44:05+00:00",
+   "images": [],
+   "model": null,
+   "guide": {},
+   "detected": [],
+   "known": ""
+  }
+ ],
+ "internal": {
+  "plan": {
+   "title": "Arduino traffic light with crosswalk request button",
+   "summary": "Build a red, yellow and green traffic light controlled by an Arduino Uno. Pressing the crosswalk button changes green to yellow for 2 seconds, then red for a 5-second crossing interval, before returning to green; the red light is the crossing cue, with no separate walk LED.",
+   "parts": [
+    {
+     "name": "Arduino Uno",
+     "quantity": 1,
+     "why": "Controls the lights and reads the crosswalk button.",
+     "user_has_it": true
+    },
+    {
+     "name": "Full-size solderless breadboard",
+     "quantity": 1,
+     "why": "Holds the components and joins their leads without soldering.",
+     "user_has_it": true
+    },
+    {
+     "name": "5 mm red LED",
+     "quantity": 1,
+     "why": "Shows the stop and crossing interval.",
+     "user_has_it": true
+    },
+    {
+     "name": "5 mm yellow LED",
+     "quantity": 1,
+     "why": "Shows the warning interval before red.",
+     "user_has_it": true
+    },
+    {
+     "name": "5 mm green LED",
+     "quantity": 1,
+     "why": "Shows the normal traffic-go state.",
+     "user_has_it": true
+    },
+    {
+     "name": "220 ohm resistor",
+     "quantity": 3,
+     "why": "Each LED needs its own resistor to limit current.",
+     "user_has_it": true
+    },
+    {
+     "name": "12 mm four-leg tactile push button",
+     "quantity": 1,
+     "why": "Requests a crossing cycle when pressed.",
+     "user_has_it": true
+    },
+    {
+     "name": "Male-to-male jumper wires",
+     "quantity": 9,
+     "why": "Connect the Arduino, LEDs, button and shared ground rail.",
+     "user_has_it": true
+    },
+    {
+     "name": "USB data cable matching your Uno and computer",
+     "quantity": 1,
+     "why": "Loads the sketch and supplies USB power; a standard Uno Rev3 uses a USB-B connector.",
+     "user_has_it": false
+    }
+   ],
+   "scene": {
+    "parts": [
+     {
+      "id": "breadboard",
+      "name": "Full-size breadboard",
+      "kind": "breadboard",
+      "color": "#F2F0E8",
+      "center_mm": [
+       0.0,
+       0.0,
+       4.0
+      ],
+      "size_mm": [
+       165.0,
+       55.0,
+       8.0
+      ],
+      "mount_board": "",
+      "mount_holes": [],
+      "terminals": [],
+      "evidence": "User has a full-size breadboard; fixed 63-row template."
+     },
+     {
+      "id": "uno",
+      "name": "Arduino Uno",
+      "kind": "development_board",
+      "color": "#168B91",
+      "center_mm": [
+       -29.21,
+       65.0,
+       4.0
+      ],
+      "size_mm": [
+       55.0,
+       28.0,
+       7.0
+      ],
+      "mount_board": "",
+      "mount_holes": [],
+      "terminals": [
+       {
+        "name": "gnd1",
+        "pin_index": 6
+       },
+       {
+        "name": "d11",
+        "pin_index": 27
+       },
+       {
+        "name": "d10",
+        "pin_index": 28
+       },
+       {
+        "name": "d9",
+        "pin_index": 29
+       },
+       {
+        "name": "d2",
+        "pin_index": 36
+       }
+      ],
+      "evidence": "User specifies an Uno and pins D11, D10, D9 and D2; rendering uses the required simplified development-board template."
+     },
+     {
+      "id": "led_red",
+      "name": "5 mm red LED",
+      "kind": "led",
+      "color": "#E53935",
+      "center_mm": [
+       -54.61,
+       6.35,
+       12.3
+      ],
+      "size_mm": [
+       5.8,
+       5.8,
+       8.6
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "e10",
+       "e11"
+      ],
+      "terminals": [],
+      "evidence": "Red LED supplied by user; long leg in row 10 and short leg in row 11."
+     },
+     {
+      "id": "res_red",
+      "name": "220 ohm resistor (red LED)",
+      "kind": "resistor",
+      "color": "#C8AA77",
+      "center_mm": [
+       -48.26,
+       8.89,
+       9.25
+      ],
+      "size_mm": [
+       10.16,
+       2.5,
+       2.5
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "d11",
+       "d15"
+      ],
+      "terminals": [],
+      "evidence": "One user-supplied 220 ohm resistor in series with the red LED."
+     },
+     {
+      "id": "led_yellow",
+      "name": "5 mm yellow LED",
+      "kind": "led",
+      "color": "#FFD600",
+      "center_mm": [
+       -29.21,
+       6.35,
+       12.3
+      ],
+      "size_mm": [
+       5.8,
+       5.8,
+       8.6
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "e20",
+       "e21"
+      ],
+      "terminals": [],
+      "evidence": "Yellow LED supplied by user; long leg in row 20 and short leg in row 21."
+     },
+     {
+      "id": "res_yellow",
+      "name": "220 ohm resistor (yellow LED)",
+      "kind": "resistor",
+      "color": "#C8AA77",
+      "center_mm": [
+       -22.86,
+       8.89,
+       9.25
+      ],
+      "size_mm": [
+       10.16,
+       2.5,
+       2.5
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "d21",
+       "d25"
+      ],
+      "terminals": [],
+      "evidence": "One user-supplied 220 ohm resistor in series with the yellow LED."
+     },
+     {
+      "id": "led_green",
+      "name": "5 mm green LED",
+      "kind": "led",
+      "color": "#24C45A",
+      "center_mm": [
+       -3.81,
+       6.35,
+       12.3
+      ],
+      "size_mm": [
+       5.8,
+       5.8,
+       8.6
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "e30",
+       "e31"
+      ],
+      "terminals": [],
+      "evidence": "Green LED supplied by user; long leg in row 30 and short leg in row 31."
+     },
+     {
+      "id": "res_green",
+      "name": "220 ohm resistor (green LED)",
+      "kind": "resistor",
+      "color": "#C8AA77",
+      "center_mm": [
+       2.54,
+       8.89,
+       9.25
+      ],
+      "size_mm": [
+       10.16,
+       2.5,
+       2.5
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "d31",
+       "d35"
+      ],
+      "terminals": [],
+      "evidence": "One user-supplied 220 ohm resistor in series with the green LED."
+     },
+     {
+      "id": "button",
+      "name": "12 mm crosswalk push button",
+      "kind": "generic",
+      "color": "#303238",
+      "center_mm": [
+       33.02,
+       0.0,
+       11.65
+      ],
+      "size_mm": [
+       12.0,
+       12.0,
+       7.3
+      ],
+      "mount_board": "breadboard",
+      "mount_holes": [
+       "e44",
+       "f44",
+       "e46",
+       "f46"
+      ],
+      "terminals": [],
+      "evidence": "User-supplied four-leg button; across-body connected pairs span the gap in rows 44 and 46, and pressing joins those pairs."
+     }
+    ],
+    "wires": [
+     {
+      "id": "wire_ground",
+      "name": "Black shared ground wire",
+      "from_part": "uno",
+      "from_terminal": "gnd1",
+      "to_part": "breadboard",
+      "to_terminal": "rail_1_24.14_1",
+      "color": "#222222",
+      "connection_note": "Uno GND to the first hole of the ground rail along the top edge."
+     },
+     {
+      "id": "wire_red_signal",
+      "name": "Red D11 signal wire",
+      "from_part": "uno",
+      "from_terminal": "d11",
+      "to_part": "breadboard",
+      "to_terminal": "a10",
+      "color": "#E53935",
+      "connection_note": "D11 drives the red LED's anode through the connected holes of row 10."
+     },
+     {
+      "id": "wire_red_ground",
+      "name": "Black red-LED return wire",
+      "from_part": "breadboard",
+      "from_terminal": "a15",
+      "to_part": "breadboard",
+      "to_terminal": "rail_1_24.14_15",
+      "color": "#222222",
+      "connection_note": "Connects the far end of the red LED's resistor up to the ground rail."
+     },
+     {
+      "id": "wire_yellow_signal",
+      "name": "Yellow D10 signal wire",
+      "from_part": "uno",
+      "from_terminal": "d10",
+      "to_part": "breadboard",
+      "to_terminal": "a20",
+      "color": "#F2C500",
+      "connection_note": "D10 drives the yellow LED's anode through row 20."
+     },
+     {
+      "id": "wire_yellow_ground",
+      "name": "Black yellow-LED return wire",
+      "from_part": "breadboard",
+      "from_terminal": "a25",
+      "to_part": "breadboard",
+      "to_terminal": "rail_1_24.14_25",
+      "color": "#222222",
+      "connection_note": "Connects the far end of the yellow LED's resistor up to the ground rail."
+     },
+     {
+      "id": "wire_green_signal",
+      "name": "Green D9 signal wire",
+      "from_part": "uno",
+      "from_terminal": "d9",
+      "to_part": "breadboard",
+      "to_terminal": "a30",
+      "color": "#18A558",
+      "connection_note": "D9 drives the green LED's anode through row 30."
+     },
+     {
+      "id": "wire_green_ground",
+      "name": "Black green-LED return wire",
+      "from_part": "breadboard",
+      "from_terminal": "a35",
+      "to_part": "breadboard",
+      "to_terminal": "rail_1_24.14_35",
+      "color": "#222222",
+      "connection_note": "Connects the far end of the green LED's resistor up to the ground rail."
+     },
+     {
+      "id": "wire_button_signal",
+      "name": "Blue D2 button wire",
+      "from_part": "uno",
+      "from_terminal": "d2",
+      "to_part": "breadboard",
+      "to_terminal": "a44",
+      "color": "#246BCE",
+      "connection_note": "D2 reads one switched side of the button using INPUT_PULLUP."
+     },
+     {
+      "id": "wire_button_ground",
+      "name": "Black button ground wire",
+      "from_part": "breadboard",
+      "from_terminal": "a46",
+      "to_part": "breadboard",
+      "to_terminal": "rail_1_24.14_46",
+      "color": "#222222",
+      "connection_note": "Grounds the button's other switched side; pressing pulls D2 LOW."
+     }
+    ],
+    "assumptions": [
+     "No existing bench placement was provided, so this is a fresh layout.",
+     "The outer rail above column a is the ground (-) rail along the top edge. No positive power rail is used.",
+     "The specified rail is continuous along all 63 rows, as required by this breadboard model.",
+     "View the breadboard with its long axis vertical and row 1 at the top to see red, yellow and green in a traffic-light column. Top-edge ground-rail wording refers to the unrotated model.",
+     "The button has four legs: the across-body pair in row 44 is permanently connected, the across-body pair in row 46 is permanently connected, and pressing joins the two rows. Across-body spacing is about 12.5 mm and same-side spacing about 5 mm.",
+     "LED leads are gently formed to fit adjacent rows without touching.",
+     "The Uno rendering uses the required 55 by 28 by 7 mm template, not the actual Uno Rev3 outline of 68.6 by 53.4 mm. Terminal anchor indices are symbolic; use printed header labels.",
+     "Resistor rendering dimensions are approximate; the exact connections are defined by their mounting holes.",
+     "The three required resistors are in the LEDs' cathode return paths, following the specified wiring pattern; a series resistor limits current on either side of an LED.",
+     "Jumper colours identify their roles; use matching colours where available."
+    ]
+   },
+   "part_guide": [
+    {
+     "id": "breadboard",
+     "what_it_is": "The white board with numbered rows holds the circuit without solder. Holes a through e in one row connect together; f through j form a separate group."
+    },
+    {
+     "id": "uno",
+     "what_it_is": "The Arduino Uno is the controller board with USB and labelled headers. It runs the traffic-light timing and reads the button."
+    },
+    {
+     "id": "led_red",
+     "what_it_is": "The red round LED shows stop during the crossing interval. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+    },
+    {
+     "id": "res_red",
+     "what_it_is": "This small banded 220 ohm resistor limits the red LED's current. A common four-band marking is red-red-brown-gold; either end can go first."
+    },
+    {
+     "id": "led_yellow",
+     "what_it_is": "The yellow round LED warns before red. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+    },
+    {
+     "id": "res_yellow",
+     "what_it_is": "This banded 220 ohm resistor limits the yellow LED's current. It has no positive or negative end."
+    },
+    {
+     "id": "led_green",
+     "what_it_is": "The green round LED shows the normal traffic-go state. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+    },
+    {
+     "id": "res_green",
+     "what_it_is": "This banded 220 ohm resistor limits the green LED's current. It has no positive or negative end."
+    },
+    {
+     "id": "button",
+     "what_it_is": "The square 12 mm button has four metal legs and a central plunger. Pressing it connects D2 to ground; the Arduino's internal pull-up keeps D2 HIGH when released."
+    },
+    {
+     "id": "wire_ground",
+     "what_it_is": "The black wire from an Uno GND header to the first top-edge ground-rail hole establishes shared ground."
+    },
+    {
+     "id": "wire_red_signal",
+     "what_it_is": "The red wire connects the Uno header labelled 11 to the red LED's anode row."
+    },
+    {
+     "id": "wire_red_ground",
+     "what_it_is": "This black wire runs from row 15 up to the ground rail, completing the red LED's path through its resistor."
+    },
+    {
+     "id": "wire_yellow_signal",
+     "what_it_is": "The yellow wire connects the Uno header labelled 10 to the yellow LED's anode row."
+    },
+    {
+     "id": "wire_yellow_ground",
+     "what_it_is": "This black wire runs from row 25 up to the ground rail, completing the yellow LED's path through its resistor."
+    },
+    {
+     "id": "wire_green_signal",
+     "what_it_is": "The green wire connects the Uno header labelled 9 to the green LED's anode row."
+    },
+    {
+     "id": "wire_green_ground",
+     "what_it_is": "This black wire runs from row 35 up to the ground rail, completing the green LED's path through its resistor."
+    },
+    {
+     "id": "wire_button_signal",
+     "what_it_is": "The blue wire connects the Uno header labelled 2 to the button's row 44 contact."
+    },
+    {
+     "id": "wire_button_ground",
+     "what_it_is": "This black wire grounds the button's row 46 contact, so a press sends a LOW signal to D2."
+    }
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "title": "Place the breadboard",
+     "part_ids": [
+      "breadboard"
+     ],
+     "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line.",
+     "placements": [],
+     "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap."
+    },
+    {
+     "number": 2,
+     "title": "Place the Uno beside the breadboard",
+     "part_ids": [
+      "uno"
+     ],
+     "instruction": "Place the disconnected Uno outside the breadboard on the ground-rail side, roughly opposite row twenty, leaving its underside clear of loose metal.",
+     "placements": [],
+     "check": "The Uno is outside the breadboard above the top-edge ground rail, near the future LED groups, with no USB cable connected."
+    },
+    {
+     "number": 3,
+     "title": "Insert the red LED",
+     "part_ids": [
+      "led_red"
+     ],
+     "instruction": "Insert the red LED's long leg (anode, +) into row ten, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row eleven, column e, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Red LED long leg (anode, +)",
+       "hole": "e10",
+       "where": "Row 10, column e (left of the centre gap)."
+      },
+      {
+       "what": "Red LED short leg / flat side (cathode, -)",
+       "hole": "e11",
+       "where": "Row 11, column e (left of the centre gap)."
+      }
+     ],
+     "check": "The red LED straddles rows 10 and 11 in column e, with its anode at row 10 and flat-side cathode at row 11."
+    },
+    {
+     "number": 4,
+     "title": "Insert the red LED resistor",
+     "part_ids": [
+      "res_red"
+     ],
+     "instruction": "Insert one leg of a 220 ohm resistor into row eleven, column d, left of the centre gap, and its other leg into row fifteen, column d, left of the centre gap. Either resistor orientation is correct.",
+     "placements": [
+      {
+       "what": "Red LED resistor leg 1",
+       "hole": "d11",
+       "where": "Row 11, column d (left of the centre gap)."
+      },
+      {
+       "what": "Red LED resistor leg 2",
+       "hole": "d15",
+       "where": "Row 15, column d (left of the centre gap)."
+      }
+     ],
+     "check": "A 220 ohm resistor runs along column d from row 11 to row 15, sharing row 11 with the red LED's cathode in column e."
+    },
+    {
+     "number": 5,
+     "title": "Insert the yellow LED",
+     "part_ids": [
+      "led_yellow"
+     ],
+     "instruction": "Insert the yellow LED's long leg (anode, +) into row twenty, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row twenty-one, column e, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Yellow LED long leg (anode, +)",
+       "hole": "e20",
+       "where": "Row 20, column e (left of the centre gap)."
+      },
+      {
+       "what": "Yellow LED short leg / flat side (cathode, -)",
+       "hole": "e21",
+       "where": "Row 21, column e (left of the centre gap)."
+      }
+     ],
+     "check": "The yellow LED occupies column e, rows 20 and 21, oriented the same way as the red LED."
+    },
+    {
+     "number": 6,
+     "title": "Insert the yellow LED resistor",
+     "part_ids": [
+      "res_yellow"
+     ],
+     "instruction": "Insert one leg of a 220 ohm resistor into row twenty-one, column d, left of the centre gap, and its other leg into row twenty-five, column d, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Yellow LED resistor leg 1",
+       "hole": "d21",
+       "where": "Row 21, column d (left of the centre gap)."
+      },
+      {
+       "what": "Yellow LED resistor leg 2",
+       "hole": "d25",
+       "where": "Row 25, column d (left of the centre gap)."
+      }
+     ],
+     "check": "A 220 ohm resistor runs along column d from row 21 to row 25, beside the yellow LED's cathode row."
+    },
+    {
+     "number": 7,
+     "title": "Insert the green LED",
+     "part_ids": [
+      "led_green"
+     ],
+     "instruction": "Insert the green LED's long leg (anode, +) into row thirty, column e, left of the centre gap, and its short leg beside the flat side (cathode, -) into row thirty-one, column e, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Green LED long leg (anode, +)",
+       "hole": "e30",
+       "where": "Row 30, column e (left of the centre gap)."
+      },
+      {
+       "what": "Green LED short leg / flat side (cathode, -)",
+       "hole": "e31",
+       "where": "Row 31, column e (left of the centre gap)."
+      }
+     ],
+     "check": "The green LED occupies column e, rows 30 and 31; all three LEDs line up with identical polarity."
+    },
+    {
+     "number": 8,
+     "title": "Insert the green LED resistor",
+     "part_ids": [
+      "res_green"
+     ],
+     "instruction": "Insert one leg of a 220 ohm resistor into row thirty-one, column d, left of the centre gap, and its other leg into row thirty-five, column d, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Green LED resistor leg 1",
+       "hole": "d31",
+       "where": "Row 31, column d (left of the centre gap)."
+      },
+      {
+       "what": "Green LED resistor leg 2",
+       "hole": "d35",
+       "where": "Row 35, column d (left of the centre gap)."
+      }
+     ],
+     "check": "A 220 ohm resistor runs along column d from row 31 to row 35; all three resistors span four row intervals."
+    },
+    {
+     "number": 9,
+     "title": "Insert the crosswalk button",
+     "part_ids": [
+      "button"
+     ],
+     "instruction": "Place the button across the centre gap with one across-body, permanently connected leg pair in row forty-four, columns e and f, and the other across-body, permanently connected leg pair in row forty-six, columns e and f. The two legs on each side of the gap must be the normally open pair that connects only when pressed; do not force a button with a different footprint.",
+     "placements": [
+      {
+       "what": "Button first connected-pair left leg",
+       "hole": "e44",
+       "where": "Row 44, column e (left of the centre gap)."
+      },
+      {
+       "what": "Button first connected-pair right leg",
+       "hole": "f44",
+       "where": "Row 44, column f (right of the centre gap)."
+      },
+      {
+       "what": "Button second connected-pair left leg",
+       "hole": "e46",
+       "where": "Row 46, column e (left of the centre gap)."
+      },
+      {
+       "what": "Button second connected-pair right leg",
+       "hole": "f46",
+       "where": "Row 46, column f (right of the centre gap)."
+      }
+     ],
+     "check": "The square button bridges the centre gap with four legs in e44, f44, e46 and f46, beyond the three LED groups."
+    },
+    {
+     "number": 10,
+     "title": "Connect the shared ground",
+     "part_ids": [
+      "wire_ground"
+     ],
+     "instruction": "Connect a black jumper from the Uno header pin labelled GND to the very first hole of the ground rail along the top edge, next to row one. This outer rail is the negative (-), blue-line rail, not a positive rail.",
+     "placements": [
+      {
+       "what": "Black shared ground wire Uno end",
+       "hole": "pin:gnd1",
+       "where": "Uno power-header pin labelled GND."
+      },
+      {
+       "what": "Black shared ground wire rail end",
+       "hole": "rail_1_24.14_1",
+       "where": "First hole of the ground rail along the top edge, the outer negative (-), blue-line rail next to row 1."
+      }
+     ],
+     "check": "One black jumper connects the Uno GND header to the outer top-edge ground rail beside row 1."
+    },
+    {
+     "number": 11,
+     "title": "Connect red to D11",
+     "part_ids": [
+      "wire_red_signal"
+     ],
+     "instruction": "Connect a red jumper from the Uno digital header pin labelled 11 to row ten, column a, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Red signal wire Uno end",
+       "hole": "pin:d11",
+       "where": "Uno digital header pin labelled 11, also marked with a PWM tilde."
+      },
+      {
+       "what": "Red signal wire breadboard end",
+       "hole": "a10",
+       "where": "Row 10, column a (left of the centre gap)."
+      }
+     ],
+     "check": "The red jumper runs from Uno pin 11 to a10, in the same connected row as the red LED's long leg at e10."
+    },
+    {
+     "number": 12,
+     "title": "Ground the red resistor",
+     "part_ids": [
+      "wire_red_ground"
+     ],
+     "instruction": "Connect a black jumper from row fifteen, column a, left of the centre gap, straight up to the ground rail along the top edge next to row fifteen, using the outer negative (-), blue-line rail.",
+     "placements": [
+      {
+       "what": "Red LED black return wire resistor-row end",
+       "hole": "a15",
+       "where": "Row 15, column a (left of the centre gap)."
+      },
+      {
+       "what": "Red LED black return wire rail end",
+       "hole": "rail_1_24.14_15",
+       "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 15."
+      }
+     ],
+     "check": "A black jumper rises from a15 to the outer top-edge ground rail beside row 15; the resistor ends at d15."
+    },
+    {
+     "number": 13,
+     "title": "Connect yellow to D10",
+     "part_ids": [
+      "wire_yellow_signal"
+     ],
+     "instruction": "Connect a yellow jumper from the Uno digital header pin labelled 10 to row twenty, column a, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Yellow signal wire Uno end",
+       "hole": "pin:d10",
+       "where": "Uno digital header pin labelled 10, also marked with a PWM tilde."
+      },
+      {
+       "what": "Yellow signal wire breadboard end",
+       "hole": "a20",
+       "where": "Row 20, column a (left of the centre gap)."
+      }
+     ],
+     "check": "The yellow jumper runs from Uno pin 10 to a20, sharing the yellow LED's anode row."
+    },
+    {
+     "number": 14,
+     "title": "Ground the yellow resistor",
+     "part_ids": [
+      "wire_yellow_ground"
+     ],
+     "instruction": "Connect a black jumper from row twenty-five, column a, left of the centre gap, straight up to the ground rail along the top edge next to row twenty-five, using the outer negative (-), blue-line rail.",
+     "placements": [
+      {
+       "what": "Yellow LED black return wire resistor-row end",
+       "hole": "a25",
+       "where": "Row 25, column a (left of the centre gap)."
+      },
+      {
+       "what": "Yellow LED black return wire rail end",
+       "hole": "rail_1_24.14_25",
+       "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 25."
+      }
+     ],
+     "check": "A black jumper rises from a25 to the outer top-edge ground rail beside row 25; the resistor ends at d25."
+    },
+    {
+     "number": 15,
+     "title": "Connect green to D9",
+     "part_ids": [
+      "wire_green_signal"
+     ],
+     "instruction": "Connect a green jumper from the Uno digital header pin labelled 9 to row thirty, column a, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Green signal wire Uno end",
+       "hole": "pin:d9",
+       "where": "Uno digital header pin labelled 9, also marked with a PWM tilde."
+      },
+      {
+       "what": "Green signal wire breadboard end",
+       "hole": "a30",
+       "where": "Row 30, column a (left of the centre gap)."
+      }
+     ],
+     "check": "The green jumper runs from Uno pin 9 to a30, sharing the green LED's anode row."
+    },
+    {
+     "number": 16,
+     "title": "Ground the green resistor",
+     "part_ids": [
+      "wire_green_ground"
+     ],
+     "instruction": "Connect a black jumper from row thirty-five, column a, left of the centre gap, straight up to the ground rail along the top edge next to row thirty-five, using the outer negative (-), blue-line rail.",
+     "placements": [
+      {
+       "what": "Green LED black return wire resistor-row end",
+       "hole": "a35",
+       "where": "Row 35, column a (left of the centre gap)."
+      },
+      {
+       "what": "Green LED black return wire rail end",
+       "hole": "rail_1_24.14_35",
+       "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 35."
+      }
+     ],
+     "check": "A black jumper rises from a35 to the outer top-edge ground rail beside row 35; the resistor ends at d35."
+    },
+    {
+     "number": 17,
+     "title": "Connect the button to D2",
+     "part_ids": [
+      "wire_button_signal"
+     ],
+     "instruction": "Connect a blue jumper from the Uno digital header pin labelled 2 to row forty-four, column a, left of the centre gap.",
+     "placements": [
+      {
+       "what": "Blue button wire Uno end",
+       "hole": "pin:d2",
+       "where": "Uno digital header pin labelled 2."
+      },
+      {
+       "what": "Blue button wire breadboard end",
+       "hole": "a44",
+       "where": "Row 44, column a (left of the centre gap)."
+      }
+     ],
+     "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at e44."
+    },
+    {
+     "number": 18,
+     "title": "Ground the button",
+     "part_ids": [
+      "wire_button_ground"
+     ],
+     "instruction": "Connect a black jumper from row forty-six, column a, left of the centre gap, up to the ground rail along the top edge next to row forty-six, using the outer negative (-), blue-line rail.",
+     "placements": [
+      {
+       "what": "Black button ground wire button-row end",
+       "hole": "a46",
+       "where": "Row 46, column a (left of the centre gap)."
+      },
+      {
+       "what": "Black button ground wire rail end",
+       "hole": "rail_1_24.14_46",
+       "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 46."
+      }
+     ],
+     "check": "A black jumper connects a46 to the outer top-edge ground rail beside row 46. The finished circuit has three LEDs, three resistors, one button and nine jumper wires."
+    }
+   ],
+   "final_result": "The LEDs form one evenly spaced line: red at row 10, yellow at row 20 and green at row 30. With row 1 facing upward, they appear in a vertical traffic-light column. Once the sketch is loaded and USB power is present, only green lights initially. A button press gives 2 seconds of yellow, then 5 seconds of red as the crossing cue, then green again. Presses during a cycle are ignored; release and press again after green returns to request another cycle.",
+   "code": "const byte RED_PIN = 11;\nconst byte YELLOW_PIN = 10;\nconst byte GREEN_PIN = 9;\nconst byte BUTTON_PIN = 2;\n\nconst unsigned long DEBOUNCE_MS = 30;\nconst unsigned long YELLOW_MS = 2000;\nconst unsigned long WALK_MS = 5000;\n\nenum Phase { TRAFFIC_GREEN, TRAFFIC_YELLOW, WALK_RED };\nPhase phase = TRAFFIC_GREEN;\nunsigned long phaseStarted = 0;\nunsigned long lastChange = 0;\nint lastReading = HIGH;\nint stableReading = HIGH;\n\nvoid showPhase() {\n  digitalWrite(RED_PIN, phase == WALK_RED ? HIGH : LOW);\n  digitalWrite(YELLOW_PIN, phase == TRAFFIC_YELLOW ? HIGH : LOW);\n  digitalWrite(GREEN_PIN, phase == TRAFFIC_GREEN ? HIGH : LOW);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(YELLOW_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BUTTON_PIN, INPUT_PULLUP);\n  showPhase();\n}\n\nvoid loop() {\n  unsigned long now = millis();\n  int reading = digitalRead(BUTTON_PIN);\n\n  if (reading != lastReading) {\n    lastReading = reading;\n    lastChange = now;\n  }\n\n  if (now - lastChange >= DEBOUNCE_MS && reading != stableReading) {\n    stableReading = reading;\n    if (stableReading == LOW && phase == TRAFFIC_GREEN) {\n      phase = TRAFFIC_YELLOW;\n      phaseStarted = now;\n      showPhase();\n    }\n  }\n\n  if (phase == TRAFFIC_YELLOW && now - phaseStarted >= YELLOW_MS) {\n    phase = WALK_RED;\n    phaseStarted = now;\n    showPhase();\n  } else if (phase == WALK_RED && now - phaseStarted >= WALK_MS) {\n    phase = TRAFFIC_GREEN;\n    phaseStarted = now;\n    showPhase();\n  }\n}\n",
+   "safety": [
+    "Keep the Uno disconnected from USB and other power while inserting or changing components.",
+    "Use USB power for this project; do not connect mains electricity or a 12 V supply to breadboard holes or Arduino GPIO pins.",
+    "Each LED must retain its own 220 ohm series resistor. Never replace a resistor with a jumper.",
+    "Keep exposed LED and resistor leads from touching adjacent leads, and never force the button into incompatible holes.",
+    "The button needs no external pull-up resistor because the sketch enables INPUT_PULLUP. Do not connect the button to 5 V.",
+    "This is a tabletop demonstration, not a real road or pedestrian safety controller."
+   ]
+  },
+  "problems": []
+ },
+ "owner": null,
+ "owner_name": "Physical Studio"
+}

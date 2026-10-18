@@ -91,174 +91,176 @@ export function DescribePage() {
   return (
     <div className="page">
       <ProgressHeader tab="dashboard" />
-      <main className="page-body describe-page">
-        <section className="describe-main">
-          <h1>What do you want to build?</h1>
-          <p className="describe-lede">
-            Say what you want to build and add photos of your bench if you have them. Physical Studio works out what's
-            already plugged in, adds the parts you still need, and writes step-by-step instructions with a picture and a
-            3D model for every step. Photograph each step and it checks your work.
-          </p>
-          <form
-            className={`describe-form${dragging ? ' dragging' : ''}`}
-            onSubmit={(e) => {
-              e.preventDefault()
-              void submit()
-            }}
-            onPaste={(e) => {
-              const files = [...e.clipboardData.files]
-              if (files.some((f) => f.type.startsWith('image/'))) {
+      <main className="page-body">
+        <div className="describe-page">
+          <section className="describe-main">
+            <h1>What do you want to build?</h1>
+            <p className="describe-lede">
+              Say what you want to build and add photos of your bench if you have them. Physical Studio works out what's
+              already plugged in, adds the parts you still need, and writes step-by-step instructions with a picture and
+              a 3D model for every step. Photograph each step and it checks your work.
+            </p>
+            <form
+              className={`describe-form${dragging ? ' dragging' : ''}`}
+              onSubmit={(e) => {
                 e.preventDefault()
-                void addImages(files)
-              }
-            }}
-            onDragOver={(e) => {
-              if ([...e.dataTransfer.items].some((i) => i.kind === 'file')) {
-                e.preventDefault()
-                setDragging(true)
-              }
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragging(false)
-              void addImages(e.dataTransfer.files)
-            }}
-          >
-            <textarea
-              ref={box}
-              value={prompt}
-              maxLength={MAX_CHARS}
-              rows={4}
-              placeholder="e.g. A traffic light: red, yellow and green LEDs that cycle, and a button that starts a crosswalk cycle."
-              aria-label="Describe your project"
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                void submit()
+              }}
+              onPaste={(e) => {
+                const files = [...e.clipboardData.files]
+                if (files.some((f) => f.type.startsWith('image/'))) {
                   e.preventDefault()
-                  void submit()
+                  void addImages(files)
                 }
               }}
-            />
-            {(images.length > 0 || links.length > 0) && (
-              <ul className="describe-attached">
-                {images.map((src, i) => (
-                  <li key={src.slice(-32) + i} className="describe-thumb">
-                    <img src={src} alt={`Attached image ${i + 1}`} />
-                    <button
-                      type="button"
-                      aria-label={`Remove image ${i + 1}`}
-                      onClick={() => setImages(images.filter((_, j) => j !== i))}
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-                {links.map((url) => (
-                  <li key={url} className="describe-link">
-                    <span title={url}>{new URL(url).hostname + new URL(url).pathname.replace(/\/$/, '')}</span>
-                    <button
-                      type="button"
-                      aria-label={`Remove link ${url}`}
-                      onClick={() => setLinks(links.filter((l) => l !== url))}
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="describe-extra">
-              <input
-                value={have}
-                onChange={(e) => setHave(e.target.value)}
-                maxLength={2000}
-                placeholder="Parts you have (optional), e.g. Arduino Uno, breadboard, some LEDs, jumper wires"
-                aria-label="Parts you have"
-              />
+              onDragOver={(e) => {
+                if ([...e.dataTransfer.items].some((i) => i.kind === 'file')) {
+                  e.preventDefault()
+                  setDragging(true)
+                }
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragging(false)
+                void addImages(e.dataTransfer.files)
+              }}
+            >
               <textarea
-                value={known}
-                onChange={(e) => setKnown(e.target.value)}
-                maxLength={3000}
-                rows={2}
-                placeholder="Connections you already know (optional), e.g. red LED long leg in e10, wire from pin 9 to a10"
-                aria-label="Connections you already know"
-              />
-            </div>
-            {linkDraft !== null && (
-              <div className="describe-linkrow">
-                <input
-                  type="url"
-                  autoFocus
-                  value={linkDraft}
-                  placeholder="https://… a product page, datasheet, tutorial or image"
-                  aria-label="Link"
-                  onChange={(e) => setLinkDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addLink()
-                    } else if (e.key === 'Escape') setLinkDraft(null)
-                  }}
-                />
-                <button type="button" className="describe-tool" onClick={addLink}>
-                  Add
-                </button>
-                <button type="button" className="describe-tool" onClick={() => setLinkDraft(null)}>
-                  Cancel
-                </button>
-              </div>
-            )}
-            <div className="describe-actions">
-              <button
-                type="button"
-                className="describe-tool"
-                disabled={images.length >= MAX_IMAGES}
-                onClick={() => filePicker.current?.click()}
-              >
-                Add bench photos
-              </button>
-              <button
-                type="button"
-                className="describe-tool"
-                disabled={links.length >= MAX_LINKS || linkDraft !== null}
-                onClick={() => setLinkDraft('')}
-              >
-                Add link
-              </button>
-              <input
-                ref={filePicker}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                multiple
-                hidden
-                onChange={(e) => {
-                  if (e.target.files) void addImages(e.target.files)
-                  e.target.value = ''
+                ref={box}
+                value={prompt}
+                maxLength={MAX_CHARS}
+                rows={4}
+                placeholder="e.g. A traffic light: red, yellow and green LEDs that cycle, and a button that starts a crosswalk cycle."
+                aria-label="Describe your project"
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    void submit()
+                  }
                 }}
               />
-              <span className="describe-hint">or paste / drop photos</span>
-              <span className="describe-count">
-                {length}/{MAX_CHARS}
-              </span>
-              <button type="submit" className="describe-go" disabled={!ready}>
-                {busy ? 'Starting…' : 'Design it'}
-              </button>
+              {(images.length > 0 || links.length > 0) && (
+                <ul className="describe-attached">
+                  {images.map((src, i) => (
+                    <li key={src.slice(-32) + i} className="describe-thumb">
+                      <img src={src} alt={`Attached image ${i + 1}`} />
+                      <button
+                        type="button"
+                        aria-label={`Remove image ${i + 1}`}
+                        onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                  {links.map((url) => (
+                    <li key={url} className="describe-link">
+                      <span title={url}>{new URL(url).hostname + new URL(url).pathname.replace(/\/$/, '')}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove link ${url}`}
+                        onClick={() => setLinks(links.filter((l) => l !== url))}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="describe-extra">
+                <input
+                  value={have}
+                  onChange={(e) => setHave(e.target.value)}
+                  maxLength={2000}
+                  placeholder="Optional: parts you have, e.g. Arduino Uno, breadboard, some LEDs, jumper wires"
+                  aria-label="Parts you have"
+                />
+                <textarea
+                  value={known}
+                  onChange={(e) => setKnown(e.target.value)}
+                  maxLength={3000}
+                  rows={2}
+                  placeholder="Optional: connections you already know, e.g. red LED long leg in e10, wire from pin 9 to a10"
+                  aria-label="Connections you already know"
+                />
+              </div>
+              {linkDraft !== null && (
+                <div className="describe-linkrow">
+                  <input
+                    type="url"
+                    autoFocus
+                    value={linkDraft}
+                    placeholder="https://… a product page, datasheet, tutorial or image"
+                    aria-label="Link"
+                    onChange={(e) => setLinkDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addLink()
+                      } else if (e.key === 'Escape') setLinkDraft(null)
+                    }}
+                  />
+                  <button type="button" className="describe-tool" onClick={addLink}>
+                    Add
+                  </button>
+                  <button type="button" className="describe-tool" onClick={() => setLinkDraft(null)}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+              <div className="describe-actions">
+                <button
+                  type="button"
+                  className="describe-tool"
+                  disabled={images.length >= MAX_IMAGES}
+                  onClick={() => filePicker.current?.click()}
+                >
+                  Add bench photos
+                </button>
+                <button
+                  type="button"
+                  className="describe-tool"
+                  disabled={links.length >= MAX_LINKS || linkDraft !== null}
+                  onClick={() => setLinkDraft('')}
+                >
+                  Add link
+                </button>
+                <input
+                  ref={filePicker}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files) void addImages(e.target.files)
+                    e.target.value = ''
+                  }}
+                />
+                <span className="describe-hint">or paste / drop photos</span>
+                <span className="describe-count">
+                  {length}/{MAX_CHARS}
+                </span>
+                <button type="submit" className="describe-go" disabled={!ready}>
+                  {busy ? 'Starting…' : 'Design it'}
+                </button>
+              </div>
+              {error && <p className="describe-error">{error}</p>}
+            </form>
+            <h2 className="describe-sub">Ready-made guides</h2>
+            <ReadyMadeGuides />
+            <h2 className="describe-sub">Try one</h2>
+            <ExamplePrompts onPick={fill} />
+            <div className="describe-parts">
+              <PartsLibrary onPick={(part) => fill(prompt.trim() ? `${prompt.trim()} ${part.name}` : part.name)} />
             </div>
-            {error && <p className="describe-error">{error}</p>}
-          </form>
-          <h2 className="describe-sub">Ready-made guides</h2>
-          <ReadyMadeGuides />
-          <h2 className="describe-sub">Try one</h2>
-          <ExamplePrompts onPick={fill} />
-          <div className="describe-parts">
-            <PartsLibrary onPick={(part) => fill(prompt.trim() ? `${prompt.trim()} ${part.name}` : part.name)} />
-          </div>
-          <details className="describe-own-ai">
-            <summary>Or design it with your own AI (Claude Code, Claude Desktop, Cursor)</summary>
-            <ConnectAI prompt={prompt} setPrompt={fill} onKey={() => {}} />
-          </details>
-        </section>
+            <details className="describe-own-ai">
+              <summary>Add your own API key</summary>
+              <ConnectAI prompt={prompt} setPrompt={fill} onKey={() => {}} />
+            </details>
+          </section>
+        </div>
       </main>
     </div>
   )

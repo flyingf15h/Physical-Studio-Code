@@ -163,6 +163,7 @@ export interface BuildCommit {
 export interface Build {
   id: string
   mine?: boolean // false: someone else's build shared by link (only its owner can commit)
+  ready?: boolean // a ready-made guide: view-only, copyBuild() makes your own
   owner_name?: string | null
   status: 'scanning' | 'planning' | 'checking' | 'modelling' | 'done' | 'error'
   stage: string
@@ -176,6 +177,10 @@ export const startBuild = (inputs: { goal: string; have?: string; known?: string
   call<{ id: string }>('/api/build', { method: 'POST', headers: headers(true), body: JSON.stringify(inputs) })
 
 export const getBuild = (id: string) => call<Build>(`/api/build/${encodeURIComponent(id)}`, { headers: headers() })
+
+/** Your own copy of a finished build (a ready-made guide), to commit photos to. */
+export const copyBuild = (id: string) =>
+  call<{ id: string }>(`/api/build/${encodeURIComponent(id)}/copy`, { method: 'POST', headers: headers() })
 
 /** Photos of the bench after a step: the AI's verdict and a 3D model of what was photographed (10–60 s). */
 export const commitStep = (id: string, step: number, photos: string[], note: string) =>

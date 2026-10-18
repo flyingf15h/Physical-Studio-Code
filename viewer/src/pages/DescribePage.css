@@ -1,7 +1,7 @@
 .describe-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; max-width: 960px; width: 100%; margin: 0 auto; }
 .describe-main { min-width: 0; }
 .describe-page h1 { font-size: 30px; margin: 0 0 8px; }
-.describe-lede { color: var(--muted); font-size: 15px; line-height: 1.5; margin: 0 0 20px; max-width: 640px; }
+.describe-lede { color: var(--muted); font-size: 13px; line-height: 1.45; margin: 0 0 16px; max-width: 600px; }
 .describe-form { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
 .describe-form textarea { width: 100%; box-sizing: border-box; border: 0; resize: vertical; min-height: 96px; font: inherit; font-size: 16px; line-height: 1.45; color: var(--ink); background: transparent; outline: none; }
 .describe-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
