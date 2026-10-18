@@ -17,6 +17,26 @@ const NEW = new THREE.Color('#0f9fb3')
 const FLAT_PICKED = new THREE.MeshBasicMaterial({ color: PICKED, side: THREE.DoubleSide })
 const FLAT_NEW = new THREE.MeshBasicMaterial({ color: NEW, side: THREE.DoubleSide })
 
+// Wires are under a millimetre thick, so clicks on them used to miss: each wire gets an invisible copy
+// pushed out along its normals, about 3 mm across, that catches the click.
+const HIT = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false })
+const HIT_MARGIN_M = 0.0012
+
+function hitZone(mesh: THREE.Mesh): THREE.Mesh {
+  const g = mesh.geometry.clone()
+  const pos = g.attributes.position as THREE.BufferAttribute
+  const nor = g.attributes.normal as THREE.BufferAttribute
+  const d = HIT_MARGIN_M / mesh.matrixWorld.getMaxScaleOnAxis() // in the mesh's own units
+  for (let i = 0; i < pos.count; i++) {
+    pos.setXYZ(i, pos.getX(i) + nor.getX(i) * d, pos.getY(i) + nor.getY(i) * d, pos.getZ(i) + nor.getZ(i) * d)
+  }
+  g.computeBoundingSphere()
+  const hit = new THREE.Mesh(g, HIT)
+  hit.name = `${mesh.userData.part}__hit`
+  hit.userData.part = mesh.userData.part
+  return hit
+}
+
 function partOf(obj: THREE.Object3D, ids: string[]): string | null {
   for (let o: THREE.Object3D | null = obj; o; o = o.parent) {
     const id = ids.find((i) => o!.name.startsWith(`${i}__`))
@@ -83,8 +103,10 @@ function Scene({
 }) {
   const gltf = useGLTF(model.glb)
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
+  const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
   const { root, meshes } = useMemo(() => {
     const root = gltf.scene.clone(true)
+    root.updateMatrixWorld(true)
     const meshes: THREE.Mesh[] = []
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
@@ -121,8 +143,11 @@ function Scene({
       mesh.userData.part = partOf(mesh, ids)
       meshes.push(mesh)
     })
+    for (const mesh of meshes) {
+      if (wireIds.includes(mesh.userData.part as string)) mesh.add(hitZone(mesh))
+    }
     return { root, meshes }
-  }, [gltf, ids])
+  }, [gltf, ids, wireIds])
 
   useEffect(() => {
     for (const mesh of meshes) {
@@ -165,7 +190,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
-  const wireLabels = model.labels.filter((l) => l.kind === 'wire' && wires[l.id])
+  const wireLabels = model.labels.filter((l) => l.kind === 'wire')
   // Scroll over the model zooms it, not the page: React's wheel handlers are passive, so stop the
   // page scroll with a native listener (the orbit controls still get the event).
   const box = useRef<HTMLDivElement>(null)
@@ -260,8 +285,14 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
               className={[l.id === picked ? 'picked' : '', highlight.includes(l.id) ? 'new' : ''].join(' ')}
               onClick={() => setPicked(l.id === picked ? null : l.id)}
             >
-              <span className="wire-swatch" style={{ background: wires[l.id].color }} />
-              {wires[l.id].from.pin} → {wires[l.id].to.pin}
+              {wires[l.id] ? (
+                <>
+                  <span className="wire-swatch" style={{ background: wires[l.id].color }} />
+                  {wires[l.id].from.pin} → {wires[l.id].to.pin}
+                </>
+              ) : (
+                l.name
+              )}
             </button>
           ))}
         </div>
