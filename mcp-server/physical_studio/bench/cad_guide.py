@@ -141,7 +141,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
     folder.mkdir(parents=True, exist_ok=True)
     built, lib = studio.build(), studio.library()
     doc = steps_document(studio.design, built, "final.glb", None)
-    step_pictures(built, doc, folder, top_textures(built, studio.parts_used(), studio.parts_dir))
+    step_pictures(built, doc, folder, top_textures(built, studio.parts_used(), studio.parts_dir), motion=True)
     url = lambda name: f"/out/build-{bid}/{name}"  # noqa: E731
     by_id = {p["id"]: p for p in doc["placements"]}
     labels = [{"id": p["id"], "name": p["name"], "kind": kind_of(p, lib)} for p in doc["placements"] if p["id"] in built.pieces]
@@ -195,6 +195,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
                 "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "tools": tools,
+                **({"picture_frames": {**s["picture_frames"], "src": url(s["picture_frames"]["file"])}} if s.get("picture_frames") else {}),
                 "model": {"glb": url(glb), "labels": [l for l in labels if l["id"] in shown], "new": new}}
         steps.append(step)
         internal_steps.append({**{k: step[k] for k in ("number", "title", "instruction", "check", "placements", "section")},

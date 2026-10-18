@@ -49,6 +49,12 @@ def camera_basis(view: str):
     return right, up, forward
 
 
+def spin(degrees: float) -> np.ndarray:
+    """Rotation about a piece's own z axis (a screw's axis: its head is at the top of its local frame)."""
+    a = np.radians(degrees)
+    return np.array([[np.cos(a), -np.sin(a), 0.0], [np.sin(a), np.cos(a), 0.0], [0.0, 0.0, 1.0]])
+
+
 def render(
     built: BuiltDesign,
     view: str = "iso",
@@ -60,15 +66,20 @@ def render(
     stats: dict | None = None,
     textures: dict | None = None,
     focus: set[str] | None = None,
+    camera: tuple[float, float, float] | None = None,
+    turns: dict[str, float] | None = None,
 ) -> bytes:
-    """stats, when given, gets "highlight_px": how many pixels of the highlighted pieces are visible, and
-    "wires": each visible wire's centre line in output pixels. textures: piece id -> a textured quad in the
-    piece's frame (export.top_face: a board's top photo), drawn on the piece. focus: piece ids to frame in
-    a close-up instead of fitting the whole build."""
+    """stats, when given, gets "highlight_px": how many pixels of the highlighted pieces are visible,
+    "wires": each visible wire's centre line in output pixels, and "camera": the framing used. textures:
+    piece id -> a textured quad in the piece's frame (export.top_face: a board's top photo), drawn on the
+    piece. focus: piece ids to frame in a close-up instead of fitting the whole build. camera: a framing
+    from an earlier render's stats, so pictures of the same step (its motion frames) share one camera.
+    turns: piece id -> degrees about its own z axis (a screw turning), drawn with a cross on its head."""
     right, up, forward = camera_basis(view)
     offsets = offsets or {}
     highlight = highlight or set()
     textures = textures or {}
+    turns = turns or {}
     ids = [pid for pid in built.pieces if visible is None or pid in visible]
     if not ids:
         raise ValueError("nothing to render")
@@ -80,7 +91,7 @@ def render(
         for mesh, tex in ((piece.local_mesh(tolerance=0.1, angular=0.5), -1), (quad, len(images))):
             if mesh is None:
                 continue
-            v = mesh.vertices @ piece.matrix[:3, :3].T + piece.matrix[:3, 3] + offsets.get(pid, 0)
+            v = mesh.vertices @ spin(turns.get(pid, 0)).T @ piece.matrix[:3, :3].T + piece.matrix[:3, 3] + offsets.get(pid, 0)
             tris.append(v[mesh.faces])
             owners.append(np.full(len(mesh.faces), k))
             tex_of.append(np.full(len(mesh.faces), tex))
@@ -113,6 +124,10 @@ def render(
         fh = max(1.5 * (fy.max() - fy.min()), span_y / 3)
         scale = min(W * (1 - 2 * margin) / max(fw, 1e-6), H * (1 - 2 * margin) / max(fh, 1e-6))
         cx, cy = (fx.max() + fx.min()) / 2, (fy.max() + fy.min()) / 2
+    if camera is not None:
+        cx, cy, scale = camera
+    if stats is not None:
+        stats["camera"] = (float(cx), float(cy), float(scale))
     px = (sx - cx) * scale + W / 2
     py = H / 2 - (sy - cy) * scale
 
@@ -213,6 +228,26 @@ def render(
     img = Image.fromarray(image.clip(0, 255).astype(np.uint8)).resize(size, Image.LANCZOS)
     draw = ImageDraw.Draw(img)
     font = ImageFont.load_default(size=13)
+
+    # A cross on each turning screw's head, so the turn shows on a round head (drawn only where the
+    # head's centre is in sight).
+    for k, pid in enumerate(ids):
+        piece = built.pieces[pid]
+        if pid not in turns or piece.kind != "fastener":
+            continue
+        lo, hi = piece.local_mesh(tolerance=0.1, angular=0.5).bounds
+        r = 0.3 * min(hi[0] - lo[0], hi[1] - lo[1])
+        a = np.radians(turns[pid])
+        local = np.array([[0, 0, hi[2]], *([r * np.cos(a + q), r * np.sin(a + q), hi[2]] for q in (0, np.pi / 2, np.pi, 1.5 * np.pi))])
+        world = local @ piece.matrix[:3, :3].T + piece.matrix[:3, 3] + offsets.get(pid, 0)
+        x = (world @ right - cx) * scale + W / 2
+        y = H / 2 - (world @ up - cy) * scale
+        c0, r0 = int(x[0]), int(y[0])
+        if not (0 <= c0 < W and 0 <= r0 < H) or owner_buf[r0, c0] != k:
+            continue
+        pts = np.stack([x, y], axis=1) / SUPERSAMPLE
+        for i, j in ((1, 3), (2, 4)):
+            draw.line((*pts[i], *pts[j]), fill=(31, 35, 42), width=2)
 
     if labels:
         for k, pid in enumerate(ids):

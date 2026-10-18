@@ -8,9 +8,11 @@ See docs/steps-format.md.
 
 from __future__ import annotations
 
+import io
 import json
 import functools
 import math
+import re
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +21,7 @@ from build123d import export_step, export_stl
 
 from .design import Design, Step
 from .geometry import BuiltDesign, assembly
-from .render import render
+from .render import SUPERSAMPLE, camera_basis, render
 from .textures import top_image
 
 DESIGN_TO_GLTF = np.array(
@@ -366,11 +368,95 @@ def close_up(built: BuiltDesign, visible: set[str], new: set[str]) -> set[str] |
     return focus if extent(built, focus) < 0.45 * extent(built, visible) else None
 
 
-def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict | None = None) -> list[str]:
+# --- step motion: how this step's parts go in, as a few pictures with the final picture's camera -----
+
+MOTION_FRAMES = 4  # pictures of the parts on their way in; the step picture itself is the last frame
+SCREW_TURN = 40.0  # degrees a screw turns between two frames (not a multiple of the head cross's 90)
+AXIAL = re.compile(r"bearing|shaft|rod|axle|pin\b|dowel|pulley|idler|coupler|pinion|wheel|magnet|leadscrew|bushing|spacer", re.I)
+
+
+def local_box(piece) -> tuple[np.ndarray, np.ndarray]:
+    lo, hi = piece.local_mesh(tolerance=0.5, angular=1.0).bounds
+    return np.asarray(lo, dtype=float), np.asarray(hi, dtype=float)
+
+
+def round_axis(size: np.ndarray) -> int:
+    """The local axis a round part (bearing, shaft, pulley) turns about: the one whose two cross
+    dimensions are the most alike."""
+    return int(np.argmin([abs(size[(k + 1) % 3] - size[(k + 2) % 3]) / max(size.max(), 1e-6) for k in range(3)]))
+
+
+def insertion(built: BuiltDesign, pid: str, view: str, reach: float, motion: dict | None = None) -> tuple[np.ndarray, bool]:
+    """Where a new piece starts before it goes in (an offset in mm, design frame) and whether it turns on
+    the way (a screw). Screws come down their own axis from above their hole; bearings, shafts and pins
+    slide along their axis from the side facing the camera; anything else comes down from above, unless
+    the step's motion says otherwise. Never further than `reach`, so it starts inside the picture."""
+    piece = built.pieces[pid]
+    lo, hi = local_box(piece)
+    size = hi - lo
+    turns = piece.kind == "fastener"
+    if motion and motion.get("from_offset"):
+        offset = np.asarray(motion["from_offset"], dtype=float)
+    elif turns:
+        offset = piece.matrix[:3, 2] * max(8.0, 1.5 * size[2])  # head up along +z, shaft down along -z
+    else:
+        rot = piece.matrix[:3, :3]
+        if AXIAL.search(f"{piece.part_id or ''} {piece.name}"):
+            k = round_axis(size)
+            axis = rot[:, k]
+            back = -camera_basis(view)[2]
+            axis = axis if axis @ (back + np.array([0, 0, 0.5])) >= 0 else -axis
+            along = size[k]
+        else:
+            axis = np.array([0.0, 0.0, 1.0])
+            along = float(np.abs(rot @ size)[2])
+        offset = axis * max(10.0, 1.2 * along)
+    length = float(np.linalg.norm(offset))
+    if length > reach > 0:
+        offset = offset * (reach / length)
+    return offset, turns
+
+
+def motion_frames(built: BuiltDesign, entry: dict, visible: set[str], lit: set[str], view: str, camera: tuple, size: tuple[int, int]) -> list[dict]:
+    """The step's motion as render arguments, one per frame: MOTION_FRAMES pictures of its new parts on
+    their way in (easing into place, screws turning), then, when the step adds wires, one with every part
+    seated and the new wires still out, so the page can draw them end to end. Earlier parts stay put, the
+    camera is the final picture's. Empty when nothing in the step moves."""
+    wires = {pid for pid in lit if built.pieces[pid].kind == "wire"}
+    moving = sorted(lit - wires)
+    reach = 0.3 * min(size) * SUPERSAMPLE / camera[2]  # mm: 30 % of the picture (render's scale is per supersampled px)
+    steps = {m.get("placement"): m for m in entry.get("motion", []) if isinstance(m, dict)}
+    paths = {pid: insertion(built, pid, view, reach, steps.get(pid)) for pid in moving}
+    shown = visible - wires
+    frames = []
+    for k in range(MOTION_FRAMES if moving else 0):
+        left = (1 - k / MOTION_FRAMES) ** 2  # the share of the way still to go: big moves first, easing in
+        frames.append({"visible": shown, "offsets": {pid: off * left for pid, (off, _) in paths.items()},
+                       "turns": {pid: SCREW_TURN * (MOTION_FRAMES - k) for pid, (_, turns) in paths.items() if turns}})
+    if wires and shown:
+        frames.append({"visible": shown, "offsets": {}, "turns": {}})
+    return frames
+
+
+def write_sprite(pictures: list[bytes], path: Path) -> None:
+    """The frames side by side in one small PNG (a 256-colour palette: the renders are flat shaded)."""
+    from PIL import Image
+
+    images = [Image.open(io.BytesIO(p)).convert("RGB") for p in pictures]
+    w, h = images[0].size
+    sheet = Image.new("RGB", (w * len(images), h))
+    for k, img in enumerate(images):
+        sheet.paste(img, (k * w, 0))
+    sheet.quantize(256, dither=Image.Dither.NONE).save(path, optimize=True)
+
+
+def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict | None = None, motion: bool = False) -> list[str]:
     """step-01.png, step-02.png, ...: what the build looks like after each step, its new parts highlighted
     (the lid left off until the step that adds it), from the angle that shows the new parts best. Photo
     checks show the AI this as the correct result. Each entry also gets picture_wires: every wire in the
-    picture as a line in fractions of the picture's width and height, so the page can make wires clickable."""
+    picture as a line in fractions of the picture's width and height, so the page can make wires clickable,
+    and with motion (the build page's guides), picture_frames: the step's motion (step-01-motion.png,
+    motion_frames side by side, same camera)."""
     written, shown = [], set()
     size = (640, 480)
     for i, entry in enumerate(doc["steps"], start=1):
@@ -382,13 +468,22 @@ def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict |
         path = out_dir / f"step-{i:02d}.png"
         stats: dict = {}
         focus = close_up(built, visible, lit)
-        path.write_bytes(render(built, view, visible, None, lit, size=size, labels=False, stats=stats, textures=textures, focus=focus))
+        screws = {pid: 0.0 for pid in visible if built.pieces[pid].kind == "fastener"}
+        path.write_bytes(render(built, view, visible, None, lit, size=size, labels=False, stats=stats, textures=textures, focus=focus, turns=screws))
         entry["picture"] = path.name
         entry["picture_view"] = view
         entry["picture_close_up"] = focus is not None
         entry["picture_wires"] = [{"id": wid, "points": [[round(x / size[0], 4), round(y / size[1], 4)] for x, y in pts]}
                                   for wid, pts in stats["wires"].items()]
         written.append(str(path))
+        frames = motion_frames(built, entry, visible, lit, view, stats["camera"], size) if motion else []
+        if frames:
+            sprite = out_dir / f"step-{i:02d}-motion.png"
+            write_sprite([render(built, view, f["visible"], f["offsets"], lit, size=size, labels=False, textures=textures,
+                                 camera=stats["camera"], turns={**screws, **f["turns"]}) for f in frames], sprite)
+            entry["picture_frames"] = {"file": sprite.name, "count": len(frames),
+                                       "seated": any(built.pieces[pid].kind == "wire" for pid in lit)}
+            written.append(str(sprite))
     return written
 
 

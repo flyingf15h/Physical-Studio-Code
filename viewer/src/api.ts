@@ -138,6 +138,10 @@ export interface BuildStep {
   picture_view?: string // hardware builds: the angle of the step picture (iso, iso_right, iso_back, iso_left_back, below)
   picture_wires?: { id: string; points: [number, number][] }[] // hardware builds: each wire in the picture, in fractions of its width and height
   picture_close_up?: boolean // hardware builds: the picture zooms in on this step's parts
+  // Hardware builds: the step's motion, `count` frames side by side in one PNG with the picture's camera
+  // (the new parts on their way in, screws turning; with `seated`, the last frame has every part in and the
+  // new wires still out).
+  picture_frames?: { src: string; count: number; seated: boolean }
 }
 
 /** One end of a wire: the part and the pin label printed on it. */

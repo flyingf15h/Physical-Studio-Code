@@ -511,11 +511,16 @@ function usePictureWidth() {
   return { width, handle }
 }
 
-// The step animation: what you do in this step plays once when the step opens (this step's parts slide
-// down into their holes and its wires draw from end to end over the faded earlier steps; on hardware
-// builds the previous step's picture fades into this one). Replay plays it again; the slider scrubs it.
-// With reduced motion on, the picture opens on its last frame.
-const CROSSFADE_MS = 1600
+// The step animation: what you do in this step plays once when the step opens, always in the step
+// picture's own frame (no zoom, no camera move). Breadboard steps: this step's parts slide down into their
+// holes, then its wires draw from end to end, over the faded earlier steps. Hardware steps: the motion
+// frames rendered with the picture's camera (export.motion_frames) play, the new parts sliding in along the
+// way they go (screws turning down into their holes), then the new wires draw end to end. Replay plays it
+// again; the slider scrubs it. With reduced motion on, the picture opens on its last frame.
+const DROP = 110 // how far above its holes a breadboard part starts, in SVG units (the picture is 330 tall)
+const PARTS_MS = 1800 // hardware: the parts sliding in
+const WIRE_MS = 700 // hardware: each wire drawing
+const SETTLE_MS = 350 // hardware: the drawn wires turning into the rendered ones
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 const easeOut = (x: number) => 1 - (1 - x) ** 3
@@ -651,7 +656,7 @@ function applyAnim({ items, marks }: Anim, t: number) {
     const a = k * slot
     const u = clamp01((t - a) / (slot * 1.25))
     if (it.kind === 'part') {
-      it.el.style.transform = u >= 1 ? '' : `translate(0px, ${(-36 * (1 - easeOut(u))).toFixed(2)}px)`
+      it.el.style.transform = u >= 1 ? '' : `translate(0px, ${(-DROP * (1 - easeOut(u))).toFixed(2)}px)`
       it.el.style.opacity = u >= 1 ? '' : String(clamp01(u * 3))
     } else {
       it.el.style.opacity = u > 0 ? '' : '0'
@@ -701,6 +706,112 @@ function AnimatedSvg({ src, alt, t, onReady }: { src: string; alt: string; t: nu
   return <div ref={box} className="step-svg" />
 }
 
+type Frames = NonNullable<BuildStep['picture_frames']>
+
+/** A hardware step's timeline: how long it plays, and at t (0..1) which picture shows (`pos`: 0..count in
+ * frames, count being the step picture itself, fractions blending two neighbours) and how far the new wires
+ * are drawn (`wire`, 0..1). */
+function cadTimeline(frames: Frames | null, wireCount: number) {
+  const count = frames?.count ?? 0
+  const seatedAt = frames?.seated ? count - 1 : count // the frame with every part in place
+  const parts = seatedAt > 0 ? PARTS_MS : 0
+  const wiring = frames?.seated && wireCount ? WIRE_MS * Math.min(wireCount, 5) : 0
+  const settle = frames?.seated ? SETTLE_MS : 0
+  const duration = parts + wiring + settle
+  const at = (t: number) => {
+    const ms = t * duration
+    if (ms < parts) return { pos: (ms / parts) * seatedAt, wire: 0 }
+    if (ms < parts + wiring) return { pos: seatedAt, wire: (ms - parts) / wiring }
+    return { pos: seatedAt + (settle ? clamp01((ms - parts - wiring) / settle) : 1) * (count - seatedAt), wire: 1 }
+  }
+  return { duration, at }
+}
+
+/** One frame of a hardware step's motion sprite, laid exactly over the step picture (inside its border). */
+function SpriteFrame({ frames, k, opacity }: { frames: Frames; k: number; opacity: number }) {
+  return (
+    <div
+      className="step-frame"
+      aria-hidden="true"
+      style={{
+        backgroundImage: `url("${frames.src}")`,
+        backgroundSize: `${frames.count * 100}% 100%`,
+        backgroundPosition: `${frames.count > 1 ? (k / (frames.count - 1)) * 100 : 0}% 0`,
+        opacity,
+      }}
+    />
+  )
+}
+
+/** The hardware step picture with its motion on top: the frame at `pos` (blended with the next one), and
+ * this step's wires drawing from end to end over the frame where the parts are seated. */
+function CadMotion({
+  frames,
+  pos,
+  wire,
+  lines,
+  colors,
+}: {
+  frames: Frames
+  pos: number
+  wire: number
+  lines: { id: string; points: [number, number][] }[]
+  colors: Record<string, string>
+}) {
+  if (pos >= frames.count) return null
+  const a = Math.floor(pos)
+  const f = pos - a
+  const b = a + 1
+  const fade = 1 - f // above the step picture: frame a fades out as the picture (or frame b) shows through
+  const drawn = frames.seated && wire > 0
+  const slot = lines.length ? 1 / lines.length : 1
+  return (
+    <>
+      {b < frames.count ? (
+        <>
+          <SpriteFrame frames={frames} k={a} opacity={1} />
+          {f > 0 && <SpriteFrame frames={frames} k={b} opacity={f} />}
+        </>
+      ) : (
+        <SpriteFrame frames={frames} k={a} opacity={fade} />
+      )}
+      {drawn && (
+        <svg className="wire-overlay wire-draw" viewBox={`0 0 ${PIC_W} ${PIC_H}`} preserveAspectRatio="none" aria-hidden="true" style={{ opacity: fade }}>
+          {lines.map((l, k) => {
+            const u = clamp01((wire - k * slot) / (slot * 1.25))
+            if (u <= 0) return null
+            const pts = l.points.map((p) => `${p[0] * PIC_W},${p[1] * PIC_H}`).join(' ')
+            const style = { strokeDasharray: '1 1', strokeDashoffset: 1 - easeInOut(u) }
+            return (
+              <g key={l.id}>
+                <polyline points={pts} pathLength={1} className="wire-draw-shadow" style={style} />
+                <polyline points={pts} pathLength={1} className="wire-draw-core" style={{ ...style, stroke: colors[l.id] }} />
+              </g>
+            )
+          })}
+        </svg>
+      )}
+    </>
+  )
+}
+
+/** Whether a hardware step's motion sprite has loaded (null while loading), so it never plays half-loaded. */
+function useSpriteLoaded(src: string | undefined) {
+  const [done, setDone] = useState<{ src: string; ok: boolean } | null>(null)
+  useEffect(() => {
+    if (!src) return
+    let live = true
+    const img = new Image()
+    img.onload = () => live && setDone({ src, ok: true })
+    img.onerror = () => live && setDone({ src, ok: false })
+    img.src = src
+    return () => {
+      live = false
+    }
+  }, [src])
+  return !src ? false : done?.src === src ? done.ok : null
+}
+
 function AnimControls({ t, playing, onReplay, onScrub }: { t: number; playing: boolean; onReplay: () => void; onScrub: (p: number) => void }) {
   return (
     <div className="step-anim">
@@ -730,13 +841,11 @@ function AnimControls({ t, playing, onReplay, onScrub }: { t: number; playing: b
 function StepPicture({
   step,
   index,
-  previous,
   wires,
   caption,
 }: {
   step: BuildStep
   index: number
-  previous?: string | null
   wires: Record<string, WireInfo>
   caption: string
 }) {
@@ -748,10 +857,17 @@ function StepPicture({
   // Breadboard SVGs: how many parts/wires it animates once loaded (-1: couldn't inline it, no animation).
   const [svgItems, setSvgItems] = useState<{ src: string; n: number } | null>(null)
   const loaded = svgItems?.src === src ? svgItems.n : null
-  const animated = isSvg ? loaded !== null && loaded >= 0 : true
-  const duration = isSvg ? Math.min(6000, 700 * Math.max(1, loaded ?? 1) + 500) : CROSSFADE_MS
-  const { t, playing, replay, scrub } = useTimeline(src, duration, isSvg ? loaded !== null : true)
   const lines = (step.picture_wires ?? []).filter((l) => wires[l.id] && l.points.length > 1)
+  // Hardware: the motion frames (none on pictures made before them: those show still) and this step's wires.
+  const sprite = useSpriteLoaded(isSvg ? undefined : step.picture_frames?.src)
+  const frames = sprite ? step.picture_frames! : null
+  const fresh = new Set(step.model?.new ?? step.part_ids)
+  const newLines = lines.filter((l) => fresh.has(l.id))
+  const cad = cadTimeline(frames, newLines.length)
+  const animated = isSvg ? loaded !== null && loaded >= 0 : cad.duration > 0
+  const duration = isSvg ? Math.min(6000, 700 * Math.max(1, loaded ?? 1) + 500) : cad.duration || 1
+  const { t, playing, replay, scrub } = useTimeline(src, duration, isSvg ? loaded !== null : sprite !== null)
+  const motion = frames && t < 1 ? cad.at(t) : null
   const line = lines.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const at = (p: [number, number]) => [p[0] * PIC_W, p[1] * PIC_H] as const
@@ -763,10 +879,15 @@ function StepPicture({
           <AnimatedSvg src={src} alt={alt} t={t} onReady={(n) => setSvgItems({ src, n })} />
         ) : (
           <>
-            <img className="step-picture" src={src} alt={alt} style={isSvg || previous ? undefined : { opacity: easeInOut(t) }} />
-            {/* Hardware builds: the previous step's picture fades into this one. */}
-            {!isSvg && previous && t < 1 && (
-              <img className="step-picture step-picture-prev" src={previous} alt="" aria-hidden="true" style={{ opacity: 1 - easeInOut(t) }} />
+            <img className="step-picture" src={src} alt={alt} />
+            {frames && motion && (
+              <CadMotion
+                frames={frames}
+                pos={motion.pos}
+                wire={motion.wire}
+                lines={newLines}
+                colors={Object.fromEntries(newLines.map((l) => [l.id, wires[l.id].color]))}
+              />
             )}
           </>
         )}
@@ -865,7 +986,6 @@ function StepView({
         <StepPicture
           step={s}
           index={index}
-          previous={index > 0 ? plan.steps[index - 1].picture : null}
           wires={plan.wires ?? {}}
           caption={
             isHardware(plan)

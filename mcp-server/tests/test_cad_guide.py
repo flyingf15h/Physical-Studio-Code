@@ -39,6 +39,14 @@ def test_a_cad_design_becomes_a_build_with_sections_pictures_and_models(ready_di
     assert any(s["tools"] for s in steps) and plan["parts"] and plan["part_guide"]
 
 
+def test_steps_carry_their_motion_frames_for_the_page(ready_dir):
+    folder = ready_dir / "cad-light"
+    steps = json.loads((folder / "build.json").read_text())["plan"]["steps"]
+    moving = [s for s in steps if s.get("picture_frames")]
+    assert moving and all(s["picture_frames"]["src"] == s["picture"].replace(".png", "-motion.png") for s in moving)
+    assert all((folder / s["picture_frames"]["file"]).is_file() and s["picture_frames"]["count"] >= 1 for s in moving)
+
+
 def test_wiring_steps_name_every_connection_pin_to_pin(ready_dir):
     steps = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]["steps"]
     wired = [s for s in steps if any(m[2].startswith("from ") for m in s["markers"])]
