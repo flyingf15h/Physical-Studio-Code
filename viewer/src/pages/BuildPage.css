@@ -23,6 +23,9 @@
 .build-table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .build-table th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--bg); padding: 8px 10px; }
 .build-table td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
+.pin-map { margin-top: 10px; }
+.pin-map caption { caption-side: top; text-align: left; font-weight: 600; padding: 4px 2px 6px; }
+.pin-map td:first-child { white-space: nowrap; }
 .pill { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
 .commit-box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .commit-box h3 { margin: 0 !important; }

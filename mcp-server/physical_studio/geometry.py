@@ -57,6 +57,7 @@ class BuiltPiece:
     extra: dict = field(default_factory=dict)  # kind-specific fields for the steps JSON
     category: str | None = None  # library category for parts
     path: np.ndarray | None = None  # wires: the centre line, pin to pin (design frame, mm)
+    finish: tuple[float, float] = (0.0, 0.6)  # (metallic, roughness) from the part's look, for the renders
 
     def local_mesh(self, tolerance: float = 0.05, angular: float = 0.3) -> trimesh.Trimesh:
         return self.mesh if self.mesh is not None else mesh_of(self.shape, tolerance, angular)
@@ -148,6 +149,19 @@ def material_color(part: dict) -> str | None:
     from .export import material_library  # here to avoid a circular import at load time
 
     return (material_library(MATERIALS_DIR).get(name) or {}).get("color")
+
+
+def part_finish(part: dict) -> tuple[float, float]:
+    """(metallic, roughness): the part's own look first, then its material's, then bare metal for
+    screws and matte for everything else."""
+    look = part.get("appearance") or {}
+    spec = {}
+    if look.get("material"):
+        from .export import material_library
+
+        spec = material_library(MATERIALS_DIR).get(look["material"]) or {}
+    metal = 0.6 if part.get("category") == "fastener" else 0.0
+    return (float(look.get("metallic", spec.get("metallic", metal))), float(look.get("roughness", spec.get("roughness", 0.6))))
 
 
 def part_shape(part: dict, parts_dir: Path) -> Part:
@@ -296,6 +310,7 @@ def build(design: Design, parts: dict[str, dict], parts_dir: Path) -> BuiltDesig
             position=tuple(p.position),
             rotation=tuple(p.rotation),
             category=part.get("category"),
+            finish=part_finish(part),
             # Pin tips in the part frame, so the viewer can draw legs (display only).
             extra={"pins": [{"id": q["id"], "position": [float(v) for v in q["position"]]} for q in part["pins"]]}
             if part.get("pins")

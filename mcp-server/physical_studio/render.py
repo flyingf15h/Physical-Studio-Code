@@ -1,4 +1,5 @@
-"""Software renderer for render_preview: orthographic, z-buffered, flat shaded, outlined edges.
+"""Software renderer for render_preview: orthographic, z-buffered, outlined edges, shaded by each part's
+finish (metal reflects and shines, plastic stays matte) with screen-space ambient occlusion.
 
 No OpenGL needed, so it works on headless servers. Output is a PNG with each visible
 placement labelled by its id and a 10 mm scale bar, so Claude can check its own design.
@@ -47,6 +48,35 @@ def camera_basis(view: str):
     right /= np.linalg.norm(right)
     up = np.cross(right, forward)
     return right, up, forward
+
+
+def ambient_occlusion(zbuf: np.ndarray, hit: np.ndarray, scale: float, strength: float = 0.35) -> np.ndarray:
+    """A screen-space ambient-occlusion factor (1 = open, down to 1 - strength): a surface sitting
+    behind what's around it on screen (a plate next to a motor, the bottom of a slot) is darkened by how
+    far it sits behind, measured against the window's size in mm, so a big machine and a small case
+    darken alike. The background counts as far away, so silhouettes don't darken themselves."""
+    H, W = zbuf.shape
+    r = max(3, int(0.012 * max(H, W)))
+    far = np.where(hit, zbuf, np.nan)
+    if not np.isfinite(far).any():
+        return np.ones_like(zbuf)
+    reach = r / scale  # mm: how deep a crease the window counts
+    z = np.where(hit, zbuf, np.nanmax(far) + 4 * reach)
+    # Opposite pairs of samples on three rings around each pixel. A pair's mean height above the pixel
+    # is zero on any flat surface however it slopes, and positive in a crease or where a part stands on
+    # a plate, so only real corners darken. A sample far in front (an arm passing over a plate) fades
+    # out by three reaches, sample by sample, so silhouettes get no halo and no ring.
+    total = np.zeros_like(z)
+    count = 0
+    for radius in (r / 3, 2 * r / 3, r):
+        for a in np.arange(4) * np.pi / 4 + radius:  # half a circle: each pair covers both sides
+            dy, dx = int(round(radius * np.sin(a))), int(round(radius * np.cos(a)))
+            d1 = (z - np.roll(z, (dy, dx), axis=(0, 1))) / reach
+            d2 = (z - np.roll(z, (-dy, -dx), axis=(0, 1))) / reach
+            keep = np.clip(1.5 - 0.5 * np.maximum(d1, d2), 0, 1)
+            total += np.clip((d1 + d2) / 2, 0, 1) * keep
+            count += 1
+    return 1 - strength * np.clip(2 * total / count, 0, 1)
 
 
 def spin(degrees: float) -> np.ndarray:
@@ -166,15 +196,29 @@ def render(
         else:
             tri_buf[window][closer] = -1
 
-    # Flat shading: key light from over the camera's left shoulder, plus ambient.
+    # Key light from over the camera's left shoulder, plus ambient, then the part's finish: metal
+    # (metallic, roughness from its look) gets a darker body, a sky-to-floor reflection and a highlight,
+    # so steel reads as steel and a printed part stays matte. Creases and contacts get ambient occlusion.
     light = -forward + 0.6 * up - 0.4 * right
     light /= np.linalg.norm(light)
     base = np.array([hex_rgb(built.pieces[pid].color) for pid in ids])
+    finish = np.array([built.pieces[pid].finish for pid in ids], dtype=float)
     hit = owner_buf >= 0
     shade = 0.45 + 0.55 * np.clip(normal_buf @ light, 0, 1)
     image = np.empty((H, W, 3))
     image[:] = BACKGROUND
-    image[hit] = base[owner_buf[hit]] * shade[hit, None]
+    metal, rough = finish[owner_buf[hit], 0], finish[owner_buf[hit], 1]
+    n = normal_buf[hit]
+    view_dir = -forward
+    reflect = 2 * (n @ view_dir)[:, None] * n - view_dir  # mirror of the view ray about the normal
+    sky = 0.75 + 0.45 * np.clip(reflect @ np.array([0.0, 0.0, 1.0]), -1, 1)  # brighter where it mirrors the sky
+    half = (light + view_dir) / np.linalg.norm(light + view_dir)
+    gloss = np.clip(n @ half, 0, 1) ** (4 + 60 * (1 - rough) ** 2)
+    body = base[owner_buf[hit]] * shade[hit, None] * (1 - 0.35 * metal)[:, None]
+    mirror = base[owner_buf[hit]] * (sky * metal * 0.45)[:, None]
+    highlight_ = (255 * gloss * (0.08 + 0.5 * metal) * (1 - 0.6 * rough))[:, None]
+    image[hit] = body + mirror + highlight_
+    occlusion = ambient_occlusion(zbuf, hit, scale)
     textured = tri_buf >= 0
     if textured.any():
         t = tri_buf[textured]
@@ -189,6 +233,7 @@ def render(
             y = np.clip(((1 - uv[sel, 1]) * h).astype(int), 0, h - 1)  # uv origin bottom-left, rows top-down
             colour[sel] = img[y, x]
         image[textured] = colour * (0.75 + 0.25 * shade[textured, None])
+    image[hit] *= occlusion[hit, None]
     if stats is not None:
         lit = [k for k, pid in enumerate(ids) if pid in highlight]
         stats["highlight_px"] = int(np.isin(owner_buf, lit).sum()) if lit else 0

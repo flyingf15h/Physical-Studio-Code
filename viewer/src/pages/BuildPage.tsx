@@ -387,6 +387,34 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
           ))}
         </tbody>
       </table>
+      {plan.pin_map && plan.pin_map.length > 0 && (
+        <details className="build-fold">
+          <summary>Pin map (for your firmware)</summary>
+          {plan.pin_map.map((b) => (
+            <table className="build-table pin-map" key={b.board}>
+              <caption>{b.board}</caption>
+              <thead>
+                <tr>
+                  <th>Pin</th>
+                  <th>Goes to</th>
+                  <th>Wire</th>
+                </tr>
+              </thead>
+              <tbody>
+                {b.pins.map((p, i) => (
+                  <tr key={i}>
+                    <td>
+                      <code>{p.pin}</code>
+                    </td>
+                    <td>{p.to.join(', ')}</td>
+                    <td className="muted">{p.colour}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ))}
+        </details>
+      )}
       {plan.steps.length > 0 && (
         <details className="build-fold">
           <summary>All steps at a glance</summary>
