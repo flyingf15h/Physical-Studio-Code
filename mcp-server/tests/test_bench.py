@@ -400,3 +400,13 @@ def test_a_failed_cad_job_falls_back_to_the_breadboard_planner(tmp_path, monkeyp
     c2, jobs2 = jobs_app(tmp_path, monkeypatch, FakeJob("done"))
     wait_done(c2, c2.post("/api/build", json={"goal": "A traffic light with three LEDs"}).json()["id"])
     assert jobs2.prompts == []  # circuits never start a CAD job
+
+
+def test_photo_checks_forgive_small_hole_offsets_but_not_real_mistakes():
+    def p(problem):
+        return {"status": "problem", "observation": "o", "problem": problem, "fix": "", "confidence": 0.7}
+    assert planner.lenient(p("The red LED is in e11 and e12 instead of e10 and e11."))["status"] == "done"
+    for real in ("The yellow LED is backwards: its long leg is in c21.", "Both legs are in row 10, the same strip.",
+                 "The wire is on pin D9 instead of D10.", "The resistor is missing.", "The LED is across the centre gap in f10."):
+        assert planner.lenient(p(real))["status"] == "problem", real
+    assert "HOLES IN PHOTOS" in open(planner.__file__).read()
