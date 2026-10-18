@@ -307,3 +307,45 @@ def test_ready_made_guides_are_view_only_and_can_be_copied(tmp_path, monkeypatch
     assert (tmp_path / "site" / f"build-{new}" / "step-1.svg").exists()
     assert len(mine["commits"]) == 1 and mine["commits"][0]["kind"] == "start"
     assert c.post(f"/api/build/{new}/commit", json={"step": 0, "photos": [photo()]}).status_code == 200
+
+
+def test_parts_i_have_are_matched_to_the_library(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    items = c.post("/api/build/match", json={"items": ["Arduino Uno", "3 red LEDs", "220 ohm resistors", "SG90 servo", "jumper wires"]}).json()["items"]
+    assert [i["part"] and i["part"]["id"] for i in items] == ["arduino-uno", "led-5mm", "resistor-220", "servo-sg90", None]
+    assert items[0]["part"]["size"] == "68.6 × 53.4 × 1.6 mm"
+    assert c.post("/api/build/match", json={"items": "nope"}).status_code == 400
+
+
+def glb_shape(data):
+    """What a GLB draws, without the float noise: node names and each mesh's vertex counts."""
+    n = int.from_bytes(data[12:16], "little")
+    doc = json.loads(data[20:20 + n])
+    counts = [[doc["accessors"][p["attributes"]["POSITION"]]["count"] for p in m["primitives"]] for m in doc.get("meshes", [])]
+    return sorted(x.get("name", "") for x in doc.get("nodes", [])), counts
+
+
+def test_the_ready_made_traffic_light_renders_the_same_as_before():
+    # The breadboard flow must not change: rebuilding the shipped traffic-light plan gives the same models.
+    ready = routes.READY_DIR / "traffic-light"
+    saved = json.loads((ready / "build.json").read_text())
+    plan = PlanModel.model_validate(saved["internal"]["plan"])
+    scene = validate(plan.scene)
+    glb, labels = build(scene)
+    assert labels == saved["plan"]["model"]["labels"]
+    assert glb_shape(glb) == glb_shape((ready / "final.glb").read_bytes())
+    models = planner.step_models(scene, plan.model_dump()["steps"], validate, build)
+    assert len(models) == len(saved["plan"]["steps"])
+    for n, (m, s) in enumerate(zip(models, saved["plan"]["steps"]), 1):
+        if not s["model"]:
+            assert not m
+            continue
+        assert m["labels"] == s["model"]["labels"] and m["new"] == s["model"]["new"]
+        assert glb_shape(m["glb"]) == glb_shape((ready / f"step-{n}.glb").read_bytes())
+
+
+def test_the_parts_brief_details_what_the_build_mentions():
+    planner.configure(REPO / "parts")
+    brief = planner.library_brief((), "ESP32, SG90 servo and an OLED")
+    assert "Micro servo SG90" in brief and "ESP32 DevKit" in brief and "ALSO IN THE LIBRARY" in brief
+    assert planner.split_items("Arduino Uno, 3 LEDs and a breadboard") == ["Arduino Uno", "3 LEDs", "a breadboard"]
