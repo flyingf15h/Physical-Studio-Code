@@ -1,0 +1,76 @@
+/* Assembly-manual look for the whole site (Senna, Oct 18): flat-pack instruction booklet style. Loaded after
+   every page's own CSS (main.tsx), so it only re-themes: palette and type through the tokens, plus a few
+   manual touches (big step numbers, pill buttons, thin outlines instead of shadows). No layout logic here;
+   the 3D models and step pictures keep their own colours (cyan = the part you add now). */
+:root {
+  --bg: #f4f3ef; /* booklet paper */
+  --panel: #ffffff;
+  --ink: #111111;
+  --muted: #5b5b5b;
+  --line: #d9d7d0;
+  --accent: #0058a3; /* deep blue */
+  --accent-soft: #e7eef7;
+  --yellow: #ffcc00; /* warm yellow highlight */
+  --yellow-soft: #fff6cc;
+  --warn: #c2410c;
+  font-family: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { letter-spacing: -0.015em; }
+h1 { font-weight: 800; }
+h2, h3 { font-weight: 700; }
+
+/* Header: white bar, bold wordmark with a yellow tab, yellow underline on the current tab. */
+.progress-header { height: 60px; border-bottom: 1px solid var(--line); box-shadow: inset 0 -3px 0 var(--yellow); }
+.progress-header .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+.progress-header .brand::before { content: ''; width: 18px; height: 18px; border-radius: 4px; background: var(--yellow); box-shadow: inset 0 0 0 3px var(--accent); }
+.progress-header .tabs a { border-radius: 0; padding: 18px 12px 16px; font-weight: 600; }
+.progress-header .tabs a:hover { background: transparent; color: var(--accent); }
+.progress-header .tabs a.active { background: transparent; color: var(--ink); box-shadow: inset 0 -4px 0 var(--accent); }
+.progress-header li.active > span { background: var(--yellow-soft); }
+.progress-header li.active .num { background: var(--ink); border-color: var(--ink); }
+
+/* Buttons: pills. Primary = solid blue, secondary = ink outline. */
+.describe-go, .build-main button.primary { border-radius: 999px; background: var(--accent); padding: 11px 22px; font-weight: 700; letter-spacing: 0.01em; }
+.describe-go:hover:not(:disabled), .build-main button.primary:hover:not(:disabled) { background: #004f93; }
+.describe-tool, .build-main button.tool, .build-main a.tool, .share-button, .build-title button { border-radius: 999px; border: 1.5px solid var(--ink); font-weight: 600; }
+.describe-tool:hover:not(:disabled), .build-main button.tool:hover:not(:disabled), .build-main a.tool:hover, .share-button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Dashboard */
+.describe-page h1 { font-size: 40px; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 10px; }
+.describe-lede { font-size: 15px; color: var(--muted); max-width: 640px; }
+.describe-form { border: 1.5px solid var(--ink); border-radius: 4px; padding: 16px; }
+.describe-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.describe-sub { color: var(--ink); font-weight: 800; letter-spacing: 0.08em; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+
+/* Build page: sidebar = the booklet's contents page */
+.sidebar { background: var(--panel); }
+.sidebar h1 { font-size: 24px; line-height: 1.15; letter-spacing: -0.025em; }
+.eyebrow { color: var(--accent); font-weight: 800; letter-spacing: 0.12em; }
+.steps button { border-radius: 4px; }
+.steps button.active { background: var(--yellow-soft); box-shadow: inset 4px 0 0 var(--yellow); }
+.steps .num { font-weight: 800; border-width: 2px; }
+.steps button.active .num { background: var(--ink); border-color: var(--ink); color: #fff; }
+.step-section .section-head.current { color: var(--accent); }
+
+/* Build page: each step as a manual page, with a big step number */
+.build-main { background: var(--bg); }
+.build-section { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; }
+.build-section h2 { font-size: 20px; }
+.step-badge { display: flex; align-items: baseline; gap: 10px; line-height: 1; }
+.step-big { font-size: 72px; font-weight: 800; letter-spacing: -0.05em; color: var(--ink); }
+.step-of { font-size: 14px; font-weight: 600; color: var(--muted); }
+.step-title { font-size: 26px !important; font-weight: 800; letter-spacing: -0.02em; }
+.step-picture { border: 0; border-radius: 0; background: #fff; }
+.step-text { font-size: 16px; line-height: 1.55; }
+.marker-n { background: var(--ink); width: 26px; height: 26px; font-size: 13px; font-weight: 800; }
+.build-table { border-radius: 4px; border: 1.5px solid var(--ink); }
+.build-table th { background: var(--ink); color: #fff; letter-spacing: 0.08em; font-weight: 700; }
+.pill { background: var(--yellow-soft); color: var(--ink); }
+.commit-box { border: 1.5px dashed var(--ink); border-radius: 4px; }
+.build-nav { gap: 10px; }
+@media (max-width: 760px) {
+  .describe-page h1 { font-size: 30px; }
+  .step-big { font-size: 56px; }
+  .build-section { padding: 18px 16px; }
+}

@@ -535,8 +535,9 @@ function StepView({
   const freshNames = (s.model?.labels ?? []).filter((l) => fresh.includes(l.id) && l.kind !== 'wire')
   return (
     <div className="build-section">
-      <div className="eyebrow">
-        Step {index + 1} of {plan.steps.length}
+      <div className="step-badge" aria-label={`Step ${index + 1} of ${plan.steps.length}`}>
+        <span className="step-big">{index + 1}</span>
+        <span className="step-of">of {plan.steps.length}</span>
       </div>
       <h2 className="step-title">{s.title}</h2>
       {s.picture && (
