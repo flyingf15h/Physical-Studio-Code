@@ -1,8 +1,8 @@
 // Projects on screen 1: the ready-made guides, and your own (opened here or exported by your AI; src/projects.ts).
 import { useEffect, useState } from 'react'
 import { listMyProjects } from '../api'
-import { forgetProject, READY_MADE, savedKey, thumbnail, yourProjects, type Project } from '../projects'
-import { designParams, navigate, withParams } from '../router'
+import { forgetProject, projectHref, READY_MADE, savedKey, thumbnail, yourProjects, type Project } from '../projects'
+import { designParams, navigate } from '../router'
 import './ProjectsList.css'
 
 function when(ms?: number) {
@@ -11,7 +11,7 @@ function when(ms?: number) {
 }
 
 function Card({ project, onRemove }: { project: Project; onRemove?: () => void }) {
-  const href = withParams('/guide', { design: project.design, code: designParams().code })
+  const href = projectHref(project.design, designParams().code)
   return (
     <li className="projects-card">
       <a

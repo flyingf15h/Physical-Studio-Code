@@ -17,6 +17,8 @@ interface Props {
   /** Overrides for links when the page knows more than the URL (e.g. the design page). */
   design?: string | null
   job?: string | null
+  /** A breadboard build (/build/<id>): Design, Guide and Build all open its page; there is no Print. */
+  build?: string
 }
 
 function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
@@ -35,18 +37,21 @@ function Link({ to, className, children }: { to: string; className?: string; chi
 }
 
 /** Dashboard · Your projects tabs on every screen, plus "1 Describe ✓ · 2 Design · ..." inside a project. */
-export function ProgressHeader({ active, tab, design, job }: Props) {
+export function ProgressHeader({ active, tab, design, job, build }: Props) {
   const params = designParams()
   const d = design ?? params.design
   const j = job ?? params.job
   const code = params.code
-  const href: Record<number, string | null> = {
-    1: withParams('/', { code }),
-    2: j ? withParams(`/design/${j}`, { code }) : null,
-    3: d ? withParams('/guide', { design: d, job: j, code }) : null,
-    4: d ? withParams('/guide', { design: d, job: j, code }) : null,
-    5: d ? withParams('/print', { design: d, job: j, code }) : null,
-  }
+  const buildHref = build ? withParams(`/build/${build}`, { code }) : null
+  const href: Record<number, string | null> = build
+    ? { 1: withParams('/', { code }), 2: buildHref, 3: buildHref, 4: buildHref, 5: null }
+    : {
+        1: withParams('/', { code }),
+        2: j ? withParams(`/design/${j}`, { code }) : null,
+        3: d ? withParams('/guide', { design: d, job: j, code }) : null,
+        4: d ? withParams('/guide', { design: d, job: j, code }) : null,
+        5: d ? withParams('/print', { design: d, job: j, code }) : null,
+      }
   return (
     <header className="progress-header">
       <Link className="brand" to={href[1]!}>

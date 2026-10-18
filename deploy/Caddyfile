@@ -19,6 +19,10 @@
 	handle /api/design* {
 		reverse_proxy mcp:8000
 	}
+	# Breadboard builds from bench photos (mcp-server/physical_studio/bench/).
+	handle /api/build* {
+		reverse_proxy mcp:8000
+	}
 	# Personal keys for visitors' own AI, and the guides each key exported (accounts.py).
 	handle /api/connect {
 		reverse_proxy mcp:8000

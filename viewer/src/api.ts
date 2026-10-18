@@ -99,3 +99,81 @@ export interface ExportedProject {
 /** Guides the visitor's AI exported with their key, newest first. */
 export const listMyProjects = (key: string) =>
   call<ExportedProject[]>('/api/my-projects', { headers: { Authorization: `Bearer ${key}` } })
+
+// --- Breadboard builds from bench photos (mcp-server/physical_studio/bench/, ported from Senna's
+// Build helper in circuit-studio/). Contract agreed with Senna's Claude.
+
+export interface BenchModel {
+  glb: string // url of a GLB whose nodes are named <id>__mesh
+  labels: { id: string; name: string; kind: string }[]
+  new?: string[] // ids placed in this step (step models only)
+}
+
+export interface Verdict {
+  observation: string
+  status: 'done' | 'problem' | 'in_progress' | 'unclear' | 'error'
+  problem: string
+  fix: string
+  confidence: number
+}
+
+export interface BuildStep {
+  number: number
+  title: string
+  instruction: string
+  check: string
+  part_ids: string[]
+  placements: { what: string; hole: string; where: string }[]
+  picture: string | null // url of the step's numbered-hole SVG
+  markers: [number, string, string, string][] // [n, what, where, hole]
+  model: BenchModel | null
+}
+
+export interface BuildPlan {
+  title: string
+  summary: string
+  final_result: string
+  code: string
+  safety: string[]
+  parts: { name: string; quantity: number; why: string; user_has_it: boolean; size: string }[]
+  part_guide: Record<string, string>
+  model: BenchModel | null
+  steps: BuildStep[]
+}
+
+export interface BuildCommit {
+  id: string
+  kind: 'start' | 'step'
+  step: number | null
+  message: string
+  time: string // ISO
+  images: string[]
+  verdict?: Verdict
+  model?: BenchModel | null
+  guide?: Record<string, string>
+  detected?: { name: string; quantity: number; where: string; scene_id: string }[]
+  parent?: string
+}
+
+export interface Build {
+  id: string
+  status: 'scanning' | 'planning' | 'checking' | 'modelling' | 'done' | 'error'
+  stage: string
+  error: string | null
+  goal: string
+  plan: BuildPlan | null
+  commits: BuildCommit[]
+}
+
+export const startBuild = (inputs: { goal: string; have?: string; known?: string; photos?: string[] }) =>
+  call<{ id: string }>('/api/build', { method: 'POST', headers: headers(true), body: JSON.stringify(inputs) })
+
+export const getBuild = (id: string) => call<Build>(`/api/build/${encodeURIComponent(id)}`, { headers: headers() })
+
+/** Photos of the bench after a step: the AI's verdict and a 3D model of what was photographed (10–60 s). */
+export const commitStep = (id: string, step: number, photos: string[], note: string) =>
+  call<BuildCommit>(`/api/build/${encodeURIComponent(id)}/commit`, {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ step, photos, note }),
+  })

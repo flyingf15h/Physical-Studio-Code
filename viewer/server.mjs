@@ -32,6 +32,8 @@ const TYPES = {
   '.stl': 'model/stl',
   '.step': 'model/step',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 }

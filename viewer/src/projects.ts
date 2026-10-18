@@ -3,8 +3,10 @@
 // AI exported with their key (GET /api/my-projects). The opened ones and the key live in
 // localStorage: per browser, and the page still works when storage is blocked.
 
+import { withParams } from './router'
+
 export interface Project {
-  design: string // ?design= value: a public/ folder or "out/<job id>"
+  design: string // ?design= value: a public/ folder or "out/<job id>"; "build/<id>" for a breadboard build
   title: string
   prompt?: string
   steps?: number
@@ -48,7 +50,12 @@ const MAX = 30
 // Every export writes design.png (render.py's quick software render). The two ready-made guides'
 // thumbnails are screenshots of the guide instead, which look closer to the real thing; rerunning
 // their example scripts replaces them with the software render.
-export const thumbnail = (design: string) => `/${design}/design.png`
+export const thumbnail = (design: string) =>
+  design.startsWith('build/') ? `/out/build-${design.slice(6)}/step-1.svg` : `/${design}/design.png`
+
+/** Where a project opens: a build's own page, or the guide. */
+export const projectHref = (design: string, code: string | null) =>
+  design.startsWith('build/') ? withParams(`/${design}`, { code }) : withParams('/guide', { design, code })
 
 export function yourProjects(): Project[] {
   try {

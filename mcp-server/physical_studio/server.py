@@ -628,6 +628,15 @@ from .jobs import JobManager, register_routes  # noqa: E402
 jobs = JobManager(OUT_DIR, Studio, mcp.list_tools)
 register_routes(mcp, jobs, PARTS_DIR)
 
+# Breadboard builds from bench photos (screen 1's "Design it"): Senna's Build helper, ported from
+# circuit-studio/ into physical_studio/bench/. Optional until that package lands.
+try:
+    from .bench import register_build_routes  # noqa: E402
+except ImportError:
+    register_build_routes = None
+if register_build_routes:
+    register_build_routes(mcp, OUT_DIR, PARTS_DIR)
+
 CONNECTS_PER_HOUR = int(os.environ.get("CONNECTS_PER_HOUR", "5"))
 _connects: dict[str, list[float]] = {}
 

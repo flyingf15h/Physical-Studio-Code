@@ -1,0 +1,11 @@
+.bench-model { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.bench-canvas { position: relative; width: 100%; border-radius: 10px; overflow: hidden; background: #ece9e4; }
+.bench-canvas canvas { touch-action: none; }
+.bench-tools { position: absolute; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.bench-tools span { background: color-mix(in srgb, var(--panel) 80%, transparent); border-radius: 999px; padding: 4px 10px; }
+.bench-tools button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 5px 11px; cursor: pointer; font-size: 12px; color: inherit; }
+.bench-info { margin: 0; font-size: 14px; line-height: 1.45; min-height: 20px; }
+.bench-parts { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
+.bench-parts button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+.bench-parts button.new { border-color: var(--accent); color: var(--accent); }
+.bench-parts button.picked { background: var(--accent); border-color: var(--accent); color: #fff; }

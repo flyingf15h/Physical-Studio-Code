@@ -1,5 +1,6 @@
 import { useRoute } from './router'
 import App from './App'
+import { BuildPage } from './pages/BuildPage'
 import { DescribePage } from './pages/DescribePage'
 import { DesignPage } from './pages/DesignPage'
 import { PrintPage } from './pages/PrintPage'
@@ -10,6 +11,8 @@ export default function Root() {
   switch (route.page) {
     case 'describe':
       return <DescribePage />
+    case 'build':
+      return <BuildPage key={route.buildId} buildId={route.buildId} />
     case 'projects':
       return <ProjectsPage />
     case 'design':

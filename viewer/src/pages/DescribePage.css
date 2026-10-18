@@ -30,6 +30,9 @@
 .describe-sub { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 28px 0 10px; }
 .describe-sample { font-size: 14px; color: var(--muted); margin: 20px 0 0; }
 .describe-sample a { color: var(--accent); }
+.describe-extra { display: grid; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.describe-extra input, .describe-extra textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; line-height: 1.4; color: var(--ink); background: var(--panel); resize: vertical; }
+.describe-extra input:focus, .describe-extra textarea:focus { outline: none; border-color: var(--accent); }
 .describe-own-ai { margin-top: 28px; }
 .describe-own-ai > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
 .describe-parts { margin-top: 28px; }

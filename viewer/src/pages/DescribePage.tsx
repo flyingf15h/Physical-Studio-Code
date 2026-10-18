@@ -1,38 +1,23 @@
-// Dashboard (screen 1). Mockup: docs/product-vision.html. The prompt box starts a design job on the
-// server's own model keys and moves on to screen 2; the example prompts (Senna's Claude) and the
-// parts library (Kelly's Claude) fill or extend the prompt. Images (upload, paste or drop) and links
-// go along with it. Below: the ready-made guides, and optionally designing with your own AI.
-import { useEffect, useRef, useState } from 'react'
-import { listProviders, startDesign, type Provider } from '../api'
+// Dashboard (screen 1). Mockup: docs/product-vision.html. "Design it" starts a breadboard build on the
+// server's own model keys (Senna's Build helper flow, mcp-server/physical_studio/bench/): the prompt,
+// photos of your bench, the parts you have and connections you already know. It moves on to the
+// build's page (/build/<id>). The example prompts (Senna's Claude) and the parts library (Kelly's
+// Claude) fill or extend the prompt. Below: the ready-made guides, and designing with your own AI.
+import { useRef, useState } from 'react'
+import { startBuild } from '../api'
 import { ConnectAI } from '../components/ConnectAI'
 import { ExamplePrompts } from '../components/ExamplePrompts'
 import { PartsLibrary } from '../components/PartsLibrary'
 import { ReadyMadeGuides } from '../components/ProjectsList'
 import { ProgressHeader } from '../components/ProgressHeader'
+import { shrink } from '../images'
 import { designParams, navigate, withParams } from '../router'
 import './DescribePage.css'
 
 const MIN_CHARS = 3
 const MAX_CHARS = 1000
-const MAX_IMAGES = 4 // same limits as mcp-server/physical_studio/attachments.py
+const MAX_IMAGES = 10 // bench photos; same limit as the build API (mcp-server/physical_studio/bench/)
 const MAX_LINKS = 5
-const MAX_SIDE = 1600 // px; photos are shrunk before upload
-
-/** Image file -> JPEG data URL, longest side at most MAX_SIDE. */
-async function shrink(file: Blob): Promise<string> {
-  const bitmap = await createImageBitmap(file)
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height))
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.round(bitmap.width * scale)
-  canvas.height = Math.round(bitmap.height * scale)
-  const ctx = canvas.getContext('2d')!
-  ctx.fillStyle = '#fff' // transparent PNGs become white, not black
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-  bitmap.close()
-  return canvas.toDataURL('image/jpeg', 0.85)
-}
-
 function asLink(text: string): string | null {
   try {
     const url = new URL(text.trim())
@@ -50,12 +35,8 @@ export function DescribePage() {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [providers, setProviders] = useState<Provider[]>([])
-  const [model, setModel] = useState<string | null>(null) // null: the server default
-
-  useEffect(() => {
-    listProviders().then(setProviders, () => setProviders([])) // no picker if it fails
-  }, [])
+  const [have, setHave] = useState('')
+  const [known, setKnown] = useState('')
   const box = useRef<HTMLTextAreaElement>(null)
   const filePicker = useRef<HTMLInputElement>(null)
   const { code } = designParams()
@@ -98,8 +79,9 @@ export function DescribePage() {
     setBusy(true)
     setError(null)
     try {
-      const { id } = await startDesign(prompt.trim(), { images, links, ...(model ? { model } : {}) })
-      navigate(withParams(`/design/${id}`, { code }))
+      const goal = prompt.trim() + (links.length ? `\nLinks: ${links.join(' ')}` : '')
+      const { id } = await startBuild({ goal, have: have.trim(), known: known.trim(), photos: images })
+      navigate(withParams(`/build/${id}`, { code }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setBusy(false)
@@ -113,8 +95,9 @@ export function DescribePage() {
         <section className="describe-main">
           <h1>What do you want to build?</h1>
           <p className="describe-lede">
-            Describe a project. Physical Studio designs it out of real parts with real dimensions, looks up what each
-            part really looks like, and writes a 3D step-by-step guide you can follow as you build.
+            Say what you want to build and add photos of your bench if you have them. Physical Studio works out what's
+            already plugged in, adds the parts you still need, and writes step-by-step instructions with a picture and a
+            3D model for every step. Photograph each step and it checks your work.
           </p>
           <form
             className={`describe-form${dragging ? ' dragging' : ''}`}
@@ -147,7 +130,7 @@ export function DescribePage() {
               value={prompt}
               maxLength={MAX_CHARS}
               rows={4}
-              placeholder="e.g. Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side."
+              placeholder="e.g. A traffic light: red, yellow and green LEDs that cycle, and a button that starts a crosswalk cycle."
               aria-label="Describe your project"
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
@@ -185,6 +168,23 @@ export function DescribePage() {
                 ))}
               </ul>
             )}
+            <div className="describe-extra">
+              <input
+                value={have}
+                onChange={(e) => setHave(e.target.value)}
+                maxLength={2000}
+                placeholder="Parts you have (optional), e.g. Arduino Uno, breadboard, some LEDs, jumper wires"
+                aria-label="Parts you have"
+              />
+              <textarea
+                value={known}
+                onChange={(e) => setKnown(e.target.value)}
+                maxLength={3000}
+                rows={2}
+                placeholder="Connections you already know (optional), e.g. red LED long leg in e10, wire from pin 9 to a10"
+                aria-label="Connections you already know"
+              />
+            </div>
             {linkDraft !== null && (
               <div className="describe-linkrow">
                 <input
@@ -216,7 +216,7 @@ export function DescribePage() {
                 disabled={images.length >= MAX_IMAGES}
                 onClick={() => filePicker.current?.click()}
               >
-                Add image
+                Add bench photos
               </button>
               <button
                 type="button"
@@ -237,32 +237,20 @@ export function DescribePage() {
                   e.target.value = ''
                 }}
               />
-              <span className="describe-hint">or paste / drop an image</span>
+              <span className="describe-hint">or paste / drop photos</span>
               <span className="describe-count">
                 {length}/{MAX_CHARS}
               </span>
-              {providers.length > 1 && (
-                <label className="describe-model">
-                  <span>Model</span>
-                  <select value={model ?? providers[0].id} onChange={(e) => setModel(e.target.value)}>
-                    {providers.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
               <button type="submit" className="describe-go" disabled={!ready}>
                 {busy ? 'Starting…' : 'Design it'}
               </button>
             </div>
             {error && <p className="describe-error">{error}</p>}
           </form>
-          <h2 className="describe-sub">Try one</h2>
-          <ExamplePrompts onPick={fill} />
           <h2 className="describe-sub">Ready-made guides</h2>
           <ReadyMadeGuides />
+          <h2 className="describe-sub">Try one</h2>
+          <ExamplePrompts onPick={fill} />
           <div className="describe-parts">
             <PartsLibrary onPick={(part) => fill(prompt.trim() ? `${prompt.trim()} ${part.name}` : part.name)} />
           </div>

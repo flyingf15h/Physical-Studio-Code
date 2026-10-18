@@ -29,12 +29,6 @@ const EXAMPLES: Example[] = [
       'Night-light for an Arduino Uno: a row of 6 LEDs on top of the enclosure and one button to cycle brightness, USB accessible on the side for power.',
     uses: 'Arduino Uno, 6 LEDs, 1 button',
   },
-  {
-    title: 'Kitchen timer',
-    prompt:
-      'Kitchen timer for an Arduino Uno in an enclosure: 2 buttons to add a minute and start, 3 LEDs showing time left, a buzzer when it ends, USB accessible on the side.',
-    uses: 'Arduino Uno, 2 buttons, 3 LEDs, piezo buzzer',
-  },
 ]
 
 /** Clickable starter prompts for the Describe screen; the first is the demo. */

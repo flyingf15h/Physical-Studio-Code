@@ -18,7 +18,8 @@ function serveExports(): Plugin {
         const file = path.join(OUT_DIR, decodeURIComponent((req.url ?? '/').split('?')[0]))
         if (!file.startsWith(OUT_DIR + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return next()
         res.setHeader('Cache-Control', 'no-store')
-        res.setHeader('Content-Type', file.endsWith('.json') ? 'application/json' : 'model/gltf-binary')
+        const types: Record<string, string> = { '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg' }
+        res.setHeader('Content-Type', types[path.extname(file)] ?? 'model/gltf-binary')
         fs.createReadStream(file).pipe(res)
       })
     },
@@ -64,6 +65,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api/parts': env.MCP_HTTP_URL || 'http://localhost:8000',
         '/api/design': env.MCP_HTTP_URL || 'http://localhost:8000',
+        '/api/build': env.MCP_HTTP_URL || 'http://localhost:8000',
         '/api/connect': env.MCP_HTTP_URL || 'http://localhost:8000',
         '/api/my-projects': env.MCP_HTTP_URL || 'http://localhost:8000',
       },
