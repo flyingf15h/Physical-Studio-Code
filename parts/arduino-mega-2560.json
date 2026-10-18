@@ -1,0 +1,574 @@
+{
+  "id": "arduino-mega-2560",
+  "name": "Arduino Mega 2560 Rev3",
+  "category": "board",
+  "source": "Arduino Mega 2560 Rev3 reference drawing (4 x 2.1 inch board, hole grid on 0.1 inch); Uno-compatible header pins from parts/arduino-uno.json; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      101.6,
+      53.3,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -2.0
+    ],
+    "max": [
+      101.6,
+      53.3,
+      12.5
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        13.97,
+        2.54,
+        0.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        15.24,
+        50.8,
+        0.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        66.04,
+        7.62,
+        0.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        66.04,
+        35.56,
+        0.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h5",
+      "position": [
+        90.17,
+        50.8,
+        0.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h6",
+      "position": [
+        96.52,
+        2.54,
+        0.0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [
+    {
+      "id": "usb_b",
+      "type": "usb-b",
+      "face": "-x",
+      "center": [
+        0.0,
+        38.1,
+        7.05
+      ],
+      "size": [
+        12.0,
+        10.9
+      ],
+      "protrusion": 6.2
+    },
+    {
+      "id": "barrel_jack",
+      "type": "barrel-jack",
+      "face": "-x",
+      "center": [
+        0.0,
+        7.6,
+        7.1
+      ],
+      "size": [
+        9.0,
+        11.0
+      ],
+      "protrusion": 1.8
+    }
+  ],
+  "pins": [
+    {
+      "id": "nc",
+      "label": "NC",
+      "position": [
+        27.94,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ioref",
+      "label": "IOREF",
+      "position": [
+        30.48,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "reset",
+      "label": "RESET",
+      "position": [
+        33.02,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        35.56,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "5v",
+      "label": "5V",
+      "position": [
+        38.1,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd1",
+      "label": "GND",
+      "position": [
+        40.64,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd2",
+      "label": "GND",
+      "position": [
+        43.18,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vin",
+      "label": "VIN",
+      "position": [
+        45.72,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a0",
+      "label": "A0",
+      "position": [
+        50.8,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a1",
+      "label": "A1",
+      "position": [
+        53.34,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a2",
+      "label": "A2",
+      "position": [
+        55.88,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a3",
+      "label": "A3",
+      "position": [
+        58.42,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a4",
+      "label": "A4",
+      "position": [
+        60.96,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "a5",
+      "label": "A5",
+      "position": [
+        63.5,
+        2.54,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d0",
+      "label": "D0",
+      "position": [
+        63.5,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d1",
+      "label": "D1",
+      "position": [
+        60.96,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d2",
+      "label": "D2",
+      "position": [
+        58.42,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d3",
+      "label": "D3",
+      "position": [
+        55.88,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d4",
+      "label": "D4",
+      "position": [
+        53.34,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d5",
+      "label": "D5",
+      "position": [
+        50.8,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d6",
+      "label": "D6",
+      "position": [
+        48.26,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d7",
+      "label": "D7",
+      "position": [
+        45.72,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d8",
+      "label": "D8",
+      "position": [
+        41.66,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d9",
+      "label": "D9",
+      "position": [
+        39.12,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d10",
+      "label": "D10",
+      "position": [
+        36.58,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d11",
+      "label": "D11",
+      "position": [
+        34.04,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d12",
+      "label": "D12",
+      "position": [
+        31.5,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "d13",
+      "label": "D13",
+      "position": [
+        28.96,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd3",
+      "label": "GND",
+      "position": [
+        26.42,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "aref",
+      "label": "AREF",
+      "position": [
+        23.88,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        21.34,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        18.8,
+        50.8,
+        10.1
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "The first 68 mm match the smaller Arduino R3 boards (same headers and holes, USB-B and barrel jack on -x), plus 32 more digital pins, 4 serial ports and 16 analog inputs. Pins listed here are the R3-header ones.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f6fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

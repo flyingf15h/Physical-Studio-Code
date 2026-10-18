@@ -547,7 +547,7 @@ function StepView({
           wires={plan.wires ?? {}}
           caption={
             isHardware(plan)
-              ? `The build after this step${VIEW_WORDS[s.picture_view ?? 'iso'] ?? ''}. Cyan is the part you add now; the AI compares your photos with this picture.`
+              ? `${s.picture_close_up ? 'A close-up of the build after this step' : 'The build after this step'}${VIEW_WORDS[s.picture_view ?? 'iso'] ?? ''}. Cyan is what you add now; the AI compares your photos with this picture.`
               : 'Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.'
           }
         />

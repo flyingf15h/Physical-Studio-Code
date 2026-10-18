@@ -1,0 +1,98 @@
+{
+  "id": "barrel-jack-dc005",
+  "name": "DC barrel jack 5.5 x 2.1 mm (DC-005)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      14.2,
+      9.0,
+      11.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -3.5
+    ],
+    "max": [
+      14.2,
+      9.0,
+      11.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "plug",
+      "type": "barrel-jack",
+      "face": "-x",
+      "center": [
+        0.0,
+        4.5,
+        6.5
+      ],
+      "size": [
+        9.0,
+        9.0
+      ],
+      "protrusion": 0.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+ (centre pin)",
+      "position": [
+        13.0,
+        4.5,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "- (sleeve)",
+      "position": [
+        7.0,
+        4.5,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "switch",
+      "label": "switch",
+      "position": [
+        10.0,
+        0.0,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Most wall adapters are centre-positive; check the symbol on the adapter.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

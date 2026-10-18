@@ -1,0 +1,99 @@
+{
+  "id": "toggle-switch-mts102",
+  "name": "Toggle switch SPDT (MTS-102, 6 mm panel)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      13.2,
+      8.0,
+      10.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -4.0
+    ],
+    "max": [
+      13.2,
+      8.0,
+      29.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "lever",
+      "type": "toggle-lever",
+      "face": "+z",
+      "center": [
+        6.6,
+        4.0,
+        10.0
+      ],
+      "size": [
+        6.0,
+        6.0
+      ],
+      "protrusion": 19.0,
+      "clearance": 0.2
+    }
+  ],
+  "pins": [
+    {
+      "id": "1",
+      "label": "1",
+      "position": [
+        1.9,
+        4.0,
+        -4.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "common",
+      "label": "common",
+      "position": [
+        6.6,
+        4.0,
+        -4.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3",
+      "label": "3",
+      "position": [
+        11.3,
+        4.0,
+        -4.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Mounts through a 6 mm panel hole with its nut. Middle leg is common; flipping the lever joins it to one side or the other.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "Typical colour of the common part"
+  }
+}

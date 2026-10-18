@@ -1,0 +1,85 @@
+{
+  "id": "led-10mm",
+  "name": "LED 10 mm",
+  "category": "output",
+  "source": "Typical 10 mm through-hole LED datasheet (11 mm flange, 13.8 mm tall, 2.54 mm lead pitch); legs assumed trimmed to 10 mm; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      11.0,
+      11.0,
+      13.8
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -10.0
+    ],
+    "max": [
+      11.0,
+      11.0,
+      13.8
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "lens",
+      "type": "led-lens",
+      "face": "+z",
+      "center": [
+        5.5,
+        5.5,
+        13.8
+      ],
+      "size": [
+        10.0,
+        10.0
+      ],
+      "protrusion": 0.0,
+      "clearance": 0.2
+    }
+  ],
+  "pins": [
+    {
+      "id": "anode",
+      "label": "anode",
+      "position": [
+        6.77,
+        5.5,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cathode",
+      "label": "cathode",
+      "position": [
+        4.23,
+        5.5,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Anode is the longer leg; the cathode is on the flat side of the flange. Needs a 220 ohm series resistor at 5 V.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#d23b3b",
+    "metallic": 0.0,
+    "roughness": 0.25,
+    "source": "Typical colour of the common part"
+  }
+}

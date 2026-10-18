@@ -62,7 +62,8 @@ def summary(part: dict) -> dict:
 
 
 def search_parts(library: dict[str, dict], query: str = "", category: str | None = None) -> list[dict]:
-    """Every word of the query must appear in the part's id, name, category or notes."""
+    """Every word of the query must appear in the part's id, name, category or notes. Parts whose id or name
+    has the words come before ones that only mention them in their notes."""
     if category is not None and category not in CATEGORIES:
         raise PartError(f"category {category!r} is not one of {sorted(CATEGORIES)}")
     words = query.lower().split()
@@ -72,8 +73,9 @@ def search_parts(library: dict[str, dict], query: str = "", category: str | None
             continue
         haystack = " ".join(str(part.get(k, "")) for k in ("id", "name", "category", "notes")).lower()
         if all(w in haystack for w in words):
-            results.append(summary(part))
-    return results
+            title = f"{part['id']} {part['name']}".lower()
+            results.append((-sum(w in title for w in words), len(results), summary(part)))
+    return [r[2] for r in sorted(results, key=lambda r: r[:2])]
 
 
 def get_part(library: dict[str, dict], part_id: str) -> dict:

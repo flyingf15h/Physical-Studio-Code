@@ -243,13 +243,70 @@ PARTS_LIST = [
     board("microsd-module", "MicroSD card module (SPI)", [42.0, 24.0, 1.6], [(["GND", "VCC", "MISO", "MOSI", "SCK", "CS"], 1.5, 5.65, "y")],
           "SPI: MISO, MOSI and SCK to the board's SPI pins, CS to any digital pin. FAT32 cards.", BLUE_PCB, holes([(3.0, 3.0), (39.0, 3.0), (3.0, 21.0), (39.0, 21.0)], 3.0),
           category="misc", above=3.0),
+    # --- more everyday parts (the Dashboard's parts search suggests these too) ---
+    part("resistor-330", "Resistor 330 Ω (1/4 W)", "misc", [6.3, 2.5, 2.5], legs(["1", "2"], -1.93, 1.25, 10.16, 3.0),
+         "Bands orange, orange, brown (gold). Either way round. A dimmer LED resistor at 5 V, or the usual one for blue/white LEDs at 3.3 V.", BEIGE, below=3.0),
+    part("resistor-4k7", "Resistor 4.7 kΩ (1/4 W)", "misc", [6.3, 2.5, 2.5], legs(["1", "2"], -1.93, 1.25, 10.16, 3.0),
+         "Bands yellow, violet, red (gold). Either way round. The usual pull-up for I2C lines and a DS18B20's data pin.", BEIGE, below=3.0),
+    part("resistor-100k", "Resistor 100 kΩ (1/4 W)", "misc", [6.3, 2.5, 2.5], legs(["1", "2"], -1.93, 1.25, 10.16, 3.0),
+         "Bands brown, black, yellow (gold). Either way round. For voltage dividers that read a battery.", BEIGE, below=3.0),
+    part("led-10mm", "LED 10 mm", "output", [11.0, 11.0, 13.8], legs(["anode", "cathode"], 6.77, 5.5, -2.54, 10.0),
+         "Anode is the longer leg; the cathode is on the flat side of the flange. Needs a 220 ohm series resistor at 5 V.", {"color": "#d23b3b", "metallic": 0.0, "roughness": 0.25},
+         connectors=[{"id": "lens", "type": "led-lens", "face": "+z", "center": [5.5, 5.5, 13.8], "size": [10.0, 10.0], "protrusion": 0.0, "clearance": 0.2}], below=10.0,
+         source="Typical 10 mm through-hole LED datasheet (11 mm flange, 13.8 mm tall, 2.54 mm lead pitch); legs assumed trimmed to 10 mm; not yet measured"),
+    part("arduino-mega-2560", "Arduino Mega 2560 Rev3", "board", [101.6, 53.3, 1.6],
+         [{**p} for p in json.loads((PARTS / "arduino-uno.json").read_text(encoding="utf-8"))["pins"]],
+         "The first 68 mm match the smaller Arduino R3 boards (same headers and holes, USB-B and barrel jack on -x), plus 32 more digital pins, "
+         "4 serial ports and 16 analog inputs. Pins listed here are the R3-header ones.", {"color": "#1f6fa8", "metallic": 0.1, "roughness": 0.6},
+         holes([(13.97, 2.54), (15.24, 50.8), (66.04, 7.62), (66.04, 35.56), (90.17, 50.8), (96.52, 2.54)], 3.2),
+         [{"id": "usb_b", "type": "usb-b", "face": "-x", "center": [0.0, 38.1, 7.05], "size": [12.0, 10.9], "protrusion": 6.2},
+          {"id": "barrel_jack", "type": "barrel-jack", "face": "-x", "center": [0.0, 7.6, 7.1], "size": [9.0, 11.0], "protrusion": 1.8}],
+         below=2.0, above=10.9,
+         source="Arduino Mega 2560 Rev3 reference drawing (4 x 2.1 inch board, hole grid on 0.1 inch); Uno-compatible header pins from parts/arduino-uno.json; not yet measured"),
+    board("xiao-esp32c3", "Seeed XIAO ESP32-C3", [21.0, 17.8, 1.2],
+          [(["D0", "D1", "D2", "D3", "D4/SDA", "D5/SCL", "D6/TX"], 2.88, 1.28, "x"), (["5V", "GND", "3V3", "D10/MOSI", "D9/MISO", "D8/SCK", "D7/RX"], 2.88, 16.52, "x")],
+          "Thumb-sized Wi-Fi + Bluetooth board, 3.3 V logic. USB-C on the -x end. Check the silkscreen: D0 sits across the board from 5V.", BLACK_PCB,
+          connectors=[usb("-x", [0.0, 8.9, 2.7], 9.0, 3.2, "usb-c")], above=3.2),
+    part("battery-18650", "Li-ion cell 18650 (3.7 V)", "misc", [65.0, 18.3, 18.3],
+         [{"id": "plus", "label": "+", "position": [65.0, 9.15, 9.15], "direction": [1, 0, 0]}, {"id": "minus", "label": "-", "position": [0.0, 9.15, 9.15], "direction": [-1, 0, 0]}],
+         "3.0-4.2 V. Always in a holder with a protection circuit or a charger board (TP4056); never solder to the cell.", {"color": "#2f6fb5", "metallic": 0.2, "roughness": 0.4}),
+    board("tp4056-charger", "Li-ion charger TP4056 (micro-USB, with protection)", [26.0, 17.0, 1.6],
+          [(["IN-", "IN+"], 3.0, 1.73, "y"), (["OUT-", "B-", "B+", "OUT+"], 24.0, 1.69, "y")],
+          "Charges one 3.7 V Li-ion cell at up to 1 A from micro-USB on the -x end. The cell goes on B+/B-, your circuit on OUT+/OUT-. Red LED charging, blue/green done.", BLUE_PCB,
+          connectors=[usb("-x", [0.0, 8.5, 2.6])], above=3.0),
+    part("speaker-28mm", "Speaker 28 mm (8 Ω, 0.5 W)", "output", [28.0, 28.0, 5.5],
+         [{"id": "plus", "label": "+", "position": [14.0, 26.0, 0.0], "direction": [0, 0, -1]}, {"id": "minus", "label": "-", "position": [14.0, 2.0, 0.0], "direction": [0, 0, -1]}],
+         "Louder and fuller than a piezo. Drive it through a transistor or a small amplifier (PAM8302), not straight from a pin.", BLACK,
+         connectors=[{"id": "cone", "type": "sound-port", "face": "+z", "center": [14.0, 14.0, 5.5], "size": [20.0, 20.0], "protrusion": 0.0}]),
+    part("vibration-motor-1027", "Coin vibration motor 10 mm (1027)", "output", [10.0, 10.0, 2.7],
+         [{"id": "plus", "label": "+ (red wire)", "position": [10.0, 6.0, 1.3], "direction": [1, 0, 0]}, {"id": "minus", "label": "- (blue wire)", "position": [10.0, 4.0, 1.3], "direction": [1, 0, 0]}],
+         "3 V, about 80 mA: switch it with a transistor and a 1N4148 across it. Peel-off adhesive on the back.", METAL),
+    part("toggle-switch-mts102", "Toggle switch SPDT (MTS-102, 6 mm panel)", "input", [13.2, 8.0, 10.0], legs(["1", "common", "3"], 1.9, 4.0, 4.7, 4.0),
+         "Mounts through a 6 mm panel hole with its nut. Middle leg is common; flipping the lever joins it to one side or the other.", METAL,
+         connectors=[{"id": "lever", "type": "toggle-lever", "face": "+z", "center": [6.6, 4.0, 10.0], "size": [6.0, 6.0], "protrusion": 19.0, "clearance": 0.2}],
+         below=4.0, above=19.0),
+    part("barrel-jack-dc005", "DC barrel jack 5.5 x 2.1 mm (DC-005)", "misc", [14.2, 9.0, 11.0],
+         [{"id": "plus", "label": "+ (centre pin)", "position": [13.0, 4.5, -3.5], "direction": [0, 0, -1]},
+          {"id": "minus", "label": "- (sleeve)", "position": [7.0, 4.5, -3.5], "direction": [0, 0, -1]},
+          {"id": "switch", "label": "switch", "position": [10.0, 0.0, -3.5], "direction": [0, 0, -1]}],
+         "Most wall adapters are centre-positive; check the symbol on the adapter.", BLACK,
+         connectors=[{"id": "plug", "type": "barrel-jack", "face": "-x", "center": [0.0, 4.5, 6.5], "size": [9.0, 9.0], "protrusion": 0.0}], below=3.5),
+    board("bmp280-module", "Pressure + temperature sensor BMP280 (GY-BMP280)", [15.0, 11.5, 1.6], [(["VCC", "GND", "SCL", "SDA", "CSB", "SDO"], 1.15, 1.5, "x")],
+          "I2C at address 0x76 (SDO to GND) or 0x77. 3.3 V only on most purple boards. Reads air pressure (altitude) and temperature.", PURPLE_PCB, category="input", above=1.0),
+    board("max7219-matrix", "8x8 LED matrix with MAX7219", [50.0, 32.0, 1.6],
+          [(["VCC", "GND", "DIN", "CS", "CLK"], 1.5, 10.92, "y"), (["OUT VCC", "OUT GND", "DOUT", "OUT CS", "OUT CLK"], 48.5, 10.92, "y")],
+          "Three data pins (DIN, CS, CLK) drive all 64 LEDs; chain more modules from the output side. 5 V; use the LedControl or MD_Parola library.", BLUE_PCB,
+          category="output", above=9.0),
+    board("mq2-gas-sensor", "Gas / smoke sensor MQ-2 module", [32.0, 22.0, 1.6], [(["VCC", "GND", "DO", "AO"], 12.19, 1.5, "x")],
+          "5 V; the heater needs about 150 mA and a 24 h first burn-in. AO gives a level, DO switches at the trimmer's threshold.", BLUE_PCB,
+          holes([(2.5, 11.0), (29.5, 11.0)], 3.0), category="input", above=18.0),
 ]
 
 
 def main():
     PARTS.mkdir(exist_ok=True)
     for data in PARTS_LIST:
-        (PARTS / f"{data['id']}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+        (PARTS / f"{data['id']}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {len(PARTS_LIST)} parts to {PARTS}")
 
 

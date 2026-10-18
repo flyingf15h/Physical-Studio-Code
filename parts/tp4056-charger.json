@@ -1,0 +1,140 @@
+{
+  "id": "tp4056-charger",
+  "name": "Li-ion charger TP4056 (micro-USB, with protection)",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      26.0,
+      17.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      26.0,
+      17.0,
+      4.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "usb-micro",
+      "face": "-x",
+      "center": [
+        0.0,
+        8.5,
+        2.6
+      ],
+      "size": [
+        8.0,
+        3.0
+      ],
+      "protrusion": 1.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "inminus",
+      "label": "IN-",
+      "position": [
+        3.0,
+        1.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "inplus",
+      "label": "IN+",
+      "position": [
+        3.0,
+        4.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "outminus",
+      "label": "OUT-",
+      "position": [
+        24.0,
+        1.69,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "bminus",
+      "label": "B-",
+      "position": [
+        24.0,
+        4.23,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "bplus",
+      "label": "B+",
+      "position": [
+        24.0,
+        6.77,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "outplus",
+      "label": "OUT+",
+      "position": [
+        24.0,
+        9.31,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Charges one 3.7 V Li-ion cell at up to 1 A from micro-USB on the -x end. The cell goes on B+/B-, your circuit on OUT+/OUT-. Red LED charging, blue/green done.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

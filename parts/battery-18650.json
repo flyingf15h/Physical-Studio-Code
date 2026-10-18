@@ -1,0 +1,68 @@
+{
+  "id": "battery-18650",
+  "name": "Li-ion cell 18650 (3.7 V)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      65.0,
+      18.3,
+      18.3
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      65.0,
+      18.3,
+      18.3
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        65.0,
+        9.15,
+        9.15
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "-",
+      "position": [
+        0.0,
+        9.15,
+        9.15
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "3.0-4.2 V. Always in a holder with a protection circuit or a charger board (TP4056); never solder to the cell.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2f6fb5",
+    "metallic": 0.2,
+    "roughness": 0.4,
+    "source": "Typical colour of the common part"
+  }
+}

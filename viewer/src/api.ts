@@ -137,6 +137,7 @@ export interface BuildStep {
   tools?: string[] // hardware builds: tools this step needs
   picture_view?: string // hardware builds: the angle of the step picture (iso, iso_right, iso_back, iso_left_back, below)
   picture_wires?: { id: string; points: [number, number][] }[] // hardware builds: each wire in the picture, in fractions of its width and height
+  picture_close_up?: boolean // hardware builds: the picture zooms in on this step's parts
 }
 
 /** One end of a wire: the part and the pin label printed on it. */

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { listParts, type PartSummary } from '../api'
 import { authToken, useUser } from '../auth'
 import { BomUpload } from './BomUpload'
+import { searchParts } from '../partSearch'
 import './PartsLibrary.css'
 
 const fmt = (mm: number) => String(Math.round(mm * 10) / 10)
@@ -63,12 +64,9 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
   }, [parts])
 
   const shown = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return (parts ?? []).filter(
-      (p) =>
-        (!category || p.category === category) &&
-        (!q || [p.name, p.id, p.category].some((s) => s.toLowerCase().includes(q))),
-    )
+    const inCategory = (parts ?? []).filter((p) => !category || p.category === category)
+    // Typing ranks the likeliest part first ("le" -> LED 5 mm); see partSearch.ts.
+    return query.trim() ? searchParts(inCategory, query, inCategory.length) : inCategory
   }, [parts, query, category])
 
   const retry = () => {

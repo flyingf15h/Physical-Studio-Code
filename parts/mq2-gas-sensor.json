@@ -1,0 +1,115 @@
+{
+  "id": "mq2-gas-sensor",
+  "name": "Gas / smoke sensor MQ-2 module",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      32.0,
+      22.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      32.0,
+      22.0,
+      19.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.5,
+        11.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        29.5,
+        11.0,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        12.19,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        14.73,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "do",
+      "label": "DO",
+      "position": [
+        17.27,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "ao",
+      "label": "AO",
+      "position": [
+        19.81,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "5 V; the heater needs about 150 mA and a 24 h first burn-in. AO gives a level, DO switches at the trimmer's threshold.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

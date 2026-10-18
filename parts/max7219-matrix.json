@@ -1,0 +1,180 @@
+{
+  "id": "max7219-matrix",
+  "name": "8x8 LED matrix with MAX7219",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      50.0,
+      32.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      50.0,
+      32.0,
+      10.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        1.5,
+        10.92,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        1.5,
+        13.46,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "din",
+      "label": "DIN",
+      "position": [
+        1.5,
+        16.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cs",
+      "label": "CS",
+      "position": [
+        1.5,
+        18.54,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "clk",
+      "label": "CLK",
+      "position": [
+        1.5,
+        21.08,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out_vcc",
+      "label": "OUT VCC",
+      "position": [
+        48.5,
+        10.92,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out_gnd",
+      "label": "OUT GND",
+      "position": [
+        48.5,
+        13.46,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dout",
+      "label": "DOUT",
+      "position": [
+        48.5,
+        16.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out_cs",
+      "label": "OUT CS",
+      "position": [
+        48.5,
+        18.54,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out_clk",
+      "label": "OUT CLK",
+      "position": [
+        48.5,
+        21.08,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Three data pins (DIN, CS, CLK) drive all 64 LEDs; chain more modules from the output side. 5 V; use the LedControl or MD_Parola library.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -263,6 +263,32 @@ def top_textures(built: BuiltDesign, parts: dict[str, dict], parts_dir: Path) ->
     return out
 
 
+def extent(built: BuiltDesign, ids: set[str]) -> float:
+    """The largest side of the box around these pieces, mm."""
+    pts = []
+    for pid in ids:
+        piece = built.pieces[pid]
+        b = piece.local_mesh(tolerance=0.5, angular=1.0).bounds
+        corners = np.array([[x, y, z] for x in b[:, 0] for y in b[:, 1] for z in b[:, 2]])
+        pts.append(corners @ piece.matrix[:3, :3].T + piece.matrix[:3, 3])
+    pts = np.concatenate(pts)
+    return float((pts.max(axis=0) - pts.min(axis=0)).max())
+
+
+def close_up(built: BuiltDesign, visible: set[str], new: set[str]) -> set[str] | None:
+    """What a step picture should zoom in on, or None to show the whole build: when the new parts are
+    small next to the build (wires on a half-metre machine, a sensor, a pinion), frame them together
+    with the parts their wires plug into."""
+    if not new or len(visible) <= len(new):
+        return None
+    focus = set(new)
+    for pid in new:
+        piece = built.pieces[pid]
+        if piece.kind == "wire":
+            focus |= {piece.extra["from"]["placement"], piece.extra["to"]["placement"]} & visible
+    return focus if extent(built, focus) < 0.45 * extent(built, visible) else None
+
+
 def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict | None = None) -> list[str]:
     """step-01.png, step-02.png, ...: what the build looks like after each step, its new parts highlighted
     (the lid left off until the step that adds it), from the angle that shows the new parts best. Photo
@@ -278,9 +304,11 @@ def step_pictures(built: BuiltDesign, doc: dict, out_dir: Path, textures: dict |
         view = best_view(built, visible, lit) if lit and len(visible) > 1 else "iso"
         path = out_dir / f"step-{i:02d}.png"
         stats: dict = {}
-        path.write_bytes(render(built, view, visible, None, lit, size=size, labels=False, stats=stats, textures=textures))
+        focus = close_up(built, visible, lit)
+        path.write_bytes(render(built, view, visible, None, lit, size=size, labels=False, stats=stats, textures=textures, focus=focus))
         entry["picture"] = path.name
         entry["picture_view"] = view
+        entry["picture_close_up"] = focus is not None
         entry["picture_wires"] = [{"id": wid, "points": [[round(x / size[0], 4), round(y / size[1], 4)] for x, y in pts]}
                                   for wid, pts in stats["wires"].items()]
         written.append(str(path))

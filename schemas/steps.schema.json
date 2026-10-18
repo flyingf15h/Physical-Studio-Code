@@ -350,6 +350,10 @@
           "type": "string",
           "description": "The angle the step picture was rendered from (iso, iso_right, iso_back, iso_left_back, below)."
         },
+        "picture_close_up": {
+          "type": "boolean",
+          "description": "True when the step picture zooms in on this step's parts (and what their wires plug into) instead of showing the whole build."
+        },
         "picture_wires": {
           "type": "array",
           "description": "Every wire in the step picture as a line through its centre, [x, y] in fractions of the picture's width and height, so a page can make each wire clickable.",

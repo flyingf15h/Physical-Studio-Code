@@ -106,7 +106,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         step = {"number": n, "title": s["title"], "instruction": s.get("text", ""), "check": s.get("check", ""),
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
-                "picture_wires": s.get("picture_wires", []), "markers": markers, "section": s.get("section"), "tools": tools,
+                "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "tools": tools,
                 "model": {"glb": url(glb), "labels": [l for l in labels if l["id"] in shown], "new": new}}
         steps.append(step)
         internal_steps.append({**{k: step[k] for k in ("number", "title", "instruction", "check", "placements", "section")},

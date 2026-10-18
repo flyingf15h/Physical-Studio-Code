@@ -1,0 +1,84 @@
+{
+  "id": "speaker-28mm",
+  "name": "Speaker 28 mm (8 Ω, 0.5 W)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      28.0,
+      28.0,
+      5.5
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      28.0,
+      28.0,
+      5.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "cone",
+      "type": "sound-port",
+      "face": "+z",
+      "center": [
+        14.0,
+        14.0,
+        5.5
+      ],
+      "size": [
+        20.0,
+        20.0
+      ],
+      "protrusion": 0.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        14.0,
+        26.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "-",
+      "position": [
+        14.0,
+        2.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Louder and fuller than a piezo. Drive it through a transistor or a small amplifier (PAM8302), not straight from a pin.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

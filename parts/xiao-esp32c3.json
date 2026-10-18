@@ -1,0 +1,252 @@
+{
+  "id": "xiao-esp32c3",
+  "name": "Seeed XIAO ESP32-C3",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      21.0,
+      17.8,
+      1.2
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      21.0,
+      17.8,
+      4.4
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "usb-c",
+      "face": "-x",
+      "center": [
+        0.0,
+        8.9,
+        2.7
+      ],
+      "size": [
+        9.0,
+        3.2
+      ],
+      "protrusion": 1.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "d0",
+      "label": "D0",
+      "position": [
+        2.88,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d1",
+      "label": "D1",
+      "position": [
+        5.42,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d2",
+      "label": "D2",
+      "position": [
+        7.96,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d3",
+      "label": "D3",
+      "position": [
+        10.5,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d4_sda",
+      "label": "D4/SDA",
+      "position": [
+        13.04,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d5_scl",
+      "label": "D5/SCL",
+      "position": [
+        15.58,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d6_tx",
+      "label": "D6/TX",
+      "position": [
+        18.12,
+        1.28,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "5v",
+      "label": "5V",
+      "position": [
+        2.88,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        5.42,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        7.96,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d10_mosi",
+      "label": "D10/MOSI",
+      "position": [
+        10.5,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d9_miso",
+      "label": "D9/MISO",
+      "position": [
+        13.04,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d8_sck",
+      "label": "D8/SCK",
+      "position": [
+        15.58,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d7_rx",
+      "label": "D7/RX",
+      "position": [
+        18.12,
+        16.52,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Thumb-sized Wi-Fi + Bluetooth board, 3.3 V logic. USB-C on the -x end. Check the silkscreen: D0 sits across the board from 5V.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#24262a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

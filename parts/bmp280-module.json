@@ -1,0 +1,124 @@
+{
+  "id": "bmp280-module",
+  "name": "Pressure + temperature sensor BMP280 (GY-BMP280)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      15.0,
+      11.5,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      15.0,
+      11.5,
+      2.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        1.15,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        3.69,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        6.23,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        8.77,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "csb",
+      "label": "CSB",
+      "position": [
+        11.31,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sdo",
+      "label": "SDO",
+      "position": [
+        13.85,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "I2C at address 0x76 (SDO to GND) or 0x77. 3.3 V only on most purple boards. Reads air pressure (altitude) and temperature.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#5b3c8c",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

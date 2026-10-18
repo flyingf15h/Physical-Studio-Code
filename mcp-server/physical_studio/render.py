@@ -59,10 +59,12 @@ def render(
     labels: bool = True,
     stats: dict | None = None,
     textures: dict | None = None,
+    focus: set[str] | None = None,
 ) -> bytes:
     """stats, when given, gets "highlight_px": how many pixels of the highlighted pieces are visible, and
     "wires": each visible wire's centre line in output pixels. textures: piece id -> a textured quad in the
-    piece's frame (export.top_face: a board's top photo), drawn on the piece."""
+    piece's frame (export.top_face: a board's top photo), drawn on the piece. focus: piece ids to frame in
+    a close-up instead of fitting the whole build."""
     right, up, forward = camera_basis(view)
     offsets = offsets or {}
     highlight = highlight or set()
@@ -101,6 +103,16 @@ def render(
     span_x, span_y = sx.max() - sx.min(), sy.max() - sy.min()
     scale = min(W * (1 - 2 * margin) / max(span_x, 1e-6), H * (1 - 2 * margin) / max(span_y, 1e-6))
     cx, cy = (sx.max() + sx.min()) / 2, (sy.max() + sy.min()) / 2
+    keep = [k for k, pid in enumerate(ids) if focus and pid in focus]
+    if keep:
+        # Close-up: frame these pieces with room around them (at least a third of the whole build's
+        # width, so the builder can still tell where on the machine this is). The rest is cropped.
+        sel = np.isin(owners, keep)
+        fx, fy = sx[sel], sy[sel]
+        fw = max(1.5 * (fx.max() - fx.min()), span_x / 3)
+        fh = max(1.5 * (fy.max() - fy.min()), span_y / 3)
+        scale = min(W * (1 - 2 * margin) / max(fw, 1e-6), H * (1 - 2 * margin) / max(fh, 1e-6))
+        cx, cy = (fx.max() + fx.min()) / 2, (fy.max() + fy.min()) / 2
     px = (sx - cx) * scale + W / 2
     py = H / 2 - (sy - cy) * scale
 
