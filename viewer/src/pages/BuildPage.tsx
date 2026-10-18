@@ -4,7 +4,17 @@
 // step, and an optional photo commit the AI checks), the finished build, and the Commits tab next to
 // the build's title (hidden on ready-made guides, which nobody commits to).
 import { useEffect, useRef, useState } from 'react'
-import { commitStep, copyBuild, getBuild, type Build, type BuildCommit, type BuildPlan, type Verdict } from '../api'
+import {
+  commitStep,
+  copyBuild,
+  getBuild,
+  setBuildSummary,
+  type Build,
+  type BuildCommit,
+  type BuildPlan,
+  type BuildStep,
+  type Verdict,
+} from '../api'
 import { BenchModel } from '../components/BenchModel'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { ShareButton } from '../components/ShareButton'
@@ -25,7 +35,98 @@ const STAGES: { status: Build['status']; label: string }[] = [
 // Hardware (CAD) builds come from the design pipeline (bench/cad.py sets plan.kind = 'cad'): photos from the
 // front and side instead of a breadboard from straight above.
 function isHardware(plan: BuildPlan | null) {
-  return (plan as { kind?: string } | null)?.kind === 'cad'
+  return plan?.kind === 'cad'
+}
+
+/** Consecutive steps with the same section, or null when the plan has no sections (breadboard builds). */
+function sectionsOf(steps: BuildStep[]) {
+  if (!steps.some((s) => s.section)) return null
+  const groups: { name: string; start: number; end: number }[] = []
+  steps.forEach((s, i) => {
+    const name = s.section || 'More steps'
+    const last = groups[groups.length - 1]
+    if (last && last.name === name) last.end = i
+    else groups.push({ name, start: i, end: i })
+  })
+  return groups
+}
+
+const SUMMARY_MAX = 280
+
+/** The short project summary under the title: at most 3 lines, and the owner can rewrite it. */
+function Summary({ build, plan, onSaved }: { build: Build; plan: BuildPlan; onSaved: (summary: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(plan.summary)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const canEdit = !build.ready && build.mine !== false
+  if (editing) {
+    return (
+      <form
+        className="summary-edit"
+        onSubmit={(e) => {
+          e.preventDefault()
+          setBusy(true)
+          setError(null)
+          setBuildSummary(build.id, text)
+            .then((r) => {
+              onSaved(r.summary)
+              setEditing(false)
+            })
+            .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
+            .finally(() => setBusy(false))
+        }}
+      >
+        <textarea
+          value={text}
+          maxLength={SUMMARY_MAX}
+          rows={4}
+          autoFocus
+          aria-label="Project summary"
+          onChange={(e) => setText(e.target.value)}
+        />
+        <div className="commit-row">
+          <button type="submit" className="primary" disabled={busy || text.trim().length < 3}>
+            {busy ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            className="tool"
+            onClick={() => {
+              setEditing(false)
+              setText(plan.summary)
+              setError(null)
+            }}
+          >
+            Cancel
+          </button>
+          <span className="muted">
+            {text.length}/{SUMMARY_MAX}
+          </span>
+        </div>
+        {error && <p className="error-text">{error}</p>}
+      </form>
+    )
+  }
+  return (
+    <div className="summary">
+      <p className="prompt summary-text" title={plan.summary || build.goal}>
+        {plan.summary || build.goal}
+      </p>
+      {canEdit && (
+        <button
+          type="button"
+          className="summary-button"
+          onClick={() => {
+            setText(plan.summary)
+            setEditing(true)
+          }}
+        >
+          Edit summary
+        </button>
+      )}
+    </div>
+  )
 }
 
 function VerdictCard({ verdict, image, hardware }: { verdict: Verdict; image?: string; hardware?: boolean }) {
@@ -47,8 +148,14 @@ function VerdictCard({ verdict, image, hardware }: { verdict: Verdict; image?: s
             <span>How to fix it</span> {verdict.fix}
           </p>
         )}
-        {verdict.status === 'problem' && <p className="verdict-next">Fix it, then take a new photo and check again.</p>}
-        {verdict.status === 'in_progress' && <p className="verdict-next">Finish the step, then check again.</p>}
+        {verdict.next ? (
+          verdict.status !== 'error' && <p className="verdict-next">{verdict.next}</p>
+        ) : (
+          <>
+            {verdict.status === 'problem' && <p className="verdict-next">Fix it, then take a new photo and check again.</p>}
+            {verdict.status === 'in_progress' && <p className="verdict-next">Finish the step, then check again.</p>}
+          </>
+        )}
         {verdict.status === 'unclear' && (
           <p className="verdict-fix">
             {hardware
@@ -350,11 +457,18 @@ function StepView({
         <figure className="step-figure">
           <img className="step-picture" src={s.picture} alt={`Step ${index + 1}: where each part goes`} />
           <figcaption className="muted">
-            Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.
+            {isHardware(plan)
+              ? 'The build after this step. Cyan is the part you add now; the AI compares your photos with this picture.'
+              : 'Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.'}
           </figcaption>
         </figure>
       )}
       <p className="step-text">{s.instruction}</p>
+      {!!s.tools?.length && (
+        <p className="step-tools">
+          <span>You need</span> {s.tools.join(', ')}
+        </p>
+      )}
       {s.markers.length > 0 && (
         <ol className="markers">
           {s.markers.map(([n, what, where, hole]) => (
@@ -511,6 +625,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
   const [error, setError] = useState<string | null>(null)
   const [at, setAt] = useState(-1) // -1 overview, 0..n-1 steps, n finished
   const [tab, setTab] = useState<'guide' | 'commits'>('guide')
+  const [open, setOpen] = useState<Record<number, boolean>>({}) // sections the builder opened or closed
 
   useEffect(() => {
     let stop = false
@@ -571,6 +686,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
   }
 
   const n = plan.steps.length
+  const groups = sectionsOf(plan.steps)
   const item = (i: number, label: string) => (
     <li key={i}>
       <button className={i === at ? 'active' : i < at ? 'done' : ''} onClick={() => (setAt(i), setTab('guide'))}>
@@ -585,7 +701,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
       <div className="app">
         <aside className="sidebar">
           <header>
-            <div className="eyebrow">Breadboard build</div>
+            <div className="eyebrow">{isHardware(plan) ? 'Hardware build' : 'Breadboard build'}</div>
             <div className="build-title">
               <h1>{plan.title}</h1>
               {!build!.ready && (
@@ -600,12 +716,42 @@ export function BuildPage({ buildId }: { buildId: string }) {
                 </button>
               )}
             </div>
-            <p className="prompt">“{build!.goal}”</p>
+            <Summary
+              build={build!}
+              plan={plan}
+              onSaved={(summary) => setBuild((b) => (b?.plan ? { ...b, plan: { ...b.plan, summary } } : b))}
+            />
             <ShareButton />
           </header>
           <ol className="steps">
             {item(-1, 'Your bench and parts')}
-            {plan.steps.map((s, i) => item(i, s.title))}
+            {groups
+              ? groups.map((g, gi) => {
+                  const here = at >= g.start && at <= g.end
+                  const expanded = open[gi] ?? here
+                  return (
+                    <li key={`section-${gi}`} className="step-section">
+                      <button
+                        type="button"
+                        className={`section-head${here ? ' current' : ''}`}
+                        aria-expanded={expanded}
+                        onClick={() => setOpen((o) => ({ ...o, [gi]: !expanded }))}
+                      >
+                        <span className="chev" aria-hidden="true">
+                          {expanded ? '▾' : '▸'}
+                        </span>
+                        <span className="section-name">{g.name}</span>
+                        <span className="section-count">{at > g.end ? '✓' : `${g.start + 1}–${g.end + 1}`}</span>
+                      </button>
+                      {expanded && (
+                        <ol className="steps nested">
+                          {plan.steps.slice(g.start, g.end + 1).map((s, k) => item(g.start + k, s.title))}
+                        </ol>
+                      )}
+                    </li>
+                  )
+                })
+              : plan.steps.map((s, i) => item(i, s.title))}
             {item(n, 'Finished build')}
           </ol>
         </aside>

@@ -72,3 +72,19 @@
 @media (max-width: 760px) {
   .build-main { padding: 12px 16px 24px; }
 }
+
+/* Hardware builds: steps folded by section in the sidebar; the open section is the one you're on. */
+.steps.nested { padding: 0 0 4px 14px; overflow: visible; flex: none; }
+.step-section .section-head { font-weight: 600; color: var(--ink); }
+.step-section .section-head.current { color: var(--accent); }
+.step-section .chev { flex: none; width: 24px; text-align: center; color: var(--muted); }
+.step-section .section-name { flex: 1; min-width: 0; }
+.step-section .section-count { flex: none; font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* The project summary under the title: 3 lines at most, editable by the owner. */
+.summary-text { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.summary-button { margin-top: 4px; padding: 0; border: 0; background: none; color: var(--accent); font-size: 12px; cursor: pointer; }
+.summary-button:hover { text-decoration: underline; }
+.summary-edit { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.summary-edit textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; line-height: 1.4; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.step-tools { margin: 0 0 12px; font-size: 14px; }
+.step-tools span { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }

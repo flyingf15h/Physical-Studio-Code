@@ -20,7 +20,7 @@ from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from ..users import user_from_request
-from . import diagram, planner
+from . import cad_guide, diagram, planner
 from .pool import hide
 
 BUILDS_PER_HOUR = int(os.environ.get("BUILDS_PER_HOUR", "4"))
@@ -30,6 +30,7 @@ BUILD_ID = re.compile(r"[0-9a-f]{12}")
 DATA_URL = re.compile(r"data:image/(jpeg|jpg|png|webp);base64,(.+)", re.S)
 FAILED = "Something went wrong while planning. Wait a minute and try again."
 NOT_OWNER = "Only the person who started this build can commit to it."
+SUMMARY_MAX = 280  # about 3 lines under the title
 # Ready-made guides (screen 1): finished builds kept in the repo under bench/ready/<name>/ (build.json
 # with /out/build-<name>/ URLs, plus its files). They're copied into out_dir at startup, can't be
 # committed to, and POST /api/build/<name>/copy gives a visitor their own copy to commit photos to.
@@ -242,7 +243,11 @@ class BuildStore:
         """Photos after a step -> the AI's verdict + a 3D model of the bench as photographed."""
         bid = build["id"]
         with self.commit_locks[bid]:
-            c = planner.commit_step(build["internal"]["plan"], step, photos, note)
+            plan = build["internal"]["plan"]
+            if plan.get("kind") == "cad":  # hardware builds: compared with the step's reference render
+                c = cad_guide.commit_step(plan, step, photos, note, self.folder(bid))
+            else:
+                c = planner.commit_step(plan, step, photos, note)
             cid = planner.new_id(bid, step, note)
             commit = {"id": cid, "kind": "step", "step": step, "message": note, "time": now_iso(),
                       "images": [self.write(bid, f"img-{cid}-{k + 1}.jpg", planner.jpeg(b, 1024)) for k, b in enumerate(photos)],
@@ -350,6 +355,20 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         except Exception as e:
             print("[bench] commit on build", build["id"], "failed:", hide(str(e))[:900], flush=True)
             return JSONResponse({"error": "Something went wrong while checking. Wait a minute and commit again."}, status_code=502)
+
+    @mcp.custom_route("/api/build/{build_id}/summary", methods=["POST"])
+    async def summary(request: Request):
+        """The owner rewrites the short summary under the build's title (at most 3 lines on the page)."""
+        build = store.get(request.path_params["build_id"])
+        if build is None or not build.get("plan"):
+            return JSONResponse({"error": "No such build."}, status_code=404)
+        if not may_commit(build, user_from_request(request)):
+            return JSONResponse({"error": READY_NOTE if build.get("ready") else NOT_OWNER}, status_code=403)
+        text = " ".join(str((await body_of(request)).get("summary") or "").split())
+        if not 3 <= len(text) <= SUMMARY_MAX:
+            return JSONResponse({"error": f"Write the summary in 3 to {SUMMARY_MAX} characters."}, status_code=400)
+        store.update(build, plan={**build["plan"], "summary": text})
+        return JSONResponse({"summary": text})
 
     @mcp.custom_route("/api/build/{build_id}/copy", methods=["POST"])
     async def copy(request: Request):

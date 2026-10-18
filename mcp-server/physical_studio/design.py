@@ -63,6 +63,7 @@ class Step:
     callouts: list[dict] = field(default_factory=list)
     dimensions: list[dict] = field(default_factory=list)
     check: str | None = None
+    section: str | None = None  # groups steps on the build page, e.g. "Cart and drive"
 
 
 @dataclass

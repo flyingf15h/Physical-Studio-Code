@@ -75,4 +75,6 @@ add_step(title="Wire the motor", text="Connect the motor's two terminals to the 
 - Each step's text is one or two short sentences in plain words. Name the tool if one is needed.
 - Each step's check line is something a camera can see: "The red button sits in the top-left hole of
   the lid", not "The circuit works".
+- Builds over about 12 steps: give every step a `section` ("Frame", "Cart and drive motor", "Wiring"), 3 to 8
+  steps each, so the build page can fold the list.
 - Call check_guide before export and fix everything under `problems`.

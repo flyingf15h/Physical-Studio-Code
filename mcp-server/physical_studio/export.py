@@ -55,11 +55,16 @@ def top_face(piece, part: dict, parts_dir: Path) -> trimesh.Trimesh | None:
     return quad
 
 
-def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = None, parts_dir: Path | None = None) -> None:
-    """parts (library entries by id) adds each part's appearance: metal finish and top picture."""
+def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = None, parts_dir: Path | None = None,
+              only: set[str] | None = None, suffix: str = "") -> None:
+    """parts (library entries by id) adds each part's appearance: metal finish and top picture. only: just
+    these piece ids (a build page step model); suffix: added to node names (the build page looks for
+    "<id>__mesh")."""
     scene = trimesh.Scene(base_frame="world")
     scene.graph.update(frame_from="world", frame_to="design", matrix=DESIGN_TO_GLTF)
     for piece in built.pieces.values():
+        if only is not None and piece.id not in only:
+            continue
         part = (parts or {}).get(piece.part_id) or {}
         look = part.get("appearance") or {}
         mesh = piece.local_mesh().copy()
@@ -73,14 +78,14 @@ def write_glb(built: BuiltDesign, path: Path, parts: dict[str, dict] | None = No
         )
         scene.add_geometry(
             mesh,
-            node_name=piece.id,
-            geom_name=piece.id,
+            node_name=piece.id + suffix,
+            geom_name=piece.id + suffix,
             parent_node_name="design",
             transform=piece.matrix,
         )
         quad = top_face(piece, part, parts_dir) if parts_dir and piece.kind == "part" else None
         if quad is not None:
-            scene.add_geometry(quad, node_name=f"{piece.id}-top", geom_name=f"{piece.id}-top", parent_node_name=piece.id)
+            scene.add_geometry(quad, node_name=f"{piece.id}{suffix}-top", geom_name=f"{piece.id}{suffix}-top", parent_node_name=piece.id + suffix)
     path.write_bytes(scene.export(file_type="glb"))
 
 
@@ -212,6 +217,8 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str, printing
                 entry[key] = getattr(s, key)
         if s.check:
             entry["check"] = s.check
+        if s.section:
+            entry["section"] = s.section
         doc_steps.append(entry)
     doc = {
         "format": "physical-studio-steps",

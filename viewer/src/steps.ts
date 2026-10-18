@@ -42,6 +42,8 @@ export interface Step {
   check?: string
   /** Reference render after this step (file next to the steps JSON), shown to the AI by photo checks. */
   picture?: string
+  /** The group this step belongs to ("Frame", "Wiring"); the build page folds steps by section. */
+  section?: string
 }
 
 export interface StepsDoc {

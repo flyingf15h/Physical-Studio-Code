@@ -119,6 +119,7 @@ export interface Verdict {
   status: 'done' | 'problem' | 'in_progress' | 'unclear' | 'error'
   problem: string
   fix: string
+  next?: string // hardware builds: what to do now
   confidence: number
 }
 
@@ -132,9 +133,12 @@ export interface BuildStep {
   picture: string | null // url of the step's numbered-hole SVG
   markers: [number, string, string, string][] // [n, what, where, hole]
   model: BenchModel | null
+  section?: string | null // hardware builds: the group this step belongs to ("Cart and drive motor")
+  tools?: string[] // hardware builds: tools this step needs
 }
 
 export interface BuildPlan {
+  kind?: 'cad' // a hardware build from the CAD design pipeline (bench/cad_guide.py); else a breadboard build
   title: string
   summary: string
   final_result: string
@@ -198,6 +202,13 @@ export const copyBuild = (id: string) =>
   call<{ id: string }>(`/api/build/${encodeURIComponent(id)}/copy`, { method: 'POST', headers: headers() })
 
 /** Photos of the bench after a step: the AI's verdict and a 3D model of what was photographed (10–60 s). */
+export const setBuildSummary = (id: string, summary: string) =>
+  call<{ summary: string }>(`/api/build/${encodeURIComponent(id)}/summary`, {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ summary }),
+  })
+
 export const commitStep = (id: string, step: number, photos: string[], note: string) =>
   call<BuildCommit>(`/api/build/${encodeURIComponent(id)}/commit`, {
     method: 'POST',

@@ -61,6 +61,7 @@ function Scene({
       const old = mesh.material as THREE.MeshStandardMaterial
       const look = {
         color: old.color?.clone() ?? new THREE.Color('white'),
+        map: old.map ?? null, // CAD guides: photo of a board's top
         vertexColors: !!mesh.geometry.attributes.color,
         side: THREE.DoubleSide,
       }
