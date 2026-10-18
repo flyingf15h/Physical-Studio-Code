@@ -410,3 +410,12 @@ def test_photo_checks_forgive_small_hole_offsets_but_not_real_mistakes():
                  "The wire is on pin D9 instead of D10.", "The resistor is missing.", "The LED is across the centre gap in f10."):
         assert planner.lenient(p(real))["status"] == "problem", real
     assert "HOLES IN PHOTOS" in open(planner.__file__).read()
+
+
+def test_photo_checks_ignore_led_colours():
+    def p(problem):
+        return {"status": "problem", "observation": "o", "problem": problem, "fix": "", "confidence": 0.7}
+    assert planner.lenient(p("The LED in e30 is red, but this step needs a blue LED."))["status"] == "done"
+    assert planner.lenient(p("Wrong colour: a green LED is in the yellow LED's spot."))["status"] == "done"
+    assert planner.lenient(p("The blue LED is backwards: its long leg is in e31."))["status"] == "problem"
+    assert "LED COLOURS DON'T MATTER" in open(planner.__file__).read()
