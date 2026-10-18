@@ -1,0 +1,68 @@
+{
+  "id": "led-3mm",
+  "name": "LED 3 mm",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      3.8,
+      3.8,
+      5.3
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -10.0
+    ],
+    "max": [
+      3.8,
+      3.8,
+      5.3
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "anode",
+      "label": "anode",
+      "position": [
+        3.17,
+        1.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cathode",
+      "label": "cathode",
+      "position": [
+        0.63,
+        1.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Long leg is the anode (+). Needs a series resistor (220-330 Ω at 5 V).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#d94b4b",
+    "metallic": 0.0,
+    "roughness": 0.3,
+    "source": "Typical colour of the common part"
+  }
+}

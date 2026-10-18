@@ -1,0 +1,68 @@
+{
+  "id": "battery-9v",
+  "name": "9 V battery",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      48.5,
+      26.5,
+      17.5
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      48.5,
+      26.5,
+      17.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        6.5,
+        13.25,
+        17.5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "-",
+      "position": [
+        19.2,
+        13.25,
+        17.5
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "Use a snap connector. Fine for a board's VIN, too weak for motors.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#202326",
+    "metallic": 0.1,
+    "roughness": 0.5,
+    "source": "Typical colour of the common part"
+  }
+}

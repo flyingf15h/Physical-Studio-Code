@@ -1,0 +1,68 @@
+{
+  "id": "diode-1n4007",
+  "name": "Diode 1N4007",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      5.2,
+      2.7,
+      2.7
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -3.0
+    ],
+    "max": [
+      5.2,
+      2.7,
+      2.7
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "anode",
+      "label": "anode",
+      "position": [
+        -2.44,
+        1.35,
+        -3.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cathode",
+      "label": "cathode",
+      "position": [
+        7.72,
+        1.35,
+        -3.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "The silver band is the cathode. Use as a flyback diode across motors and relay coils (band towards +).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

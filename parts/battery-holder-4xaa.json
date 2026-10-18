@@ -1,0 +1,68 @@
+{
+  "id": "battery-holder-4xaa",
+  "name": "Battery holder, 4x AA (6 V)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      62.0,
+      57.0,
+      15.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      62.0,
+      57.0,
+      15.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+ (red wire)",
+      "position": [
+        0.0,
+        10.0,
+        7.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "- (black wire)",
+      "position": [
+        0.0,
+        47.0,
+        7.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "6 V with alkaline cells: good for servos and small motors. Share GND with the board.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

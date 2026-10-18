@@ -1,0 +1,117 @@
+{
+  "id": "pir-hc-sr501",
+  "name": "PIR motion sensor HC-SR501",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      32.0,
+      24.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      32.0,
+      24.0,
+      14.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.0,
+        12.0,
+        0.0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        30.0,
+        12.0,
+        0.0
+      ],
+      "diameter": 2.0
+    }
+  ],
+  "connectors": [
+    {
+      "id": "dome",
+      "type": "pir-lens",
+      "face": "+z",
+      "center": [
+        16.0,
+        12.0,
+        14.0
+      ],
+      "size": [
+        23.0,
+        23.0
+      ],
+      "protrusion": 12.4
+    }
+  ],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        13.46,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "out",
+      "label": "OUT",
+      "position": [
+        16.0,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        18.54,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Powered from 5 V; OUT goes high (3.3 V) for a few seconds when it sees movement. Two pots set sensitivity and on-time.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1e6b3a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,683 @@
+{
+  "id": "raspberry-pi-4",
+  "name": "Raspberry Pi 4 Model B",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      85.0,
+      56.0,
+      1.4
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      85.0,
+      56.0,
+      17.4
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.5,
+        3.5,
+        0.0
+      ],
+      "diameter": 2.75
+    },
+    {
+      "id": "h2",
+      "position": [
+        61.5,
+        3.5,
+        0.0
+      ],
+      "diameter": 2.75
+    },
+    {
+      "id": "h3",
+      "position": [
+        3.5,
+        52.5,
+        0.0
+      ],
+      "diameter": 2.75
+    },
+    {
+      "id": "h4",
+      "position": [
+        61.5,
+        52.5,
+        0.0
+      ],
+      "diameter": 2.75
+    }
+  ],
+  "connectors": [
+    {
+      "id": "usb_c",
+      "type": "usb-c",
+      "face": "-y",
+      "center": [
+        11.2,
+        0.0,
+        3.2
+      ],
+      "size": [
+        9.0,
+        3.2
+      ],
+      "protrusion": 1.0
+    },
+    {
+      "id": "usb_a",
+      "type": "usb-a",
+      "face": "+x",
+      "center": [
+        85.0,
+        9.0,
+        8.0
+      ],
+      "size": [
+        14.0,
+        16.0
+      ],
+      "protrusion": 2.0
+    },
+    {
+      "id": "ethernet",
+      "type": "rj45",
+      "face": "+x",
+      "center": [
+        85.0,
+        45.75,
+        7.0
+      ],
+      "size": [
+        16.0,
+        13.5
+      ],
+      "protrusion": 2.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "gpio_header_pin_1",
+      "label": "GPIO header pin 1",
+      "position": [
+        7.1,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_2",
+      "label": "GPIO header pin 2",
+      "position": [
+        9.64,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_3",
+      "label": "GPIO header pin 3",
+      "position": [
+        12.18,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_4",
+      "label": "GPIO header pin 4",
+      "position": [
+        14.72,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_5",
+      "label": "GPIO header pin 5",
+      "position": [
+        17.26,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_6",
+      "label": "GPIO header pin 6",
+      "position": [
+        19.8,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_7",
+      "label": "GPIO header pin 7",
+      "position": [
+        22.34,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_8",
+      "label": "GPIO header pin 8",
+      "position": [
+        24.88,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_9",
+      "label": "GPIO header pin 9",
+      "position": [
+        27.42,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_10",
+      "label": "GPIO header pin 10",
+      "position": [
+        29.96,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_11",
+      "label": "GPIO header pin 11",
+      "position": [
+        32.5,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_12",
+      "label": "GPIO header pin 12",
+      "position": [
+        35.04,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_13",
+      "label": "GPIO header pin 13",
+      "position": [
+        37.58,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_14",
+      "label": "GPIO header pin 14",
+      "position": [
+        40.12,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_15",
+      "label": "GPIO header pin 15",
+      "position": [
+        42.66,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_16",
+      "label": "GPIO header pin 16",
+      "position": [
+        45.2,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_17",
+      "label": "GPIO header pin 17",
+      "position": [
+        47.74,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_18",
+      "label": "GPIO header pin 18",
+      "position": [
+        50.28,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_19",
+      "label": "GPIO header pin 19",
+      "position": [
+        52.82,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_20",
+      "label": "GPIO header pin 20",
+      "position": [
+        55.36,
+        52.5,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_21",
+      "label": "GPIO header pin 21",
+      "position": [
+        7.1,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_22",
+      "label": "GPIO header pin 22",
+      "position": [
+        9.64,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_23",
+      "label": "GPIO header pin 23",
+      "position": [
+        12.18,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_24",
+      "label": "GPIO header pin 24",
+      "position": [
+        14.72,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_25",
+      "label": "GPIO header pin 25",
+      "position": [
+        17.26,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_26",
+      "label": "GPIO header pin 26",
+      "position": [
+        19.8,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_27",
+      "label": "GPIO header pin 27",
+      "position": [
+        22.34,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_28",
+      "label": "GPIO header pin 28",
+      "position": [
+        24.88,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_29",
+      "label": "GPIO header pin 29",
+      "position": [
+        27.42,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_30",
+      "label": "GPIO header pin 30",
+      "position": [
+        29.96,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_31",
+      "label": "GPIO header pin 31",
+      "position": [
+        32.5,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_32",
+      "label": "GPIO header pin 32",
+      "position": [
+        35.04,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_33",
+      "label": "GPIO header pin 33",
+      "position": [
+        37.58,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_34",
+      "label": "GPIO header pin 34",
+      "position": [
+        40.12,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_35",
+      "label": "GPIO header pin 35",
+      "position": [
+        42.66,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_36",
+      "label": "GPIO header pin 36",
+      "position": [
+        45.2,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_37",
+      "label": "GPIO header pin 37",
+      "position": [
+        47.74,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_38",
+      "label": "GPIO header pin 38",
+      "position": [
+        50.28,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_39",
+      "label": "GPIO header pin 39",
+      "position": [
+        52.82,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gpio_header_pin_40",
+      "label": "GPIO header pin 40",
+      "position": [
+        55.36,
+        49.96,
+        10.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "A small Linux computer. 3.3 V GPIO on the 40-pin header; never connect 5 V to a GPIO. Needs a 5 V 3 A USB-C supply.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1e6b3a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

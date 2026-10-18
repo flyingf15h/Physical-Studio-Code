@@ -1,0 +1,101 @@
+{
+  "id": "servo-sg90",
+  "name": "Micro servo SG90 (9 g)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      22.8,
+      12.2,
+      22.7
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      22.8,
+      12.2,
+      28.7
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        -2.35,
+        6.1,
+        0.0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        25.15,
+        6.1,
+        0.0
+      ],
+      "diameter": 2.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "signal",
+      "label": "Signal (orange)",
+      "position": [
+        0.0,
+        6.1,
+        10.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "V+ (red)",
+      "position": [
+        0.0,
+        6.1,
+        9.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND (brown)",
+      "position": [
+        0.0,
+        6.1,
+        8.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Orange = signal to a PWM pin, red = 5 V, brown = GND. 0-180°. Power several servos from a separate 5 V supply with a shared GND.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2f6fc7",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "breadboard-full",
+  "name": "Breadboard, full size (830 tie points)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      165.1,
+      54.6,
+      8.5
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      165.1,
+      54.6,
+      8.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [],
+  "notes": "Rows 1-63; holes a-e in one row are connected, f-j likewise; the centre gap separates them. Two power rails run along each long edge.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#ece9e2",
+    "metallic": 0.0,
+    "roughness": 0.8,
+    "source": "Typical colour of the common part"
+  }
+}

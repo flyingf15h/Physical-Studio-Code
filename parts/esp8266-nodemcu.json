@@ -1,0 +1,476 @@
+{
+  "id": "esp8266-nodemcu",
+  "name": "ESP8266 NodeMCU (v2, Amica)",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      48.3,
+      25.4,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      48.3,
+      25.4,
+      9.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "usb-micro",
+      "face": "-x",
+      "center": [
+        0.0,
+        12.7,
+        3.2
+      ],
+      "size": [
+        8.0,
+        3.0
+      ],
+      "protrusion": 1.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "a0",
+      "label": "A0",
+      "position": [
+        6.35,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "rsv",
+      "label": "RSV",
+      "position": [
+        8.89,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "rsv",
+      "label": "RSV",
+      "position": [
+        11.43,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sd3",
+      "label": "SD3",
+      "position": [
+        13.97,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sd2",
+      "label": "SD2",
+      "position": [
+        16.51,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sd1",
+      "label": "SD1",
+      "position": [
+        19.05,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cmd",
+      "label": "CMD",
+      "position": [
+        21.59,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sd0",
+      "label": "SD0",
+      "position": [
+        24.13,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "clk",
+      "label": "CLK",
+      "position": [
+        26.67,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        29.21,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        31.75,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "en",
+      "label": "EN",
+      "position": [
+        34.29,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "rst",
+      "label": "RST",
+      "position": [
+        36.83,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        39.37,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vin",
+      "label": "VIN",
+      "position": [
+        41.91,
+        1.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d0",
+      "label": "D0",
+      "position": [
+        6.35,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d1",
+      "label": "D1",
+      "position": [
+        8.89,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d2",
+      "label": "D2",
+      "position": [
+        11.43,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d3",
+      "label": "D3",
+      "position": [
+        13.97,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d4",
+      "label": "D4",
+      "position": [
+        16.51,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        19.05,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        21.59,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d5",
+      "label": "D5",
+      "position": [
+        24.13,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d6",
+      "label": "D6",
+      "position": [
+        26.67,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d7",
+      "label": "D7",
+      "position": [
+        29.21,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d8",
+      "label": "D8",
+      "position": [
+        31.75,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "rx",
+      "label": "RX",
+      "position": [
+        34.29,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "tx",
+      "label": "TX",
+      "position": [
+        36.83,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        39.37,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        41.91,
+        24.13,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "3.3 V logic. Wi-Fi. Label D0-D8 is not the GPIO number (D4 = GPIO2, the onboard LED). Only one analog input, A0 (0-3.3 V).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#24262a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "trimpot-10k",
+  "name": "Trim potentiometer 10 kΩ (3386)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      9.5,
+      10.0,
+      4.8
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -5.0
+    ],
+    "max": [
+      9.5,
+      10.0,
+      4.8
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "1",
+      "label": "1",
+      "position": [
+        2.21,
+        5.0,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "wiper",
+      "label": "wiper",
+      "position": [
+        4.75,
+        5.0,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3",
+      "label": "3",
+      "position": [
+        7.29,
+        5.0,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Small screwdriver-adjusted pot that fits a breadboard. Outer legs to power and GND, middle leg to an analog pin.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

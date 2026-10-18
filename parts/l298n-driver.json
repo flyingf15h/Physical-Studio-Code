@@ -1,0 +1,161 @@
+{
+  "id": "l298n-driver",
+  "name": "Motor driver L298N (dual H-bridge)",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      43.0,
+      43.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      43.0,
+      43.0,
+      28.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.0,
+        3.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        40.0,
+        3.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        3.0,
+        40.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        40.0,
+        40.0,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "ena",
+      "label": "ENA",
+      "position": [
+        14.15,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in1",
+      "label": "IN1",
+      "position": [
+        16.69,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in2",
+      "label": "IN2",
+      "position": [
+        19.23,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in3",
+      "label": "IN3",
+      "position": [
+        21.77,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in4",
+      "label": "IN4",
+      "position": [
+        24.31,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "enb",
+      "label": "ENB",
+      "position": [
+        26.85,
+        2.0,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Drives two DC motors (or one stepper) from 5-35 V. ENA/ENB to PWM pins, IN1-IN4 to digital pins; share GND with the board.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#c0392b",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

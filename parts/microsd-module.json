@@ -1,0 +1,161 @@
+{
+  "id": "microsd-module",
+  "name": "MicroSD card module (SPI)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      42.0,
+      24.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      42.0,
+      24.0,
+      4.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.0,
+        3.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        39.0,
+        3.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        3.0,
+        21.0,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        39.0,
+        21.0,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        1.5,
+        5.65,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        1.5,
+        8.19,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "miso",
+      "label": "MISO",
+      "position": [
+        1.5,
+        10.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "mosi",
+      "label": "MOSI",
+      "position": [
+        1.5,
+        13.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sck",
+      "label": "SCK",
+      "position": [
+        1.5,
+        15.81,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cs",
+      "label": "CS",
+      "position": [
+        1.5,
+        18.35,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "SPI: MISO, MOSI and SCK to the board's SPI pins, CS to any digital pin. FAT32 cards.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

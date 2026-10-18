@@ -1,0 +1,149 @@
+{
+  "id": "hc-sr04",
+  "name": "Ultrasonic distance sensor HC-SR04",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      45.0,
+      20.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      45.0,
+      20.0,
+      13.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "diameter": 1.8
+    },
+    {
+      "id": "h2",
+      "position": [
+        43.0,
+        2.0,
+        0.0
+      ],
+      "diameter": 1.8
+    },
+    {
+      "id": "h3",
+      "position": [
+        2.0,
+        18.0,
+        0.0
+      ],
+      "diameter": 1.8
+    },
+    {
+      "id": "h4",
+      "position": [
+        43.0,
+        18.0,
+        0.0
+      ],
+      "diameter": 1.8
+    }
+  ],
+  "connectors": [
+    {
+      "id": "transducers",
+      "type": "ultrasonic",
+      "face": "+z",
+      "center": [
+        22.5,
+        10.0,
+        13.6
+      ],
+      "size": [
+        42.0,
+        16.0
+      ],
+      "protrusion": 12.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        18.69,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "trig",
+      "label": "Trig",
+      "position": [
+        21.23,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "echo",
+      "label": "Echo",
+      "position": [
+        23.77,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        26.31,
+        1.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "5 V sensor: Trig to an output pin, Echo to an input pin (on 3.3 V boards, put a voltage divider on Echo). Measures 2-400 cm.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

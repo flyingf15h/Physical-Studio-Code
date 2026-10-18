@@ -1,0 +1,92 @@
+{
+  "id": "mosfet-irlz44n",
+  "name": "N-channel MOSFET IRLZ44N (TO-220, logic level)",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      10.0,
+      4.5,
+      15.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -13.0
+    ],
+    "max": [
+      10.0,
+      4.5,
+      21.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        5.0,
+        2.25,
+        0.0
+      ],
+      "diameter": 3.6
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "g",
+      "label": "G",
+      "position": [
+        2.46,
+        2.25,
+        -13.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d",
+      "label": "D",
+      "position": [
+        5.0,
+        2.25,
+        -13.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "s",
+      "label": "S",
+      "position": [
+        7.54,
+        2.25,
+        -13.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Logic-level: switches a motor or LED strip from a 5 V pin. Gate through 220 Ω, 10 kΩ gate-to-source pull-down; add a flyback diode for motors.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

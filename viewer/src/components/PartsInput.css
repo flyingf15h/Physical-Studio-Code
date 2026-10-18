@@ -1,0 +1,25 @@
+.parts-input { border: 1px solid var(--line); border-radius: 10px; padding: 10px 10px 8px; background: var(--panel); cursor: text; }
+.parts-input:focus-within { border-color: var(--accent); }
+.parts-input-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.parts-input-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.parts-input-hint { font-size: 12px; color: var(--muted); }
+.parts-input-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; min-height: 64px; align-content: flex-start; }
+.parts-have-chip { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 120px; max-width: 340px; padding: 6px 28px 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: default; }
+.parts-have-chip.matched { border-color: #9fd3b0; background: #eef8f1; }
+.parts-have-chip.unmatched { border-style: dashed; }
+.parts-have-text { font-size: 14px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.parts-have-match { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.parts-have-chip.matched .parts-have-match { color: #23794a; }
+.parts-have-size { color: var(--muted); }
+.parts-have-chip button { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); font-size: 16px; line-height: 1; width: 18px; height: 18px; padding: 0; cursor: pointer; border-radius: 50%; }
+.parts-have-chip button:hover { background: var(--line); color: var(--ink); }
+.parts-input-field { position: relative; flex: 1 1 220px; min-width: 200px; display: flex; align-items: center; }
+.parts-input .parts-input-field input { width: 100%; border: 0; border-radius: 0; resize: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: var(--ink); padding: 8px 4px; }
+.parts-input-suggest { position: absolute; z-index: 20; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(31, 41, 51, .12); }
+.parts-input-suggest li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 9px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.parts-input-suggest li:hover, .parts-input-suggest li.active { background: var(--accent-soft); }
+.parts-input-suggest-size { color: var(--muted); white-space: nowrap; font-size: 12px; }
+@media (max-width: 760px) {
+  .parts-have-chip { max-width: 100%; }
+}
+.parts-input .parts-input-field input:focus { border: 0; }

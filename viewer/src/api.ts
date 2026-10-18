@@ -178,6 +178,21 @@ export const startBuild = (inputs: { goal: string; have?: string; known?: string
 
 export const getBuild = (id: string) => call<Build>(`/api/build/${encodeURIComponent(id)}`, { headers: headers() })
 
+/** A "Parts I have" entry looked up in the parts library (bench routes.py, the planner's own lookup). */
+export interface MatchedPart {
+  id: string
+  name: string
+  category: PartSummary['category']
+  size: string
+  verified: boolean
+}
+export const matchParts = (items: string[]) =>
+  call<{ items: { text: string; part: MatchedPart | null }[] }>('/api/build/match', {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ items }),
+  })
+
 /** Your own copy of a finished build (a ready-made guide), to commit photos to. */
 export const copyBuild = (id: string) =>
   call<{ id: string }>(`/api/build/${encodeURIComponent(id)}/copy`, { method: 'POST', headers: headers() })

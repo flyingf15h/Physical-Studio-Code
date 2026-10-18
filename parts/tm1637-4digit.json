@@ -1,0 +1,133 @@
+{
+  "id": "tm1637-4digit",
+  "name": "4-digit display module TM1637",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      42.0,
+      24.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      42.0,
+      24.0,
+      9.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        40.0,
+        2.0,
+        0.0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        2.0,
+        22.0,
+        0.0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        40.0,
+        22.0,
+        0.0
+      ],
+      "diameter": 2.2
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "clk",
+      "label": "CLK",
+      "position": [
+        40.0,
+        8.19,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dio",
+      "label": "DIO",
+      "position": [
+        40.0,
+        10.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        40.0,
+        13.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        40.0,
+        15.81,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Two data wires (CLK, DIO) to any digital pins; TM1637Display library.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

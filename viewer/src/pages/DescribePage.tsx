@@ -1,12 +1,14 @@
 // Dashboard (screen 1). Mockup: docs/product-vision.html. "Design it" starts a breadboard build on the
 // server's own model keys (Senna's Build helper flow, mcp-server/physical_studio/bench/): the prompt,
 // photos of your bench, the parts you have and connections you already know. It moves on to the
-// build's page (/build/<id>). The example prompts (Senna's Claude) and the parts library (Kelly's
-// Claude) fill or extend the prompt. Below: the ready-made guides, and designing with your own AI.
+// build's page (/build/<id>). The example prompts (Senna's Claude) fill the prompt; picking a part in the
+// parts library (Kelly's Claude) adds it to "Parts I have" (PartsInput), where each part is a chip looked up
+// in the library. Below: the ready-made guides, and designing with your own AI.
 import { useRef, useState } from 'react'
 import { startBuild } from '../api'
 import { ConnectAI } from '../components/ConnectAI'
 import { ExamplePrompts } from '../components/ExamplePrompts'
+import { PartsInput } from '../components/PartsInput'
 import { PartsLibrary } from '../components/PartsLibrary'
 import { ReadyMadeGuides } from '../components/ProjectsList'
 import { ProgressHeader } from '../components/ProgressHeader'
@@ -35,7 +37,7 @@ export function DescribePage() {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [have, setHave] = useState('')
+  const [have, setHave] = useState<string[]>([])
   const [known, setKnown] = useState('')
   const box = useRef<HTMLTextAreaElement>(null)
   const filePicker = useRef<HTMLInputElement>(null)
@@ -80,7 +82,7 @@ export function DescribePage() {
     setError(null)
     try {
       const goal = prompt.trim() + (links.length ? `\nLinks: ${links.join(' ')}` : '')
-      const { id } = await startBuild({ goal, have: have.trim(), known: known.trim(), photos: images })
+      const { id } = await startBuild({ goal, have: have.join(', '), known: known.trim(), photos: images })
       navigate(withParams(`/build/${id}`, { code }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -170,13 +172,7 @@ export function DescribePage() {
                 </ul>
               )}
               <div className="describe-extra">
-                <input
-                  value={have}
-                  onChange={(e) => setHave(e.target.value)}
-                  maxLength={2000}
-                  placeholder="Optional: parts you have, e.g. Arduino Uno, breadboard, some LEDs, jumper wires"
-                  aria-label="Parts you have"
-                />
+                <PartsInput parts={have} onChange={setHave} />
                 <textarea
                   value={known}
                   onChange={(e) => setKnown(e.target.value)}
@@ -253,7 +249,7 @@ export function DescribePage() {
             <h2 className="describe-sub">Try one</h2>
             <ExamplePrompts onPick={fill} />
             <div className="describe-parts">
-              <PartsLibrary onPick={(part) => fill(prompt.trim() ? `${prompt.trim()} ${part.name}` : part.name)} />
+              <PartsLibrary onPick={(part) => setHave(have.includes(part.name) ? have : [...have, part.name])} />
             </div>
             <details className="describe-own-ai">
               <summary>Add your own API key</summary>

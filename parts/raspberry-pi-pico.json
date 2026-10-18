@@ -1,0 +1,653 @@
+{
+  "id": "raspberry-pi-pico",
+  "name": "Raspberry Pi Pico",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      51.0,
+      21.0,
+      1.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      51.0,
+      21.0,
+      9.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.0,
+        4.8,
+        0.0
+      ],
+      "diameter": 2.1
+    },
+    {
+      "id": "h2",
+      "position": [
+        2.0,
+        16.2,
+        0.0
+      ],
+      "diameter": 2.1
+    },
+    {
+      "id": "h3",
+      "position": [
+        49.0,
+        4.8,
+        0.0
+      ],
+      "diameter": 2.1
+    },
+    {
+      "id": "h4",
+      "position": [
+        49.0,
+        16.2,
+        0.0
+      ],
+      "diameter": 2.1
+    }
+  ],
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "usb-micro",
+      "face": "-x",
+      "center": [
+        0.0,
+        10.5,
+        2.4
+      ],
+      "size": [
+        8.0,
+        3.0
+      ],
+      "protrusion": 1.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "gp0",
+      "label": "GP0",
+      "position": [
+        1.61,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp1",
+      "label": "GP1",
+      "position": [
+        4.15,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        6.69,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp2",
+      "label": "GP2",
+      "position": [
+        9.23,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp3",
+      "label": "GP3",
+      "position": [
+        11.77,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp4",
+      "label": "GP4",
+      "position": [
+        14.31,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp5",
+      "label": "GP5",
+      "position": [
+        16.85,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        19.39,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp6",
+      "label": "GP6",
+      "position": [
+        21.93,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp7",
+      "label": "GP7",
+      "position": [
+        24.47,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp8",
+      "label": "GP8",
+      "position": [
+        27.01,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp9",
+      "label": "GP9",
+      "position": [
+        29.55,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        32.09,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp10",
+      "label": "GP10",
+      "position": [
+        34.63,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp11",
+      "label": "GP11",
+      "position": [
+        37.17,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp12",
+      "label": "GP12",
+      "position": [
+        39.71,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp13",
+      "label": "GP13",
+      "position": [
+        42.25,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        44.79,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp14",
+      "label": "GP14",
+      "position": [
+        47.33,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp15",
+      "label": "GP15",
+      "position": [
+        49.87,
+        1.61,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vbus",
+      "label": "VBUS",
+      "position": [
+        1.61,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vsys",
+      "label": "VSYS",
+      "position": [
+        4.15,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        6.69,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3_en",
+      "label": "3V3_EN",
+      "position": [
+        9.23,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        11.77,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "adc_vref",
+      "label": "ADC_VREF",
+      "position": [
+        14.31,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp28",
+      "label": "GP28",
+      "position": [
+        16.85,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        19.39,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp27",
+      "label": "GP27",
+      "position": [
+        21.93,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp26",
+      "label": "GP26",
+      "position": [
+        24.47,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "run",
+      "label": "RUN",
+      "position": [
+        27.01,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp22",
+      "label": "GP22",
+      "position": [
+        29.55,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        32.09,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp21",
+      "label": "GP21",
+      "position": [
+        34.63,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp20",
+      "label": "GP20",
+      "position": [
+        37.17,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp19",
+      "label": "GP19",
+      "position": [
+        39.71,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp18",
+      "label": "GP18",
+      "position": [
+        42.25,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        44.79,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp17",
+      "label": "GP17",
+      "position": [
+        47.33,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gp16",
+      "label": "GP16",
+      "position": [
+        49.87,
+        19.39,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "3.3 V logic, RP2040. Straddles the breadboard gap. 26 usable GPIO; GP26-GP28 are also analog inputs. The onboard LED is GP25.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1e6b3a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

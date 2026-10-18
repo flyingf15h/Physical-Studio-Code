@@ -1,0 +1,129 @@
+{
+  "id": "rotary-encoder-ky040",
+  "name": "Rotary encoder (KY-040)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      32.0,
+      19.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      32.0,
+      19.0,
+      29.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        14.5,
+        2.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        14.5,
+        16.5,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        1.0,
+        4.42,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        1.0,
+        6.96,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sw",
+      "label": "SW",
+      "position": [
+        1.0,
+        9.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dt",
+      "label": "DT",
+      "position": [
+        1.0,
+        12.04,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "clk",
+      "label": "CLK",
+      "position": [
+        1.0,
+        14.58,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "CLK and DT to two digital pins (read the order to get direction); SW is the push button.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#24262a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

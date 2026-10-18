@@ -1,0 +1,476 @@
+{
+  "id": "esp32-devkit-v1",
+  "name": "ESP32 DevKit V1 (30-pin)",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      51.4,
+      28.3,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      51.4,
+      28.3,
+      9.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [
+    {
+      "id": "usb",
+      "type": "usb-micro",
+      "face": "-x",
+      "center": [
+        0.0,
+        14.15,
+        3.2
+      ],
+      "size": [
+        8.0,
+        3.0
+      ],
+      "protrusion": 1.0
+    }
+  ],
+  "pins": [
+    {
+      "id": "en",
+      "label": "EN",
+      "position": [
+        7.32,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vp",
+      "label": "VP",
+      "position": [
+        9.86,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vn",
+      "label": "VN",
+      "position": [
+        12.4,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d34",
+      "label": "D34",
+      "position": [
+        14.94,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d35",
+      "label": "D35",
+      "position": [
+        17.48,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d32",
+      "label": "D32",
+      "position": [
+        20.02,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d33",
+      "label": "D33",
+      "position": [
+        22.56,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d25",
+      "label": "D25",
+      "position": [
+        25.1,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d26",
+      "label": "D26",
+      "position": [
+        27.64,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d27",
+      "label": "D27",
+      "position": [
+        30.18,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d14",
+      "label": "D14",
+      "position": [
+        32.72,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d12",
+      "label": "D12",
+      "position": [
+        35.26,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d13",
+      "label": "D13",
+      "position": [
+        37.8,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        40.34,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vin",
+      "label": "VIN",
+      "position": [
+        42.88,
+        1.45,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d23",
+      "label": "D23",
+      "position": [
+        7.32,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d22",
+      "label": "D22",
+      "position": [
+        9.86,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "tx0",
+      "label": "TX0",
+      "position": [
+        12.4,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "rx0",
+      "label": "RX0",
+      "position": [
+        14.94,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d21",
+      "label": "D21",
+      "position": [
+        17.48,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d19",
+      "label": "D19",
+      "position": [
+        20.02,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d18",
+      "label": "D18",
+      "position": [
+        22.56,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d5",
+      "label": "D5",
+      "position": [
+        25.1,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d17",
+      "label": "D17",
+      "position": [
+        27.64,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d16",
+      "label": "D16",
+      "position": [
+        30.18,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d4",
+      "label": "D4",
+      "position": [
+        32.72,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d2",
+      "label": "D2",
+      "position": [
+        35.26,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d15",
+      "label": "D15",
+      "position": [
+        37.8,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        40.34,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3v3",
+      "label": "3V3",
+      "position": [
+        42.88,
+        26.85,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "3.3 V logic: never feed 5 V into a GPIO. Wi-Fi + Bluetooth. Too wide for one breadboard: it straddles the gap with only one free row of holes on each side, or use two breadboards. D34, D35, VP and VN are input only.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#24262a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

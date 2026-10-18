@@ -1,0 +1,152 @@
+{
+  "id": "keypad-4x4",
+  "name": "Membrane keypad 4x4",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      69.0,
+      76.0,
+      1.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      69.0,
+      76.0,
+      2.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "r1",
+      "label": "R1",
+      "position": [
+        25.61,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "r2",
+      "label": "R2",
+      "position": [
+        28.15,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "r3",
+      "label": "R3",
+      "position": [
+        30.69,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "r4",
+      "label": "R4",
+      "position": [
+        33.23,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "c1",
+      "label": "C1",
+      "position": [
+        35.77,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "c2",
+      "label": "C2",
+      "position": [
+        38.31,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "c3",
+      "label": "C3",
+      "position": [
+        40.85,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "c4",
+      "label": "C4",
+      "position": [
+        43.39,
+        76.0,
+        0.5
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ]
+    }
+  ],
+  "notes": "Eight wires: four rows and four columns to eight digital pins; the Keypad library scans them.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

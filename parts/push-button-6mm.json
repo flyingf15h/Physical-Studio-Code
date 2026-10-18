@@ -1,0 +1,96 @@
+{
+  "id": "push-button-6mm",
+  "name": "Tactile push button 6x6 mm",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      6.0,
+      6.0,
+      5.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -3.5
+    ],
+    "max": [
+      6.0,
+      6.0,
+      5.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "1a",
+      "label": "1",
+      "position": [
+        0.75,
+        0.0,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "1b",
+      "label": "1",
+      "position": [
+        5.25,
+        0.0,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "2a",
+      "label": "2",
+      "position": [
+        0.75,
+        6.0,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "2b",
+      "label": "2",
+      "position": [
+        5.25,
+        6.0,
+        -3.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Straddle the breadboard's centre gap. The two legs on the same side are always connected; pressing joins the two sides. Read it with INPUT_PULLUP and wire the other side to GND.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

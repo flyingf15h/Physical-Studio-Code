@@ -24,30 +24,60 @@ def configure(parts_dir):
     for f in sorted(Path(parts_dir).glob('*.json')) if parts_dir and Path(parts_dir).exists() else []:
         try:d=json.loads(f.read_text());LIBRARY[d['id']]=d
         except (ValueError,KeyError):pass
-# Which library part a shopping-list name means. Resistors, wires and breadboards aren't in the library.
-LIBRARY_MATCH=[('arduino-uno',r'\buno\b|arduino'),('tactile-button-12mm',r'button|push|tactile'),('piezo-buzzer',r'piezo|buzzer'),('m3-screw-6mm',r'\bm3\b|screw'),('led-5mm',r'\bleds?\b')]
+# Which library part a shopping-list name means: the part whose id/name share the most words with it.
+# Generic words get a default (an "LED" is the 5 mm one). Wires and cables aren't library parts.
+STOP={'a','an','the','and','of','with','for','to','my','some','x','mm','module','board','sensor','kit','pack','pcs','piece','pieces','small','big','common','ohm','ohms','v','volt'}
+DEFAULT_FOR={'led':'led-5mm','leds':'led-5mm','resistor':'resistor-220','resistors':'resistor-220','button':'tactile-button-12mm','buttons':'tactile-button-12mm',
+    'pushbutton':'tactile-button-12mm','servo':'servo-sg90','breadboard':'breadboard-full','buzzer':'piezo-buzzer','arduino':'arduino-uno','esp32':'esp32-devkit-v1',
+    'pot':'potentiometer-10k','potentiometer':'potentiometer-10k','motor':'dc-motor-130','stepper':'stepper-28byj48','lcd':'lcd-1602-i2c','oled':'oled-ssd1306-128x64',
+    'screw':'m3-screw-6mm','capacitor':'capacitor-ceramic-100nf','transistor':'transistor-2n2222','diode':'diode-1n4007','relay':'relay-module-1ch','battery':'battery-9v'}
+def words(text):
+    text=re.sub(r'(\d+(?:\.\d+)?)\s*(k|kΩ|kohm|k ohm)\b',r'\1k',text.lower())  # "10 kΩ" -> 10k
+    text=re.sub(r'(\d+(?:\.\d+)?)\s*(Ω|ohms?)\b',r'\1',text)                     # "220 Ω" -> 220
+    return [w for w in re.findall(r'[a-z0-9.]+',text.replace('-',' ')) if w not in STOP]
 def library_part(name):
-    if re.search(r'resistor|wire|jumper|breadboard|cable',name,re.I):return None
-    return next((LIBRARY[pid] for pid,rx in LIBRARY_MATCH if pid in LIBRARY and re.search(rx,name,re.I)),None)
+    if re.search(r'\bwires?\b|jumper|cable|\bdupont\b',name,re.I):return None
+    q=set(words(name))
+    if not q or not LIBRARY:return None
+    def score(p):
+        ids=set(p['id'].split('-'))|set(words(p['id']));names=set(words(p['name']))
+        return 2*len(q&ids)+len(q&names)
+    best=max(LIBRARY.values(),key=lambda p:(score(p),p['id']==next((DEFAULT_FOR[w] for w in q if w in DEFAULT_FOR),None)))
+    if score(best)==0:return None
+    tied=[p for p in LIBRARY.values() if score(p)==score(best)]
+    default=next((DEFAULT_FOR[w] for w in q if w in DEFAULT_FOR and DEFAULT_FOR[w] in {t['id'] for t in tied}),None)
+    return LIBRARY[default] if default else best
 def part_size(name):
     p=library_part(name)
     if not p:return ''
     return ' × '.join(f'{v:g}' for v in p['body']['size'])+' mm'
+def split_items(text):
+    """'Arduino Uno, 3 LEDs and a breadboard' -> ['Arduino Uno', '3 LEDs', 'a breadboard']"""
+    return [i.strip(' .;') for i in re.split(r'[,\n;]|\band\b|\+',text or '') if i.strip(' .;')]
 def brief_line(p):
     size=(p.get('body') or {}).get('size')
     body=f"body {' x '.join(f'{v:g}' for v in size)} mm. " if size else ''
     pins=p.get('pins') or []
     return f"- {p['name']}: {body}Pins: {', '.join(q['id']+' ('+q.get('label',q['id'])+')' for q in pins[:6])}{'…' if len(pins)>6 else ''}. {p.get('notes','')}"
-def library_brief(own=()):
-    """The measured library, plus the signed-in owner's BOM parts (own: parts/*.json-shaped dicts)."""
-    text=''
+CORE=('arduino-uno','led-5mm','resistor-220','tactile-button-12mm','breadboard-full')  # always briefed in full
+def library_brief(own=(),text=''):
+    """The measured library: full details for the parts this build mentions (text = goal, parts and
+    connections) plus the usual starter parts, the names of everything else, and the signed-in owner's BOM
+    parts (own: parts/*.json-shaped dicts)."""
+    text_out=''
     if LIBRARY:
-        text='\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(brief_line(p) for p in LIBRARY.values())
+        picked=[LIBRARY[i] for i in CORE if i in LIBRARY]
+        for item in split_items(text)+[text]:
+            p=library_part(item)
+            if p and p not in picked:picked.append(p)
+        rest=[p['name'] for p in LIBRARY.values() if p not in picked]
+        text_out='\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(brief_line(p) for p in picked)
+        if rest:text_out+='\nALSO IN THE LIBRARY (ask for these by name if the build needs them): '+'; '.join(rest)
     own=[p for p in own if isinstance(p,dict) and p.get('name')]
     if own:
-        text+=('\nTHE USER\'S OWN PARTS (from the bill of materials they uploaded; they already have these, so prefer them over other parts and mark them user_has_it=true; their numbers are not verified):\n'+
+        text_out+=('\nTHE USER\'S OWN PARTS (from the bill of materials they uploaded; they already have these, so prefer them over other parts and mark them user_has_it=true; their numbers are not verified):\n'+
                '\n'.join(brief_line(p)+(f" {p['source']}" if p.get('source') else '') for p in own))
-    return text
+    return text_out
 
 
 class NeededPart(BaseModel):
@@ -395,7 +425,7 @@ def make_plan(goal,have='',known='',photos=(),stage=lambda status,text:None,own_
     connections (commit #0), the plan, up to two repair rounds, one guarded tidy pass, and the 3D models.
     stage(status, sentence) reports progress; own_parts are the owner's BOM parts for the brief. Returns
     plan, scan, start scene and the models."""
-    PlanModel=plan_model(Spec);scan=None;start=None;start_model=None;blobs=list(photos);brief=library_brief(own_parts)
+    PlanModel=plan_model(Spec);scan=None;start=None;start_model=None;blobs=list(photos);brief=library_brief(own_parts,' '.join((goal,have,known)))
     if blobs or known.strip():
         stage('scanning','Looking at what you have: building a 3D model of your bench and spotting your parts.')
         scan=scan_bench(goal,blobs,known);start=scan.scene;start_model=model_of(start,validate,build)

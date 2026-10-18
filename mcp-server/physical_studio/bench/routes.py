@@ -301,6 +301,21 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
             return JSONResponse({"error": "You've started a lot of builds; try again in a while."}, status_code=429)
         return JSONResponse({"id": store.start(goal, have, known, photos, user_from_request(request))}, status_code=202)
 
+    @mcp.custom_route("/api/build/match", methods=["POST"])
+    async def match(request: Request):
+        """The "Parts I have" chips: {items: [text]} -> each item's library part (the same lookup the planner
+        uses for sizes and the parts brief), or null when the library doesn't have it."""
+        items = (await body_of(request)).get("items")
+        if not isinstance(items, list) or len(items) > 60:
+            return JSONResponse({"error": "items must be a list of up to 60 part names."}, status_code=400)
+        out = []
+        for item in items:
+            text = str(item).strip()[:120]
+            p = planner.library_part(text) if text else None
+            out.append({"text": text, "part": p and {"id": p["id"], "name": p["name"], "category": p["category"],
+                                                     "size": " × ".join(f"{v:g}" for v in p["body"]["size"]) + " mm", "verified": bool(p.get("verified"))}})
+        return JSONResponse({"items": out})
+
     @mcp.custom_route("/api/build/{build_id}", methods=["GET"])
     async def status(request: Request):
         build = store.get(request.path_params["build_id"])

@@ -1,0 +1,133 @@
+{
+  "id": "lcd-1602-i2c",
+  "name": "LCD 16x2 with I2C backpack",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      80.0,
+      36.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      80.0,
+      36.0,
+      11.299999999999999
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.5,
+        2.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        77.5,
+        2.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        2.5,
+        33.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        77.5,
+        33.5,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        -2.0,
+        13.19,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        -2.0,
+        15.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        -2.0,
+        18.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        -2.0,
+        20.81,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Only four wires thanks to the I2C backpack (address 0x27 or 0x3F). Turn the backpack's pot if the text is invisible.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2e7d32",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

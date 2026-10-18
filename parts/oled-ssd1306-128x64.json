@@ -1,0 +1,133 @@
+{
+  "id": "oled-ssd1306-128x64",
+  "name": "OLED display 0.96\" 128x64 (SSD1306, I2C)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      27.3,
+      27.8,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      27.3,
+      27.8,
+      3.7
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        25.3,
+        2.0,
+        0.0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        2.0,
+        25.8,
+        0.0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        25.3,
+        25.8,
+        0.0
+      ],
+      "diameter": 2.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        9.84,
+        25.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        12.38,
+        25.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        14.92,
+        25.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        17.46,
+        25.5,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "I2C at 0x3C. VCC 3.3-5 V. Use the Adafruit SSD1306 or U8g2 library.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "ds18b20",
+  "name": "Temperature sensor DS18B20 (TO-92)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      4.8,
+      3.8,
+      4.8
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -12.0
+    ],
+    "max": [
+      4.8,
+      3.8,
+      4.8
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        1.13,
+        1.9,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dq",
+      "label": "DQ",
+      "position": [
+        2.4,
+        1.9,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vdd",
+      "label": "VDD",
+      "position": [
+        3.67,
+        1.9,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "1-Wire: 4.7 kΩ pull-up from DQ to VDD. Flat side facing you: GND, DQ, VDD left to right.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "ir-receiver-vs1838b",
+  "name": "IR receiver VS1838B",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      6.0,
+      5.0,
+      9.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -12.0
+    ],
+    "max": [
+      6.0,
+      5.0,
+      9.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "out",
+      "label": "OUT",
+      "position": [
+        0.46,
+        2.5,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        3.0,
+        2.5,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        5.54,
+        2.5,
+        -12.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Receives TV-remote signals (38 kHz). OUT to a digital pin; works at 3.3 or 5 V.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

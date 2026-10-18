@@ -1,0 +1,68 @@
+{
+  "id": "buzzer-active-12mm",
+  "name": "Active buzzer 12 mm (5 V)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      12.0,
+      12.0,
+      9.5
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.0
+    ],
+    "max": [
+      12.0,
+      12.0,
+      9.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "plus",
+      "position": [
+        2.2,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "minus",
+      "position": [
+        9.8,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Beeps by itself when powered: + (longer leg, marked) to a digital pin, - to GND. A passive buzzer needs tone() instead.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

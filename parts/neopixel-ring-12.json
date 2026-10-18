@@ -1,0 +1,96 @@
+{
+  "id": "neopixel-ring-12",
+  "name": "NeoPixel ring, 12 LEDs (WS2812B)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      37.0,
+      37.0,
+      3.2
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      37.0,
+      37.0,
+      3.2
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "din",
+      "label": "DIN",
+      "position": [
+        14.69,
+        3.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "5v",
+      "label": "5V",
+      "position": [
+        17.23,
+        3.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        19.77,
+        3.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dout",
+      "label": "DOUT",
+      "position": [
+        22.31,
+        3.0,
+        0.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Data into DIN through a 330 Ω resistor; 5 V supply with a 1000 µF capacitor across it for more than a few LEDs.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#24262a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

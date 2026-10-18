@@ -1,0 +1,68 @@
+{
+  "id": "dc-motor-130",
+  "name": "DC hobby motor (130 size, 3-6 V)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      27.5,
+      20.0,
+      15.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      27.5,
+      20.0,
+      15.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        0.0,
+        5.0,
+        7.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "-",
+      "position": [
+        0.0,
+        15.0,
+        7.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Never run it straight from a GPIO pin: use a transistor/MOSFET with a flyback diode, or a motor driver.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "Typical colour of the common part"
+  }
+}

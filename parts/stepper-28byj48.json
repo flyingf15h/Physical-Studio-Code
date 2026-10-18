@@ -1,0 +1,73 @@
+{
+  "id": "stepper-28byj48",
+  "name": "Stepper motor 28BYJ-48 (5 V)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      28.0,
+      28.0,
+      19.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "max": [
+      28.0,
+      28.0,
+      29.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        -3.5,
+        14.0,
+        0.0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        31.5,
+        14.0,
+        0.0
+      ],
+      "diameter": 4.2
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "cable",
+      "label": "5-wire cable to ULN2003 board",
+      "position": [
+        14.0,
+        0.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        -1,
+        0
+      ]
+    }
+  ],
+  "notes": "Plug its cable into a ULN2003 driver board; never drive it straight from GPIO pins. 2048 steps per turn.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b8bdc2",
+    "metallic": 0.85,
+    "roughness": 0.35,
+    "source": "Typical colour of the common part"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": "capacitor-ceramic-100nf",
+  "name": "Ceramic capacitor 100 nF",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      5.0,
+      2.5,
+      5.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -5.0
+    ],
+    "max": [
+      5.0,
+      2.5,
+      5.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "1",
+      "label": "1",
+      "position": [
+        1.23,
+        1.25,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "2",
+      "label": "2",
+      "position": [
+        3.77,
+        1.25,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Marked 104. Either way round. Put one across the power pins of a chip or module to smooth noise.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#d9a441",
+    "metallic": 0.0,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

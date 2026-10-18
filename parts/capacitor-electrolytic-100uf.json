@@ -1,0 +1,68 @@
+{
+  "id": "capacitor-electrolytic-100uf",
+  "name": "Electrolytic capacitor 100 µF 25 V",
+  "category": "misc",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      6.3,
+      6.3,
+      11.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -5.0
+    ],
+    "max": [
+      6.3,
+      6.3,
+      11.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "plus",
+      "position": [
+        1.9,
+        3.15,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "minus",
+      "position": [
+        4.4,
+        3.15,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Polarised: the stripe marks the minus leg (also the shorter one). Wrong way round can make it pop.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1c2f6b",
+    "metallic": 0.2,
+    "roughness": 0.4,
+    "source": "Typical colour of the common part"
+  }
+}

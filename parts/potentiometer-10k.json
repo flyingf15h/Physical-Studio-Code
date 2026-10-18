@@ -1,0 +1,82 @@
+{
+  "id": "potentiometer-10k",
+  "name": "Potentiometer 10 kΩ (rotary, 16 mm)",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      16.0,
+      18.0,
+      10.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -5.0
+    ],
+    "max": [
+      16.0,
+      18.0,
+      25.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "1",
+      "label": "1",
+      "position": [
+        3.0,
+        9.0,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "wiper",
+      "label": "wiper",
+      "position": [
+        8.0,
+        9.0,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "3",
+      "label": "3",
+      "position": [
+        13.0,
+        9.0,
+        -5.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Outer legs to 5 V (or 3.3 V) and GND, the middle leg (wiper) to an analog pin. Turning it changes the voltage on the wiper.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}

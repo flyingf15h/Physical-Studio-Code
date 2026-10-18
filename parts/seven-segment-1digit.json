@@ -1,0 +1,180 @@
+{
+  "id": "seven-segment-1digit",
+  "name": "7-segment display, 1 digit 0.56\" (common cathode)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      12.6,
+      19.0,
+      8.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -6.0
+    ],
+    "max": [
+      12.6,
+      19.0,
+      8.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "e",
+      "label": "E",
+      "position": [
+        1.22,
+        0.0,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "d",
+      "label": "D",
+      "position": [
+        3.76,
+        0.0,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "com",
+      "label": "COM",
+      "position": [
+        6.3,
+        0.0,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "c",
+      "label": "C",
+      "position": [
+        8.84,
+        0.0,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "dp",
+      "label": "DP",
+      "position": [
+        11.38,
+        0.0,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "g",
+      "label": "G",
+      "position": [
+        1.22,
+        15.24,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "f",
+      "label": "F",
+      "position": [
+        3.76,
+        15.24,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "com2",
+      "label": "COM2",
+      "position": [
+        6.3,
+        15.24,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "a",
+      "label": "A",
+      "position": [
+        8.84,
+        15.24,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "b",
+      "label": "B",
+      "position": [
+        11.38,
+        15.24,
+        -6.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "Each segment needs its own 220 Ω resistor; the two COM pins go to GND.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

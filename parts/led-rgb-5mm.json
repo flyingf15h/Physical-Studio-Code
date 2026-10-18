@@ -1,0 +1,96 @@
+{
+  "id": "led-rgb-5mm",
+  "name": "RGB LED 5 mm (common cathode)",
+  "category": "output",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      5.8,
+      5.8,
+      8.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -10.0
+    ],
+    "max": [
+      5.8,
+      5.8,
+      8.6
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "red",
+      "label": "red",
+      "position": [
+        0.0,
+        2.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "cathode",
+      "label": "cathode",
+      "position": [
+        1.9,
+        2.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "green",
+      "label": "green",
+      "position": [
+        3.8,
+        2.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "blue",
+      "label": "blue",
+      "position": [
+        5.7,
+        2.9,
+        -10.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "The longest leg is the common cathode (to GND). Each colour leg needs its own 220 Ω resistor to a PWM pin.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#ece9e2",
+    "metallic": 0.0,
+    "roughness": 0.8,
+    "source": "Typical colour of the common part"
+  }
+}

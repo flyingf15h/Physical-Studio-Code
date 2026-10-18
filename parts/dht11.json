@@ -1,0 +1,96 @@
+{
+  "id": "dht11",
+  "name": "Temperature + humidity sensor DHT11",
+  "category": "input",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      15.5,
+      12.0,
+      5.5
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.0
+    ],
+    "max": [
+      15.5,
+      12.0,
+      5.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        3.94,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "data",
+      "label": "DATA",
+      "position": [
+        6.48,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "nc",
+      "label": "NC",
+      "position": [
+        9.02,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        11.56,
+        6.0,
+        -8.0
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "One-wire style data pin: add a 10 kΩ pull-up from DATA to VCC (modules on a small board already have it).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#4a8fd4",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "Typical colour of the common part"
+  }
+}

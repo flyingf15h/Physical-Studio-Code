@@ -1,0 +1,161 @@
+{
+  "id": "uln2003-driver",
+  "name": "Stepper driver board ULN2003",
+  "category": "board",
+  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      35.0,
+      32.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0.0,
+      0.0,
+      -8.5
+    ],
+    "max": [
+      35.0,
+      32.0,
+      13.6
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.5,
+        2.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        32.5,
+        2.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        2.5,
+        29.5,
+        0.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        32.5,
+        29.5,
+        0.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "in1",
+      "label": "IN1",
+      "position": [
+        1.5,
+        12.19,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in2",
+      "label": "IN2",
+      "position": [
+        1.5,
+        14.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in3",
+      "label": "IN3",
+      "position": [
+        1.5,
+        17.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "in4",
+      "label": "IN4",
+      "position": [
+        1.5,
+        19.81,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "-",
+      "position": [
+        30.0,
+        14.73,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "plus",
+      "label": "+",
+      "position": [
+        30.0,
+        17.27,
+        -8.5
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "notes": "IN1-IN4 to four digital pins; + to 5 V, - to GND. The white socket takes the 28BYJ-48's plug.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1e6b3a",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "Typical colour of the common part"
+  }
+}
