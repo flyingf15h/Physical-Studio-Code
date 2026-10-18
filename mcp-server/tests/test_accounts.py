@@ -52,3 +52,14 @@ def test_signup_login_sessions_and_saved_projects(tmp_path):
         users.save_project(user["id"], {"design": "../../etc/passwd"})
     users.forget_project(user["id"], "double-pendulum")
     assert [p["design"] for p in users.projects(user["id"])] == ["build/abc123"]
+
+
+def test_guest_mode_and_upgrading_a_guest_keeps_its_projects(tmp_path):
+    users = Users(tmp_path)
+    token, guest = users.guest()
+    assert guest["guest"] and users.user_for(token)["id"] == guest["id"]
+    users.save_project(guest["id"], {"design": "build/abc123", "title": "Guest build"})
+    _, account = users.signup("new@example.com", "a long password", "New", guest=users.user_for(token))
+    assert account["id"] == guest["id"] and not account["guest"]
+    assert [p["title"] for p in users.projects(account["id"])] == ["Guest build"]
+    assert users.user_for(token) is None  # the guest session ends with the upgrade

@@ -20,3 +20,7 @@
 .account-go:disabled { opacity: .5; cursor: default; }
 .account-switch { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
 .account-switch button { border: 0; background: none; color: var(--accent); font-weight: 600; cursor: pointer; padding: 0; }
+.account-guest { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 9px; font-size: 14px; cursor: pointer; }
+.account-guest:hover:not(:disabled) { border-color: var(--accent); }
+.account-menu span { white-space: normal; line-height: 1.4; }
+.account-menu .account-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; text-align: center; }

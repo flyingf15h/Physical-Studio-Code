@@ -7,6 +7,7 @@ export interface User {
   id: string
   email: string
   name: string
+  guest?: boolean // guest mode: no email or password yet
 }
 
 const TOKEN = 'physical-studio:session'

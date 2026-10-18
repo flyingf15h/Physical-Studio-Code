@@ -1,4 +1,5 @@
 // Types for design.steps.json. Source of truth: schemas/steps.schema.json, docs/steps-format.md.
+import { reach } from './network'
 
 export type Vec3 = [number, number, number]
 
@@ -54,7 +55,7 @@ export interface StepsDoc {
 }
 
 export async function loadSteps(url: string): Promise<StepsDoc> {
-  const res = await fetch(url)
+  const res = await reach(url)
   if (!res.ok) throw new Error(`${url}: ${res.status} ${res.statusText}`)
   const doc = (await res.json()) as StepsDoc
   if (doc.format !== 'physical-studio-steps') throw new Error(`${url} is not a Physical Studio steps file`)

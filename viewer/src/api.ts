@@ -2,6 +2,7 @@
 // HTTP app; Caddy and the Vite dev server route /api/parts and /api/design* to it).
 
 import { authToken, type User } from './auth'
+import { reach } from './network'
 import { designParams } from './router'
 
 export interface PartSummary {
@@ -67,7 +68,7 @@ function headers(json = false): Record<string, string> {
 }
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init)
+  const res = await reach(url, init)
   const body = await res.json().catch(() => null)
   if (!res.ok) throw new Error(body?.error ?? `${url}: ${res.status}`)
   // e.g. the app's own index.html when no API server is behind it: an error, not an empty result
@@ -199,6 +200,9 @@ export const logIn = (email: string, password: string) =>
     headers: headers(true),
     body: JSON.stringify({ email, password }),
   })
+
+export const guestLogIn = () =>
+  call<{ token: string; user: User }>('/api/auth/guest', { method: 'POST', headers: headers() })
 
 export const logOut = () => call<object>('/api/auth/logout', { method: 'POST', headers: headers() })
 

@@ -4,6 +4,10 @@ Passwords are stored as scrypt hashes with a per-user salt; sessions are random 
 only a hash is stored. Everything lives in <OUT_DIR>/.accounts/ (never served: the viewer refuses
 dot paths). The browser keeps its session token and sends it as `Authorization: Bearer sess_...`.
 
+Guest mode: POST /api/auth/guest makes a guest (no email or password) with its own session, so a
+visitor can save projects and upload a BOM without signing up. Signing up while in guest mode turns
+that guest into the new account, keeping its id, so its projects, parts and builds come along.
+
 Other modules use user_from_request(request) to find who is calling (None when signed out).
 """
 
@@ -56,7 +60,16 @@ class Users:
 
     # --- accounts --------------------------------------------------------------------------------
 
-    def signup(self, email: str, password: str, name: str = "") -> tuple[str, dict]:
+    def guest(self) -> tuple[str, dict]:
+        user = {"id": secrets.token_hex(8), "email": "", "name": "Guest", "guest": True, "created": int(time.time())}
+        with _lock:
+            users = self._read("users.json", {})
+            users[f"guest:{user['id']}"] = user
+            self._write("users.json", users)
+        return self._new_session(user), self.public(user)
+
+    def signup(self, email: str, password: str, name: str = "", guest: dict | None = None) -> tuple[str, dict]:
+        """guest: the signed-in guest, if any; the account takes over its id (and so its projects)."""
         email = email.strip().lower()
         if not EMAIL.fullmatch(email):
             raise ValueError("Enter a valid email address.")
@@ -67,8 +80,10 @@ class Users:
             if email in users:
                 raise ValueError("There's already an account with that email. Log in instead.")
             salt = secrets.token_bytes(16)
+            if guest and guest.get("guest"):
+                users.pop(f"guest:{guest['id']}", None)
             user = {
-                "id": secrets.token_hex(8),
+                "id": guest["id"] if guest and guest.get("guest") else secrets.token_hex(8),
                 "email": email,
                 "name": (name.strip() or email.split("@")[0])[:60],
                 "salt": salt.hex(),
@@ -91,7 +106,8 @@ class Users:
             sessions = self._read("sessions.json", {})
             now = time.time()
             sessions = {k: v for k, v in sessions.items() if v["expires"] > now}  # drop expired ones
-            sessions[_hash(token)] = {"user": user["email"], "expires": now + SESSION_DAYS * 86400}
+            key = f"guest:{user['id']}" if user.get("guest") else user["email"]
+            sessions[_hash(token)] = {"user": key, "expires": now + SESSION_DAYS * 86400}
             self._write("sessions.json", sessions)
         return token
 
@@ -112,7 +128,7 @@ class Users:
 
     @staticmethod
     def public(user: dict) -> dict:
-        return {"id": user["id"], "email": user["email"], "name": user["name"]}
+        return {"id": user["id"], "email": user["email"], "name": user["name"], "guest": bool(user.get("guest"))}
 
     # --- saved projects --------------------------------------------------------------------------
 
@@ -185,7 +201,9 @@ def register_user_routes(mcp, out_dir: Path) -> Users:
             return fail("Too many attempts. Wait a minute and try again.", 429)
         b = await body(request)
         try:
-            token, user = users.signup(str(b.get("email", "")), str(b.get("password", "")), str(b.get("name", "")))
+            token, user = users.signup(
+                str(b.get("email", "")), str(b.get("password", "")), str(b.get("name", "")), user_from_request(request)
+            )
         except ValueError as e:
             return fail(str(e))
         return JSONResponse({"token": token, "user": user})
@@ -199,6 +217,13 @@ def register_user_routes(mcp, out_dir: Path) -> Users:
             token, user = users.login(str(b.get("email", "")), str(b.get("password", "")))
         except ValueError as e:
             return fail(str(e), 401)
+        return JSONResponse({"token": token, "user": user})
+
+    @mcp.custom_route("/api/auth/guest", methods=["POST"])
+    async def guest(request: Request):
+        if _too_many(request):
+            return fail("Too many attempts. Wait a minute and try again.", 429)
+        token, user = users.guest()
         return JSONResponse({"token": token, "user": user})
 
     @mcp.custom_route("/api/auth/logout", methods=["POST"])

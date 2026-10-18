@@ -1,7 +1,7 @@
 // The header's account corner: "Log in" (opens the dialog) or your name with a log-out menu. The
 // dialog is rendered here once, and anything can open it with openLogin() (src/auth.ts).
 import { useEffect, useState } from 'react'
-import { logIn, logOut, signUp } from '../api'
+import { guestLogIn, logIn, logOut, signUp } from '../api'
 import { onOpenLogin, setSession, useUser } from '../auth'
 import './Account.css'
 
@@ -89,6 +89,26 @@ function Dialog({
         <button type="submit" className="account-go" disabled={busy}>
           {busy ? 'One moment…' : mode === 'signup' ? 'Create account' : 'Log in'}
         </button>
+        <button
+          type="button"
+          className="account-guest"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true)
+            guestLogIn().then(
+              ({ token, user }) => {
+                setSession(token, user)
+                close()
+              },
+              (e) => {
+                setError(e instanceof Error ? e.message : String(e))
+                setBusy(false)
+              },
+            )
+          }}
+        >
+          Continue as guest
+        </button>
         <p className="account-switch">
           {mode === 'signup' ? 'Already have an account?' : 'New to Physical Studio?'}{' '}
           <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}>
@@ -116,7 +136,23 @@ export function Account() {
           </button>
           {menu && (
             <div className="account-menu">
-              <span>{user.email}</span>
+              {user.guest ? (
+                <>
+                  <span>You're in guest mode. Create an account to keep your work on every device.</span>
+                  <button
+                    type="button"
+                    className="account-primary"
+                    onClick={() => {
+                      setMode('signup')
+                      setMenu(false)
+                    }}
+                  >
+                    Create an account
+                  </button>
+                </>
+              ) : (
+                <span>{user.email}</span>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -125,7 +161,7 @@ export function Account() {
                   setMenu(false)
                 }}
               >
-                Log out
+                {user.guest ? 'Leave guest mode' : 'Log out'}
               </button>
             </div>
           )}
