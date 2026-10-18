@@ -204,6 +204,19 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
           ))}
         </tbody>
       </table>
+      {plan.steps.length > 0 && (
+        <details className="build-fold">
+          <summary>All steps at a glance</summary>
+          <ol className="glance">
+            {plan.steps.map((s, i) => (
+              <li key={i}>
+                <strong>{s.title}</strong> {s.instruction}
+                <span className="muted"> Check: {s.check}</span>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
     </div>
   )
 }
@@ -247,22 +260,33 @@ function StepView({
   plan,
   index,
   onCommit,
+  onNext,
 }: {
   build: Build
   plan: BuildPlan
   index: number
   onCommit: (c: BuildCommit) => void
+  onNext: () => void
 }) {
   const s = plan.steps[index]
   const mine = build.commits.filter((c) => c.kind === 'step' && c.step === index)
   const last = mine[mine.length - 1]
+  const fresh = s.model?.new ?? s.part_ids
+  const freshNames = (s.model?.labels ?? []).filter((l) => fresh.includes(l.id) && l.kind !== 'wire')
   return (
     <div className="build-section">
       <div className="eyebrow">
         Step {index + 1} of {plan.steps.length}
       </div>
       <h2 className="step-title">{s.title}</h2>
-      {s.picture && <img className="step-picture" src={s.picture} alt={`Step ${index + 1}: where each part goes`} />}
+      {s.picture && (
+        <figure className="step-figure">
+          <img className="step-picture" src={s.picture} alt={`Step ${index + 1}: where each part goes`} />
+          <figcaption className="muted">
+            Cyan is what you place in this step; faded parts are from earlier steps. Numbers match the list below.
+          </figcaption>
+        </figure>
+      )}
       <p className="step-text">{s.instruction}</p>
       {s.markers.length > 0 && (
         <ol className="markers">
@@ -282,7 +306,19 @@ function StepView({
       {s.model && (
         <>
           <h3>Your bench after step {index + 1}</h3>
-          <BenchModel model={s.model} guide={plan.part_guide} highlight={s.model.new ?? s.part_ids} />
+          <p className="muted">Your starting bench plus everything added so far, with this step's parts highlighted.</p>
+          <BenchModel model={s.model} guide={plan.part_guide} highlight={fresh} />
+          {freshNames.length > 0 && (
+            <ul className="new-parts">
+              {freshNames.map((l) => (
+                <li key={l.id}>
+                  <span className="pill">new</span> <strong>{l.name}</strong>
+                  {' · '}
+                  {plan.part_guide[l.id] || 'placed in this step'}
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
       {build.ready ? (
@@ -296,6 +332,13 @@ function StepView({
         <CommitBox build={build} step={index} onCommit={onCommit} />
       )}
       {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} />}
+      {last?.verdict?.status === 'done' && (
+        <div className="commit-row">
+          <button type="button" className="primary" onClick={onNext}>
+            {index === plan.steps.length - 1 ? 'Finish →' : `On to step ${index + 2} →`}
+          </button>
+        </div>
+      )}
       {mine.length > 1 && (
         <p className="muted">{mine.length} commits for this step. See them all in the Commits tab.</p>
       )}
@@ -326,6 +369,20 @@ function Finished({ plan }: { plan: BuildPlan }) {
           </ul>
         </details>
       )}
+      <div className="commit-row">
+        <a
+          className="tool"
+          href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(plan, null, 2))}`}
+          download="build_plan.json"
+        >
+          Download the build plan (JSON)
+        </a>
+        {plan.model && (
+          <a className="tool" href={plan.model.glb} download>
+            Download the finished 3D model (GLB)
+          </a>
+        )}
+      </div>
     </div>
   )
 }
@@ -500,7 +557,14 @@ export function BuildPage({ buildId }: { buildId: string }) {
           ) : at >= n ? (
             <Finished plan={plan} />
           ) : (
-            <StepView key={at} build={build!} plan={plan} index={at} onCommit={addCommit} />
+            <StepView
+              key={at}
+              build={build!}
+              plan={plan}
+              index={at}
+              onCommit={addCommit}
+              onNext={() => setAt(at + 1)}
+            />
           )}
           {tab === 'guide' && (
             <div className="build-nav">
