@@ -43,7 +43,8 @@ def traffic_light(n_leds=3, rows=(10, 20, 30, 40), cols="eeee", span=4):
         wires += [W(f"w_sig{n}", "esp", pins[n], "bb", f"a{a}"), W(f"w_g{n}", "bb", f"a{r2}", "bb", f"rail_1_24.14_{r2}")]
         for pid, holes in ((f"led{n}", [f"{c}{a}", f"{c}{a + 1}"]), (f"r{n}", [f"d{a + 1}", f"d{r2}"]),
                            (f"w_sig{n}", [f"pin:{pins[n]}", f"a{a}"]), (f"w_g{n}", [f"a{r2}", f"rail_1_24.14_{r2}"])):
-            steps.append(dict(number=len(steps) + 1, title=f"Place {pid}", part_ids=[pid], instruction="x",
+            text = f"Put the longer leg in {holes[0]} and the shorter leg in {holes[1]}." if pid.startswith("led") else "x"
+            steps.append(dict(number=len(steps) + 1, title=f"Place {pid}", part_ids=[pid], instruction=text,
                               placements=[dict(what="end", hole=h, where="x") for h in holes], check="x"))
     steps.insert(0, dict(number=0, title="Ground wire", part_ids=["w_gnd"], instruction="x",
                          placements=[dict(what="end", hole=h, where="x") for h in ("pin:gnd", "rail_1_24.14_1")], check="x"))
@@ -406,7 +407,7 @@ def test_photo_checks_forgive_small_hole_offsets_but_not_real_mistakes():
     def p(problem):
         return {"status": "problem", "observation": "o", "problem": problem, "fix": "", "confidence": 0.7}
     assert planner.lenient(p("The red LED is in e11 and e12 instead of e10 and e11."))["status"] == "done"
-    for real in ("The yellow LED is backwards: its long leg is in c21.", "Both legs are in row 10, the same strip.",
+    for real in ("Both legs are in row 10, the same strip.",
                  "The wire is on pin D9 instead of D10.", "The resistor is missing.", "The LED is across the centre gap in f10."):
         assert planner.lenient(p(real))["status"] == "problem", real
     assert "HOLES IN PHOTOS" in open(planner.__file__).read()
@@ -417,5 +418,33 @@ def test_photo_checks_ignore_led_colours():
         return {"status": "problem", "observation": "o", "problem": problem, "fix": "", "confidence": 0.7}
     assert planner.lenient(p("The LED in e30 is red, but this step needs a blue LED."))["status"] == "done"
     assert planner.lenient(p("Wrong colour: a green LED is in the yellow LED's spot."))["status"] == "done"
-    assert planner.lenient(p("The blue LED is backwards: its long leg is in e31."))["status"] == "problem"
+    assert planner.lenient(p("The blue LED is missing from e30 and e31."))["status"] == "problem"
     assert "LED COLOURS DON'T MATTER" in open(planner.__file__).read()
+
+
+def test_polarity_is_never_checked():
+    def p(problem):
+        return {"status": "problem", "observation": "o", "problem": problem, "fix": "", "confidence": 0.7}
+    for polarity in ("The yellow LED is backwards: its long leg is in c21.", "The LED's flat side faces the wrong way.",
+                     "The capacitor's stripe is on the wrong side.", "The shorter leg is in e10 where the longer leg should go."):
+        assert planner.lenient(p(polarity))["status"] == "done", polarity
+    assert planner.lenient(p("The wire is on pin D9 instead of D10."))["status"] == "problem"
+    assert "POLARITY IS NEVER CHECKED" in open(planner.__file__).read()
+
+
+def test_led_steps_say_where_the_longer_and_shorter_legs_go():
+    raw = traffic_light()
+    for s in raw["steps"]:
+        if s["part_ids"][0].startswith("led"):
+            s["instruction"] = "Put the LED in e10 and e11."
+    assert planner.check_led_legs(PlanModel.model_validate(raw)) != []  # holes only, no legs named
+    for s in raw["steps"]:
+        if s["part_ids"][0].startswith("led"):
+            s["instruction"] = "Put the longer leg in e10 and the shorter leg in e11."
+    assert planner.check_led_legs(PlanModel.model_validate(raw)) == []
+    ready = json.loads((REPO / "mcp-server/physical_studio/bench/ready/traffic-light/build.json").read_text())
+    assert planner.check_led_legs(PlanModel.model_validate(ready["internal"]["plan"])) == []  # the ready-made guide already does
+
+
+def test_scans_list_jumper_wires():
+    assert "jumper wires included" in planner.SCAN_RULES and "every plugged-in jumper wire" in planner.SCAN_RULES
