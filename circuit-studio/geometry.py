@@ -108,7 +108,9 @@ def build(spec):
             for yy in [-26.75,26.75]:box(pid,[x,y+yy,7],[165,1.5,2],'#efefe8')
             for yy in [-3.55,3.55]:box(pid,[x,y+yy,7],[160,4.25,2],'#efefe8')
             for yy in [-19.05,19.05]:box(pid,[x,y+yy,7],[160,2.54,2],'#efefe8')
-            for yy,col in [(-25.8,'#d94b4b'),(-20.12,'#4b87c8'),(20.12,'#4b87c8'),(25.8,'#d94b4b')]:box(pid,[x,y+yy,8.04],[157,.28,.06],col)
+            # rail lines like a real board turned so column a is on top: blue (-) on the outer edge above column a (the
+            # planner's ground rail, rail_1_24.14), red (+) inside it; the far edge the other way round
+            for yy,col in [(-25.8,'#d94b4b'),(-20.12,'#4b87c8'),(20.12,'#d94b4b'),(25.8,'#4b87c8')]:box(pid,[x,y+yy,8.04],[157,.28,.06],col)
             anchors[pid]=holes[pid]
         elif p.kind=='development_board':
             box(pid,[x,y,5],[55,28,1.6],'#293139')
