@@ -28,6 +28,16 @@ Claude, or any MCP client).
   low), and keep them clear of the board's tall parts.
 - Keep ports a cable plugs into (USB, barrel jack) against a wall so they get a cutout.
 
+### Mechanism builds (motors, rails, gears, arms, frames)
+- No case unless the request asks for one. A base plate or frame part is the first placement.
+- Build it in the order hands really do it: rail on the base, carriage on the rail, plate on the
+  carriage, motor on the plate, gear on the motor shaft, then bearings, shafts and arms, then
+  sensors on their mounts, then the boards on the base, then wiring with power last.
+- Parts that must line up (a pinion meshing a rack, a magnet centred under an encoder chip, a shaft
+  through two bearings) get a callout and a check line about exactly that.
+- Leave cable slack for anything that moves, and say so in the wiring step.
+- The power supply stays unplugged until the last wire is in; the last wiring step's check says so.
+
 ### The check-and-fix loop
 - After every placement change: check_interference, check_clearance, then render_preview twice:
   `iso` with the lid hidden (`hide: ["lid"]`) and `top`. Look at both pictures.
@@ -37,7 +47,9 @@ Claude, or any MCP client).
   previews show nothing floating, overlapping or poking out of the case.
 
 ### The assembly guide (add_step)
-- Order: base, board, screws, then the lid parts, then wiring, then close the lid.
+- Case builds: base, board, screws, then the lid parts, then wiring, then close the lid.
+- Every step that adds a part has motion (from_offset, e.g. [0, 0, 40] to drop it in from above), so
+  the viewer animates it into place. Every screw, set screw, press-fit or glue step names its tool.
 - Lid-mounted parts go in with the lid: turn the lid upside down, press the buttons and LEDs into it,
   then wire them. Don't show them hanging in the base.
 - One step per part. Wiring gets its own steps, a few wires each, grouped by part ("Wire the red
@@ -45,3 +57,4 @@ Claude, or any MCP client).
 - Each step's text is one or two short sentences in plain words. Name the tool if one is needed.
 - Each step's check line is something a camera can see: "The red button sits in the top-left hole of
   the lid", not "The circuit works".
+- Call check_guide before export and fix everything under `problems`.

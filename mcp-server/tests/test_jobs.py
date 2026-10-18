@@ -240,3 +240,16 @@ def test_attached_images_reach_the_model_and_the_page(tmp_path, monkeypatch):
     assert content[1] == {"type": "input_image", "image_url": PNG_1PX}
     assert snap["attachments"] == {"images": ["/out/job4/input-1.png"], "links": [{"url": "https://example.com/traffic-light", "error": None}]}
     assert (tmp_path / "job4" / "input-1.png").exists()
+
+
+def test_export_sends_a_weak_guide_back_once(tmp_path):
+    job = DesignJob("job9", "Uno case", tmp_path / "job9", lambda: Studio(REPO / "parts", tmp_path))
+    s = job.studio
+    s.new_design("Uno case")
+    s.place_part("arduino-uno", (0, 0, 0), id="uno")
+    s.add_step("Board", "Put the board down.", ["uno"], check="It works.")
+    first = json.loads(job.run_tool("export", {}))
+    assert first["exported"] is False and any("can't be seen" in p for p in first["problems"])
+    assert not job.exported
+    job.run_tool("export", {})  # the second try goes through, so a stubborn model can't loop forever
+    assert job.exported

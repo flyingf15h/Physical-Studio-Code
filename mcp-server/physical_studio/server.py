@@ -32,6 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from .looks import LookError, fetch_image, find_look
 from .design import Design, EnclosureSpec, Placement, Step, Wire
 from .export import default_steps, export_design
+from .guide_check import check_guide
 from .geometry import aabb, apply, build, envelope, placement_matrix, wire_piece
 from .render import VIEWS, render
 
@@ -356,6 +357,9 @@ class Studio:
     def check_interference(self) -> dict:
         return checks.check_interference(self.design, self.build())
 
+    def check_guide(self) -> dict:
+        return check_guide(self.design)
+
     def check_clearance(self, min_gap: float = 1.0, bed: Vec3 | None = None) -> dict:
         return checks.check_clearance(self.design, self.build(), min_gap, tuple(bed) if bed else checks.DEFAULT_BED)
 
@@ -415,7 +419,7 @@ mcp = FastMCP(
         "other parts -> add_fastener for each board mounting hole -> create_enclosure -> add_wire for each connection (pins come "
         "from get_part) -> add_step for each "
         "assembly step -> check_interference + check_clearance + render_preview (look at it, fix, repeat) -> "
-        "export. Connectors that face a wall (e.g. USB on -x) get a cutout if the part "
+        "check_guide (fix its problems) -> export. Mechanism builds (motors, rails, gears) skip create_enclosure. Connectors that face a wall (e.g. USB on -x) get a cutout if the part "
         "is within reach of that wall; parts poking up through the lid need a '+z' connector.\n\n"
         + Path(__file__).with_name("design_guide.md").read_text(encoding="utf-8")
     ),
@@ -563,6 +567,16 @@ def check_clearance(min_gap: float = 1.0, bed: Vec3 | None = None) -> dict:
     """Pairs of pieces closer than min_gap mm (without touching), connector cutouts that couldn't be made,
     and whether the case fits the print bed (default 220 x 220 x 250 mm)."""
     return current().check_clearance(min_gap, bed)
+
+
+@mcp.tool(name="check_guide")
+def check_guide_tool() -> dict:
+    """Checks the assembly guide (the add_step steps) against the Physical Studio bar: every part, screw
+    and wire added in some step, one part per step, a check line a camera can see, the tool named for
+    every screw, wiring in its own steps after the parts it joins, at most 8 wires a step, and motion
+    and callouts that show the builder where things go. Fix every item in `problems` (and the `tips`
+    you can) before export."""
+    return current().check_guide()
 
 
 @mcp.tool

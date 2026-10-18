@@ -85,9 +85,15 @@ MAX_RUNNING = int(os.environ.get("DESIGN_MAX_RUNNING", "1"))
 DESIGN_GUIDE = Path(__file__).with_name("design_guide.md").read_text(encoding="utf-8")
 SKIP_TOOLS = {"new_design"}  # the job names the design itself
 
-SYSTEM = """You design hardware projects for Physical Studio: a 3D-printed case built around real,
-measured parts, plus a step-by-step assembly guide that a beginner follows while a camera checks
-each step.
+SYSTEM = """You design hardware projects for Physical Studio out of real, measured parts, plus a
+step-by-step IKEA-style assembly guide that a beginner follows while a camera checks each step.
+
+There are two kinds of build. Pick one from the request:
+- A case build (a gadget in a box: buttons, LEDs, a small board): a 3D-printed case from
+  create_enclosure around the parts.
+- A mechanism build (motors, rails, gears, shafts, bearings, arms, frames, sensors on brackets): no
+  case. Lay out a base or frame part first, then the moving parts in the order they're assembled,
+  then the boards on the base, then wiring. Skip create_enclosure unless the request asks for a box.
 
 Rules:
 - Never invent a dimension. Find parts with search_parts and read every number you use from
@@ -105,8 +111,17 @@ Rules:
 - Loop until it's clean: check_interference, check_clearance and render_preview (iso with the lid
   hidden, and top). Fix what they report with move_part (screws move with their board) or
   remove_part (e.g. a screw whose head clashes), and check again.
-- Then write the guide with add_step: base, board, screws, parts under the lid, wiring (one step
-  per part), close the lid. Each step needs a one-sentence check line a camera can verify.
+- Then write the guide with add_step, one part per step, in the order a person really assembles it.
+  Case build: base, board, screws, parts under the lid, wiring, close the lid. Mechanism build: base
+  or frame, then each moving part in assembly order (rail, carriage, plate, motor, gear, bearings,
+  shafts, arms), then sensors and their mounts, then boards, then wiring, power last.
+  Every step that adds a part gets motion ({placement, from_offset}) so the viewer moves it into
+  place; every screw, set screw or press-fit names its tool in tools; every place a beginner could
+  get it backwards (LED legs, gear teeth meshing, a chip facing a magnet, a flange side) gets a
+  callout. Wiring goes in its own steps grouped by part ("Wire the motor"), at most 8 wires each.
+  Each step's check line says what a camera sees when it's right: where the part is and which way
+  it faces.
+- Call check_guide and fix every problem it lists before you export.
 - Before exporting, call find_part_looks once with every placed part id that has no `appearance`
   in get_part, so the guide shows the real parts (product photos, colours, metal finishes).
 - Finish with export(["glb", "stl", "step"]). Your final message: two sentences on what you built.
@@ -148,6 +163,7 @@ class DesignJob:
         self.parts_seen: dict[str, str] = {}
         self.previews = 0
         self.exported = False
+        self.guide_sent_back = False  # export refused once for guide problems; the next try goes through
         self.designer: str | None = None
         self.lock = threading.Lock()
 
@@ -199,6 +215,12 @@ class DesignJob:
             self.event("preview", f"Rendered the {args.get('view', 'iso')} view", image=url)
             return [{"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": base64.b64encode(png).decode()}}]
         if name == "export":
+            guide = s.check_guide()
+            if s.design.steps and guide["problems"] and not self.guide_sent_back:  # no steps: export writes default ones
+                self.guide_sent_back = True
+                self.event("guide", f"Fixing {len(guide['problems'])} guide problem{'s' if len(guide['problems']) != 1 else ''} before export")
+                return json.dumps({"exported": False, "why": "The guide isn't ready. Fix these with add_step (or by renaming parts), then export again.",
+                                   "problems": guide["problems"], "tips": guide["tips"]})
             result = s.export(["glb", "stl", "step"], str(self.out_dir))
             self.exported = True
             self.design = f"out/{self.id}"
@@ -213,6 +235,9 @@ class DesignJob:
         if name == "get_part":
             self.parts_seen[result["id"]] = result.get("name", result["id"])
             self.event("parts", "Found parts: " + ", ".join(self.parts_seen.values()))
+        elif name == "check_guide":
+            n = len(result["problems"])
+            self.event("guide", "Guide check: " + (f"{n} problem{'s' if n != 1 else ''} to fix" if n else "clean"))
         elif name in ("place_part", "add_fastener"):
             n = len(s.design.placements)
             self.event("place", f"Placed {n} part{'s' if n != 1 else ''}")
