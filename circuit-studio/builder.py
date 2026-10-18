@@ -186,19 +186,61 @@ LIBRARY={};PARTS_DIR=find('parts')
 for f in sorted(PARTS_DIR.glob('*.json')) if PARTS_DIR else []:
     try:d=json.loads(f.read_text());LIBRARY[d['id']]=d
     except (ValueError,KeyError):pass
-# Which library part a shopping-list name means. Resistors, wires and breadboards aren't in the library.
-LIBRARY_MATCH=[('arduino-uno',r'\buno\b|arduino'),('tactile-button-12mm',r'button|push|tactile'),('piezo-buzzer',r'piezo|buzzer'),('m3-screw-6mm',r'\bm3\b|screw'),('led-5mm',r'\bleds?\b')]
+# Same lookup as the main site's mcp-server/physical_studio/bench/planner.py.
+# Which library part a shopping-list name means: the part whose id/name share the most words with it.
+# Generic words get a default (an "LED" is the 5 mm one). Wires and cables aren't library parts.
+STOP={'a','an','the','and','of','with','for','to','my','some','x','mm','module','board','sensor','kit','pack','pcs','piece','pieces','small','big','common','ohm','ohms','v','volt'}
+DEFAULT_FOR={'led':'led-5mm','leds':'led-5mm','resistor':'resistor-220','resistors':'resistor-220','button':'tactile-button-12mm','buttons':'tactile-button-12mm',
+    'pushbutton':'tactile-button-12mm','servo':'servo-sg90','breadboard':'breadboard-full','buzzer':'piezo-buzzer','arduino':'arduino-uno','esp32':'esp32-devkit-v1',
+    'pot':'potentiometer-10k','potentiometer':'potentiometer-10k','motor':'dc-motor-130','stepper':'stepper-28byj48','lcd':'lcd-1602-i2c','oled':'oled-ssd1306-128x64',
+    'screw':'m3-screw-6mm','capacitor':'capacitor-ceramic-100nf','transistor':'transistor-2n2222','diode':'diode-1n4007','relay':'relay-module-1ch','battery':'battery-9v'}
+def words(text):
+    text=re.sub(r'(\d+(?:\.\d+)?)\s*(k|kΩ|kohm|k ohm)\b',r'\1k',text.lower())  # "10 kΩ" -> 10k
+    text=re.sub(r'(\d+(?:\.\d+)?)\s*(Ω|ohms?)\b',r'\1',text)                     # "220 Ω" -> 220
+    return [w for w in re.findall(r'[a-z0-9.]+',text.replace('-',' ')) if w not in STOP]
 def library_part(name):
-    if re.search(r'resistor|wire|jumper|breadboard|cable',name,re.I):return None
-    return next((LIBRARY[pid] for pid,rx in LIBRARY_MATCH if pid in LIBRARY and re.search(rx,name,re.I)),None)
+    if re.search(r'\bwires?\b|jumper|cable|\bdupont\b',name,re.I):return None
+    q=set(words(name))
+    if not q or not LIBRARY:return None
+    def score(p):
+        ids=set(p['id'].split('-'))|set(words(p['id']));names=set(words(p['name']))
+        return 2*len(q&ids)+len(q&names)
+    best=max(LIBRARY.values(),key=lambda p:(score(p),p['id']==next((DEFAULT_FOR[w] for w in q if w in DEFAULT_FOR),None)))
+    if score(best)==0:return None
+    tied=[p for p in LIBRARY.values() if score(p)==score(best)]
+    default=next((DEFAULT_FOR[w] for w in q if w in DEFAULT_FOR and DEFAULT_FOR[w] in {t['id'] for t in tied}),None)
+    return LIBRARY[default] if default else best
 def part_size(name):
     p=library_part(name)
     if not p:return ''
     return ' × '.join(f'{v:g}' for v in p['body']['size'])+' mm'
-def library_brief():
-    if not LIBRARY:return ''
-    lines=[f"- {p['name']}: body {' x '.join(f'{v:g}' for v in p['body']['size'])} mm. Pins: {', '.join(q['id']+' ('+q.get('label',q['id'])+')' for q in p.get('pins',[])[:6])}{'…' if len(p.get('pins',[]))>6 else ''}. {p.get('notes','')}" for p in LIBRARY.values()]
-    return '\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(lines)
+def split_items(text):
+    """'Arduino Uno, 3 LEDs and a breadboard' -> ['Arduino Uno', '3 LEDs', 'a breadboard']"""
+    return [i.strip(' .;') for i in re.split(r'[,\n;]|\band\b|\+',text or '') if i.strip(' .;')]
+def brief_line(p):
+    size=(p.get('body') or {}).get('size')
+    body=f"body {' x '.join(f'{v:g}' for v in size)} mm. " if size else ''
+    pins=p.get('pins') or []
+    return f"- {p['name']}: {body}Pins: {', '.join(q['id']+' ('+q.get('label',q['id'])+')' for q in pins[:6])}{'…' if len(pins)>6 else ''}. {p.get('notes','')}"
+CORE=('arduino-uno','led-5mm','resistor-220','tactile-button-12mm','breadboard-full')  # always briefed in full
+def library_brief(own=(),text=''):
+    """The measured library: full details for the parts this build mentions (text = goal, parts and
+    connections) plus the usual starter parts, the names of everything else, and the signed-in owner's BOM
+    parts (own: parts/*.json-shaped dicts)."""
+    text_out=''
+    if LIBRARY:
+        picked=[LIBRARY[i] for i in CORE if i in LIBRARY]
+        for item in split_items(text)+[text]:
+            p=library_part(item)
+            if p and p not in picked:picked.append(p)
+        rest=[p['name'] for p in LIBRARY.values() if p not in picked]
+        text_out='\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(brief_line(p) for p in picked)
+        if rest:text_out+='\nALSO IN THE LIBRARY (ask for these by name if the build needs them): '+'; '.join(rest)
+    own=[p for p in own if isinstance(p,dict) and p.get('name')]
+    if own:
+        text_out+=('\nTHE USER\'S OWN PARTS (from the bill of materials they uploaded; they already have these, so prefer them over other parts and mark them user_has_it=true; their numbers are not verified):\n'+
+               '\n'.join(brief_line(p)+(f" {p['source']}" if p.get('source') else '') for p in own))
+    return text_out
 
 
 class NeededPart(BaseModel):
@@ -531,7 +573,12 @@ def render(g):
     st.caption("Don't know hardware? Say what you want to do and attach photos of what you already have. The AI builds a 3D model of your bench, spots your parts, and gives you IKEA-style steps that start from there, one part at a time.")
     goal=st.text_area('What do you want to do?',height=110,key='bh_goal',placeholder='e.g. A traffic light: red, yellow and green LEDs that cycle, plus a button that starts a crosswalk cycle.')
     photos=st.file_uploader(f'Photos of what you have now: your breadboard, board and parts (optional, up to {MAX_PHOTOS})',type=['jpg','jpeg','png','webp'],accept_multiple_files=True,key='bh_start_photos')
-    have=st.text_input('Parts you have available (optional)',key='bh_have',placeholder='e.g. Arduino Uno, breadboard, some LEDs, jumper wires')
+    picked=st.multiselect('Parts you have available (optional)',sorted(p['name'] for p in LIBRARY.values()),key='bh_have_parts',accept_new_options=True,
+        placeholder='Pick from the parts library or type a part and press Enter: e.g. Arduino Uno, 3 LEDs, 220 ohm resistors')
+    if picked:  # each chip looked up in the parts library, like the main site's "Parts I have"
+        found=[(name,library_part(name)) for name in picked]
+        st.caption('  ·  '.join(f"✓ **{name}** → {m['name']} ({' × '.join(f'{v:g}' for v in m['body']['size'])} mm)" if m else f"**{name}**: not in the parts library" for name,m in found))
+    have=', '.join(picked)
     known=st.text_area('Connections you already know (optional)',height=90,key='bh_known',placeholder='e.g. Red LED long leg in e10, short leg in e11. Resistor from d11 to d15. Wire from GPIO25 to a10. Wire from GND to the ground rail, first hole.')
     consent=st.checkbox(CONSENT,key='bh_consent')
     if st.button('Submit and plan my build',type='primary',key='bh_plan_btn'):
@@ -550,17 +597,17 @@ def render(g):
                         '\nThe plan\'s final scene must contain every starting part and wire with the SAME id, holes and terminals. Steps start from this bench and add only what is missing: step 1 is the first LED, resistor or wire the bench does NOT have yet. Never place a starting part again, never list a starting ID in any step\'s part_ids, and never add a second wire for a connection a starting wire already makes (two points already joined by a wire or the same strip need no new wire).'
                         '\nPARTS THE PHOTOS SHOW (placed or loose): '+'; '.join(f'{d.quantity} x {d.name} ({d.where})' for d in scan.detected)+'. Mark these user_has_it=true.')
                 seen+=known_text(known)
-                prompt=PLAN_RULES+WIRING+library_brief()+'\nUSER GOAL:\n'+goal[:4000]+'\nPARTS THE USER SAYS THEY HAVE:\n'+(have[:2000] or '(not stated)')+seen
+                prompt=PLAN_RULES+WIRING+library_brief((),' '.join((goal,have,known)))+'\nUSER GOAL:\n'+goal[:4000]+'\nPARTS THE USER SAYS THEY HAVE:\n'+(have[:2000] or '(not stated)')+seen
                 with st.spinner('Choosing the parts you still need and writing your steps…'):
                     plan=PlanModel.model_validate_json(ask(g,[prompt]+as_images(blobs[:4]),PlanModel).text or '')
                     problems=check_plan(plan,None,start)
                     for _ in range(2):  # up to two repair rounds with the exact problems found
                         if not problems:break
-                        fix=PLAN_RULES+WIRING+library_brief()+seen+'\nThis plan has problems. Return the corrected full plan. Fix every problem; keep everything else.\nPROBLEMS:\n- '+'\n- '.join(problems)+'\nPLAN:\n'+plan.model_dump_json()
+                        fix=PLAN_RULES+WIRING+library_brief((),' '.join((goal,have,known)))+seen+'\nThis plan has problems. Return the corrected full plan. Fix every problem; keep everything else.\nPROBLEMS:\n- '+'\n- '.join(problems)+'\nPLAN:\n'+plan.model_dump_json()
                         plan=PlanModel.model_validate_json(ask(g,[fix],PlanModel).text or '');problems=check_plan(plan,None,start)
                     looks=check_layout(plan,start) if not problems else []
                     if looks:  # one tidy-up pass; kept only if every functional check still passes
-                        tidy=PLAN_RULES+WIRING+library_brief()+seen+'\nThis plan works. Only tidy its layout so it looks neat: move the NEW parts and wires to follow the neat layout pattern, keeping every electrical connection exactly the same (same LED to same board pin, same resistor and ground path) and never moving parts already on the bench. Update the steps\' holes and plain-word instructions to match.\nLAYOUT FIXES:\n- '+'\n- '.join(looks)+'\nPLAN:\n'+plan.model_dump_json()
+                        tidy=PLAN_RULES+WIRING+library_brief((),' '.join((goal,have,known)))+seen+'\nThis plan works. Only tidy its layout so it looks neat: move the NEW parts and wires to follow the neat layout pattern, keeping every electrical connection exactly the same (same LED to same board pin, same resistor and ground path) and never moving parts already on the bench. Update the steps\' holes and plain-word instructions to match.\nLAYOUT FIXES:\n- '+'\n- '.join(looks)+'\nPLAN:\n'+plan.model_dump_json()
                         try:
                             neat=PlanModel.model_validate_json(ask(g,[tidy],PlanModel).text or '')
                             if not check_plan(neat,None,start) and led_pins(neat.scene)==led_pins(plan.scene) and len(check_layout(neat,start))<len(looks):plan=neat
