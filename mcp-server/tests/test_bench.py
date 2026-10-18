@@ -4,7 +4,9 @@ import base64
 import copy
 import io
 import json
+import sys
 import time
+import types
 from pathlib import Path
 
 from fastmcp import FastMCP
@@ -132,7 +134,11 @@ def photo():
     return "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()
 
 
-def fake_make_plan(goal, have="", known="", photos=(), stage=lambda *a: None):
+PLANNED_WITH = {}  # goal -> the own_parts the planner was given
+
+
+def fake_make_plan(goal, have="", known="", photos=(), stage=lambda *a: None, own_parts=()):
+    PLANNED_WITH[goal] = list(own_parts)
     stage("planning", "Choosing the parts you still need and writing your steps.")
     plan = PlanModel.model_validate(traffic_light())
     scene = validate(plan.scene)
@@ -207,6 +213,62 @@ def app_again(tmp_path):
     mcp = FastMCP("bench-test-2")
     routes.register_build_routes(mcp, tmp_path, REPO / "parts")
     return mcp.http_app(path="/mcp")
+
+
+USERS = {"sess_ada": {"id": "u-ada", "email": "ada@example.com", "name": "Ada"},
+         "sess_bob": {"id": "u-bob", "email": "bob@example.com", "name": "Bob"}}
+ADA, BOB = {"Authorization": "Bearer sess_ada"}, {"Authorization": "Bearer sess_bob"}
+BOM_PART = {"id": "bom-oled", "name": "0.96 inch OLED display", "body": {"size": [27, 27, 4]}, "pins": [{"id": "sda", "label": "SDA"}],
+            "notes": "I2C.", "verified": False, "source": "From your BOM: https://example.com/oled"}
+
+
+def fake_user(request):
+    auth = request.headers.get("authorization", "")
+    return USERS.get(auth[7:]) if auth.startswith("Bearer ") else None
+
+
+def test_owned_builds_hide_the_owner_and_only_take_their_commits(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    monkeypatch.setattr(routes, "user_from_request", fake_user)
+    bid = c.post("/api/build", json={"goal": "Ada's traffic light"}, headers=ADA).json()["id"]
+    b = wait_done(c, bid)
+    assert b["owner_name"] == "Ada" and b["mine"] is False and "owner" not in b
+    assert "u-ada" not in json.dumps(b) and "ada@example.com" not in json.dumps(b)
+    assert c.get(f"/api/build/{bid}", headers=ADA).json()["mine"] is True
+    assert c.get(f"/api/build/{bid}", headers=BOB).json()["mine"] is False
+    for headers in ({}, BOB):
+        r = c.post(f"/api/build/{bid}/commit", json={"step": 2, "photos": [photo()]}, headers=headers)
+        assert r.status_code == 403 and r.json() == {"error": routes.NOT_OWNER}
+    assert c.post(f"/api/build/{bid}/commit", json={"step": 2, "photos": [photo()]}, headers=ADA).status_code == 200
+    assert json.loads((tmp_path / f"build-{bid}" / "build.json").read_text())["owner"] == "u-ada"  # kept on disk
+
+    anon = wait_done(c, c.post("/api/build", json={"goal": "Anonymous light"}).json()["id"])
+    assert anon["mine"] is True and anon["owner_name"] is None
+    assert c.get(f"/api/build/{anon['id']}", headers=BOB).json()["mine"] is True
+    assert c.post(f"/api/build/{anon['id']}/commit", json={"step": 2, "photos": [photo()]}, headers=BOB).status_code == 200
+
+
+def test_the_owners_bom_parts_reach_the_planner(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    monkeypatch.setattr(routes, "user_from_request", fake_user)
+    boms = types.ModuleType("physical_studio.boms")
+    boms.user_parts = lambda user_id: [BOM_PART] if user_id == "u-ada" else []
+    monkeypatch.setitem(sys.modules, "physical_studio.boms", boms)
+    wait_done(c, c.post("/api/build", json={"goal": "Ada's OLED clock"}, headers=ADA).json()["id"])
+    wait_done(c, c.post("/api/build", json={"goal": "Someone's OLED clock"}).json()["id"])
+    assert PLANNED_WITH["Ada's OLED clock"] == [BOM_PART] and PLANNED_WITH["Someone's OLED clock"] == []
+    brief = planner.library_brief([BOM_PART])
+    assert "THE USER'S OWN PARTS" in brief and "0.96 inch OLED display: body 27 x 27 x 4 mm" in brief and "From your BOM: https://example.com/oled" in brief
+    assert "OWN PARTS" not in planner.library_brief() and "no size" in planner.library_brief([{"name": "Mystery sensor", "notes": "no size"}])
+
+
+def test_a_missing_or_broken_bom_module_doesnt_stop_a_build(monkeypatch):
+    monkeypatch.setitem(sys.modules, "physical_studio.boms", None)  # import raises ImportError
+    assert routes.owner_parts("u-ada") == []
+    broken = types.ModuleType("physical_studio.boms")
+    broken.user_parts = lambda user_id: 1 / 0
+    monkeypatch.setitem(sys.modules, "physical_studio.boms", broken)
+    assert routes.owner_parts("u-ada") == [] and routes.owner_parts(None) == []
 
 
 def test_a_failed_build_shows_a_plain_error(tmp_path, monkeypatch):

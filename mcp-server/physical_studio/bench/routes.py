@@ -7,6 +7,10 @@
 #   GET  /api/build/<id>           status, stage, plan, commits (see snapshot())
 #   POST /api/build/<id>/commit    {step, photos: [data URL], note?}           -> 200 the new commit
 #
+# A build started while logged in has an owner: only they can commit to it (others get 403), GET says
+# `mine` and `owner_name` (never the owner's id or email), and the planner also gets their BOM parts.
+# Anonymous builds stay open to anyone with the link.
+#
 # Files go to <out_dir>/build-<id>/ and are served by the viewer at /out/build-<id>/<file>. build.json is
 # rewritten after every change, so a build and its commits survive a reload or a restart.
 import asyncio, base64, binascii, json, os, re, threading, time, uuid
@@ -15,6 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from ..users import user_from_request
 from . import diagram, planner
 from .pool import hide
 
@@ -24,6 +29,7 @@ MAX_BYTES = 40 * 1024 * 1024
 BUILD_ID = re.compile(r"[0-9a-f]{12}")
 DATA_URL = re.compile(r"data:image/(jpeg|jpg|png|webp);base64,(.+)", re.S)
 FAILED = "Something went wrong while planning. Wait a minute and try again."
+NOT_OWNER = "Only the person who started this build can commit to it."
 
 
 class BadRequest(Exception):
@@ -59,6 +65,21 @@ def parse_photos(items, required=False):
         return [planner.jpeg(d) for d in raw]
     except Exception:
         raise BadRequest("A photo couldn't be read as an image.")
+
+
+def owner_parts(user_id):
+    """The owner's uploaded BOM parts for the planner ([] when anonymous or boms.py isn't there)."""
+    if not user_id:
+        return []
+    try:
+        from ..boms import user_parts
+    except ImportError:
+        return []
+    try:
+        return list(user_parts(user_id) or [])
+    except Exception as e:  # a broken BOM shouldn't stop the build
+        print("[bench] no BOM parts for the planner:", hide(str(e))[:300], flush=True)
+        return []
 
 
 class BuildStore:
@@ -116,10 +137,11 @@ class BuildStore:
             self.recent[ip].append(now)
             return True
 
-    def start(self, goal, have, known, photos):
+    def start(self, goal, have, known, photos, user=None):
         bid = uuid.uuid4().hex[:12]
         build = {"id": bid, "status": "scanning" if photos or known.strip() else "planning", "stage": "Starting your build.",
-                 "error": None, "goal": goal, "have": have, "known": known, "created": now_iso(), "plan": None, "commits": [], "internal": {}}
+                 "error": None, "goal": goal, "have": have, "known": known, "created": now_iso(), "plan": None, "commits": [], "internal": {},
+                 "owner": user["id"] if user else None, "owner_name": user["name"] if user else None}
         with self.lock:
             self.builds[bid] = build
         self.save(build)
@@ -130,7 +152,8 @@ class BuildStore:
         bid = build["id"]
         try:
             result = planner.make_plan(build["goal"], build["have"], build["known"], photos,
-                                       stage=lambda status, text: self.update(build, status=status, stage=text))
+                                       stage=lambda status, text: self.update(build, status=status, stage=text),
+                                       own_parts=owner_parts(build.get("owner")))
             self.update(build, plan=self.publish(bid, result), commits=[self.start_commit(bid, build, result, photos)],
                         internal={"plan": result["plan"], "problems": result["problems"]}, status="done", stage="Your build is ready.")
         except Exception as e:
@@ -193,8 +216,15 @@ class BuildStore:
             return commit
 
 
-def snapshot(build):
-    return {k: v for k, v in build.items() if k not in ("internal", "have")}
+def may_commit(build, user):
+    """Anonymous builds are open to anyone with the link; owned ones only to their owner."""
+    return not build.get("owner") or bool(user and user["id"] == build["owner"])
+
+
+def snapshot(build, user=None):
+    data = {k: v for k, v in build.items() if k not in ("internal", "have", "owner")}
+    data.update(mine=may_commit(build, user), owner_name=build.get("owner_name"))
+    return data
 
 
 def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
@@ -228,7 +258,7 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
         if not store.allow(ip):
             return JSONResponse({"error": "You've started a lot of builds; try again in a while."}, status_code=429)
-        return JSONResponse({"id": store.start(goal, have, known, photos)}, status_code=202)
+        return JSONResponse({"id": store.start(goal, have, known, photos, user_from_request(request))}, status_code=202)
 
     @mcp.custom_route("/api/build/{build_id}", methods=["GET"])
     async def status(request: Request):
@@ -236,7 +266,7 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         if build is None:
             return JSONResponse({"error": "No such build."}, status_code=404)
         with store.lock:  # the worker thread updates this dict while it plans
-            data = json.loads(json.dumps(snapshot(build)))
+            data = json.loads(json.dumps(snapshot(build, user_from_request(request))))
         return JSONResponse(data)
 
     @mcp.custom_route("/api/build/{build_id}/commit", methods=["POST"])
@@ -246,6 +276,8 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path):
         build = store.get(request.path_params["build_id"])
         if build is None:
             return JSONResponse({"error": "No such build."}, status_code=404)
+        if not may_commit(build, user_from_request(request)):
+            return JSONResponse({"error": NOT_OWNER}, status_code=403)
         if build["status"] != "done":
             return JSONResponse({"error": "This build isn't ready for commits yet."}, status_code=409)
         body = await body_of(request)

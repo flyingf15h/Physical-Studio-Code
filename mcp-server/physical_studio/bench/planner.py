@@ -33,10 +33,21 @@ def part_size(name):
     p=library_part(name)
     if not p:return ''
     return ' × '.join(f'{v:g}' for v in p['body']['size'])+' mm'
-def library_brief():
-    if not LIBRARY:return ''
-    lines=[f"- {p['name']}: body {' x '.join(f'{v:g}' for v in p['body']['size'])} mm. Pins: {', '.join(q['id']+' ('+q.get('label',q['id'])+')' for q in p.get('pins',[])[:6])}{'…' if len(p.get('pins',[]))>6 else ''}. {p.get('notes','')}" for p in LIBRARY.values()]
-    return '\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(lines)
+def brief_line(p):
+    size=(p.get('body') or {}).get('size')
+    body=f"body {' x '.join(f'{v:g}' for v in size)} mm. " if size else ''
+    pins=p.get('pins') or []
+    return f"- {p['name']}: {body}Pins: {', '.join(q['id']+' ('+q.get('label',q['id'])+')' for q in pins[:6])}{'…' if len(pins)>6 else ''}. {p.get('notes','')}"
+def library_brief(own=()):
+    """The measured library, plus the signed-in owner's BOM parts (own: parts/*.json-shaped dicts)."""
+    text=''
+    if LIBRARY:
+        text='\nMEASURED PARTS LIBRARY (real dimensions and pin facts; use them, never invent other numbers):\n'+'\n'.join(brief_line(p) for p in LIBRARY.values())
+    own=[p for p in own if isinstance(p,dict) and p.get('name')]
+    if own:
+        text+=('\nTHE USER\'S OWN PARTS (from the bill of materials they uploaded; they already have these, so prefer them over other parts and mark them user_has_it=true; their numbers are not verified):\n'+
+               '\n'.join(brief_line(p)+(f" {p['source']}" if p.get('source') else '') for p in own))
+    return text
 
 
 class NeededPart(BaseModel):
@@ -379,11 +390,12 @@ Typical mistakes to look for, against the wiring pattern below: the wire after a
 
 STARTING_BENCH=("\nThe plan's final scene must contain every starting part and wire with the SAME id, holes and terminals. Steps start from this bench and add only what is missing: step 1 is the first LED, resistor or wire the bench does NOT have yet. Never place a starting part again, never list a starting ID in any step's part_ids, and never add a second wire for a connection a starting wire already makes (two points already joined by a wire or the same strip need no new wire).")
 
-def make_plan(goal,have='',known='',photos=(),stage=lambda status,text:None):
+def make_plan(goal,have='',known='',photos=(),stage=lambda status,text:None,own_parts=()):
     """What the Build helper's Submit button did, without the page: optional scan of the photos and typed
     connections (commit #0), the plan, up to two repair rounds, one guarded tidy pass, and the 3D models.
-    stage(status, sentence) reports progress. Returns plan, scan, start scene and the models."""
-    PlanModel=plan_model(Spec);scan=None;start=None;start_model=None;blobs=list(photos)
+    stage(status, sentence) reports progress; own_parts are the owner's BOM parts for the brief. Returns
+    plan, scan, start scene and the models."""
+    PlanModel=plan_model(Spec);scan=None;start=None;start_model=None;blobs=list(photos);brief=library_brief(own_parts)
     if blobs or known.strip():
         stage('scanning','Looking at what you have: building a 3D model of your bench and spotting your parts.')
         scan=scan_bench(goal,blobs,known);start=scan.scene;start_model=model_of(start,validate,build)
@@ -393,18 +405,18 @@ def make_plan(goal,have='',known='',photos=(),stage=lambda status,text:None):
             '\nPARTS THE PHOTOS SHOW (placed or loose): '+'; '.join(f'{d.quantity} x {d.name} ({d.where})' for d in scan.detected)+'. Mark these user_has_it=true.')
     seen+=known_text(known)
     stage('planning','Choosing the parts you still need and writing your steps.')
-    prompt=PLAN_RULES+WIRING+library_brief()+'\nUSER GOAL:\n'+goal[:4000]+'\nPARTS THE USER SAYS THEY HAVE:\n'+(have[:2000] or '(not stated)')+seen
+    prompt=PLAN_RULES+WIRING+brief+'\nUSER GOAL:\n'+goal[:4000]+'\nPARTS THE USER SAYS THEY HAVE:\n'+(have[:2000] or '(not stated)')+seen
     plan=PlanModel.model_validate_json(ask([prompt]+as_images(blobs[:4]),PlanModel).text or '')
     problems=check_plan(plan,None,start)
     for _ in range(2):  # up to two repair rounds with the exact problems found
         if not problems:break
         stage('checking','Checking the wiring and fixing what the checks found.')
-        fix=PLAN_RULES+WIRING+library_brief()+seen+'\nThis plan has problems. Return the corrected full plan. Fix every problem; keep everything else.\nPROBLEMS:\n- '+'\n- '.join(problems)+'\nPLAN:\n'+plan.model_dump_json()
+        fix=PLAN_RULES+WIRING+brief+seen+'\nThis plan has problems. Return the corrected full plan. Fix every problem; keep everything else.\nPROBLEMS:\n- '+'\n- '.join(problems)+'\nPLAN:\n'+plan.model_dump_json()
         plan=PlanModel.model_validate_json(ask([fix],PlanModel).text or '');problems=check_plan(plan,None,start)
     looks=check_layout(plan,start) if not problems else []
     if looks:  # one tidy-up pass; kept only if every functional check still passes
         stage('checking','Tidying the layout so everything lines up.')
-        tidy=PLAN_RULES+WIRING+library_brief()+seen+'\nThis plan works. Only tidy its layout so it looks neat: move the NEW parts and wires to follow the neat layout pattern, keeping every electrical connection exactly the same (same LED to same board pin, same resistor and ground path) and never moving parts already on the bench. Update the steps\' holes and plain-word instructions to match.\nLAYOUT FIXES:\n- '+'\n- '.join(looks)+'\nPLAN:\n'+plan.model_dump_json()
+        tidy=PLAN_RULES+WIRING+brief+seen+'\nThis plan works. Only tidy its layout so it looks neat: move the NEW parts and wires to follow the neat layout pattern, keeping every electrical connection exactly the same (same LED to same board pin, same resistor and ground path) and never moving parts already on the bench. Update the steps\' holes and plain-word instructions to match.\nLAYOUT FIXES:\n- '+'\n- '.join(looks)+'\nPLAN:\n'+plan.model_dump_json()
         try:
             neat=PlanModel.model_validate_json(ask([tidy],PlanModel).text or '')
             if not check_plan(neat,None,start) and led_pins(neat.scene)==led_pins(plan.scene) and len(check_layout(neat,start))<len(looks):plan=neat
