@@ -109,3 +109,38 @@ def test_import_route_builds_a_guide_from_the_project(tmp_path, monkeypatch):
     assert Path(tmp_path / f"build-{b['id']}" / "imported.glb").exists()
     extra = {p["name"]: p["why"] for p in b["plan"]["parts"]}
     assert extra["Zorblax 3000 widget"].startswith("In the project's parts list")
+
+
+def test_an_import_that_needs_cad_never_falls_back_to_the_breadboard(tmp_path, monkeypatch):
+    from test_bench import FakeJob, jobs_app
+
+    from physical_studio.bench import routes
+    monkeypatch.setattr(importer, "fetch", fake_fetch)
+    monkeypatch.setitem(FILES, API, json.dumps({"name": "plant-waterer", "description": "A pump in a 3D printed case.",
+                                                "default_branch": "main"}).encode())
+    url = {"url": "https://github.com/ada/plant-waterer"}
+    c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("error"))
+    b = wait_done(c, c.post("/api/build/import", json=url).json()["id"])
+    assert b["status"] == "error" and b["error"] == routes.CAD_FAILED and not b.get("plan") and jobs.prompts
+
+    async def busy(prompt, ip, *a, **k):
+        raise RuntimeError("Another design is running; try again in a minute.")
+    jobs.start = busy
+    r = c.post("/api/build/import", json=url)
+    assert r.status_code == 503 and r.json()["error"] == routes.CAD_BUSY
+    jobs.providers = lambda first=None: []  # no CAD pipeline on this server: the breadboard planner it is
+    assert wait_done(c, c.post("/api/build/import", json=url).json()["id"])["status"] == "done"
+
+
+def test_a_circuit_import_still_falls_back_when_the_design_fails(tmp_path, monkeypatch):
+    from test_bench import FakeJob, jobs_app
+    monkeypatch.setattr(importer, "fetch", fake_fetch)
+    url = {"url": "https://github.com/ada/plant-waterer"}
+    c, jobs = jobs_app(tmp_path, monkeypatch, FakeJob("error"))
+    assert wait_done(c, c.post("/api/build/import", json=url).json()["id"])["status"] == "done" and jobs.prompts
+
+    async def busy(prompt, ip, *a, **k):
+        raise RuntimeError("Another design is running; try again in a minute.")
+    jobs.start = busy
+    r = c.post("/api/build/import", json=url)
+    assert r.status_code == 202 and wait_done(c, r.json()["id"])["status"] == "done"

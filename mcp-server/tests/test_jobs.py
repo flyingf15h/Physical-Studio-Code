@@ -253,3 +253,54 @@ def test_export_sends_a_weak_guide_back_once(tmp_path):
     assert not job.exported
     job.run_tool("export", {})  # the second try goes through, so a stubborn model can't loop forever
     assert job.exported
+
+
+def test_a_failed_design_is_tried_again_with_the_failure_fed_back(tmp_path, monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
+    monkeypatch.setattr(jobs, "DESIGN_RETRIES", 1)
+    place = NS(id="c0", function=NS(name="place_part", arguments='{"part_id": "arduino-uno", "position": [0, 0, 0], "id": "uno"}'))
+    step = NS(id="c1", function=NS(name="add_step", arguments=json.dumps(
+        {"title": "Place the Uno", "text": "Set the Arduino Uno on the desk.", "add": ["uno"], "check": "The USB port faces you."})))
+    stop = NS(choices=[NS(finish_reason="stop", message=NS(content="Done.", tool_calls=None))])
+    script = [  # the first try never writes a step; the second does
+        NS(choices=[NS(finish_reason="tool_calls", message=NS(content=None, tool_calls=[place]))]), stop,
+        NS(choices=[NS(finish_reason="tool_calls", message=NS(content=None, tool_calls=[step]))]), stop,
+    ]
+    seen = []
+
+    class FakeClient:
+        def __init__(self, api_key, base_url):
+            self.chat = NS(completions=NS(create=lambda **kw: (seen.append(json.loads(json.dumps(kw["messages"]))), script.pop(0))[1]))
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", FakeClient)
+    job = DesignJob("job4", "Uno stand", tmp_path / "job4", lambda: Studio(REPO / "parts", tmp_path), need_steps=True)
+    job.run([], ["deepseek"])
+    snap = job.snapshot()
+    assert snap["status"] == "done", snap["error"]
+    assert len(job.studio.design.steps) == 1 and not script
+    retry = seen[2][1]["content"][0]["text"]
+    assert "no assembly steps" in retry and "Carry on from there" in retry and '"uno"' in retry
+    assert any("trying again" in e["text"] for e in snap["events"] if e["kind"] == "note")
+
+
+def test_a_design_fails_after_its_retries_and_a_refusal_is_not_retried(tmp_path, monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "d")
+    monkeypatch.setattr(jobs, "DESIGN_RETRIES", 1)
+    calls = []
+
+    def broken(**kw):
+        calls.append(1)
+        raise ValueError("the model sent nonsense")
+
+    monkeypatch.setattr(jobs.openai, "OpenAI", lambda api_key, base_url: NS(chat=NS(completions=NS(create=broken))))
+    job = DesignJob("job5", "Uno stand", tmp_path / "job5", lambda: Studio(REPO / "parts", tmp_path))
+    job.run([], ["deepseek"])
+    assert job.snapshot()["status"] == "error" and "nonsense" in job.snapshot()["error"] and len(calls) == 2
+
+    declined = NS(choices=[NS(finish_reason="content_filter", message=NS(content=None, tool_calls=None))])
+    calls.clear()
+    monkeypatch.setattr(jobs.openai, "OpenAI", lambda api_key, base_url: NS(chat=NS(completions=NS(
+        create=lambda **kw: (calls.append(1), declined)[1]))))
+    job = DesignJob("job6", "Uno stand", tmp_path / "job6", lambda: Studio(REPO / "parts", tmp_path))
+    job.run([], ["deepseek"])
+    assert job.snapshot()["status"] == "error" and "declined" in job.snapshot()["error"] and len(calls) == 1

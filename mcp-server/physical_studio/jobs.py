@@ -80,6 +80,9 @@ SWITCH_ERRORS = (
     openai.InternalServerError,
 )
 MAX_TURNS = 80
+# A design that fails (an API error, a crash, or no assembly steps when the caller needs them) gets this many
+# more tries, each carrying on from the design's state with the failure in the opening message.
+DESIGN_RETRIES = int(os.environ.get("DESIGN_RETRIES", "1"))
 DESIGNS_PER_HOUR = int(os.environ.get("DESIGNS_PER_HOUR", "4"))
 MAX_RUNNING = int(os.environ.get("DESIGN_MAX_RUNNING", "1"))
 DESIGN_GUIDE = Path(__file__).with_name("design_guide.md").read_text(encoding="utf-8")
@@ -149,11 +152,17 @@ class JobError(Exception):
     pass
 
 
+class Declined(JobError):
+    """The model refused the request: trying again won't help."""
+
+
 class DesignJob:
-    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory, images=(), links=(), context: str = ""):
+    def __init__(self, job_id: str, prompt: str, out_dir: Path, studio_factory, images=(), links=(), context: str = "",
+                 need_steps: bool = False):
         self.id = job_id
         self.prompt = prompt
         self.context = context  # more material for the designer, e.g. an imported project's README and parts list
+        self.need_steps = need_steps  # the Build page turns the steps into its guide: a design without any has failed
         self.images: list[attachments.Image] = list(images)
         self.link_urls: list[str] = list(links)
         self.links: list[attachments.Link] = []
@@ -292,38 +301,63 @@ class DesignJob:
         self.studio.new_design(title, self.prompt)
         self.title = title
         self.prepare_attachments()
-        if providers[0] == "anthropic":
-            return self.run_claude(tools)
+        failure = None
+        for attempt in range(DESIGN_RETRIES + 1):
+            try:
+                if providers[0] == "anthropic":
+                    self.run_claude(tools, failure)
+                else:
+                    self.run_compatible(tools, providers, failure)
+                if not self.exported:
+                    self.run_tool("export", {})
+                failure = None
+                if self.need_steps and not self.studio.design.steps:
+                    failure = "the design has no assembly steps (add_step was never called)"
+            except Declined as e:
+                return self.fail(str(e))
+            except Exception as e:
+                failure = self.failure_text(e)
+            if failure is None:
+                self.status = "done"
+                return
+            if attempt < DESIGN_RETRIES:
+                print("[jobs] design", self.id, "failed, trying again:", failure[:300], flush=True)
+                self.event("note", f"The design stopped ({failure}); trying again from where it got to.")
+                self.exported = self.guide_sent_back = False
+        self.fail(failure)
+
+    def failure_text(self, e: Exception) -> str:
+        if isinstance(e, openai.APIStatusError):
+            return f"{self.designer} API error {e.status_code}: {e.message}"
+        if isinstance(e, openai.APIConnectionError):
+            return f"Couldn't reach the {self.designer} API"
+        if isinstance(e, anthropic.APIStatusError):
+            return f"Claude API error {e.status_code}: {e.message}"
+        if isinstance(e, anthropic.APIConnectionError):
+            return "Couldn't reach the Claude API"
+        return str(e) or type(e).__name__
+
+    def run_compatible(self, tools: list[dict], providers: list[str], failure: str | None = None):
+        """The OpenAI-compatible providers in turn. failure: why the last attempt stopped (a retry)."""
         # One entry per key, so a rate-limited Gemini key hands over to the next before another provider.
         queue = [(p, key) for p in providers if p in COMPATIBLE for key in provider_keys(p, rotate=True)]
-        resume = False
-        try:
-            while True:
-                name, key = queue.pop(0)
-                label, _, base_url, model_env, default_model = COMPATIBLE[name]
-                self.designer = label
-                client = openai.OpenAI(api_key=key, base_url=base_url)
-                model = os.environ.get(model_env, default_model)
-                loop = self.run_openai if name == "openai" else self.run_chat
-                try:
-                    loop(client, model, tools, self.opening(resume))
-                    break
-                except SWITCH_ERRORS as e:
-                    if not queue:
-                        raise
-                    nxt = COMPATIBLE[queue[0][0]][0]
-                    carries = f"{nxt} carries on with another key" if queue[0][0] == name else f"{nxt} carries on with the design"
-                    self.event("note", f"{label} stopped ({type(e).__name__}); {carries}.")
-                    resume = True
-            if not self.exported:
-                self.run_tool("export", {})
-            self.status = "done"
-        except openai.APIStatusError as e:
-            self.fail(f"{self.designer} API error {e.status_code}: {e.message}")
-        except openai.APIConnectionError:
-            self.fail(f"Couldn't reach the {self.designer} API")
-        except Exception as e:
-            self.fail(str(e))
+        resume = failure is not None
+        while True:
+            name, key = queue.pop(0)
+            label, _, base_url, model_env, default_model = COMPATIBLE[name]
+            self.designer = label
+            client = openai.OpenAI(api_key=key, base_url=base_url)
+            model = os.environ.get(model_env, default_model)
+            loop = self.run_openai if name == "openai" else self.run_chat
+            try:
+                return loop(client, model, tools, self.opening(resume, failure))
+            except SWITCH_ERRORS as e:
+                if not queue:
+                    raise
+                nxt = COMPATIBLE[queue[0][0]][0]
+                carries = f"{nxt} carries on with another key" if queue[0][0] == name else f"{nxt} carries on with the design"
+                self.event("note", f"{label} stopped ({type(e).__name__}); {carries}.")
+                resume = True
 
     def prepare_attachments(self):
         """Saves the attached images where the page can show them and reads the links."""
@@ -343,7 +377,7 @@ class DesignJob:
     def opening_images(self) -> list[attachments.Image]:
         return self.images + [k.image for k in self.links if k.image]
 
-    def opening(self, resume: bool) -> str:
+    def opening(self, resume: bool, failure: str | None = None) -> str:
         text = f"Design this project: {self.prompt}"
         if self.context:
             text += f"\n\n{self.context}"
@@ -356,11 +390,14 @@ class DesignJob:
                 text += f"\n\nLinked image {k.url} (below)."
             else:
                 text += f"\n\nLinked {k.url} (couldn't read it: {k.error})."
-        if resume:
+        if resume or failure:
             state = json.dumps(self.studio.describe_design(), default=str)
+            why = (f"An earlier attempt at this design stopped partway with this problem: {failure}. Avoid it this time."
+                   if failure else "Another model started this design and stopped partway.")
             text += (
-                "\n\nAnother model started this design and stopped partway. Its current state "
-                f"(describe_design):\n{state}\nCarry on from there; don't start over."
+                f"\n\n{why} Its current state "
+                f"(describe_design):\n{state}\nCarry on from there; don't start over. Make sure the guide has its "
+                "add_step steps, check_guide is clean and you finish with export."
             )
         return text
 
@@ -412,7 +449,7 @@ class DesignJob:
             if msg.content and msg.content.strip():
                 self.event("note", msg.content.strip())
             if choice.finish_reason == "content_filter":
-                raise JobError(f"{self.designer} declined this request")
+                raise Declined(f"{self.designer} declined this request")
             turn: dict = {"role": "assistant", "content": msg.content or ""}
             if getattr(msg, "reasoning_content", None):
                 turn["reasoning_content"] = msg.reasoning_content  # DeepSeek wants it back during tool calls
@@ -447,59 +484,49 @@ class DesignJob:
                     *({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{data}"}} for data in images),
                 ]})
 
-    def run_claude(self, tools: list[dict]):
+    def run_claude(self, tools: list[dict], failure: str | None = None):
         self.designer = "Claude"
         client = anthropic.Anthropic()
         messages: list[dict] = [{"role": "user", "content": [
-            {"type": "text", "text": self.opening(False)},
+            {"type": "text", "text": self.opening(False, failure)},
             *({"type": "image", "source": {"type": "base64", "media_type": img.media_type, "data": img.data}} for img in self.opening_images()),
         ]}]
-        try:
-            for _ in range(MAX_TURNS):
-                response = client.beta.messages.create(
-                    model=MODEL,
-                    max_tokens=16000,
-                    system=SYSTEM,
-                    tools=tools,
-                    messages=messages,
-                    thinking={"type": "adaptive", "display": "updates"},
-                    output_config={"effort": "high"},
-                    cache_control={"type": "ephemeral"},
-                    betas=["server-side-fallback-2026-07-01", "thinking-display-updates-2026-08-18"],
-                    fallbacks="default",
-                )
-                for block in response.content:
-                    note = getattr(block, "thinking", None) if block.type == "thinking" else getattr(block, "text", None) if block.type == "text" else None
-                    if note and note.strip():
-                        self.event("note", note.strip())
-                if response.stop_reason == "refusal":
-                    raise JobError("Claude declined this request")
-                messages.append({"role": "assistant", "content": response.content})
-                if response.stop_reason == "pause_turn":
-                    continue
-                if response.stop_reason == "max_tokens":
-                    messages.append({"role": "user", "content": "Continue."})
-                    continue
-                calls = [b for b in response.content if b.type == "tool_use"]
-                if not calls:
-                    break
-                results = []
-                for call in calls:
-                    try:
-                        content = self.run_tool(call.name, dict(call.input))
-                        results.append({"type": "tool_result", "tool_use_id": call.id, "content": content})
-                    except Exception as e:  # tool errors go back to Claude so it can correct course
-                        results.append({"type": "tool_result", "tool_use_id": call.id, "content": f"Error: {e}", "is_error": True})
-                messages.append({"role": "user", "content": results})
-            if not self.exported:
-                self.run_tool("export", {})
-            self.status = "done"
-        except anthropic.APIStatusError as e:
-            self.fail(f"Claude API error {e.status_code}: {e.message}")
-        except anthropic.APIConnectionError:
-            self.fail("Couldn't reach the Claude API")
-        except Exception as e:
-            self.fail(str(e))
+        for _ in range(MAX_TURNS):
+            response = client.beta.messages.create(
+                model=MODEL,
+                max_tokens=16000,
+                system=SYSTEM,
+                tools=tools,
+                messages=messages,
+                thinking={"type": "adaptive", "display": "updates"},
+                output_config={"effort": "high"},
+                cache_control={"type": "ephemeral"},
+                betas=["server-side-fallback-2026-07-01", "thinking-display-updates-2026-08-18"],
+                fallbacks="default",
+            )
+            for block in response.content:
+                note = getattr(block, "thinking", None) if block.type == "thinking" else getattr(block, "text", None) if block.type == "text" else None
+                if note and note.strip():
+                    self.event("note", note.strip())
+            if response.stop_reason == "refusal":
+                raise Declined("Claude declined this request")
+            messages.append({"role": "assistant", "content": response.content})
+            if response.stop_reason == "pause_turn":
+                continue
+            if response.stop_reason == "max_tokens":
+                messages.append({"role": "user", "content": "Continue."})
+                continue
+            calls = [b for b in response.content if b.type == "tool_use"]
+            if not calls:
+                break
+            results = []
+            for call in calls:
+                try:
+                    content = self.run_tool(call.name, dict(call.input))
+                    results.append({"type": "tool_result", "tool_use_id": call.id, "content": content})
+                except Exception as e:  # tool errors go back to Claude so it can correct course
+                    results.append({"type": "tool_result", "tool_use_id": call.id, "content": f"Error: {e}", "is_error": True})
+            messages.append({"role": "user", "content": results})
 
     def fail(self, message: str):
         self.error = message
@@ -538,7 +565,8 @@ class JobManager:
     def running(self) -> int:
         return sum(1 for j in self.jobs.values() if j.status in ("queued", "running"))
 
-    async def start(self, prompt: str, ip: str, images=(), links=(), model: str | None = None, context: str = "") -> DesignJob:
+    async def start(self, prompt: str, ip: str, images=(), links=(), model: str | None = None, context: str = "",
+                    need_steps: bool = False) -> DesignJob:
         providers = self.providers(model)
         if not providers:
             raise JobError(
@@ -552,7 +580,7 @@ class JobManager:
             raise JobError("Another design is running; try again in a minute.")
         self.recent[ip].append(now)
         job_id = uuid.uuid4().hex[:10]
-        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory, images, links, context)
+        job = DesignJob(job_id, prompt, self.out_dir / job_id, self.studio_factory, images, links, context, need_steps)
         self.jobs[job_id] = job
         tools = await self.tool_defs()
         threading.Thread(target=job.run, args=(tools, providers), daemon=True).start()

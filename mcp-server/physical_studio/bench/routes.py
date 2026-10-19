@@ -45,7 +45,8 @@ READY_NOTE = "This is a ready-made guide. Make your own copy to commit photos of
 # the design into the build (sections, tools, reference pictures, a 3D model per step). The route depends on
 # the prompt alone: a hardware prompt never quietly becomes a breadboard build because the design slot was
 # busy, the hour's designs were used up or the design failed (that's an error to try again); only a server with no CAD pipeline
-# (no JobManager or no design key) plans hardware prompts on the breadboard.
+# (no JobManager or no design key) plans hardware prompts on the breadboard. Imports always try CAD, and the
+# same holds for them: one whose goal needs CAD errors out; one that's just a circuit falls back to the breadboard.
 CAD_WORDS = ("rack and pinion", "rack-and-pinion", "pinion", "gear", "linear rail", "rail", "carriage", "cart", "pendulum", "robot arm",
              "chassis", "enclosure", "case", "box", "housing", "shell", "3d print", "3d-print", "printed", "printable", "mount", "bracket",
              "frame", "bearing", "shaft", "motor", "gearmotor", "servo", "stepper", "nema", "belt", "pulley", "wheel", "caster", "drone",
@@ -267,7 +268,7 @@ class BuildStore:
             if job:
                 if self.cad_build(build, job, imported):
                     return
-                if not imported:  # a hardware prompt: a failed design is an error, never a breadboard guide for a case
+                if not imported or needs_cad(build["goal"]):  # hardware: a failed design is an error, never a breadboard guide for a case
                     self.update(build, status="error", stage="", error=CAD_FAILED)
                     return
                 self.update(build, status="planning", stage="Planning it as a breadboard circuit instead.")
@@ -390,7 +391,7 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
         if cad_available(store.jobs) and needs_cad(goal):  # a hardware build: design it in CAD from real parts
             prompt = goal + (f"\nParts I have: {have}" if have else "") + (f"\nConnections I already know: {known}" if known else "")
             try:
-                job = await store.jobs.start(prompt[:1000], ip)
+                job = await store.jobs.start(prompt[:1000], ip, need_steps=True)
             except Exception as e:  # another design running, too many designs: try again, not a breadboard build
                 print("[bench] no CAD job for a hardware build:", hide(str(e))[:300], flush=True)
                 return JSONResponse({"error": CAD_BUSY}, status_code=503)
@@ -432,15 +433,17 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
         user = user_from_request(request)
         importer.match_parts(project)
         importer.add_missing(project, user)
-        job = None
-        if store.jobs is not None:
-            try:
-                job = await store.jobs.start(importer.prompt(project), ip, context=importer.context(project))
-            except Exception as e:  # no design key, too many designs: the breadboard planner instead
-                print("[bench] no CAD job for the import, planning a breadboard build instead:", hide(str(e))[:300], flush=True)
         # The project's wiring is what to build, not what's on the bench already (`known`), so it goes in the goal.
         wiring = "\n".join(project.wiring + project.pins)
         goal = (importer.goal(project) + (f"\nThe project's own wiring and pin assignments:\n{wiring}" if wiring else ""))[:4000]
+        job = None
+        if cad_available(store.jobs):
+            try:
+                job = await store.jobs.start(importer.prompt(project), ip, context=importer.context(project), need_steps=True)
+            except Exception as e:  # busy or out of designs: an error for hardware, the breadboard planner for a circuit
+                print("[bench] no CAD job for the import:", hide(str(e))[:300], flush=True)
+                if needs_cad(goal):
+                    return JSONResponse({"error": CAD_BUSY}, status_code=503)
         bid = store.start(goal, importer.have_text(project), "", [], user, job, project)
         return JSONResponse({"id": bid}, status_code=202)
 
