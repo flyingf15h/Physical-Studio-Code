@@ -1397,6 +1397,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
   const [error, setError] = useState<string | null>(null)
   const [at, setAt] = useState(-1) // -1 overview, 0..n-1 steps, n finished
   const [tab, setTab] = useState<'guide' | 'code' | 'commits'>('guide')
+  useEffect(() => window.scrollTo({ top: 0 }), [tab]) // a new tab starts at its top, not where the last one was
   const [open, setOpen] = useState<Record<number, boolean>>({}) // sections the builder opened or closed
 
   useEffect(() => {
