@@ -16,8 +16,8 @@ KEEP_DAYS=${KEEP_DAYS:-7}
 
 if [ "${1:-}" = install ]; then
   line="17 4 * * * sh $REPO/deploy/backup.sh >> /var/log/physical-studio-backup.log 2>&1"
-  (crontab -l 2>/dev/null | grep -v 'deploy/backup.sh'; echo "$line") | crontab -
-  echo "installed: $line"
+  { crontab -l 2>/dev/null | grep -v 'deploy/backup.sh' || true; echo "$line"; } | crontab -  # || true: no crontab yet
+  crontab -l | grep -q 'deploy/backup.sh' && echo "installed: $line"
 fi
 
 DATA=$(docker volume inspect -f '{{.Mountpoint}}' physical-studio_designs)
