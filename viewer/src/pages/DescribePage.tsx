@@ -1,6 +1,6 @@
 // Dashboard (screen 1). Mockup: docs/product-vision.html. "Design it" starts a breadboard build on the
 // server's own model keys (Senna's Build helper flow, mcp-server/physical_studio/bench/): the prompt,
-// photos of your bench, the parts you have and connections you already know. It moves on to the
+// photos of your bench and the parts you have. It moves on to the
 // build's page (/build/<id>). The example prompts (Senna's Claude) fill the prompt; picking a part in the
 // parts library (Kelly's Claude) adds it to "Parts I have" (PartsInput), where each part is a chip looked up
 // in the library. Below: the ready-made guides, and designing with your own AI.
@@ -39,7 +39,6 @@ export function DescribePage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [have, setHave] = useState<string[]>([])
-  const [known, setKnown] = useState('')
   const box = useRef<HTMLTextAreaElement>(null)
   const filePicker = useRef<HTMLInputElement>(null)
   const { code } = designParams()
@@ -83,7 +82,7 @@ export function DescribePage() {
     setError(null)
     try {
       const goal = prompt.trim() + (links.length ? `\nLinks: ${links.join(' ')}` : '')
-      const { id } = await startBuild({ goal, have: have.join(', '), known: known.trim(), photos: images })
+      const { id } = await startBuild({ goal, have: have.join(', '), photos: images })
       navigate(withParams(`/build/${id}`, { code }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -182,14 +181,6 @@ export function DescribePage() {
               )}
               <div className="describe-extra">
                 <PartsInput parts={have} onChange={setHave} />
-                <textarea
-                  value={known}
-                  onChange={(e) => setKnown(e.target.value)}
-                  maxLength={3000}
-                  rows={2}
-                  placeholder="Optional: connections you already know, e.g. red LED long leg in e10, wire from pin 9 to a10"
-                  aria-label="Connections you already know"
-                />
               </div>
               {linkDraft !== null && (
                 <div className="describe-linkrow">
@@ -266,7 +257,7 @@ export function DescribePage() {
               <ConnectAI prompt={prompt} setPrompt={fill} onKey={() => {}} />
             </details>
             <footer className="site-footer">
-              Physical Studio · real parts, real dimensions, step-by-step guides · built at Hack the Valley
+              Physical Studio · real parts, real dimensions, step-by-step guides
             </footer>
           </section>
         </div>
