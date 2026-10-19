@@ -18,3 +18,4 @@
 .level-beginner { background: #dcfce7; color: #166534; }
 .level-intermediate { background: #fef3c7; color: #92400e; }
 .level-advanced { background: #fee2e2; color: #991b1b; }
+.projects-card img[src^="/guides/"] { object-fit: cover; padding: 0; background: var(--bg); }

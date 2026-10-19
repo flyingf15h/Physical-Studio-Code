@@ -1823,6 +1823,32 @@
      ]
     }
    }
+  ],
+  "tests": [
+   {
+    "after_step": 12,
+    "title": "Test the red LED",
+    "what_it_tests": "Checks the red LED, its resistor, the D11 connection, and the shared ground connection.",
+    "code": "void setup() {\n  pinMode(11, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(11, HIGH);\n  delay(500);\n  digitalWrite(11, LOW);\n  delay(500);\n}",
+    "expect": "Plug in the USB cable and upload this sketch. The red LED should blink repeatedly: half a second on, then half a second off. Unplug the USB cable before continuing the build.",
+    "if_not": "Re-check step 3: the red LED's long leg belongs in 10e and its short leg in 11e. Check the resistor in step 4 at 11d and 15d, the D11 jumper in step 11 at 10a, and the ground jumper in step 12 at 15a and the top negative rail next to row 15. Check step 10 connects Uno GND to the same negative rail next to row 1."
+   },
+   {
+    "after_step": 14,
+    "title": "Test the yellow LED",
+    "what_it_tests": "Checks the yellow LED, its resistor, and its D10-to-ground circuit.",
+    "code": "void setup() {\n  pinMode(11, OUTPUT);\n  digitalWrite(11, LOW);\n  pinMode(10, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(10, HIGH);\n  delay(500);\n  digitalWrite(10, LOW);\n  delay(500);\n}",
+    "expect": "Plug in the USB cable and upload this sketch. The yellow LED should blink repeatedly: half a second on, then half a second off. The red LED should stay off. Unplug the USB cable before continuing the build.",
+    "if_not": "Re-check step 5: the yellow LED's long leg belongs in 20e and its short leg in 21e. Check step 6's resistor at 21d and 25d, step 13's jumper from D10 to 20a, and step 14's ground jumper from 25a to the top negative rail next to row 25. Check step 10's Uno GND connection and that the rail is continuous between rows 1 and 25."
+   },
+   {
+    "after_step": 16,
+    "title": "Test all three lights",
+    "what_it_tests": "Checks the green LED circuit and confirms that D11, D10, and D9 control the correct lights independently.",
+    "code": "const byte lights[] = {11, 10, 9};\n\nvoid setup() {\n  for (byte i = 0; i < 3; i++) {\n    pinMode(lights[i], OUTPUT);\n    digitalWrite(lights[i], LOW);\n  }\n}\n\nvoid loop() {\n  for (byte i = 0; i < 3; i++) {\n    digitalWrite(lights[i], HIGH);\n    delay(1000);\n    digitalWrite(lights[i], LOW);\n  }\n}",
+    "expect": "Plug in the USB cable and upload this sketch. Only one LED should light at a time: red for one second, yellow for one second, then green for one second, repeating. The button is not connected yet and has no effect. Unplug the USB cable before continuing the build.",
+    "if_not": "For green, re-check step 7's LED legs at 30e (long) and 31e (short), step 8's resistor at 31d and 35d, step 15's D9 jumper to 30a, and step 16's ground jumper from 35a to the negative rail next to row 35. If green alone fails, check whether that rail has a break between step 10's GND connection near row 1 and row 35. For red or yellow problems, re-check steps 3\u20134 and 11\u201312, or steps 5\u20136 and 13\u201314, respectively."
+   }
   ]
  },
  "commits": [

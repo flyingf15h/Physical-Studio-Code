@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#e0f2fe"/>
+  <rect x="300" y="40" width="80" height="220" rx="6" fill="#f97316"/>
+  <g fill="#ea580c"><rect x="300" y="80" width="80" height="6"/><rect x="300" y="140" width="80" height="6"/><rect x="300" y="200" width="80" height="6"/></g>
+  <g fill="none" stroke="#0284c7" stroke-width="7" stroke-linecap="round">
+    <path d="M170 110 a60 60 0 0 1 0 80" opacity=".95"/>
+    <path d="M200 90 a90 90 0 0 1 0 120" opacity=".7"/>
+    <path d="M230 72 a120 120 0 0 1 0 156" opacity=".45"/>
+  </g>
+  <rect x="20" y="104" width="140" height="92" rx="8" fill="#1d4ed8"/>
+  <g fill="#cbd5e1"><circle cx="58" cy="150" r="30"/><circle cx="122" cy="150" r="30"/></g>
+  <g fill="#334155"><circle cx="58" cy="150" r="20"/><circle cx="122" cy="150" r="20"/></g>
+  <g fill="#94a3b8" opacity=".6"><circle cx="58" cy="150" r="8"/><circle cx="122" cy="150" r="8"/></g>
+  <rect x="78" y="112" width="24" height="10" rx="2" fill="#e2e8f0"/>
+  <g fill="#f59e0b"><rect x="60" y="196" width="6" height="40"/><rect x="78" y="196" width="6" height="40"/><rect x="96" y="196" width="6" height="40"/><rect x="114" y="196" width="6" height="40"/></g>
+  <g font-family="system-ui,sans-serif" font-weight="800" fill="#be123c"><text x="30" y="276" font-size="30">beep beep</text></g>
+  <circle cx="268" cy="58" r="16" fill="#ef4444"/><circle cx="263" cy="53" r="5" fill="#fecaca"/>
+</svg>

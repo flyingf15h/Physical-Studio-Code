@@ -6,11 +6,9 @@
   <url><loc>https://physicalstudio.work/privacy</loc></url>
   <url><loc>https://physicalstudio.work/build/traffic-light</loc></url>
   <url><loc>https://physicalstudio.work/build/blink</loc></url>
-  <url><loc>https://physicalstudio.work/build/button-led</loc></url>
-  <url><loc>https://physicalstudio.work/build/led-dimmer</loc></url>
   <url><loc>https://physicalstudio.work/build/night-light</loc></url>
-  <url><loc>https://physicalstudio.work/build/buzzer-melody</loc></url>
-  <url><loc>https://physicalstudio.work/build/rgb-led</loc></url>
   <url><loc>https://physicalstudio.work/build/distance-alarm</loc></url>
+  <url><loc>https://physicalstudio.work/build/snake-game</loc></url>
+  <url><loc>https://physicalstudio.work/build/fire-alarm</loc></url>
   <url><loc>https://physicalstudio.work/build/double-pendulum</loc></url>
 </urlset>
