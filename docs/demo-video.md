@@ -26,7 +26,7 @@ Open https://physicalstudio.work in a fresh tab.
 
 ## Backup recording (in case the live demo fails)
 
-`~/Videos/physical-studio-backup-demo.mp4` on tszfei's machine (`~/Videos/physical-studio-demo/`, raw
+`~/Videos/physical-studio-demo/physical-studio-backup-demo.mp4` on tszfei's machine (raw
 clips in `raw-clips/`). It's 3:17, 1080p, silent, with captions. Recorded Oct 18 from the live site
 with headless Chromium:
 1. Typing a traffic-light prompt (with a buzzer) and clicking **Design it**. The live design took about 75 s and is shown at 3× speed.
