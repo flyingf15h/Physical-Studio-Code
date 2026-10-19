@@ -5,6 +5,7 @@ import type { LegalDoc } from '../router'
 import './DescribePage.css'
 
 const UPDATED = 'October 19, 2026'
+const CONTACT = 'flyingfish9508@gmail.com'
 
 export function LegalPage({ doc }: { doc: LegalDoc }) {
   return (
@@ -154,8 +155,13 @@ function Privacy() {
       <h2>Keeping and deleting data</h2>
       <p>
         Builds and photos are kept so you can come back to them. Anyone with a build's link can open it, so only
-        share links you mean to. To have your account, builds or photos deleted, contact the team and we'll
-        remove them.
+        share links you mean to. You can download or delete everything in your account on{' '}
+        <Link to="/account">Your data and account</Link>. For anything else, such as a build you started without
+        an account, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> and we'll remove it.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        Questions about your data or these pages: <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
       </p>
     </>
   )

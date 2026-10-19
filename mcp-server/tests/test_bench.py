@@ -516,3 +516,17 @@ def test_anyone_can_report_a_wrong_step_and_reports_stay_private(tmp_path, monke
     assert c.post(f"/api/build/{bid}/report", json={"step": 99, "text": "wrong"}).status_code == 400
     assert c.post(f"/api/build/{bid}/report", json={"step": 0, "text": " "}).status_code == 400
     assert c.post("/api/build/000000000000/report", json={"step": 0, "text": "wrong"}).status_code == 404
+
+
+def test_test_checkpoints_keep_only_real_steps_before_the_end(monkeypatch):
+    answer = {"tests": [
+        {"after_step": 3, "title": "Test the LED", "what_it_tests": "LED", "code": "void setup(){}\nvoid loop(){}", "expect": "It blinks.", "if_not": "Step 2."},
+        {"after_step": 4, "title": "After the last step", "what_it_tests": "all", "code": "void setup(){}", "expect": "x", "if_not": "x"},
+        {"after_step": 9, "title": "No such step", "what_it_tests": "x", "code": "void setup(){}", "expect": "x", "if_not": "x"},
+        {"after_step": 3, "title": "Same step twice", "what_it_tests": "x", "code": "void setup(){}", "expect": "x", "if_not": "x"},
+        {"after_step": 1, "title": "No code", "what_it_tests": "x", "code": " ", "expect": "x", "if_not": "x"}]}
+    monkeypatch.setattr(planner, "ask", lambda contents, schema: types.SimpleNamespace(text=json.dumps(answer)))
+    steps = [{"number": n, "title": f"Step {n}", "instruction": "Place it."} for n in range(1, 5)]
+    tests = planner.write_tests({"title": "Blink", "summary": "", "steps": steps, "code": "void setup(){}"})
+    assert [t["title"] for t in tests] == ["Test the LED"]
+    assert planner.write_tests({"title": "No sketch", "steps": steps, "code": ""}) == []

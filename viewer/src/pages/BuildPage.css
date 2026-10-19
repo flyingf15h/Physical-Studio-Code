@@ -130,3 +130,15 @@ form.report-step { display: flex; flex-direction: column; gap: 8px; align-self: 
 form.report-step textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); resize: vertical; }
 .buy-links { white-space: nowrap; font-size: 13px; }
 .buy-links a { color: var(--accent); }
+/* Code tab and test checkpoints */
+.code-block { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.code-actions { display: flex; gap: 6px; }
+.code-block pre { overflow-x: auto; font-size: 12.5px; line-height: 1.5; background: #1f2933; color: #e6edf3; border-radius: 8px; padding: 12px; margin: 0; max-height: 480px; }
+.test-badge { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 1px 6px; border-radius: 999px; background: #fef3c7; color: #92400e; margin-left: 6px; vertical-align: middle; }
+.test-card { border: 1px dashed #f59e0b; background: #fffbeb; border-radius: 12px; padding: 10px 14px; }
+.test-card summary { cursor: pointer; font-weight: 600; }
+.test-card summary .test-badge { margin-left: 0; margin-right: 4px; }
+.test-card p { margin: 8px 0 0; line-height: 1.5; }
+.test-list { padding-left: 20px; display: flex; flex-direction: column; gap: 18px; }
+.test-list h3 { margin: 0 0 4px; font-size: 16px; }
+.test-list p { margin: 6px 0; line-height: 1.5; }

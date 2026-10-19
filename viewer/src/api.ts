@@ -161,12 +161,23 @@ export interface WireInfo {
   ends: [number, number, number][] | null // where each end sits in the GLB (metres, +Y up)
 }
 
+/** An optional test between steps: a short sketch using only what's wired so far (planner.write_tests). */
+export interface TestPoint {
+  after_step: number // 1-based: run it once this step is done
+  title: string
+  what_it_tests: string
+  code: string
+  expect: string
+  if_not: string
+}
+
 export interface BuildPlan {
   kind?: 'cad' // a hardware build from the CAD design pipeline (bench/cad_guide.py); else a breadboard build
   title: string
   summary: string
   final_result: string
   code: string
+  tests?: TestPoint[]
   safety: string[]
   parts: { name: string; quantity: number; why: string; user_has_it: boolean; size: string }[]
   part_guide: Record<string, string>

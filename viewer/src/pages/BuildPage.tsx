@@ -14,6 +14,7 @@ import {
   type BuildCommit,
   type BuildPlan,
   type BuildStep,
+  type TestPoint,
   type Verdict,
   type WireInfo,
 } from '../api'
@@ -1106,7 +1107,120 @@ function StepView({
       {mine.length > 1 && (
         <p className="muted">{mine.length} commits for this step. See them all in the Commits tab.</p>
       )}
+      {plan.tests
+        ?.filter((t) => t.after_step === index + 1)
+        .map((t) => <TestCard key={t.title} test={t} />)}
       <ReportStep key={index} buildId={build.id} step={index} />
+    </div>
+  )
+}
+
+/** A sketch with Copy and Download buttons (download as name.ino, the Arduino IDE's file type). */
+function CodeBlock({ code, name }: { code: string; name: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <div className="code-block">
+      <div className="code-actions">
+        <button
+          type="button"
+          className="tool"
+          onClick={() =>
+            navigator.clipboard.writeText(code).then(
+              () => {
+                setCopied(true)
+                setTimeout(() => setCopied(false), 1500)
+              },
+              () => {},
+            )
+          }
+        >
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        <a
+          className="tool"
+          download={`${name}.ino`}
+          href={`data:text/plain;charset=utf-8,${encodeURIComponent(code)}`}
+        >
+          Download .ino
+        </a>
+      </div>
+      <pre>{code}</pre>
+    </div>
+  )
+}
+
+const sketchName = (title: string) =>
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40) || 'sketch'
+
+/** "Test it now": an optional check after this step, so a beginner finds a mistake before building on it. */
+function TestCard({ test }: { test: TestPoint }) {
+  return (
+    <details className="test-card">
+      <summary>
+        <span className="test-badge">optional test</span> {test.title}
+      </summary>
+      <p>{test.what_it_tests}</p>
+      <CodeBlock code={test.code} name={sketchName(test.title)} />
+      <p>
+        <strong>What you should see:</strong> {test.expect}
+      </p>
+      <p className="muted">
+        <strong>If it doesn't work:</strong> {test.if_not}
+      </p>
+    </details>
+  )
+}
+
+/** The Code tab: the full sketch from the start of the build, and every test checkpoint in build order. */
+function CodeView({ plan, onStep }: { plan: BuildPlan; onStep: (index: number) => void }) {
+  const tests = plan.tests ?? []
+  return (
+    <div className="build-section">
+      <h2>Code</h2>
+      {plan.code ? (
+        <>
+          <p className="muted">
+            The finished sketch. Upload it from the Arduino IDE once every step is done. The pin numbers match the
+            steps.
+          </p>
+          <CodeBlock code={plan.code} name={sketchName(plan.title)} />
+        </>
+      ) : (
+        <p className="muted">This build doesn't need a sketch.</p>
+      )}
+      {tests.length > 0 && (
+        <>
+          <h2>Test as you go</h2>
+          <p className="muted">
+            Optional: each short sketch below uses only what's wired by its step, so you can check that part works
+            before you carry on.
+          </p>
+          <ol className="test-list">
+            {tests.map((t) => (
+              <li key={t.after_step}>
+                <h3>
+                  After step {t.after_step}: {t.title}{' '}
+                  <button type="button" className="link" onClick={() => onStep(t.after_step - 1)}>
+                    go to step {t.after_step}
+                  </button>
+                </h3>
+                <p>{t.what_it_tests}</p>
+                <CodeBlock code={t.code} name={sketchName(t.title)} />
+                <p>
+                  <strong>What you should see:</strong> {t.expect}
+                </p>
+                <p className="muted">
+                  <strong>If it doesn't work:</strong> {t.if_not}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
     </div>
   )
 }
@@ -1282,7 +1396,7 @@ export function BuildPage({ buildId }: { buildId: string }) {
   const [build, setBuild] = useState<Build | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [at, setAt] = useState(-1) // -1 overview, 0..n-1 steps, n finished
-  const [tab, setTab] = useState<'guide' | 'commits'>('guide')
+  const [tab, setTab] = useState<'guide' | 'code' | 'commits'>('guide')
   const [open, setOpen] = useState<Record<number, boolean>>({}) // sections the builder opened or closed
 
   useEffect(() => {
@@ -1354,6 +1468,11 @@ export function BuildPage({ buildId }: { buildId: string }) {
       <button className={i === at ? 'active' : i < at ? 'done' : ''} onClick={() => (setAt(i), setTab('guide'))}>
         <span className="num">{i < 0 ? '0' : i >= n ? '✓' : i + 1}</span>
         {label}
+        {plan.tests?.some((t) => t.after_step === i + 1) && (
+          <span className="test-badge" title="An optional test you can run after this step">
+            test
+          </span>
+        )}
       </button>
     </li>
   )
@@ -1366,6 +1485,17 @@ export function BuildPage({ buildId }: { buildId: string }) {
             <div className="eyebrow">{isHardware(plan) ? 'Hardware build' : 'Breadboard build'}</div>
             <div className="build-title">
               <h1>{plan.title}</h1>
+              {(plan.code || !!plan.tests?.length) && (
+                <button
+                  type="button"
+                  className={tab === 'code' ? 'active' : ''}
+                  aria-pressed={tab === 'code'}
+                  title={tab === 'code' ? 'Back to the guide' : 'The Arduino sketch and the tests you can run while you build'}
+                  onClick={() => setTab(tab === 'code' ? 'guide' : 'code')}
+                >
+                  Code
+                </button>
+              )}
               {!build!.ready && (
                 <button
                   type="button"
@@ -1426,6 +1556,15 @@ export function BuildPage({ buildId }: { buildId: string }) {
                 </button>
               </div>
               <Commits build={build!} plan={plan} />
+            </>
+          ) : tab === 'code' ? (
+            <>
+              <div className="build-nav">
+                <button type="button" className="tool" onClick={() => setTab('guide')}>
+                  ← Back to the guide
+                </button>
+              </div>
+              <CodeView plan={plan} onStep={(i) => (setAt(i), setTab('guide'))} />
             </>
           ) : at < 0 ? (
             <Overview build={build!} plan={plan} />

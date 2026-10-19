@@ -341,7 +341,7 @@ class BuildStore:
             steps.append({**{k: s[k] for k in ("number", "title", "instruction", "check", "part_ids", "placements")},
                           "picture": picture, "markers": [list(x) for x in markers], "model": model})
         return {"title": plan["title"], "summary": plan["summary"], "final_result": plan["final_result"],
-                "code": plan["code"], "safety": plan["safety"],
+                "code": plan["code"], "tests": plan.get("tests", []), "safety": plan["safety"],
                 "parts": [{**p, "size": planner.part_size(p["name"])} for p in plan["parts"]],
                 "part_guide": planner.guide_of(plan),
                 "model": {"glb": self.write(bid, "final.glb", result["model"]["glb"]), "labels": result["model"]["labels"]},
