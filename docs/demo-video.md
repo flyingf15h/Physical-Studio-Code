@@ -23,3 +23,22 @@ Open https://physicalstudio.work in a fresh tab.
 - The bench clip needs a real camera, so the screen capture can't cover shot 5. Film it on a phone
   clamped over the breadboard, or capture the browser tab with the webcam view showing.
 - Editing: Clipchamp (built into Windows) can speed up a section, cut and add title cards.
+
+## Backup recording (in case the live demo fails)
+
+`~/Videos/physical-studio-backup-demo.mp4` on tszfei's machine (`~/Videos/physical-studio-demo/`, raw
+clips in `raw-clips/`). It's 3:17, 1080p, silent, with captions. Recorded Oct 18 from the live site
+with headless Chromium:
+1. Typing a traffic-light prompt (with a buzzer) and clicking **Design it**. The live design took about 75 s and is shown at 3× speed.
+2. Stepping through the guide that came out of it, with step pictures and the rotating 3D bench.
+3. The ready-made enclosure guide (`/guide?design=traffic-light`): steps, rotate, zoom, Exploded.
+4. **Watch my bench**: Gemini Live sees the camera and speaks the step. The camera feed is
+   *simulated* (a still render of step 1) because the recording machine has no webcam, and the caption says so.
+   In this take Gemini gave the instruction but didn't call the step done. In an earlier take the checker hit a Gemini 503 ("high demand").
+5. Photo check on the fresh build: Gemini answered "Looks right".
+
+To re-record: `pip install playwright`, then from an empty folder run `mkdir shots clips`, then
+`python3 <repo>/docs/backup-demo/rec_design.py`, then `rec_guide.py`, then `rec_track.py`, then
+`bash <repo>/docs/backup-demo/edit.sh`. Chromium comes from snap (`/snap/chromium/current/...`).
+Playwright's video recording needs its own ffmpeg build, so symlink the system one:
+`ln -s /usr/bin/ffmpeg ~/.cache/ms-playwright/ffmpeg-1011/ffmpeg-linux`.
