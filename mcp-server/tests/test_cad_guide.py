@@ -68,6 +68,18 @@ def test_screws_say_which_mounting_hole_they_go_in(ready_dir):
         "A screw head sits flat in Uno's front-left mounting hole."
 
 
+def test_the_pin_map_lists_every_wired_board_pin_for_the_firmware(ready_dir):
+    plan = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]
+    uno = plan["pin_map"][0]  # the controller: most connections first
+    assert "Arduino" in uno["board"]
+    assert all(e["to"] and e["colour"] for e in uno["pins"])
+    assert any("through a" in t and "resistor" in t for e in uno["pins"] for t in e["to"])  # LED anodes via 220 ohm
+    listed = sum(len(e["to"]) for b in plan["pin_map"] for e in b["pins"])
+    boards = {b["board"] for b in plan["pin_map"]}
+    on_boards = sum(1 for w in plan["wires"].values() for end in (w["from"], w["to"]) if end["part"] in boards)
+    assert listed == on_boards  # every wire end on a board is listed once
+
+
 def test_numbered_pins_say_pin_but_supply_pins_do_not():
     assert [cad_guide.pin_name(l) for l in ("18 / SDA", "2 (PWM)", "13", "3.3V", "5V", "3V3", "GND")] == \
         ["pin 18 / SDA", "pin 2 (PWM)", "pin 13", "3.3V", "5V", "3V3", "GND"]

@@ -191,7 +191,7 @@
     "source": "https://www.pjrc.com/store/teensy41.html (photo teensy41_4.jpg)",
     "material": "pcb"
   },
-  "notes": "600 MHz Cortex-M7, 3 I2C buses (Wire 18/19, Wire1 17/16). Powered over USB here; its pins are 3.3 V only.",
+  "notes": "600 MHz Cortex-M7, 3 I2C buses (Wire 18/19, Wire1 17/16). Powered over USB here; its pins are 3.3 V only. VIN takes 3.6 to 5.5 V.",
   "verified": false,
   "verified_by": null,
   "verified_on": null

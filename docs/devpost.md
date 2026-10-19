@@ -39,10 +39,13 @@ Physical Studio has two parts that share one site, [physicalstudio.work](https:/
 ### 2. Assembly guides ([physicalstudio.work](https://physicalstudio.work))
 
 - **Designed from real parts.** The Physical Studio **MCP server** lets an AI model design a project out of a parts library with real, measured dimensions, mounting holes and connector positions. Its tools are `search_parts`, `place_part`, `add_wire`, `check_interference`, `check_clearance`, `render_preview`, `add_step` and `export`. The model checks its own design for collisions and clearance and looks at rendered previews before it exports.
-- **Played back as a 3D guide.** The React Three Fiber viewer plays the guide: animated steps, an exploded view, callouts, wire lengths, part legs and photo-textured boards.
+- **The right build for the prompt.** Circuits go to the breadboard planner; anything with a case, lid, motors, rails or gears goes to the CAD designer, every time. `check_guide` rejects placeholder steps ("stage the motor", "drill a hole") so every step fits a real part.
+- **Played back as a guide you can follow.** Every step has an animated picture (parts slide in along their real direction, screws turn into their holes, wires draw end to end, with a fixed camera so the last frame is the reference) and a 3D model with clickable parts and wires. Wiring steps list each connection pin to pin with the boards' printed labels and wire colours. Metal and printed parts carry real-scale material textures; boards wear their real top photos.
+- **Import a project.** Paste a GitHub repo or project page: its README, BOM, pin tables, firmware pin definitions and CAD files become a guide. Or upload a BOM so the planner uses parts you already own.
+- **Bring your own AI.** A personal key connects Claude Code, Claude Desktop or Cursor to the same MCP tools.
 - **Ready-made guides:**
   - **Traffic light:** Arduino Uno, red/yellow/green LEDs on D11/D10/D9 (each through 220 Ω) and a crosswalk button on D2.
-  - **Double inverted pendulum:** a rack-and-pinion cart on an HGR20 rail with a Teensy 4.1, a DRV8874 motor driver, 2× AS5600 magnetic encoders and 2× VL53L0X distance sensors. 23 parts, 33 steps.
+  - **Double inverted pendulum:** a rack-and-pinion cart on an HGR20 rail with a Teensy 4.1, a DRV8874 motor driver, 2× AS5600 magnetic encoders and 2× VL53L0X distance sensors. 30 parts, 30 wires, 33 steps.
 
 ## How we built it
 
@@ -65,7 +68,7 @@ Physical Studio has two parts that share one site, [physicalstudio.work](https:/
 
 - Plans start from the bench you already have instead of assuming an empty table.
 - A circuit checker that catches miswired grounds before a beginner ever sees the plan.
-- A 23-part, 33-step double inverted pendulum guide built from real part dimensions, not just a blinky demo.
+- A 30-part, 33-step double inverted pendulum guide (every wire listed pin to pin) built from real part dimensions, not just a blinky demo.
 - Two working products, deployed on our own domain with HTTPS, built by three people in one weekend.
 
 ## What we learned
@@ -97,7 +100,7 @@ Physical Studio has two parts that share one site, [physicalstudio.work](https:/
 
 - Live site: https://physicalstudio.work
 - Build helper: https://physicalstudio.work/studio/
-- Code: https://github.com/notkelly1/Physical-Studio-Code
+- Code: https://github.com/flyingf15h/Physical-Studio-Code
 - Demo video: **TODO (Kelly):** link once uploaded (board task d0962092)
 
 ## Open questions before submitting

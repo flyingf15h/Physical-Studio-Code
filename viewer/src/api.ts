@@ -171,9 +171,16 @@ export interface BuildPlan {
   parts: { name: string; quantity: number; why: string; user_has_it: boolean; size: string }[]
   part_guide: Record<string, string>
   wires?: Record<string, WireInfo> // hardware builds: wire id -> its two ends
+  pin_map?: PinMapBoard[] // hardware builds: every wired pin of each board, for the firmware
   model: BenchModel | null
   steps: BuildStep[]
   imported?: ImportedProject // builds made with "Import a project"
+}
+
+/** One board's wired pins: "pin 18 / SDA" -> ["Cart joint encoder SDA", "Left distance sensor SDA"]. */
+export interface PinMapBoard {
+  board: string
+  pins: { pin: string; to: string[]; colour: string }[]
 }
 
 /** Where an imported build came from, and the project's own CAD files placed side by side in one model. */

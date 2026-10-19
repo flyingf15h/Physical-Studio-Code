@@ -126,6 +126,30 @@ def hole_where(design, library, fid):
     return f"{host.name}'s {corner + ' ' if corner else 'middle '}mounting hole"
 
 
+def pin_map(wires, by_id, library):
+    """Every wired pin of each board (controllers, drivers), for whoever writes the firmware:
+    [{"board": "Teensy 4.1", "pins": [{"pin": "pin 18 / SDA", "to": ["Cart joint encoder SDA"], "colour": "green"}]}],
+    the board with the most connections first, pins in the board's own order."""
+    boards = {}
+    for w in wires:
+        for here, there in ((w["from"], w["to"]), (w["to"], w["from"])):
+            p = by_id.get(here.get("placement"), {})
+            part = library.get(p.get("part") or "", {})
+            if part.get("category") != "board":
+                continue
+            far = pin_end(by_id, library, there)
+            via = f" (through a {w['inline']})" if w.get("inline") else ""
+            pins = boards.setdefault(here["placement"], {})
+            entry = pins.setdefault(here.get("pin"), {"pin": pin_name(pin_end(by_id, library, here)["pin"]), "to": [], "colour": colour_name(w.get("color"))})
+            entry["to"].append(f"{far['part']} {far['pin']}{via}")
+    out = []
+    for pid, pins in sorted(boards.items(), key=lambda kv: -sum(len(e["to"]) for e in kv[1].values())):
+        order = [q.get("id") for q in library.get(by_id[pid].get("part") or "", {}).get("pins", [])]
+        rows = sorted(pins.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else len(order))
+        out.append({"board": by_id[pid].get("name", pid), "pins": [e for _, e in rows]})
+    return out
+
+
 def wire_info(piece, p, by_id, library):
     """What the page shows when a wire is clicked: both ends (part and pin) and, for the 3D model, where
     each end sits in the GLB's frame (metres, +Y up)."""
@@ -207,7 +231,8 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
             "final_result": f"The finished {title.lower()}, every part in place and every wire connected.",
             "code": "", "safety": ["Keep the power supply unplugged until the last wire is in.",
                                    "Keep fingers clear of moving parts (gears, belts, rails) when it runs."],
-            "parts": parts, "part_guide": guide, "wires": wire_infos, "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps}
+            "parts": parts, "part_guide": guide, "wires": wire_infos, "pin_map": pin_map(wires, by_id, lib),
+            "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps}
     build = {"id": bid, "status": "done", "stage": "Your build is ready.", "error": None, "goal": goal, "have": "", "known": "",
              "created": created, "plan": plan, "internal": {"plan": {"kind": "cad", "title": title, "summary": summary, "steps": internal_steps}},
              "commits": [{"id": planner.new_id(bid), "kind": "start", "step": None, "message": "Starting from the parts list",

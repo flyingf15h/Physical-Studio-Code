@@ -359,7 +359,7 @@ class Studio:
         return checks.check_interference(self.design, self.build())
 
     def check_guide(self) -> dict:
-        return check_guide(self.design)
+        return check_guide(self.design, self.library())
 
     def check_clearance(self, min_gap: float = 1.0, bed: Vec3 | None = None) -> dict:
         return checks.check_clearance(self.design, self.build(), min_gap, tuple(bed) if bed else checks.DEFAULT_BED)

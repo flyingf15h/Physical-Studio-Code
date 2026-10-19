@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 
 from .design import Design
+from .electrical import check_wiring
 
 VAGUE_CHECKS = re.compile(r"\b(works?|working|functions?|correct(ly)?|properly|fine|ok(ay)?|done|complete[ds]?|as shown)\b", re.I)
 SCREW_WORDS = re.compile(r"\b(screw|bolt|tighten|set screw|nut|hex|allen)", re.I)
@@ -32,12 +33,18 @@ def sentences(text: str) -> int:
     return len([s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s])
 
 
-def check_guide(design: Design) -> dict:
+def check_guide(design: Design, library: dict[str, dict] | None = None) -> dict:
+    """With the parts library, also checks the wiring itself (electrical.check_wiring: shorts, mixed
+    voltages, two same-address I2C devices on one line)."""
     problems: list[str] = []
     tips: list[str] = []
+    if library is not None:
+        wiring = check_wiring(design, library)
+        problems += wiring["problems"]
+        tips += wiring["tips"]
     steps = design.steps
     if not steps:
-        return {"ok": False, "problems": ["No steps yet: write the guide with add_step (one step per part, then wiring)."], "tips": [], "stats": {}}
+        return {"ok": False, "problems": problems + ["No steps yet: write the guide with add_step (one step per part, then wiring)."], "tips": tips, "stats": {}}
 
     added_at: dict[str, int] = {}
     for n, s in enumerate(steps, 1):

@@ -89,4 +89,7 @@ add_step(title="Wire the cart encoder", text="Connect the cart encoder.\nCart en
   the lid", not "The circuit works".
 - Builds over about 12 steps: give every step a `section` ("Frame", "Cart and drive motor", "Wiring"), 3 to 8
   steps each, so the build page can fold the list.
-- Call check_guide before export and fix everything under `problems`.
+- Call check_guide before export and fix everything under `problems`. It also checks the wiring from
+  the boards' printed labels: a supply wired to ground, two different voltages on one wire, a supply
+  pin outside the range its part's notes give (Teensy 4.1 VIN 3.6 to 5.5 V), 5 V on a 3.3 V only part,
+  and two fixed-address I2C devices on one SDA line (give each its own bus).
