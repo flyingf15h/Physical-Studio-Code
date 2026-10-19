@@ -27,6 +27,48 @@ export const READY_MADE: Project[] = [
     steps: 18,
   },
   {
+    design: 'build/blink',
+    title: 'Blink',
+    prompt: 'Arduino Uno with a red LED on D13 that turns on and off every second.',
+    steps: 6,
+  },
+  {
+    design: 'build/button-led',
+    title: 'Button and LED',
+    prompt: 'A push button on D2 toggles a green LED on D13 on and off.',
+    steps: 9,
+  },
+  {
+    design: 'build/led-dimmer',
+    title: 'LED dimmer',
+    prompt: 'A 10k potentiometer on A0 sets the brightness of a yellow LED on PWM pin D9.',
+    steps: 9,
+  },
+  {
+    design: 'build/night-light',
+    title: 'Night light',
+    prompt: 'A photoresistor on A0 turns an LED on D9 on when the room gets dark.',
+    steps: 10,
+  },
+  {
+    design: 'build/buzzer-melody',
+    title: 'Buzzer melody',
+    prompt: 'Press the button on D2 and a piezo buzzer on D8 plays a short tune.',
+    steps: 9,
+  },
+  {
+    design: 'build/rgb-led',
+    title: 'RGB colour mixer',
+    prompt: 'A common-cathode RGB LED on D9, D10 and D11 fades through the rainbow.',
+    steps: 9,
+  },
+  {
+    design: 'build/distance-alarm',
+    title: 'Distance alarm',
+    prompt: 'An HC-SR04 ultrasonic sensor and a buzzer that beeps faster as something gets closer.',
+    steps: 15,
+  },
+  {
     design: 'build/double-pendulum',
     title: 'Double inverted pendulum',
     prompt: 'Teensy 4.1, DRV8874 motor driver, two AS5600 encoders and two VL53L0X distance sensors on a breadboard.',
