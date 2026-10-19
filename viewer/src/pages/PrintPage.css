@@ -1,0 +1,41 @@
+.print-page { box-sizing: border-box; width: 100%; max-width: 1180px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+.print-head h1 { font-size: 34px; letter-spacing: -0.02em; margin: 6px 0 0; }
+.print-error { background: #fde8e8; color: #9b1c1c; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin: 0; }
+.print-error a { color: inherit; }
+.print-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.print-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.print-card h2 { margin: 0; font-size: 18px; }
+.print-card .design-model { height: 220px; border-radius: 8px; overflow: hidden; }
+.print-card .design-model-tools span { display: none; }
+.print-page .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.print-facts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.print-facts li { display: flex; justify-content: space-between; gap: 8px; }
+.print-downloads { display: flex; flex-direction: column; gap: 8px; }
+.print-primary, .print-secondary { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; text-decoration: none; font: inherit; border-radius: 8px; cursor: pointer; }
+.print-primary { min-height: 48px; font-weight: 600; background: var(--accent); color: #fff; padding: 6px 12px; }
+.print-primary small { font-weight: 400; font-size: 12px; opacity: .85; }
+.print-secondary { min-height: 44px; font-size: 14px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); padding: 0 12px; }
+.print-secondary:hover { border-color: var(--accent); }
+.print-note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.print-parts { width: 100%; border-collapse: collapse; font-size: 14px; }
+.print-parts th { text-align: left; color: var(--muted); font-size: 12px; font-weight: 600; padding: 6px 0; }
+.print-parts th:last-child, .print-parts td:last-child { text-align: right; padding-left: 12px; }
+.print-parts td { border-top: 1px solid var(--line); padding: 8px 0; vertical-align: top; }
+.print-parts small { display: block; color: var(--muted); font-size: 12px; }
+.print-sub { font-size: 13px; font-weight: 600; color: var(--muted); }
+.print-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.print-chips span { padding: 4px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); font-size: 13px; }
+.print-card input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.print-takeapart-link { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 8px; background: #e3f2e8; color: var(--ink); text-decoration: none; font-size: 14px; }
+.print-takeapart-link strong { color: #23603c; }
+.print-takeapart ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.print-takeapart > ol > li { border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; }
+.print-step-title { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.print-step-title .num { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: #e3f2e8; color: #23603c; }
+.print-takeapart ul { margin: 6px 0 0 34px; padding-left: 16px; color: var(--ink); }
+.print-takeapart small { display: block; margin: 6px 0 0 34px; color: var(--muted); font-size: 12px; }
+@media (max-width: 900px) {
+  .print-grid { grid-template-columns: 1fr; }
+  .print-page { padding: 20px 16px; }
+  .print-head h1 { font-size: 26px; }
+}
