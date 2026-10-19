@@ -18,6 +18,7 @@ import hmac
 import json
 import re
 import secrets
+import shutil
 import threading
 import time
 from pathlib import Path
@@ -156,6 +157,41 @@ class Users:
             self._write(f"saved-{user_id}.json", [p for p in self.projects(user_id) if p["design"] != design])
 
 
+    # --- your data: download it, delete it (the privacy page promises both) ------------------------
+
+    def export(self, user: dict) -> dict:
+        return {"account": {**self.public(user), "created": self._read("users.json", {}).get(self._key(user), {}).get("created")},
+                "saved_projects": self.projects(user["id"]), "builds": [f(user["id"]) for f in EXPORT_HOOKS]}
+
+    def delete(self, user: dict, password: str) -> None:
+        """Removes the account, its sessions, saved projects and BOM parts; DELETE_HOOKS remove the rest
+        (the builds it owns). Accounts with a password must give it again; guests have none."""
+        key = self._key(user)
+        with _lock:
+            users = self._read("users.json", {})
+            stored = users.get(key)
+            if not stored:
+                raise ValueError("No such account.")
+            if not stored.get("guest") and not hmac.compare_digest(_scrypt(password, bytes.fromhex(stored["salt"])), stored["password"]):
+                raise ValueError("That password isn't right.")
+            users.pop(key)
+            self._write("users.json", users)
+            self._write("sessions.json", {k: v for k, v in self._read("sessions.json", {}).items() if v["user"] != key})
+            (self.dir / f"saved-{user['id']}.json").unlink(missing_ok=True)
+            shutil.rmtree(self.dir / f"parts-{user['id']}", ignore_errors=True)
+        for hook in DELETE_HOOKS:
+            hook(user["id"])
+
+    @staticmethod
+    def _key(user: dict) -> str:
+        return f"guest:{user['id']}" if user.get("guest") else user["email"]
+
+
+# Other modules' data that belongs to a user (bench/routes.py: the builds they own). Each takes a user id.
+EXPORT_HOOKS: list = []
+DELETE_HOOKS: list = []
+
+
 def bearer(request: Request) -> str:
     auth = request.headers.get("authorization", "")
     return auth[7:].strip() if auth.lower().startswith("bearer ") else ""
@@ -235,6 +271,26 @@ def register_user_routes(mcp, out_dir: Path) -> Users:
     async def me(request: Request):
         user = user_from_request(request)
         return JSONResponse({"user": user}) if user else fail("Not logged in.", 401)
+
+    @mcp.custom_route("/api/auth/export", methods=["GET"])
+    async def export(request: Request):
+        user = user_from_request(request)
+        if not user:
+            return fail("Log in first.", 401)
+        return JSONResponse(users.export(user), headers={"Content-Disposition": 'attachment; filename="physical-studio-data.json"'})
+
+    @mcp.custom_route("/api/auth/delete", methods=["POST"])
+    async def delete(request: Request):
+        user = user_from_request(request)
+        if not user:
+            return fail("Log in first.", 401)
+        if _too_many(request):
+            return fail("Too many attempts. Wait a minute and try again.", 429)
+        try:
+            users.delete(user, str((await body(request)).get("password", "")))
+        except ValueError as e:
+            return fail(str(e), 403)
+        return JSONResponse({})
 
     @mcp.custom_route("/api/projects", methods=["GET", "POST"])
     async def projects(request: Request):

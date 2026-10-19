@@ -80,3 +80,28 @@ def test_bom_rows_already_in_the_library_are_not_looked_up(tmp_path, monkeypatch
     assert boms.own_part("0123456789abcdef", "2 x VL53L0X TOF Sensor")["id"] == "gy-530-abc123"
     assert boms.own_part("0123456789abcdef", "gy-530 vl53l0x")["id"] == "gy-530-abc123"
     assert boms.own_part("0123456789abcdef", "Arduino Uno") is None
+
+
+def test_deleting_an_account_removes_its_sessions_projects_and_builds(tmp_path):
+    from physical_studio.bench.routes import BuildStore
+    from physical_studio import users as users_module
+    users = Users(tmp_path)
+    store = BuildStore(tmp_path)
+    users_module.EXPORT_HOOKS[:], users_module.DELETE_HOOKS[:] = [store.export_user], [store.delete_user]
+    token, ada = users.signup("ada@example.com", "correct horse", "Ada")
+    _, bob = users.signup("bob@example.com", "battery staple", "Bob")
+    users.save_project(ada["id"], {"design": "build/blink", "title": "Blink"})
+    for bid, owner in (("aaaaaaaaaaaa", ada["id"]), ("bbbbbbbbbbbb", bob["id"])):
+        store.save({"id": bid, "status": "done", "goal": "Blink", "owner": owner, "plan": None, "commits": []})
+    data = users.export(ada)
+    assert data["account"]["email"] == "ada@example.com" and "password" not in data["account"]
+    assert [b["id"] for b in data["builds"][0]] == ["aaaaaaaaaaaa"] and data["saved_projects"][0]["design"] == "build/blink"
+    with pytest.raises(ValueError):
+        users.delete(ada, "wrong password")
+    users.delete(ada, "correct horse")
+    assert users.user_for(token) is None and users.projects(ada["id"]) == []
+    assert not (tmp_path / "build-aaaaaaaaaaaa").exists() and (tmp_path / "build-bbbbbbbbbbbb").exists()
+    with pytest.raises(ValueError):
+        users.login("ada@example.com", "correct horse")
+    _, guest = users.guest()
+    users.delete(guest, "")  # guests have no password to give

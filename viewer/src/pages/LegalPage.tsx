@@ -23,6 +23,25 @@ export function LegalPage({ doc }: { doc: LegalDoc }) {
   )
 }
 
+export function NotFoundPage() {
+  return (
+    <div className="page">
+      <ProgressHeader />
+      <main className="page-body">
+        <div className="describe-page">
+          <section className="describe-main legal">
+            <h1>Page not found</h1>
+            <p>This page doesn't exist, or the link is missing part of its address.</p>
+            <p>
+              <Link to="/">Start a new build</Link> or open one of the ready-made guides on the dashboard.
+            </p>
+          </section>
+        </div>
+      </main>
+    </div>
+  )
+}
+
 export function LegalLinks() {
   return (
     <nav className="legal-links" aria-label="Legal">

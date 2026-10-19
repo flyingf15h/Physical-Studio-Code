@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { guestLogIn, logIn, logOut, signUp } from '../api'
 import { onOpenLogin, setSession, useUser } from '../auth'
+import { navigate } from '../router'
 import './Account.css'
 
 function Dialog({
@@ -153,6 +154,16 @@ export function Account() {
               ) : (
                 <span>{user.email}</span>
               )}
+              <a
+                href="/account"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setMenu(false)
+                  navigate('/account')
+                }}
+              >
+                Your data and account
+              </a>
               <button
                 type="button"
                 onClick={() => {

@@ -54,3 +54,13 @@
 .legal h2 { font-size: 18px; margin: 20px 0 6px; }
 .legal p, .legal li { line-height: 1.55; }
 .legal ul { padding-left: 20px; }
+.account-box { margin: 16px 0; }
+.account-box h2 { margin: 0 !important; font-size: 17px; }
+.account-box input[type="password"] { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; max-width: 320px; }
+.account-box.danger { border-color: #fca5a5; }
+.account-check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+button.danger { background: #b91c1c; color: #fff; border: none; border-radius: 999px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
+button.danger:disabled { opacity: .5; cursor: default; }
+.legal a { color: var(--accent); }
+.legal-links a { color: var(--muted); }
+button.pill-button { background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 6px 16px; font-weight: 600; cursor: pointer; }

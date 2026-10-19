@@ -10,3 +10,11 @@
 .projects-remove { position: absolute; top: 8px; right: 8px; border: 0; background: rgba(31, 41, 51, .75); color: #fff; width: 24px; height: 24px; border-radius: 50%; font-size: 16px; line-height: 1; cursor: pointer; padding: 0; }
 .projects-empty { font-size: 14px; color: var(--muted); margin: 0; }
 .projects-card img[src$=".svg"] { object-fit: contain; background: #fff; padding: 8px; box-sizing: border-box; }
+/* Ready-made guides: difficulty filter and badge */
+.level-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.level-filter button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.level-filter button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.level { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-right: 6px; }
+.level-beginner { background: #dcfce7; color: #166534; }
+.level-intermediate { background: #fef3c7; color: #92400e; }
+.level-advanced { background: #fee2e2; color: #991b1b; }

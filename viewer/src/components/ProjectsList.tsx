@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { listMyProjects, listSaved } from '../api'
 import { useUser } from '../auth'
-import { forgetProject, projectHref, READY_MADE, savedKey, thumbnail, yourProjects, type Project } from '../projects'
+import { forgetProject, LEVELS, projectHref, READY_MADE, savedKey, thumbnail, yourProjects, type Level, type Project } from '../projects'
 import { designParams, navigate } from '../router'
 import './ProjectsList.css'
 
@@ -31,7 +31,12 @@ function Card({ project, onRemove }: { project: Project; onRemove?: () => void }
         <span className="projects-title">{project.title}</span>
         {project.prompt && <span className="projects-prompt">{project.prompt}</span>}
         <span className="projects-meta">
-          {[project.steps ? `${project.steps} step${project.steps === 1 ? '' : 's'}` : '', when(project.openedAt)]
+          {project.level && <span className={`level level-${project.level.toLowerCase()}`}>{project.level}</span>}
+          {[
+            project.steps ? `${project.steps} step${project.steps === 1 ? '' : 's'}` : '',
+            project.minutes ? duration(project.minutes) : '',
+            when(project.openedAt),
+          ]
             .filter(Boolean)
             .join(' · ')}
         </span>
@@ -55,13 +60,32 @@ function merge(opened: Project[], exported: Project[]): Project[] {
   return [...byDesign.values()].sort((a, b) => (b.openedAt ?? 0) - (a.openedAt ?? 0))
 }
 
+const duration = (minutes: number) => (minutes < 90 ? `about ${minutes} min` : `about ${Math.round(minutes / 60)} h`)
+
 export function ReadyMadeGuides() {
+  const [level, setLevel] = useState<Level | null>(null)
+  const shown = READY_MADE.filter((p) => !level || p.level === level)
   return (
-    <ul className="projects-grid">
-      {READY_MADE.map((p) => (
-        <Card key={p.design} project={p} />
-      ))}
-    </ul>
+    <>
+      <div className="level-filter" role="group" aria-label="Filter by difficulty">
+        {[null, ...LEVELS].map((l) => (
+          <button
+            key={l ?? 'all'}
+            type="button"
+            className={l === level ? 'active' : ''}
+            aria-pressed={l === level}
+            onClick={() => setLevel(l)}
+          >
+            {l ?? 'All'} ({READY_MADE.filter((p) => !l || p.level === l).length})
+          </button>
+        ))}
+      </div>
+      <ul className="projects-grid">
+        {shown.map((p) => (
+          <Card key={p.design} project={p} />
+        ))}
+      </ul>
+    </>
   )
 }
 

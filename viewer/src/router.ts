@@ -6,6 +6,7 @@
 //   /guide?design=out/<id>    3 Guide + 4 Build (the tracker panel); /?design=... still works
 //   /print?design=out/<id>    5 Print and share
 //   /safety, /terms, /privacy  the legal pages (LegalPage)
+//   /account                  download or delete your data (AccountPage)
 
 import { useEffect, useState } from 'react'
 
@@ -17,6 +18,8 @@ export type Route =
   | { page: 'guide' }
   | { page: 'print' }
   | { page: 'legal'; doc: LegalDoc }
+  | { page: 'notfound' }
+  | { page: 'account' }
 
 export type LegalDoc = 'safety' | 'terms' | 'privacy'
 
@@ -26,11 +29,13 @@ export function parseRoute(path = location.pathname, search = location.search): 
   const job = path.match(/^\/design\/([\w-]+)\/?$/)
   if (job) return { page: 'design', jobId: job[1] }
   if (path.startsWith('/projects')) return { page: 'projects' }
+  if (/^\/account\/?$/.test(path)) return { page: 'account' }
   if (path.startsWith('/guide')) return { page: 'guide' }
   if (path.startsWith('/print')) return { page: 'print' }
   const legal = path.match(/^\/(safety|terms|privacy)\/?$/)
   if (legal) return { page: 'legal', doc: legal[1] as LegalDoc }
   if (new URLSearchParams(search).has('design')) return { page: 'guide' } // old /?design=... links
+  if (path !== '/' && path !== '/index.html') return { page: 'notfound' }
   return { page: 'describe' }
 }
 

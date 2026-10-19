@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from .. import users
 from ..users import user_from_request
 from . import cad_guide, diagram, importer, planner
 from .pool import hide
@@ -227,6 +228,27 @@ class BuildStore:
         with self.lock, open(folder / "reports.jsonl", "a") as f:
             f.write(json.dumps(entry) + "\n")
 
+    def owned(self, user_id):
+        """The builds a user started (or copied), from disk: the in-memory cache only holds recent ones."""
+        out = []
+        for path in self.out_dir.glob("build-*/build.json"):
+            try:
+                build = json.loads(path.read_text())
+            except (OSError, ValueError):
+                continue
+            if build.get("owner") == user_id and not build.get("ready"):
+                out.append(build)
+        return out
+
+    def export_user(self, user_id):
+        return [{k: b.get(k) for k in ("id", "created", "goal", "have", "known", "status", "plan", "commits")} for b in self.owned(user_id)]
+
+    def delete_user(self, user_id):
+        for build in self.owned(user_id):
+            with self.lock:
+                self.builds.pop(build["id"], None)
+            shutil.rmtree(self.folder(build["id"]), ignore_errors=True)
+
     def update(self, build, **fields):
         with self.lock:
             build.update(fields)
@@ -377,6 +399,8 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
     """jobs: the server's jobs.JobManager, so hardware prompts can run the CAD design pipeline."""
     planner.configure(parts_dir)
     store = BuildStore(out_dir, jobs)
+    users.EXPORT_HOOKS[:] = [store.export_user]  # a user's data download and account deletion cover their builds
+    users.DELETE_HOOKS[:] = [store.delete_user]
 
     def code_ok(request: Request) -> bool:
         code = os.environ.get("DEMO_CODE")

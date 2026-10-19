@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /out/
+Sitemap: https://physicalstudio.work/sitemap.xml

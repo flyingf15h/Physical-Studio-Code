@@ -1311,6 +1311,10 @@ export function BuildPage({ buildId }: { buildId: string }) {
   }, [buildId])
 
   const plan = build?.status === 'done' ? build.plan : null
+  const title = plan?.title
+  useEffect(() => {
+    if (title) document.title = `${title} · Physical Studio`
+  }, [title])
   const addCommit = (c: BuildCommit) => setBuild((b) => (b ? { ...b, commits: [...b.commits, c] } : b))
 
   if (!plan) {

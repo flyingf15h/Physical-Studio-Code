@@ -290,6 +290,11 @@ export const guestLogIn = () =>
   call<{ token: string; user: User }>('/api/auth/guest', { method: 'POST', headers: headers() })
 
 export const logOut = () => call<object>('/api/auth/logout', { method: 'POST', headers: headers() })
+/** Everything stored about you: account, saved projects and the builds you own (users.py export). */
+export const exportMyData = () => call<object>('/api/auth/export', { headers: headers() })
+/** Deletes the account and everything it owns. Accounts with a password must give it again. */
+export const deleteAccount = (password: string) =>
+  call<object>('/api/auth/delete', { method: 'POST', headers: headers(true), body: JSON.stringify({ password }) })
 
 export interface SavedProject {
   design: string

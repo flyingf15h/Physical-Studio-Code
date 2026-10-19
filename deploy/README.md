@@ -72,3 +72,16 @@ sh /opt/Physical-Studio-Code/deploy/update.sh "physicalstudio.work, www.physical
 ```
 
 For a new domain, first add DNS records at the registrar (GoDaddy: My Products → the domain → DNS): an `A` record for `@` pointing at the server's IP (155.138.154.8) and a `CNAME` for `www` pointing at `@`, and delete GoDaddy's default "Parked" `A` record.
+
+## Backups
+
+`deploy/backup.sh` saves the designs volume (accounts, saved projects, BOM parts, every build with its photos and commits, step reports) to `/var/backups/physical-studio/`, leaving out the ready-made guides because they're in the repo. It keeps 7 days.
+
+```sh
+sh /opt/Physical-Studio-Code/deploy/backup.sh install   # back up now and every night at 04:17 UTC
+```
+
+Step reports ("Something wrong with this step?") are in `.reports/reports.jsonl` inside the volume:
+`cat /var/lib/docker/volumes/physical-studio_designs/_data/.reports/reports.jsonl`.
+
+The backups are on the same server, so they don't survive losing the server. To copy them off it, download the newest file now and then (`scp root@<server>:/var/backups/physical-studio/designs-*.tar.gz .`), or sync the folder to free object storage (Cloudflare R2's free tier is 10 GB).

@@ -14,62 +14,85 @@ export interface Project {
   steps?: number
   openedAt?: number // ms; your projects only
   thumb?: string // a picture of the project for its card, instead of thumbnail()
+  level?: Level // ready-made guides: how hard it is
+  minutes?: number // ready-made guides: about how long it takes to build
 }
+
+export const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const
+export type Level = (typeof LEVELS)[number]
 
 // The ready-made guides are finished breadboard builds shipped with the server
 // (mcp-server/physical_studio/bench/ready/<name>/), opened at /build/<name>.
-const PENDULUM_STEPS = 9
+const PENDULUM_STEPS = 33
 export const READY_MADE: Project[] = [
   {
     design: 'build/traffic-light',
+    level: 'Beginner',
+    minutes: 30,
     title: 'Traffic light',
     prompt: 'Arduino Uno with red, yellow and green LEDs on D11, D10 and D9 and a crosswalk button on D2.',
     steps: 18,
   },
   {
     design: 'build/blink',
+    level: 'Beginner',
+    minutes: 10,
     title: 'Blink',
     prompt: 'Arduino Uno with a red LED on D13 that turns on and off every second.',
     steps: 6,
   },
   {
     design: 'build/button-led',
+    level: 'Beginner',
+    minutes: 15,
     title: 'Button and LED',
     prompt: 'A push button on D2 toggles a green LED on D13 on and off.',
     steps: 9,
   },
   {
     design: 'build/led-dimmer',
+    level: 'Beginner',
+    minutes: 15,
     title: 'LED dimmer',
     prompt: 'A 10k potentiometer on A0 sets the brightness of a yellow LED on PWM pin D9.',
     steps: 9,
   },
   {
     design: 'build/night-light',
+    level: 'Beginner',
+    minutes: 20,
     title: 'Night light',
     prompt: 'A photoresistor on A0 turns an LED on D9 on when the room gets dark.',
     steps: 10,
   },
   {
     design: 'build/buzzer-melody',
+    level: 'Beginner',
+    minutes: 15,
     title: 'Buzzer melody',
     prompt: 'Press the button on D2 and a piezo buzzer on D8 plays a short tune.',
     steps: 9,
   },
   {
     design: 'build/rgb-led',
+    level: 'Beginner',
+    minutes: 20,
     title: 'RGB colour mixer',
     prompt: 'A common-cathode RGB LED on D9, D10 and D11 fades through the rainbow.',
     steps: 9,
   },
   {
     design: 'build/distance-alarm',
+    level: 'Intermediate',
+    minutes: 30,
     title: 'Distance alarm',
     prompt: 'An HC-SR04 ultrasonic sensor and a buzzer that beeps faster as something gets closer.',
     steps: 15,
   },
   {
     design: 'build/double-pendulum',
+    level: 'Advanced',
+    minutes: 480,
     title: 'Double inverted pendulum',
     prompt: 'Teensy 4.1, DRV8874 motor driver, two AS5600 encoders and two VL53L0X distance sensors on a breadboard.',
     steps: PENDULUM_STEPS,
