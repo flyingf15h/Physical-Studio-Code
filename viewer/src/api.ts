@@ -247,6 +247,14 @@ export const matchParts = (items: string[]) =>
 export const copyBuild = (id: string) =>
   call<{ id: string }>(`/api/build/${encodeURIComponent(id)}/copy`, { method: 'POST', headers: headers() })
 
+/** "Something wrong with this step?": a report for a person to review (bench routes.py, out/.reports/). */
+export const reportStep = (id: string, step: number, text: string) =>
+  call<{ ok: boolean }>(`/api/build/${encodeURIComponent(id)}/report`, {
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ step, text }),
+  })
+
 /** Photos of the bench after a step: the AI's verdict and a 3D model of what was photographed (10–60 s). */
 export const setBuildSummary = (id: string, summary: string) =>
   call<{ summary: string }>(`/api/build/${encodeURIComponent(id)}/summary`, {

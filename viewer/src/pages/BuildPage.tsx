@@ -8,6 +8,7 @@ import {
   commitStep,
   copyBuild,
   getBuild,
+  reportStep,
   setBuildSummary,
   type Build,
   type BuildCommit,
@@ -372,6 +373,7 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
             <th>Qty</th>
             <th>Size</th>
             <th>Why</th>
+            <th>Find it</th>
           </tr>
         </thead>
         <tbody>
@@ -383,6 +385,16 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
               <td>{p.quantity}</td>
               <td className="muted">{p.size}</td>
               <td>{p.why}</td>
+              <td className="buy-links">
+                {buyLinks(p.name).map((l, j) => (
+                  <span key={l.shop}>
+                    {j > 0 && ' · '}
+                    <a href={l.url} target="_blank" rel="noopener noreferrer sponsored">
+                      {l.shop}
+                    </a>
+                  </span>
+                ))}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -430,6 +442,18 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
       )}
     </div>
   )
+}
+
+// "Find it" in the parts table: a store search for each part. VITE_AMAZON_TAG (an Amazon Associates
+// tracking id, set at build time) turns the Amazon links into affiliate links; without it they're plain searches.
+const AMAZON_TAG = import.meta.env.VITE_AMAZON_TAG as string | undefined
+
+function buyLinks(name: string) {
+  const q = encodeURIComponent(name.replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim())
+  return [
+    { shop: 'Amazon', url: `https://www.amazon.com/s?k=${q}${AMAZON_TAG ? `&tag=${encodeURIComponent(AMAZON_TAG)}` : ''}` },
+    { shop: 'AliExpress', url: `https://www.aliexpress.com/wholesale?SearchText=${q}` },
+  ]
 }
 
 function CopyBuild({ build }: { build: Build }) {
@@ -1082,7 +1106,59 @@ function StepView({
       {mine.length > 1 && (
         <p className="muted">{mine.length} commits for this step. See them all in the Commits tab.</p>
       )}
+      <ReportStep key={index} buildId={build.id} step={index} />
     </div>
+  )
+}
+
+/** A wrong step can cost someone a board, so anyone reading a guide can flag one for a person to fix. */
+function ReportStep({ buildId, step }: { buildId: string; step: number }) {
+  const [open, setOpen] = useState(false)
+  const [text, setText] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [error, setError] = useState<string | null>(null)
+  if (state === 'sent') return <p className="muted report-step">Thanks. We'll look at this step.</p>
+  if (!open)
+    return (
+      <button type="button" className="link report-step" onClick={() => setOpen(true)}>
+        Something wrong with this step?
+      </button>
+    )
+  return (
+    <form
+      className="report-step"
+      onSubmit={(e) => {
+        e.preventDefault()
+        setState('sending')
+        setError(null)
+        reportStep(buildId, step, text).then(
+          () => setState('sent'),
+          (err) => {
+            setError(err instanceof Error ? err.message : String(err))
+            setState('idle')
+          },
+        )
+      }}
+    >
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        maxLength={1000}
+        rows={2}
+        autoFocus
+        placeholder="What's wrong? e.g. the resistor goes in row 12, not 14"
+        aria-label="What's wrong with this step"
+      />
+      <div className="commit-row">
+        <button type="submit" disabled={state === 'sending' || text.trim().length < 3}>
+          {state === 'sending' ? 'Sending…' : 'Send report'}
+        </button>
+        <button type="button" className="link" onClick={() => setOpen(false)}>
+          Cancel
+        </button>
+      </div>
+      {error && <p className="error-text">{error}</p>}
+    </form>
   )
 }
 

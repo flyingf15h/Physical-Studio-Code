@@ -4,6 +4,7 @@ import { NetworkBanner } from './components/NetworkBanner'
 import { BuildPage } from './pages/BuildPage'
 import { DescribePage } from './pages/DescribePage'
 import { DesignPage } from './pages/DesignPage'
+import { LegalPage } from './pages/LegalPage'
 import { PrintPage } from './pages/PrintPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 
@@ -29,6 +30,8 @@ function Page() {
       return <DesignPage key={route.jobId} jobId={route.jobId} />
     case 'print':
       return <PrintPage />
+    case 'legal':
+      return <LegalPage doc={route.doc} />
     default:
       return <App />
   }

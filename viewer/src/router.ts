@@ -5,6 +5,7 @@
 //   /design/<job id>          2 the AI designs it
 //   /guide?design=out/<id>    3 Guide + 4 Build (the tracker panel); /?design=... still works
 //   /print?design=out/<id>    5 Print and share
+//   /safety, /terms, /privacy  the legal pages (LegalPage)
 
 import { useEffect, useState } from 'react'
 
@@ -15,6 +16,9 @@ export type Route =
   | { page: 'design'; jobId: string }
   | { page: 'guide' }
   | { page: 'print' }
+  | { page: 'legal'; doc: LegalDoc }
+
+export type LegalDoc = 'safety' | 'terms' | 'privacy'
 
 export function parseRoute(path = location.pathname, search = location.search): Route {
   const build = path.match(/^\/build\/([\w-]+)\/?$/)
@@ -24,6 +28,8 @@ export function parseRoute(path = location.pathname, search = location.search): 
   if (path.startsWith('/projects')) return { page: 'projects' }
   if (path.startsWith('/guide')) return { page: 'guide' }
   if (path.startsWith('/print')) return { page: 'print' }
+  const legal = path.match(/^\/(safety|terms|privacy)\/?$/)
+  if (legal) return { page: 'legal', doc: legal[1] as LegalDoc }
   if (new URLSearchParams(search).has('design')) return { page: 'guide' } // old /?design=... links
   return { page: 'describe' }
 }

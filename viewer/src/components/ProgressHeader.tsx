@@ -22,7 +22,7 @@ interface Props {
   build?: string
 }
 
-function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
+export function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
   return (
     <a
       className={className}

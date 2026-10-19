@@ -503,3 +503,16 @@ def test_the_scan_takes_a_second_look_for_jumper_wires(monkeypatch):
     monkeypatch.setattr(planner, "ask", lambda contents, schema: NS(text=next(answers)))
     scan = planner.scan_bench("traffic light", [b"jpeg"], "")
     assert len(scan.scene.wires) == 2 and scan.detected[0].name == "red jumper wire"
+
+
+def test_anyone_can_report_a_wrong_step_and_reports_stay_private(tmp_path, monkeypatch):
+    c = app(tmp_path, monkeypatch)
+    bid = c.post("/api/build", json={"goal": "Traffic light with 3 LEDs"}).json()["id"]
+    wait_done(c, bid)
+    r = c.post(f"/api/build/{bid}/report", json={"step": 0, "text": "  The LED   is in the wrong row "})
+    assert r.status_code == 201
+    entry = json.loads((tmp_path / ".reports" / "reports.jsonl").read_text().splitlines()[0])
+    assert entry["build"] == bid and entry["step"] == 0 and entry["text"] == "The LED is in the wrong row"
+    assert c.post(f"/api/build/{bid}/report", json={"step": 99, "text": "wrong"}).status_code == 400
+    assert c.post(f"/api/build/{bid}/report", json={"step": 0, "text": " "}).status_code == 400
+    assert c.post("/api/build/000000000000/report", json={"step": 0, "text": "wrong"}).status_code == 404

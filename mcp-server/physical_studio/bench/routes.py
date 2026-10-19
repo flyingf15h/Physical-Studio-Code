@@ -32,6 +32,8 @@ DATA_URL = re.compile(r"data:image/(jpeg|jpg|png|webp);base64,(.+)", re.S)
 FAILED = "Something went wrong while planning. Wait a minute and try again."
 NOT_OWNER = "Only the person who started this build can commit to it."
 SUMMARY_MAX = 280  # about 3 lines under the title
+REPORT_MAX = 1000  # "this step is wrong" reports
+REPORTS_PER_HOUR = 20
 # Ready-made guides (screen 1): finished builds kept in the repo under bench/ready/<name>/ (build.json
 # with /out/build-<name>/ URLs, plus its files). They're copied into out_dir at startup, can't be
 # committed to, and POST /api/build/<name>/copy gives a visitor their own copy to commit photos to.
@@ -143,6 +145,7 @@ class BuildStore:
         self.lock = threading.Lock()
         self.commit_locks = defaultdict(threading.Lock)
         self.recent = defaultdict(list)
+        self.reports = defaultdict(list)  # ip -> times of recent step reports
         self.ready = set()
         self.seed_ready()
 
@@ -208,6 +211,21 @@ class BuildStore:
                 build.update(status="error", stage="", error="The server restarted while this build was planning. Start it again.")
             self.builds[bid] = build
             return build
+
+    def allow_report(self, ip):
+        now = time.time()
+        with self.lock:
+            self.reports[ip] = [t for t in self.reports[ip] if now - t < 3600]
+            if len(self.reports[ip]) >= REPORTS_PER_HOUR:
+                return False
+            self.reports[ip].append(now)
+            return True
+
+    def add_report(self, entry):
+        folder = self.out_dir / ".reports"
+        folder.mkdir(parents=True, exist_ok=True)
+        with self.lock, open(folder / "reports.jsonl", "a") as f:
+            f.write(json.dumps(entry) + "\n")
 
     def update(self, build, **fields):
         with self.lock:
@@ -495,6 +513,28 @@ def register_build_routes(mcp, out_dir: Path, parts_dir: Path, jobs=None):
             return JSONResponse({"error": f"Write the summary in 3 to {SUMMARY_MAX} characters."}, status_code=400)
         store.update(build, plan={**build["plan"], "summary": text})
         return JSONResponse({"summary": text})
+
+    @mcp.custom_route("/api/build/{build_id}/report", methods=["POST"])
+    async def report(request: Request):
+        """Anyone viewing a guide can say a step is wrong ("the LED is in the wrong row"). Reports go to
+        <out_dir>/.reports/reports.jsonl (never served: the viewer skips dot folders) for a person to review."""
+        build = store.get(request.path_params["build_id"])
+        if build is None or not build.get("plan"):
+            return JSONResponse({"error": "No such build."}, status_code=404)
+        body = await body_of(request)
+        step = body.get("step")
+        if not isinstance(step, int) or isinstance(step, bool) or not 0 <= step < len(build["plan"]["steps"]):
+            return JSONResponse({"error": "step must be a step index from this build."}, status_code=400)
+        text = " ".join(str(body.get("text") or "").split())[:REPORT_MAX]
+        if len(text) < 3:
+            return JSONResponse({"error": "Say what's wrong with this step."}, status_code=400)
+        ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+        if not store.allow_report(ip):
+            return JSONResponse({"error": "You've sent a lot of reports; try again in a while."}, status_code=429)
+        user = user_from_request(request)
+        store.add_report({"time": now_iso(), "build": build["id"], "ready": bool(build.get("ready")), "step": step,
+                          "step_title": build["plan"]["steps"][step].get("title", ""), "text": text, "user": user and user["id"]})
+        return JSONResponse({"ok": True}, status_code=201)
 
     @mcp.custom_route("/api/build/{build_id}/copy", methods=["POST"])
     async def copy(request: Request):

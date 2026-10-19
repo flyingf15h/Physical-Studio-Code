@@ -12,6 +12,7 @@ import { ImportProject } from '../components/ImportProject'
 import { PartsInput } from '../components/PartsInput'
 import { PartsLibrary } from '../components/PartsLibrary'
 import { ReadyMadeGuides } from '../components/ProjectsList'
+import { LegalLinks } from './LegalPage'
 import { ProgressHeader } from '../components/ProgressHeader'
 import { shrink } from '../images'
 import { designParams, navigate, withParams } from '../router'
@@ -258,6 +259,7 @@ export function DescribePage() {
             </details>
             <footer className="site-footer">
               Physical Studio · real parts, real dimensions, step-by-step guides
+              <LegalLinks />
             </footer>
           </section>
         </div>

@@ -49,3 +49,8 @@
 .hero-points li::before { content: '✓'; color: var(--accent); font-weight: 700; margin-right: 6px; }
 .site-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); text-align: center; }
 @media (max-width: 760px) { .hero h1 { font-size: 26px; } }
+.legal-links { margin-top: 6px; }
+.legal-links a { color: var(--muted); }
+.legal h2 { font-size: 18px; margin: 20px 0 6px; }
+.legal p, .legal li { line-height: 1.55; }
+.legal ul { padding-left: 20px; }
