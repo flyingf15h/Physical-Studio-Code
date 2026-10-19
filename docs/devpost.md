@@ -1,112 +1,106 @@
-# Physical Studio: Devpost draft
+# Physical Studio: Devpost writeup
 
-Draft for Hack the Valley 11. Deadline: **Oct 18, 8:00am EDT**. Edit freely; things the team still has to decide are marked **TODO**.
+For Hack the Valley 11. Deadline: **Oct 18, 8:00am EDT**. Pitch: 4 min + 1 min Q&A (script and slides in [`pitch.md`](pitch.md) and [`slides.md`](slides.md)).
+
+**Framing:** Physical Studio is **assembly visualization with correct dimensions**: an animated, IKEA-style 3D guide built from real, measured parts, so what you see on screen is what fits on your bench. Lead with that. The Commits tab is a feature, not the pitch; don't call it "git for hardware".
+
+Paste each section below into the matching Devpost field. Items still to fill in are marked **TODO**.
 
 ---
 
 ## Tagline
 
-**IKEA-style instructions for any hardware project, and an AI that checks every step from a photo.**
+**Say what you want to build. See every step in 3D, at real size, and let Gemini check your work.**
 
-Other options:
-- *Say what you want to build. Physical Studio shows you how, one checked step at a time.*
-- *Hardware gets git: every step is a commit, checked by Gemini from a photo of your bench.*
+## Elevator pitch (Devpost "short description")
 
-## Elevator pitch
-
-Following a hardware tutorial usually means squinting at a blurry photo, guessing which breadboard hole it means, and finding the miswired ground an hour later. Physical Studio starts from **what's already on your bench**. Upload photos of it and say what you want to build. Gemini works out what's plugged in, writes a plan that builds on top of it as IKEA-style steps with numbered-hole pictures and a 3D model after every step, and then checks your work: after each step you take a photo, and one AI call tells you what's wrong, how to fix it, and gives you a 3D model of what you actually built. For bigger builds, our MCP server designs the project from a library of real, measured parts and plays it back as an animated 3D assembly guide.
-
-**TODO (Senna):** which flow leads the demo and the pitch, the Build helper or the Assembly guides? This draft leads with the Build helper.
+Hardware tutorials show a blurry photo and hope you guess right. Physical Studio turns a one-line prompt into an animated, IKEA-style 3D assembly guide built from real, measured parts: every board, LED, screw and mounting hole is at its true size, so the case it designs fits, the screws clear the headers, and the picture on each step matches what's on your bench. Then Gemini watches your build and tells you exactly what's wrong, like an LED in backwards.
 
 ---
 
 ## Inspiration
 
-<!-- TODO Kelly/Senna/Fei: swap in your own story; this is a starting point. -->
-All three of us have lost evenings to hardware tutorials: the photo doesn't show which hole the wire goes in, the parts list assumes you're starting from nothing, and when the LED doesn't light you can't tell if the problem is the code, the wiring or the part. Flat-pack furniture solved this decades ago with numbered pictures and one change per step. We wanted that for electronics, plus something IKEA can't do: look at what you built and tell you whether it's right.
+<!-- TODO Kelly/Senna/Fei: swap in a real moment from one of you if you have one. -->
+Every one of us has lost an evening to a hardware tutorial: a photo that doesn't show which hole the wire goes in, a case that's 2 mm too small for the board, a screw that hits a header. Flat-pack furniture solved the first problem decades ago with numbered pictures and one change per step. But IKEA instructions work because IKEA knows the exact size of every part. We wanted that for electronics: a guide where every part on screen is the real part at its real size, so you can trust the picture.
 
 ## What it does
 
-Physical Studio has two parts that share one site, [physicalstudio.work](https://physicalstudio.work).
+**1. Prompt to design, from real parts.** Type what you want, e.g. *"Traffic light for an Arduino Uno: red, yellow and green LEDs in a column on the lid, a crosswalk button, USB accessible on the side."* An AI model designs it with our **MCP server**, using a library of 100+ parts whose dimensions, pin positions, mounting holes and connector positions come from datasheets and were checked with calipers. It never invents a number.
 
-### 1. Build helper ([physicalstudio.work/studio/](https://physicalstudio.work/studio/))
+**2. Checked before you see it.** The model has to pass the same checks an engineer would: `check_interference` (do any parts collide?), `check_clearance` (is there room for fingers, screw heads and cables?) and `render_preview` (it looks at its own render and fixes what's off). One real catch: on the Arduino Uno, an M3 socket head at the mounting hole next to AREF/SCL overlaps the digital header, so the design leaves that hole empty and the guide says so.
 
-1. **Show us your bench.** Say what you want to build and upload up to 10 photos of what's in front of you. Gemini scans them into a model of what's plugged in right now. That's commit #0, "Your bench now".
-2. **Get a plan that builds on it.** Gemini writes IKEA-style steps: a picture with numbered breadboard holes, a 3D model of the bench after every step, and notes you get by clicking a part.
-3. **Plans get checked before you see them.** `check_plan`, `check_circuit` and `check_extras` reject plans that move parts already on your bench, miswire an LED (the wire after the resistor has to reach ground; we check this with union-find over the breadboard strips) or add duplicate or USB-cable steps. A rejected plan goes back to the model to be fixed.
-4. **Photo check after every step.** Upload a photo when you finish a step. One AI call returns a verdict (what's wrong and how to fix it) and a 3D model rebuilt from your photo. The **Commits** tab lists every checked step, like a git log for your build.
+**3. Played back as an animated 3D assembly guide.** Our React Three Fiber viewer plays one step per part: the board drops onto its standoffs, screws spin down into their holes, LEDs slide into the lid, wires draw from pin to pin. Exploded view, callouts ("USB-B lines up with this opening"), the tools for each step, wire lengths and photo-textured boards with real finishes. Every step has a reference picture and a "check" line saying what you should see.
 
-### 2. Assembly guides ([physicalstudio.work](https://physicalstudio.work))
+**4. A case that fits.** Because the design uses true dimensions, the export includes a print-ready enclosure (base and lid STL) with cutouts where the USB and barrel jack meet the wall and holes where the LEDs and button poke through the lid. We printed it. <!-- TODO Kelly: confirm the printed case fit the real Uno first try; if yes, say "It fit first try." -->
 
-- **Designed from real parts.** The Physical Studio **MCP server** lets an AI model design a project out of a parts library with real, measured dimensions, mounting holes and connector positions. Its tools are `search_parts`, `place_part`, `add_wire`, `check_interference`, `check_clearance`, `render_preview`, `add_step` and `export`. The model checks its own design for collisions and clearance and looks at rendered previews before it exports.
-- **The right build for the prompt.** Circuits go to the breadboard planner; anything with a case, lid, motors, rails or gears goes to the CAD designer, every time. `check_guide` rejects placeholder steps ("stage the motor", "drill a hole") so every step fits a real part.
-- **Played back as a guide you can follow.** Every step has an animated picture (parts slide in along their real direction, screws turn into their holes, wires draw end to end, with a fixed camera so the last frame is the reference) and a 3D model with clickable parts and wires. Wiring steps list each connection pin to pin with the boards' printed labels and wire colours. Metal and printed parts carry real-scale material textures; boards wear their real top photos.
-- **Import a project.** Paste a GitHub repo or project page: its README, BOM, pin tables, firmware pin definitions and CAD files become a guide. Or upload a BOM so the planner uses parts you already own.
-- **Bring your own AI.** A personal key connects Claude Code, Claude Desktop or Cursor to the same MCP tools.
-- **Ready-made guides:**
-  - **Traffic light:** Arduino Uno, red/yellow/green LEDs on D11/D10/D9 (each through 220 Ω) and a crosswalk button on D2.
-  - **Double inverted pendulum:** a rack-and-pinion cart on an HGR20 rail with a Teensy 4.1, a DRV8874 motor driver, 2× AS5600 magnetic encoders and 2× VL53L0X distance sensors. 30 parts, 30 wires, 33 steps.
+**5. Gemini watches your bench.** Point a camera at your build or take a photo after a step. Gemini compares it with that step's expected 3D render and gives a verdict with a specific fix, e.g. *"The red LED is in backwards: the long leg should go toward the resistor."* <!-- TODO: paste the real verdict text from the recorded demo. --> A deterministic circuit checker (union-find over breadboard strips) rejects plans whose LED path doesn't reach ground before a beginner ever sees them.
+
+**It goes past breadboards.** The ready-made **double inverted pendulum** guide is a rack-and-pinion cart on an HGR20 linear rail with a Teensy 4.1, a DRV8874 motor driver, two AS5600 magnetic encoders and two VL53L0X distance sensors: 30 parts, 33 steps, generated from its real CAD design with a 3D model per step.
+
+Try it at [physicalstudio.work](https://physicalstudio.work). The traffic-light guide: [physicalstudio.work/guide?design=traffic-light](https://physicalstudio.work/guide?design=traffic-light).
 
 ## How we built it
 
-- **Gemini at the core.** Bench scans, plan writing and per-step photo checks all run on **Gemini 3.8 Flash** (`google-genai`) with **pydantic structured outputs**, so every answer arrives as typed data (parts, holes, wires, verdicts) instead of free text. The Assembly guide viewer uses the **Gemini Live API** (`gemini-3.8-live`) with ephemeral tokens, so the browser can talk to Gemini without ever seeing a key.
-- **Reliability layer.** Calls go through a pool of 6 team keys with round-robin and hedged requests, and fall back to **OpenAI gpt-6.1-sol** (Responses API over `httpx`) when Gemini is rate-limited. Design jobs can run on OpenAI, DeepSeek, Gemini or Claude.
-- **Deterministic checkers.** We don't trust a model with a circuit unchecked. `check_circuit` models the breadboard as strips and joins connected holes with union-find, so we can prove an LED's path reaches ground. `check_plan` and `check_extras` enforce "don't touch what's already there" and "no pointless steps".
-- **3D.** The Build helper renders with Streamlit, Pillow, trimesh + numpy and a three.js (r170) scene bundled with esbuild. The MCP server (Python, FastMCP over HTTP) builds geometry with build123d/OpenCascade and exports GLB plus a steps JSON that the React 19 + Vite + React Three Fiber/drei viewer plays.
-- **Shipping.** One **Vultr** server running Docker Compose behind Caddy for HTTPS, at **physicalstudio.work** (registered through Porkbun; `.work` is a GoDaddy Registry TLD).
+- **Real-parts design engine.** A Python **MCP server** (FastMCP over HTTP) exposes `search_parts`, `get_part`, `place_part`, `add_fastener`, `add_wire`, `create_enclosure`, `check_interference`, `check_clearance`, `render_preview`, `add_step`, `check_guide` and `export`. Geometry is built with **build123d / OpenCascade**; each part is a JSON file of measured dimensions, pins and holes (`parts/*.json`). Units are millimetres throughout.
+- **Any model can drive it.** Design jobs run on Claude, Gemini, OpenAI or DeepSeek through the same tools, with one shared design guide (part colours, lid-mounted parts, one step per part, camera-checkable steps). `check_guide` sends weak guides back to the model before export.
+- **Export.** We tessellate each placement ourselves and write the GLB with **trimesh**, one node per part, plus a steps JSON (validated by `schemas/steps.schema.json`), a STEP file and print-ready STLs. (build123d's own glTF export split every shape into one node per face, so the viewer couldn't find parts by name.)
+- **Viewer.** **React 19 + Vite + React Three Fiber/drei** plays the steps JSON: motion paths, exploded view, callouts, part legs, material textures (PCB, brushed aluminium, PLA…).
+- **Gemini.** **Gemini 3.8 Flash** (`google-genai`) with **pydantic structured outputs** checks each step photo against the expected render and returns a typed verdict. The viewer uses the **Gemini Live API** (`gemini-3.8-live`) with ephemeral tokens, so the browser talks to Gemini without ever seeing a key.
+- **Reliability.** A pool of team keys taken in turn, hedged requests, retry delays parsed from the API, and an OpenAI fallback when Gemini is rate-limited.
+- **Shipping.** Docker Compose behind Caddy (HTTPS) on a **Vultr** server, at **physicalstudio.work**, a `.work` domain run by **GoDaddy Registry**. <!-- TODO tszfei: if the site has moved to Oracle Cloud, update this line and the Vultr prize line below. -->
 
 ## Challenges we ran into
 
-- **Rate limits.** The free Gemini tier allows 20 Flash requests per day per project, and one build takes a lot of calls. We pooled keys across the team, parsed the API's retry delay so we wait exactly as long as needed, and added an OpenAI fallback so the demo never stalls.
-- **AI-generated circuits that looked right but weren't.** Early plans often left the LED's ground leg on a strip that went nowhere. We fixed it twice over: a fixed wiring pattern in the prompt, plus a circuit checker that rejects any plan whose LED path doesn't reach ground.
-- **The venue network blocked our brand-new domain.** Some networks block freshly registered domains, so we added an `sslip.io` fallback address on the same server.
-- **Cutting scope.** We planned to 3D-print an enclosure for the demo but cut it for time, and moved the demo onto a breadboard, which turned out to suit the photo checks better.
+- **Dimensions that looked right but weren't.** Datasheet drawings and KiCad footprints disagree with each other, and with the board on the desk. We caliper-checked every part in the demo builds and modelled header *housings* as keep-outs, not just pin rows. That's how the checker caught the screw that hits the Uno's header.
+- **Models making things up.** Left alone, a model will guess a part's size from memory. The MCP tools only accept parts from the library, and the design guide forbids taking a size from an image or web page; photos can change a part's *look*, never its numbers.
+- **Getting the animation to show the action.** Our first step animations zoomed and crossfaded, which hid what actually moved. We rebuilt them with a fixed camera: parts slide in along their insertion direction, screws turn as they go down, wires draw after the parts are in.
+- **Rate limits.** The free Gemini tier allows 5 requests a minute and 20 a day per project, and a camera checking every few seconds burns through that fast. We pooled keys, parsed retry delays and added a fallback so the demo doesn't stall.
+- **The venue network blocked our brand-new domain.** Some networks block freshly registered hostnames, so we kept an `sslip.io` address on the same server as a fallback.
 
 ## Accomplishments that we're proud of
 
-- The photo-check loop works on a real bench: build a step, take a photo, get a specific fix (which wire, which hole), not just "looks wrong". <!-- TODO: paste a real verdict from the demo here -->
-
-- Plans start from the bench you already have instead of assuming an empty table.
-- A circuit checker that catches miswired grounds before a beginner ever sees the plan.
-- A 30-part, 33-step double inverted pendulum guide (every wire listed pin to pin) built from real part dimensions, not just a blinky demo.
-- Two working products, deployed on our own domain with HTTPS, built by three people in one weekend.
+- A guide where the 3D model is trustworthy: real parts at real sizes, checked for collisions and clearance before anyone sees it.
+- A generated case we could actually print.
+- Gemini catching a backwards LED from a phone photo and saying how to fix it.
+- Going past blinky: a 30-part, 33-step inverted-pendulum build from real CAD.
+- The same MCP tools work for Claude, Gemini, OpenAI and DeepSeek.
+- Deployed on our own domain with HTTPS by three people in one weekend.
 
 ## What we learned
 
-- Structured outputs plus a deterministic checker beat a bigger prompt. Once we could reject bad plans with code and send the reason back, the quality jumped.
-- Multimodal models are much better at checking against a known expected state than at describing a photo from scratch, so every step carries its expected bench model.
-- Plan for rate limits and flaky networks on day one, especially at a hackathon.
-- Real dimensions matter: designing against measured parts caught problems a picture never would.
+- Correct dimensions are the feature. Once every part was real, collisions, clearances, cutouts and the printed case all fell out of the same data.
+- Tools plus deterministic checks beat a bigger prompt: rejecting a bad design with code and sending back the reason improved quality more than any prompt change.
+- Multimodal models are far better at comparing a photo with a known expected picture than at describing a photo from scratch, so every step carries its expected render.
+- Plan for rate limits and flaky networks on day one.
 
 ## What's next
 
-- Merge the two flows: start from a photo of your bench and end with a full 3D assembly guide and enclosure.
-- Live checking with the Gemini Live API and a camera, so you don't have to stop and take a photo.
-- A bigger measured parts library, with community contributions.
-- Bring back the 3D-printed enclosure: export print-ready STL files sized to the parts.
-- Firmware generation and upload checks to go with each wiring plan.
+- Grow the measured parts library, with community submissions checked against calipers.
+- Start from a photo of what's already on your bench and build the guide on top of it.
+- Continuous checking with the Gemini Live API, so you never stop to take a photo.
+- Firmware generated alongside each guide, with an upload check.
 
 ## Built with
 
-`gemini-api` · `google-genai` · `gemini-3.8-flash` · `gemini-live-api` · `openai` · `python` · `streamlit` · `pydantic` · `pillow` · `trimesh` · `numpy` · `three.js` · `esbuild` · `fastmcp` · `mcp` · `build123d` · `opencascade` · `react` · `vite` · `react-three-fiber` · `drei` · `typescript` · `node.js` · `httpx` · `docker` · `docker-compose` · `caddy` · `vultr` · `porkbun` · `godaddy-registry` · `arduino` · `teensy`
+`gemini-api` · `google-genai` · `gemini-live-api` · `mcp` · `fastmcp` · `python` · `build123d` · `opencascade` · `trimesh` · `pydantic` · `react` · `vite` · `react-three-fiber` · `drei` · `three.js` · `typescript` · `node.js` · `streamlit` · `openai` · `claude` · `docker` · `caddy` · `vultr` · `godaddy-registry` · `arduino` · `teensy`
 
 ## Prize tracks to tick
 
-- **Best Use of Gemini API:** multimodal photo checks are the core loop (bench scan → plan → per-step verdict + 3D model), plus the Live API in the viewer.
-- **Best Use of Vultr:** the whole stack runs on one Vultr server.
+- **Best Use of Gemini API:** Gemini checks every step against the expected 3D render (structured verdicts), Live API in the viewer, and Gemini can drive the MCP design tools.
+- **Best Use of Vultr:** the whole stack runs on one Vultr server. <!-- TODO tszfei: drop if the live site is now on Oracle Cloud. -->
 - **Best Domain Name (GoDaddy Registry):** physicalstudio.work.
 
 ## Links
 
 - Live site: https://physicalstudio.work
-- Build helper: https://physicalstudio.work/studio/
+- Traffic-light guide: https://physicalstudio.work/guide?design=traffic-light
 - Code: https://github.com/flyingf15h/Physical-Studio-Code
-- Demo video: **TODO (Kelly):** link once uploaded (board task d0962092)
+- Demo video: **TODO:** link once uploaded
 
-## Open questions before submitting
+## Before you hit submit
 
-- [ ] **Senna:** which flow is the main demo? Reorder "What it does" to match.
-- [ ] **Kelly/Senna/Fei:** personalize Inspiration.
-- [ ] **Kelly:** demo video link.
-- [ ] Check the model names (Gemini 3.8 Flash, gemini-3.8-live, gpt-6.1-sol) against the deployed config.
-- [ ] Add screenshots: bench scan, a step with numbered holes, a photo verdict, the Commits tab, the pendulum guide.
+- [ ] Demo video link (and paste the real Gemini verdict above).
+- [ ] Screenshots, in this order: the traffic-light guide mid-animation, the exploded view, the printed case next to the 3D model, a Gemini verdict, the pendulum guide.
+- [ ] Confirm hosting (Vultr or Oracle) and fix the two Vultr lines.
+- [ ] Repo is public and the link works logged out.
+- [ ] All three teammates added on Devpost; the three prize tracks ticked.
