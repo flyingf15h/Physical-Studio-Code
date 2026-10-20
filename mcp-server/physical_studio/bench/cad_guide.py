@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from ..electrical import check_wiring
 from ..export import DESIGN_TO_GLTF, step_pictures, steps_document, top_textures, write_glb
 from ..geometry import apply, placement_matrix
-from . import planner
+from . import planner, sketch
 from .pool import pooled_generate
 from .reference import NOTE
 
@@ -151,6 +151,50 @@ def pin_map(wires, by_id, library):
     return out
 
 
+class Firmware(BaseModel):
+    code: str = Field(description="The complete Arduino sketch (setup and loop), no markdown fences.")
+
+
+def fence_free(code):
+    """A sketch without the ``` fences a model sometimes wraps it in."""
+    m = re.search(r"```(?:\w+)?\n(.*?)```", code or "", re.S)
+    return (m.group(1) if m else code or "").strip()
+
+
+def pin_map_text(pins):
+    return "\n".join(f"- {b['board']}: " + "; ".join(f"{e['pin']} -> {', '.join(e['to'])}" for e in b["pins"]) for b in pins)
+
+
+def ask_firmware(prompt):
+    r = pooled_generate([prompt], types.GenerateContentConfig(response_mime_type="application/json", response_schema=Firmware))
+    return fence_free(Firmware.model_validate_json(r.text or "").code)
+
+
+def make_firmware(title, goal, summary, pins, board, fqbn, ask=None, fixes=2):
+    """A sketch for the design's `board` using exactly the wired pins, compiled for `fqbn`, with up to `fixes`
+    rounds of compiler errors fed back. -> (code, status 'ok'|'error'|'skipped', compiler message). The model
+    failing leaves code '' and status 'skipped'; the code is kept even when it doesn't compile."""
+    ask = ask or ask_firmware
+    prompt = f"""Write a complete Arduino sketch (setup and loop) for the {board}, for this hardware build.
+PROJECT: {title}. {summary}
+GOAL: {goal}
+THE WIRED PINS (board pin -> what it is wired to). Use exactly these pins and no others for those parts; the wiring is already built:
+{pin_map_text(pins)}
+Name each pin with a const at the top, add short comments, print readings to Serial where it helps, and make it do what the goal says. Return only the code."""
+    code, status, msg = "", "skipped", "no sketch"
+    for attempt in range(fixes + 1):
+        try:
+            code = ask(prompt)
+        except Exception as e:  # noqa: BLE001 - the guide still ships without code
+            print("[bench] firmware not written:", type(e).__name__, flush=True)
+            return code, "skipped", "the model could not write a sketch"
+        status, msg = sketch.compile_result(code, fqbn)
+        if status != "error" or attempt == fixes:
+            break
+        prompt = f"{prompt}\n\nYOUR LAST SKETCH:\n{code}\n\nIT DOES NOT COMPILE. Compiler errors:\n{msg}\nReturn the complete fixed sketch, same pins."
+    return code, status, msg
+
+
 def wire_info(piece, p, by_id, library):
     """What the page shows when a wire is clicked: both ends (part and pin) and, for the 3D model, where
     each end sits in the GLB's frame (metres, +Y up)."""
@@ -232,12 +276,25 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
     problems = list(wiring["problems"])
     if any(lib.get(p.part_id, {}).get("category") == "board" for p in studio.design.placements.values()) and not studio.design.wires:
         problems.append("The design has a board but no wires: the guide can't say how to connect it.")
-    checks = {"passed": not problems, "compiled": None, "board": None, "problems": problems, "warnings": wiring["tips"]}
+    pins = pin_map(wires, by_id, lib)
+    code, compiled, board_name = "", None, None
+    board = next((p for p in studio.design.placements.values() if lib.get(p.part_id, {}).get("category") == "board"), None)
+    if board and pins:
+        code, status, msg = make_firmware(title, goal, summary, pins, board.name, sketch.fqbn_of(f"{board.name} {lib[board.part_id].get('name', '')}"))
+        board_name = board.name
+        if status == "ok":
+            compiled = True
+        elif status == "error":
+            compiled = False
+            problems.append(f"The firmware for the {board.name} doesn't compile: {msg.strip().splitlines()[0] if msg.strip() else 'compiler error'}")
+        elif code:
+            print("[bench] cad firmware not compiled:", msg, flush=True)  # compiled stays None: not checked, not failed
+    checks = {"passed": not problems, "compiled": compiled, "board": board_name, "problems": problems, "warnings": wiring["tips"]}
     plan = {"kind": "cad", "title": title, "summary": summary,
             "final_result": f"The finished {title.lower()}, every part in place and every wire connected.",
-            "code": "", "safety": ["Keep the power supply unplugged until the last wire is in.",
+            "code": code, "safety": ["Keep the power supply unplugged until the last wire is in.",
                                    "Keep fingers clear of moving parts (gears, belts, rails) when it runs."],
-            "parts": parts, "part_guide": guide, "wires": wire_infos, "pin_map": pin_map(wires, by_id, lib),
+            "parts": parts, "part_guide": guide, "wires": wire_infos, "pin_map": pins,
             "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps, "checks": checks}
     build = {"id": bid, "status": "done", "stage": "Your build is ready.", "error": None, "goal": goal, "have": "", "known": "",
              "created": created, "plan": plan, "internal": {"plan": {"kind": "cad", "title": title, "summary": summary, "steps": internal_steps}},
