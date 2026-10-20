@@ -4,7 +4,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /usr/local/bin/uv
 # OpenCascade's wheels link against libGL and glib even without a display.
 RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
-# arduino-cli + the AVR, Teensy and ESP32 cores (about 2 GB) and common libraries: every generated sketch is
+# arduino-cli + the AVR, Teensy and ESP32 cores (only the ESP32 and C3 chip libraries are kept, to fit the server's disk) and common libraries: every generated sketch is
 # compiled before the guide is shown (bench/sketch.py), one compile at a time. Keep the library list in step with the ones the planner may use.
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
     && curl -fsSL https://downloads.arduino.cc/arduino-cli/arduino-cli_1.2.2_Linux_64bit.tar.gz | tar -xz -C /usr/local/bin arduino-cli \
@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
        https://espressif.github.io/arduino-esp32/package_esp32_index.json \
     && arduino-cli core update-index \
     && arduino-cli core install arduino:avr@1.8.8 teensy:avr@1.62.0 esp32:esp32@3.3.12 \
+    && cd /root/.arduino15/packages/esp32/tools \
+    && rm -rf esp32s2-libs esp32s3-libs esp32c5-libs esp32c6-libs esp32h2-libs esp32p4-libs esp32p4_es-libs *-gdb && cd / \
     && arduino-cli lib install LedControl Servo ESP32Servo "LiquidCrystal I2C" "DHT sensor library" "Adafruit Unified Sensor" \
        "Adafruit NeoPixel" NewPing Keypad \
     && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
