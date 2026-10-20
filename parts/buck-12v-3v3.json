@@ -76,5 +76,18 @@
   "appearance": {
     "material": "pcb",
     "color": "#1f4e8c"
+  },
+  "electrical": {
+    "supply_v": [
+      4.5,
+      24.0
+    ],
+    "output_v": 3.3,
+    "output_ma": 800,
+    "efficiency": 0.85,
+    "output_pin": "out_p",
+    "input_pin": "in_p",
+    "note": "switching step-down",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

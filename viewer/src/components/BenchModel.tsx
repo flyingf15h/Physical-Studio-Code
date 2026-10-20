@@ -7,7 +7,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
+import { Bounds, ContactShadows, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
 import type { BenchModel as Model, WireInfo } from '../api'
 import './BenchModel.css'
 
@@ -16,6 +16,24 @@ const NEW = new THREE.Color('#0f9fb3')
 // "Even light" (the Build helper's default): unlit colours, so dark parts and wires stay readable.
 const FLAT_PICKED = new THREE.MeshBasicMaterial({ color: PICKED, side: THREE.DoubleSide })
 const FLAT_NEW = new THREE.MeshBasicMaterial({ color: NEW, side: THREE.DoubleSide })
+// "Drawing": an assembly-manual line drawing (like IKEA's, and Flatpack's drawing view). White parts with black
+// edges where faces meet at more than 25°, wires in their own colour, this step's new parts in cyan.
+const INK = new THREE.LineBasicMaterial({ color: '#1d1d1f' })
+const PAPER = new THREE.MeshLambertMaterial({ color: '#ffffff', side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
+const PAPER_NEW = new THREE.MeshLambertMaterial({ color: '#7fe3f0', side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
+export type Look = 'studio' | 'even' | 'drawing'
+
+/** The mesh's ink lines, made the first time the drawing view needs them. */
+function inkOf(mesh: THREE.Mesh): THREE.LineSegments {
+  let ink = mesh.userData.ink as THREE.LineSegments | undefined
+  if (!ink) {
+    ink = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, 25), INK)
+    ink.raycast = () => {} // clicks go to the part, not its outline
+    mesh.add(ink)
+    mesh.userData.ink = ink
+  }
+  return ink
+}
 
 // Wires are under a millimetre thick, so clicks on them used to miss: each wire gets an invisible copy
 // pushed out along its normals, about 3 mm across, that catches the click.
@@ -92,19 +110,19 @@ function Scene({
   model,
   picked,
   highlight,
-  flat,
+  look,
   onPick,
 }: {
   model: Model
   picked: string | null
   highlight: string[]
-  flat: boolean
+  look: Look
   onPick: (id: string | null) => void
 }) {
   const gltf = useGLTF(model.glb)
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
   const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
-  const { root, meshes } = useMemo(() => {
+  const { root, meshes, box } = useMemo(() => {
     const root = gltf.scene.clone(true)
     root.updateMatrixWorld(true)
     const meshes: THREE.Mesh[] = []
@@ -144,16 +162,22 @@ function Scene({
       meshes.push(mesh)
     })
     for (const mesh of meshes) {
-      if (wireIds.includes(mesh.userData.part as string)) mesh.add(hitZone(mesh))
+      mesh.userData.wire = wireIds.includes(mesh.userData.part as string)
+      if (mesh.userData.wire) mesh.add(hitZone(mesh))
     }
-    return { root, meshes }
+    const box = new THREE.Box3().setFromObject(root)
+    return { root, meshes, box }
   }, [gltf, ids, wireIds])
 
   useEffect(() => {
     for (const mesh of meshes) {
       const id = mesh.userData.part as string | null
       const on = id && id === picked ? PICKED : id && highlight.includes(id) ? NEW : null
-      if (flat) {
+      const ink = look === 'drawing' && !mesh.userData.wire ? inkOf(mesh) : (mesh.userData.ink as THREE.LineSegments | undefined)
+      if (ink) ink.visible = look === 'drawing' && !mesh.userData.wire
+      if (look === 'drawing') {
+        mesh.material = on === PICKED ? FLAT_PICKED : on === NEW ? PAPER_NEW : mesh.userData.wire ? (mesh.userData.flat as THREE.Material) : PAPER
+      } else if (look === 'even') {
         mesh.material = on === PICKED ? FLAT_PICKED : on === NEW ? FLAT_NEW : (mesh.userData.flat as THREE.Material)
       } else {
         const mat = mesh.userData.lit as THREE.MeshStandardMaterial
@@ -162,16 +186,31 @@ function Scene({
         mesh.material = mat
       }
     }
-  }, [meshes, picked, highlight, flat])
+  }, [meshes, picked, highlight, look])
 
+  const size = box.getSize(new THREE.Vector3())
+  const centre = box.getCenter(new THREE.Vector3())
   return (
-    <primitive
-      object={root}
-      onClick={(e: ThreeEvent<MouseEvent>) => {
-        e.stopPropagation()
-        onPick((e.object.userData.part as string | null) ?? null)
-      }}
-    />
+    <>
+      <primitive
+        object={root}
+        onClick={(e: ThreeEvent<MouseEvent>) => {
+          e.stopPropagation()
+          onPick((e.object.userData.part as string | null) ?? null)
+        }}
+      />
+      {/* A soft shadow on the table under the model, so it sits on something instead of floating. */}
+      {look === 'studio' && (
+        <ContactShadows
+          position={[centre.x, box.min.y - 0.0004, centre.z]}
+          scale={Math.max(size.x, size.z) * 1.6}
+          far={Math.max(size.y, 0.02) * 1.5}
+          blur={2.4}
+          opacity={0.42}
+          resolution={512}
+        />
+      )}
+    </>
   )
 }
 
@@ -186,7 +225,7 @@ interface Props {
 export function BenchModel({ model, guide = {}, wires = {}, highlight = [], height = 420 }: Props) {
   const [picked, setPicked] = useState<string | null>(null)
   const [view, setView] = useState({ n: 0, top: false }) // a new n remounts the canvas at that view
-  const [flat, setFlat] = useState(false)
+  const [look, setLook] = useState<Look>('studio')
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
@@ -211,7 +250,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           dpr={[1, 2]}
           onPointerMissed={() => setPicked(null)}
         >
-          <color attach="background" args={['#ece9e4']} />
+          <color attach="background" args={[look === 'drawing' ? '#ffffff' : '#ece9e4']} />
           <hemisphereLight args={['#ffffff', '#b9b4ae', 1.7]} />
           <directionalLight position={[1, 2, 1.5]} intensity={2} />
           <directionalLight position={[-1.5, 1, -1]} intensity={0.7} />
@@ -223,7 +262,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           </Environment>
           <Suspense fallback={null}>
             <Bounds fit observe margin={1.15}>
-              <Scene model={model} picked={picked} highlight={highlight} flat={flat} onPick={setPicked} />
+              <Scene model={model} picked={picked} highlight={highlight} look={look} onPick={setPicked} />
             </Bounds>
             {wire && <WireMarkers wire={wire} />}
           </Suspense>
@@ -237,14 +276,19 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           <button type="button" onClick={() => setView((v) => ({ n: v.n + 1, top: true }))}>
             Top view
           </button>
-          <button
-            type="button"
-            aria-pressed={flat}
-            title={flat ? 'Back to studio lighting' : 'Light every part evenly: dark parts are easier to see'}
-            onClick={() => setFlat(!flat)}
-          >
-            {flat ? 'Studio light' : 'Even light'}
-          </button>
+          <span className="bench-looks" role="group" aria-label="How the model is drawn">
+            {(
+              [
+                ['studio', 'Studio', 'Studio lighting with shadows'],
+                ['even', 'Even light', 'Light every part evenly: dark parts are easier to see'],
+                ['drawing', 'Drawing', 'Black-and-white line drawing, like an assembly manual; new parts in cyan'],
+              ] as const
+            ).map(([id, name, title]) => (
+              <button key={id} type="button" aria-pressed={look === id} title={title} onClick={() => setLook(id)}>
+                {name}
+              </button>
+            ))}
+          </span>
           <a href={model.glb} download title="Download this 3D model (GLB)">
             Download
           </a>

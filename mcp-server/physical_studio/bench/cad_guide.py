@@ -13,6 +13,7 @@ from pathlib import Path
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from ..electrical import check_wiring
 from ..export import DESIGN_TO_GLTF, step_pictures, steps_document, top_textures, write_glb
 from ..geometry import apply, placement_matrix
 from . import planner
@@ -227,12 +228,14 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
 
     write_glb(built, folder / "final.glb", studio.parts_used(), studio.parts_dir, suffix="__mesh")
     title = studio.design.title
+    wiring = check_wiring(studio.design, lib)  # shorts, voltages, supply and driver currents (electrical.py)
+    checks = {"passed": not wiring["problems"], "compiled": None, "board": None, "problems": wiring["problems"], "warnings": wiring["tips"]}
     plan = {"kind": "cad", "title": title, "summary": summary,
             "final_result": f"The finished {title.lower()}, every part in place and every wire connected.",
             "code": "", "safety": ["Keep the power supply unplugged until the last wire is in.",
                                    "Keep fingers clear of moving parts (gears, belts, rails) when it runs."],
             "parts": parts, "part_guide": guide, "wires": wire_infos, "pin_map": pin_map(wires, by_id, lib),
-            "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps}
+            "model": {"glb": url("final.glb"), "labels": labels}, "steps": steps, "checks": checks}
     build = {"id": bid, "status": "done", "stage": "Your build is ready.", "error": None, "goal": goal, "have": "", "known": "",
              "created": created, "plan": plan, "internal": {"plan": {"kind": "cad", "title": title, "summary": summary, "steps": internal_steps}},
              "commits": [{"id": planner.new_id(bid), "kind": "start", "step": None, "message": "Starting from the parts list",

@@ -88,5 +88,18 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      7.0,
+      35.0
+    ],
+    "output_v": 5.0,
+    "output_ma": 1000,
+    "linear": true,
+    "output_pin": "out",
+    "input_pin": "in",
+    "note": "linear: input current = output current, the rest is heat",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

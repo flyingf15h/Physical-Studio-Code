@@ -69,10 +69,11 @@ An AI writes each breadboard guide, so deterministic checks decide whether it's 
 
 `tests/test_sketch.py` and `tests/test_power.py` run every check on the ready-made guides and on planted mistakes.
 
-Not covered yet: sketches for ESP32, Teensy and Pico aren't compiled (the guide says so), hardware/CAD guides don't get the power checks, and no generated guide has been built on a real bench yet.
+Not covered yet: Pico sketches aren't compiled (the guide says so), and no generated guide has been built on a real bench yet.
 
 ## Updates
 
+- **Oct 20, 2026:** ESP32 and Teensy sketches are compiled too. Hardware/CAD guides get the power and motor-driver checks (stall current vs driver rating, supply peaks). The 3D view has Studio, Even light and Drawing looks, with a soft shadow under the model, and steps show parts and wires placed so far ([ and ] step through the guide). Ideas taken from Flatpack's interactive IKEA-style manuals. Fixed a crash on the Build page in newer Chrome.
 - **Oct 20, 2026:** Power and current checks, with supply voltage, current and driver data on 55 library parts. The breadboard 3D model and step pictures use real column spacing (the e-f gap was drawn 12.7 mm wide instead of 7.62 mm).
 - **Oct 20, 2026:** Guide checks for compiling, code pins vs wiring and part footprints. Guides record their check results, and the Build page shows them.
 - **Oct 20, 2026:** The ready-made guide cards show renders of each finished build. The 3D builder draws a real-size Uno and recognisable modules (HC-SR04, 8×8 matrix, joystick, buzzer, button, LDR, thermistor).

@@ -242,6 +242,7 @@
     "current_ma": 3,
     "peak_ma": 3,
     "note": "VIN; 2.1 A continuous",
-    "source": "Typical datasheet numbers; not yet measured"
+    "source": "Typical datasheet numbers; not yet measured",
+    "drive_ma": 2100
   }
 }

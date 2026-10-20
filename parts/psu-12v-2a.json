@@ -48,5 +48,11 @@
   "notes": "Wall adapter. Feeds the motor driver (VIN) and the 3.3 V regulator.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "output_v": 12.0,
+    "output_ma": 2000,
+    "output_pin": "v12",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

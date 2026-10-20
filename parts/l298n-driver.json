@@ -166,6 +166,7 @@
     "current_ma": 36,
     "peak_ma": 36,
     "note": "drops about 2 V; 2 A per channel",
-    "source": "Typical datasheet numbers; not yet measured"
+    "source": "Typical datasheet numbers; not yet measured",
+    "drive_ma": 2000
   }
 }

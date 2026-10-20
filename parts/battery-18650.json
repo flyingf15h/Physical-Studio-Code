@@ -64,5 +64,11 @@
     "metallic": 0.2,
     "roughness": 0.4,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "output_v": 3.7,
+    "output_ma": 2000,
+    "source": "Typical datasheet numbers; not yet measured",
+    "output_pin": "plus"
   }
 }

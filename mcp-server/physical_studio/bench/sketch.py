@@ -2,14 +2,28 @@
 # the sketch compiles for the board, the pins in the code are the pins the wires go to, and parts
 # with a fixed leg spacing (buttons, pin headers, buzzers) sit in holes they can physically reach.
 # Problems are plain sentences, fed back to the planner's repair rounds like check_plan's.
-import hashlib, os, re, shutil, subprocess, tempfile
+import hashlib, os, re, shutil, subprocess, tempfile, threading
 
-# Boards we can compile for with the cores installed in the image (deploy/mcp.Dockerfile).
-FQBN = [(re.compile(r'\buno\b', re.I), 'arduino:avr:uno'), (re.compile(r'\bnano\b', re.I), 'arduino:avr:nano'),
-        (re.compile(r'\bmega\b', re.I), 'arduino:avr:mega')]
+# Boards we can compile for with the cores installed in the image (deploy/mcp.Dockerfile), first match wins.
+FQBN = [(re.compile(r'\buno\b', re.I), 'arduino:avr:uno'), (re.compile(r'\bnano\b(?!.*esp)', re.I), 'arduino:avr:nano'),
+        (re.compile(r'\bmega\b', re.I), 'arduino:avr:mega'), (re.compile(r'teensy\s*4\.?1', re.I), 'teensy:avr:teensy41'),
+        (re.compile(r'teensy\s*4(\.0)?\b', re.I), 'teensy:avr:teensy40'), (re.compile(r'xiao.*c3|esp32-?c3', re.I), 'esp32:esp32:XIAO_ESP32C3'),
+        (re.compile(r'esp32', re.I), 'esp32:esp32:esp32doit-devkit-v1')]
+TEENSY_PWM = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 22, 23, 24, 25, 28, 29, 33, 36, 37}
 PWM = {'arduino:avr:uno': {3, 5, 6, 9, 10, 11}, 'arduino:avr:nano': {3, 5, 6, 9, 10, 11},
-       'arduino:avr:mega': set(range(2, 14)) | {44, 45, 46}}
-ANALOG_BASE = {'arduino:avr:uno': 14, 'arduino:avr:nano': 14, 'arduino:avr:mega': 54}
+       'arduino:avr:mega': set(range(2, 14)) | {44, 45, 46}, 'teensy:avr:teensy41': TEENSY_PWM | {42, 43, 44, 45, 46, 47, 51, 54},
+       'teensy:avr:teensy40': TEENSY_PWM, 'esp32:esp32:esp32doit-devkit-v1': None, 'esp32:esp32:XIAO_ESP32C3': None}  # None: any output pin (LEDC)
+# A<n> -> pin number, per board.
+ANALOG = {'arduino:avr:uno': {i: 14 + i for i in range(6)}, 'arduino:avr:nano': {i: 14 + i for i in range(8)},
+          'arduino:avr:mega': {i: 54 + i for i in range(16)},
+          'teensy:avr:teensy41': {**{i: 14 + i for i in range(14)}, 14: 38, 15: 39, 16: 40, 17: 41},
+          'teensy:avr:teensy40': {i: 14 + i for i in range(14)},
+          'esp32:esp32:esp32doit-devkit-v1': {0: 36, 3: 39, 4: 32, 5: 33, 6: 34, 7: 35, 10: 4, 11: 0, 12: 2, 13: 15, 14: 13, 15: 12,
+                                16: 14, 17: 27, 18: 25, 19: 26},
+          'esp32:esp32:XIAO_ESP32C3': {0: 2, 1: 3, 2: 4}}
+BUILTIN_LED = {'arduino:avr:uno': 13, 'arduino:avr:nano': 13, 'arduino:avr:mega': 13, 'teensy:avr:teensy41': 13,
+               'teensy:avr:teensy40': 13, 'esp32:esp32:esp32doit-devkit-v1': 2, 'esp32:esp32:XIAO_ESP32C3': None}
+SLOW = re.compile(r'^esp32:')  # big toolchains: first compile on the server's single CPU can take minutes
 POWER = re.compile(r'^(gnd\d*|5v|3v3|3\.3v|vin|ioref|aref|reset|rst|v5|vcc)$')
 
 
@@ -24,28 +38,40 @@ def board_of(scene):
 # --- 1. compile --------------------------------------------------------------------------------
 CLI = os.environ.get('ARDUINO_CLI') or shutil.which('arduino-cli')
 _compiled = {}
+_one_at_a_time = threading.Lock()  # the server has 2 GB of RAM: never two compilers at once
 
 
-def compile_sketch(code, fqbn):
-    """None when it compiles (or arduino-cli isn't installed: then it's logged, not blocked), else the
-    compiler's first errors as one short paragraph. Cached by code, so repair rounds don't recompile."""
-    if not CLI or not fqbn or not (code or '').strip():
-        if not CLI: print('[bench] arduino-cli not installed: sketches are not compiled', flush=True)
-        return None
+def compile_result(code, fqbn):
+    """('ok' | 'error' | 'skipped', compiler errors or why it was skipped). Skipped when arduino-cli or
+    the board's core isn't installed, or the compile timed out: logged, never passed off as compiled.
+    Cached by code, so repair rounds don't recompile."""
+    if not (code or '').strip(): return 'skipped', 'no sketch'
+    if not CLI: return 'skipped', 'arduino-cli is not installed'
+    if not fqbn: return 'skipped', 'no compiler for this board'
     key = hashlib.sha1((fqbn + code).encode()).hexdigest()
     if key in _compiled: return _compiled[key]
-    with tempfile.TemporaryDirectory() as d:
+    with _one_at_a_time, tempfile.TemporaryDirectory() as d:
         os.makedirs(os.path.join(d, 'sketch'))
         with open(os.path.join(d, 'sketch', 'sketch.ino'), 'w') as f: f.write(code)
         try:
             r = subprocess.run([CLI, 'compile', '--fqbn', fqbn, '--no-color', os.path.join(d, 'sketch')],
-                               capture_output=True, text=True, timeout=120)
-            out = None if r.returncode == 0 else errors_of(r.stdout + r.stderr, d)
+                               capture_output=True, text=True, timeout=420 if SLOW.match(fqbn) else 120)
+            text = r.stdout + r.stderr
+            if r.returncode == 0: out = ('ok', '')
+            elif re.search(r'platform not installed|Platform .* not found|Invalid FQBN|board .* not found', text, re.I):
+                out = ('skipped', f'the {fqbn} core is not installed')
+            else: out = ('error', errors_of(text, d))
         except subprocess.TimeoutExpired:
-            out = None  # a slow machine is not the sketch's fault
-            print('[bench] arduino-cli compile timed out', flush=True)
-    _compiled[key] = out
+            out = ('skipped', 'the compiler timed out')
+    if out[0] == 'skipped': print('[bench] sketch not compiled:', out[1], flush=True)
+    else: _compiled[key] = out
     return out
+
+
+def compile_sketch(code, fqbn):
+    """The compiler's errors when the sketch doesn't compile, else None (compiled, or skipped)."""
+    status, msg = compile_result(code, fqbn)
+    return msg if status == 'error' else None
 
 
 def errors_of(text, tmp):
@@ -68,14 +94,16 @@ def strip_comments(code):
 
 def pin_number(token, fqbn):
     token = token.strip()
-    if token == 'LED_BUILTIN': return 13
-    if re.fullmatch(r'A\d{1,2}', token): return ANALOG_BASE[fqbn] + int(token[1:])
+    if token == 'LED_BUILTIN': return BUILTIN_LED.get(fqbn)
+    if re.fullmatch(r'A\d{1,2}', token): return ANALOG.get(fqbn, {}).get(int(token[1:]))
     return int(token) if token.isdigit() else None
 
 
 def pin_label(n, fqbn):
-    base = ANALOG_BASE[fqbn]
-    return f'A{n - base}' if n >= base else f'D{n}'
+    if fqbn.startswith('arduino:avr:'):
+        a = next((i for i, v in ANALOG[fqbn].items() if v == n), None)
+        return f'A{a}' if a is not None else f'D{n}'
+    return f'GPIO{n}' if fqbn.startswith('esp32:') else f'{n}'
 
 
 def code_pins(code, fqbn):
@@ -108,10 +136,10 @@ def wired_pins(scene, board, fqbn):
             if part != board.id: continue
             t = term.lower().replace(' ', '').replace('pin:', '').lstrip('~')
             if POWER.match(t): continue
-            m = re.fullmatch(r'(?:d|gpio|io)?(\d{1,2})', t) or re.fullmatch(r'a(\d{1,2})', t)
+            m = re.fullmatch(r'(?:d|gpio|io|p|pin)?(\d{1,2})', t) or re.fullmatch(r'a(\d{1,2})', t)
             if not m: continue
-            n = ANALOG_BASE[fqbn] + int(m[1]) if t.startswith('a') else int(m[1])
-            out[n] = w.name
+            n = ANALOG.get(fqbn, {}).get(int(m[1])) if t.startswith('a') else int(m[1])
+            if n is not None: out[n] = w.name
     return out
 
 
@@ -119,7 +147,7 @@ def mentions(code, n, fqbn, names):
     """Does the code refer to pin n anywhere (a constant, a literal, a library constructor's argument)?"""
     code = strip_comments(code)
     if any(n in v for v in names.values()): return True
-    tokens = [str(n)] + ([f'A{n - ANALOG_BASE[fqbn]}'] if n >= ANALOG_BASE[fqbn] else [])
+    tokens = [str(n)] + [f'A{i}' for i, v in ANALOG.get(fqbn, {}).items() if v == n]
     return any(re.search(r'(?<![\w.])' + re.escape(t) + r'(?![\w.])', code) for t in tokens)
 
 
@@ -131,7 +159,7 @@ def check_pins(code, scene):
     problems = []
     for n, how in sorted(used.items()):
         if n in wired: continue
-        if n == 13 and n not in inputs: continue  # the Uno's own L LED on D13 is a fine output
+        if n == BUILTIN_LED.get(fqbn) and n not in inputs: continue  # the board's own LED is a fine output
         problems.append(f'The sketch uses pin {pin_label(n, fqbn)} ({how}), but no wire goes to that pin. '
                         'Wire the part that pin is for, or change the code to the pin that is wired.')
     for n, wire in sorted(wired.items()):
@@ -140,7 +168,7 @@ def check_pins(code, scene):
                             'Make the code and the wiring use the same pin.')
     for m in re.finditer(r'\banalogWrite\s*\(\s*([A-Za-z_]\w*|\d+)', strip_comments(code)):
         for n in names.get(m[1]) or ([pin_number(m[1], fqbn)] if pin_number(m[1], fqbn) is not None else []):
-            if n not in PWM[fqbn]:
+            if PWM.get(fqbn) is not None and n not in PWM[fqbn]:
                 problems.append(f'The sketch calls analogWrite on pin {pin_label(n, fqbn)}, which has no PWM on this board '
                                 f'(PWM pins: {", ".join(map(str, sorted(PWM[fqbn])))}). Move it to a PWM pin.')
     return problems

@@ -88,5 +88,9 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "drive_ma": 5000,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

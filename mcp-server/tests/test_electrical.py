@@ -96,4 +96,46 @@ def test_the_ready_made_designs_are_wired_cleanly(example, tmp_path, monkeypatch
     monkeypatch.setattr(Studio, "export", lambda self, *a, **k: {})  # the design is all this test needs
     sys.argv = [f"{example}.py", str(tmp_path)]
     studio = runpy.run_path(f"examples/{example}.py", run_name="__main__")["studio"]
-    assert check_wiring(studio.design, studio.library()) == {"problems": [], "tips": []}
+    r = check_wiring(studio.design, studio.library())
+    assert r["problems"] == []
+    # the pendulum's only notes are its gearmotor's 3 A stall current (driver 2.1 A, adapter 2 A)
+    assert all("stall" in t for t in r["tips"]) and len(r["tips"]) == (2 if example == "double_pendulum" else 0)
+
+
+def drive(d, driver, motor, supply):
+    wire(d, driver + "-vin", supply, (driver, "vin"))
+    wire(d, driver + "-a", (driver, "out1"), (motor, "m_pos"))
+    wire(d, driver + "-b", (driver, "out2"), (motor, "m_neg"))
+
+
+def test_a_driver_logic_pin_on_the_boards_3v3_is_not_charged_the_motor_current():
+    d = board(("psu", "psu-12v-2a"), ("mcu", "teensy-41"), ("drv", "drv8874-board"), ("m", "dc-gearmotor-12v-37"))
+    drive(d, "drv", "m", ("psu", "v12"))
+    wire(d, "w-pmode", ("mcu", "3v3"), ("drv", "pmode"))
+    wire(d, "w-in1", ("mcu", "d2"), ("drv", "in1"))
+    r = check_wiring(d, LIB)
+    assert r["problems"] == []
+    assert any("stalls" in t and "2100 mA" in t for t in r["tips"])  # 3 A stall vs the driver's 2.1 A
+    assert any("up to 3003 mA" in t for t in r["tips"])  # vs the adapter's 2 A (motor + driver)
+
+
+def test_a_motor_on_a_bare_board_pin_is_a_problem():
+    d = board(("mcu", "teensy-41"), ("m", "tt-gearmotor"))
+    wire(d, "w1", ("mcu", "d2"), ("m", "m_pos"))
+    assert any("Drive it through a motor driver" in p for p in check_wiring(d, LIB)["problems"])
+
+
+def test_motors_that_draw_more_than_the_supply_gives_are_a_problem():
+    d = board(("bat", "battery-9v"), ("d1", "drv8874-board"), ("d2", "drv8874-board"),
+              ("m1", "dc-gearmotor-12v-37"), ("m2", "dc-gearmotor-12v-37"))
+    drive(d, "d1", "m1", ("bat", "plus"))
+    drive(d, "d2", "m2", ("bat", "plus"))
+    assert any("can give 300 mA" in p and "about 606 mA" in p for p in check_wiring(d, LIB)["problems"])
+
+
+def test_a_5v_signal_into_a_3v3_board_is_a_problem():
+    d = board(("psu", "psu-12v-2a"), ("reg", "regulator-7805"), ("mcu", "teensy-41"), ("sonar", "hc-sr04"))
+    wire(d, "w-in", ("psu", "v12"), ("reg", "in"))
+    wire(d, "w-5v", ("reg", "out"), ("sonar", "vcc"))
+    wire(d, "w-echo", ("sonar", "echo"), ("mcu", "d2"))
+    assert any("level shifter" in p for p in check_wiring(d, LIB)["problems"])

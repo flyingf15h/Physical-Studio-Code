@@ -86,3 +86,28 @@ def test_the_ready_made_sketches_compile(name):
 def test_a_sketch_that_does_not_compile_is_caught():
     err = sketch.compile_sketch("void setup() { pinMode(13, OUTPUT) }\nvoid loop() {}\n", "arduino:avr:uno")
     assert err and "error" in err
+
+
+BLINK = "void setup() { pinMode(LED_BUILTIN, OUTPUT); }\nvoid loop() { digitalWrite(LED_BUILTIN, HIGH); delay(500); digitalWrite(LED_BUILTIN, LOW); delay(500); }\n"
+
+
+@needs_cli
+@pytest.mark.parametrize("fqbn", ["teensy:avr:teensy41", "esp32:esp32:esp32doit-devkit-v1"])
+def test_teensy_and_esp32_sketches_compile_and_errors_are_caught(fqbn):
+    status, msg = sketch.compile_result(BLINK, fqbn)
+    if status == "skipped":
+        pytest.skip(msg)  # that core isn't installed here
+    assert status == "ok", msg
+    assert sketch.compile_result(BLINK.replace("HIGH);", "HIGH)"), fqbn)[0] == "error"
+
+
+def test_boards_get_their_own_compiler_and_pin_names():
+    from types import SimpleNamespace as NS
+    def fq(name):
+        return sketch.board_of(NS(parts=[NS(kind="development_board", name=name)]))[1]
+    assert fq("Teensy 4.1") == "teensy:avr:teensy41"
+    assert fq("ESP32 DevKit V1") == "esp32:esp32:esp32doit-devkit-v1"
+    assert fq("Seeed XIAO ESP32-C3") == "esp32:esp32:XIAO_ESP32C3"
+    assert fq("Arduino Nano") == "arduino:avr:nano"
+    assert sketch.pin_number("A0", "esp32:esp32:esp32doit-devkit-v1") == 36 and sketch.pin_number("A14", "teensy:avr:teensy41") == 38
+    assert sketch.pin_label(25, "esp32:esp32:esp32doit-devkit-v1") == "GPIO25" and sketch.pin_label(15, "arduino:avr:uno") == "A1"

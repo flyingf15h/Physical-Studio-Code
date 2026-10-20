@@ -330,7 +330,7 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
 }
 
 /** What the automatic checks found, so nobody builds a guide that still fails them without knowing. */
-function ChecksNote({ checks }: { checks?: BuildPlan['checks'] }) {
+function ChecksNote({ checks, hardware }: { checks?: BuildPlan['checks']; hardware?: boolean }) {
   if (!checks) return null
   if (!checks.passed)
     return (
@@ -347,9 +347,15 @@ function ChecksNote({ checks }: { checks?: BuildPlan['checks'] }) {
   return (
     <>
       <p className="checks-note checks-passed">
-        Checked automatically: no shorts or double-booked holes, every part fits its holes, currents and voltages are
-        within each part's limits, the code's pins match the wires
-        {checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'}.
+        {hardware
+          ? `Checked automatically: no shorts or mixed voltages in the wiring, every part gets a voltage it takes, and ${
+              checks.warnings?.length
+                ? 'every supply covers what its parts draw in normal use (see the notes below for peaks).'
+                : 'every supply, regulator and motor driver can deliver what its parts draw.'
+            }`
+          : `Checked automatically: no shorts or double-booked holes, every part fits its holes, currents and voltages are within each part's limits, the code's pins match the wires${
+              checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'
+            }.`}
       </p>
       {checks.warnings?.length ? (
         <div className="checks-note checks-warning">
@@ -370,7 +376,7 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
   return (
     <div className="build-section">
       <p className="lede">{plan.summary}</p>
-      <ChecksNote checks={plan.checks} />
+      <ChecksNote checks={plan.checks} hardware={isHardware(plan)} />
       {isHardware(plan) ? null : <h2>Your bench now (commit #0)</h2>}
       {isHardware(plan) ? null : start?.model ? (
         <BenchModel model={start.model} guide={start.guide} />
@@ -1047,6 +1053,32 @@ function StepPicture({
   )
 }
 
+/** "Parts in 4/9 · Wires in 2/9": how much of the build is in after this step. */
+function Progress({ plan, index }: { plan: BuildPlan; index: number }) {
+  const kinds = new Map((plan.model?.labels ?? []).map((l) => [l.id, l.kind]))
+  const count = (upto: number, wire: boolean) => {
+    const ids = new Set(plan.steps.slice(0, upto).flatMap((s) => s.model?.new ?? s.part_ids))
+    return [...ids].filter((id) => kinds.has(id) && (kinds.get(id) === 'wire') === wire && !/^(breadboard|development_board)$/.test(kinds.get(id) ?? '')).length
+  }
+  const total = plan.steps.length
+  const parts = [count(index + 1, false), count(total, false)]
+  const wires = [count(index + 1, true), count(total, true)]
+  return (
+    <div className="step-progress" aria-label="Build progress">
+      {parts[1] > 0 && (
+        <span>
+          <i>Parts in</i> <b>{parts[0]}</b>/{parts[1]}
+        </span>
+      )}
+      {wires[1] > 0 && (
+        <span>
+          <i>Wires in</i> <b>{wires[0]}</b>/{wires[1]}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function StepView({
   build,
   plan,
@@ -1067,9 +1099,12 @@ function StepView({
   const freshNames = (s.model?.labels ?? []).filter((l) => fresh.includes(l.id) && l.kind !== 'wire')
   return (
     <div className="build-section">
-      <div className="step-badge" aria-label={`Step ${index + 1} of ${plan.steps.length}`}>
-        <span className="step-big">{index + 1}</span>
-        <span className="step-of">of {plan.steps.length}</span>
+      <div className="step-head">
+        <div className="step-badge" aria-label={`Step ${index + 1} of ${plan.steps.length}`}>
+          <span className="step-big">{index + 1}</span>
+          <span className="step-of">of {plan.steps.length}</span>
+        </div>
+        <Progress plan={plan} index={index} />
       </div>
       <h2 className="step-title">{s.title}</h2>
       {s.picture && (
@@ -1434,8 +1469,21 @@ export function BuildPage({ buildId }: { buildId: string }) {
   const [error, setError] = useState<string | null>(null)
   const [at, setAt] = useState(-1) // -1 overview, 0..n-1 steps, n finished
   const [tab, setTab] = useState<'guide' | 'code' | 'commits'>('guide')
-  useEffect(() => window.scrollTo({ top: 0 }), [tab]) // a new tab starts at its top, not where the last one was
+  useEffect(() => {
+    window.scrollTo({ top: 0 }) // braces: newer Chromium returns a Promise here, which React would take for a cleanup
+  }, [tab]) // a new tab starts at its top, not where the last one was
   const [open, setOpen] = useState<Record<number, boolean>>({}) // sections the builder opened or closed
+  const steps = build?.plan?.steps.length ?? 0
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (tab !== 'guide' || e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return
+      if (e.key === ']') setAt((a) => Math.min(steps, a + 1))
+      else if (e.key === '[') setAt((a) => Math.max(-1, a - 1))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [tab, steps])
 
   useEffect(() => {
     let stop = false

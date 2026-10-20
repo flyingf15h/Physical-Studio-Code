@@ -267,6 +267,7 @@
     "current_ma": 8,
     "peak_ma": 8,
     "note": "VMOT; logic 2.5-5.25 V",
-    "source": "Typical datasheet numbers; not yet measured"
+    "source": "Typical datasheet numbers; not yet measured",
+    "drive_ma": 1500
   }
 }

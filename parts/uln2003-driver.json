@@ -166,6 +166,7 @@
     "current_ma": 0,
     "peak_ma": 0,
     "note": "motor current comes from its own + pin",
-    "source": "Typical datasheet numbers; not yet measured"
+    "source": "Typical datasheet numbers; not yet measured",
+    "drive_ma": 500
   }
 }

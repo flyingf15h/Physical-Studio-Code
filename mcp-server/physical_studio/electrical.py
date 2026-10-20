@@ -8,6 +8,9 @@ ends); then a net may not:
 - join two different supply voltages (12 V into a 3.3 V pin),
 - carry 5 V or more to the supply pin of a 3.3 V only part,
 - put two devices with the same fixed I2C address on one SDA line.
+check_power adds current, from the parts' `electrical` data (parts/README.md): what each supply,
+regulator and motor driver is asked to deliver against its rating, motors on a bare board pin, and
+5 V signals into a board whose pins take 3.3 V.
 `problems` are mistakes that break or burn parts; `tips` are ones the builder can fix with a jumper or a
 setting (a second I2C address).
 """
@@ -136,4 +139,137 @@ def check_wiring(design: Design, library: dict[str, dict]) -> dict:
                                 "address (its address pin or jumper) and say so in the wiring step.")
             else:
                 seen[first] = (name(p), fixed)
-    return {"problems": problems, "tips": tips}
+    power = check_power(design, library)
+    return {"problems": problems + power["problems"], "tips": tips + power["tips"]}
+
+
+def check_power(design: Design, library: dict[str, dict]) -> dict:
+    """Supply budgets and drive limits. Steady draw over a rating is a problem; brief peaks (a motor
+    stalling) are tips, since a driver's current limit or a bigger supply handles them."""
+    problems: list[str] = []
+    tips: list[str] = []
+    groups = nets(design)
+    net_of = {pin: n for n, g in enumerate(groups) for pin in g}
+
+    def part(pid):
+        p = design.placements.get(pid)
+        return p, (library.get(p.part_id, {}) if p else {})
+
+    def elec(pid):
+        return part(pid)[1].get("electrical") or {}
+
+    def label(pin):
+        q = next((q for q in part(pin[0])[1].get("pins", []) if q.get("id") == pin[1]), {})
+        return q.get("label") or pin[1]
+
+    def pname(pid):
+        p, lib = part(pid)
+        return p.name if p else pid
+
+    def sources():
+        """(pin, volts, mA it can give) for every supply output: adapters, batteries, regulators, board 5V/3V3 pins."""
+        out = []
+        for pid in design.placements:
+            e = elec(pid)
+            if e.get("output_pin") and e.get("output_ma"):
+                out.append(((pid, e["output_pin"]), e.get("output_v"), e["output_ma"]))
+            for rail, ma in (e.get("rails_ma") or {}).items():
+                for q in part(pid)[1].get("pins", []):
+                    if re.fullmatch(r"\+?" + {"5v": r"5\s*V", "3v3": r"3(\.3\s*V|V3)"}[rail], q.get("label", "").strip(), re.I):
+                        out.append(((pid, q["id"]), 5.0 if rail == "5v" else 3.3, ma))
+        return out
+
+    def on_net(n, skip):
+        return {pin[0] for pin in groups[n] if pin[0] != skip and not GROUND.search(label(pin))} if n is not None else set()
+
+    def motors_of(pid):
+        """Parts that need a driver and share a net with this driver's (non-supply) pins."""
+        found = set()
+        for pin in (q for q in net_of if q[0] == pid):
+            for other in on_net(net_of[pin], pid):
+                if elec(other).get("needs_driver"):
+                    found.add(other)
+        return found
+
+    MOTOR_SUPPLY = re.compile(r"^\+?\s*(VIN|VM|VMOT|VS|V\+|\+|\d+(\.\d+)?\s*V)\b", re.I)
+
+    def load(pid, volts, seen, via=None):
+        """(typical, peak) mA this part takes from a supply at `volts` through its pin `via`, including what
+        it passes on."""
+        if pid in seen:
+            return 0.0, 0.0
+        e = elec(pid)
+        if e.get("drive_ma") and via is not None and not MOTOR_SUPPLY.search(label(via)):
+            return 1.0, 1.0  # a driver's logic pin (SLEEP, PMODE, VCC): the motor current isn't on this supply
+        seen.add(pid)
+        if e.get("input_pin") and e.get("output_pin"):  # a regulator: its outputs' load, converted to its input
+            out_v = e.get("output_v") or volts
+            typ = peak = 0.0
+            out_net = net_of.get((pid, e["output_pin"]))
+            for other in on_net(out_net, pid):
+                t, pk = load(other, out_v, seen, next((q for q in groups[out_net] if q[0] == other), None))
+                typ, peak = typ + t, peak + pk
+            if e.get("output_ma") and typ > e["output_ma"]:
+                problems.append(f"{pname(pid)} gives at most {e['output_ma']} mA, but its loads draw about {typ:.0f} mA. Use a bigger regulator.")
+            if e.get("linear") or not volts:
+                return typ, peak
+            k = out_v / (volts * e.get("efficiency", 0.85))
+            return typ * k, peak * k
+        if e.get("drive_ma"):  # a motor driver: its motors' current flows through it
+            typ = peak = 0.0
+            for m in motors_of(pid):
+                me = elec(m)
+                typ, peak = typ + me.get("current_ma", 0), peak + me.get("peak_ma", me.get("current_ma", 0))
+                if me.get("current_ma", 0) > e["drive_ma"]:
+                    problems.append(f"{pname(m)} draws about {me['current_ma']} mA running, more than {pname(pid)}'s {e['drive_ma']} mA. Use a bigger driver.")
+                elif me.get("peak_ma", 0) > e["drive_ma"]:
+                    tips.append(f"{pname(m)} can draw {me['peak_ma']} mA when it stalls, more than {pname(pid)}'s {e['drive_ma']} mA. "
+                                f"Set the driver's current limit (or rely on its overcurrent shutdown) and say so in the wiring step.")
+                seen.add(m)
+            return typ + e.get("current_ma", 0), peak + e.get("peak_ma", e.get("current_ma", 0))
+        if e.get("needs_driver"):
+            return 0.0, 0.0  # counted through its driver, or flagged below when it has none
+        return float(e.get("current_ma", 0)), float(e.get("peak_ma", e.get("current_ma", 0)))
+
+    for pin, volts, rating in sources():
+        n = net_of.get(pin)
+        if n is None:
+            continue
+        typ = peak = 0.0
+        seen: set = {pin[0]}
+        users = []
+        for other in sorted(on_net(n, pin[0])):
+            t, pk = load(other, volts, seen, next((q for q in groups[n] if q[0] == other), None))
+            if t or pk:
+                users.append(pname(other))
+            typ, peak = typ + t, peak + pk
+        what = f"{pname(pin[0])}'s {label(pin)} output"
+        who = " and ".join(filter(None, [", ".join(users[:-1]), users[-1] if users else ""]))
+        if typ > rating:
+            problems.append(f"{what} can give {rating} mA, but {who} {'draws' if len(users) == 1 else 'draw'} about {typ:.0f} mA. Use a bigger supply or split the load.")
+        elif peak > rating:
+            tips.append(f"{what} can give {rating} mA, but {who} can briefly draw up to {peak:.0f} mA together (a motor starting or stalling). "
+                        "If the board resets when the motor starts, use a bigger supply.")
+
+    boards = {pid: elec(pid) for pid in design.placements if elec(pid).get("logic_v")}
+    supply_v = {}
+    for pin, volts, _ in sources():
+        if net_of.get(pin) is not None:
+            for other in on_net(net_of[pin], pin[0]):
+                supply_v[other] = max(supply_v.get(other, 0), volts or 0)
+    for g in groups:
+        board_pins = [p for p in g if p[0] in boards and not GROUND.search(label(p)) and not is_supply(label(p))]
+        if not board_pins:
+            continue
+        for pid in {p[0] for p in g if p[0] not in boards}:
+            e = elec(pid)
+            if e.get("needs_driver"):
+                problems.append(f"{pname(pid)} is wired straight to {pname(board_pins[0][0])} {label(board_pins[0])}, but it draws about "
+                                f"{e.get('current_ma')} mA and a board pin gives {boards[board_pins[0][0]].get('pin_ma', 20)} mA. Drive it through a motor driver or transistor.")
+            sv = e.get("signal_v")
+            out_v = supply_v.get(pid) if sv == "supply" else sv
+            board = boards[board_pins[0][0]]
+            if out_v and out_v > 3.6 and not board.get("five_v_tolerant", True):
+                problems.append(f"{pname(pid)} is powered from {out_v:g} V, so its signal on {pname(board_pins[0][0])} {label(board_pins[0])} is {out_v:g} V, "
+                                "but that pin takes 3.3 V. Power it from 3.3 V, or add a level shifter or divider.")
+    return {"problems": list(dict.fromkeys(problems)), "tips": list(dict.fromkeys(tips))}

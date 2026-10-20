@@ -64,5 +64,12 @@
     "metallic": 0.1,
     "roughness": 0.5,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "output_v": 9.0,
+    "output_ma": 300,
+    "note": "too weak for motors",
+    "source": "Typical datasheet numbers; not yet measured",
+    "output_pin": "plus"
   }
 }

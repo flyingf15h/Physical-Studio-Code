@@ -5,7 +5,8 @@
 .bench-tools span { background: color-mix(in srgb, var(--panel) 80%, transparent); border-radius: 999px; padding: 4px 10px; }
 .bench-tools button, .bench-tools a { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 5px 11px; cursor: pointer; font-size: 12px; color: inherit; text-decoration: none; }
 .bench-tools button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
-@media (max-width: 760px) { .bench-tools { flex-wrap: wrap; justify-content: flex-end; left: 10px; } .bench-tools span { display: none; } }
+.bench-tools .bench-looks { display: inline-flex; gap: 4px; background: none; padding: 0; }
+@media (max-width: 760px) { .bench-tools { flex-wrap: wrap; justify-content: flex-end; left: 10px; } .bench-tools span { display: none; } .bench-tools .bench-looks { display: inline-flex; } }
 .bench-info { margin: 0; font-size: 14px; line-height: 1.45; min-height: 20px; }
 .bench-parts { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
 .bench-parts button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }

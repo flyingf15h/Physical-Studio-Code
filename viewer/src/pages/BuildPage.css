@@ -148,3 +148,9 @@ form.report-step textarea { width: 100%; box-sizing: border-box; border: 1px sol
 .checks-failed { color: #8a2a1f; background: #fbeceb; border: 1px solid #f0c2bd; }
 .checks-warning { color: #7a5200; background: #fdf4e3; border: 1px solid #f0dcae; }
 .checks-failed ul, .checks-warning ul { margin: 6px 0; padding-left: 18px; }
+
+.step-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.step-progress { display: flex; gap: 8px; font-size: 13px; color: var(--muted); }
+.step-progress span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+.step-progress i { font-style: normal; }
+.step-progress b { color: var(--ink); }
