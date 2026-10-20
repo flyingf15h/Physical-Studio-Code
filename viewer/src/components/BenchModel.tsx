@@ -8,6 +8,8 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
+import { EffectComposer, N8AO, ToneMapping } from '@react-three/postprocessing'
+import { ToneMappingMode } from 'postprocessing'
 import type { BenchModel as Model, WireInfo } from '../api'
 import './BenchModel.css'
 
@@ -51,6 +53,7 @@ function hitZone(mesh: THREE.Mesh): THREE.Mesh {
   g.computeBoundingSphere()
   const hit = new THREE.Mesh(g, HIT)
   hit.name = `${mesh.userData.part}__hit`
+  hit.visible = false // still clickable (raycasts ignore visibility), but kept out of the ambient-occlusion depth pass
   hit.userData.part = mesh.userData.part
   return hit
 }
@@ -112,23 +115,26 @@ function Scene({
   highlight,
   look,
   onPick,
+  onBox,
 }: {
   model: Model
   picked: string | null
   highlight: string[]
   look: Look
   onPick: (id: string | null) => void
+  onBox: (box: THREE.Box3) => void // the studio light sits outside <Bounds>, or its floor would be framed too
 }) {
   const gltf = useGLTF(model.glb)
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
   const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
-  const { root, meshes } = useMemo(() => {
+  const { root, meshes, box } = useMemo(() => {
     const root = gltf.scene.clone(true)
     root.updateMatrixWorld(true)
     const meshes: THREE.Mesh[] = []
     root.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
+      mesh.castShadow = mesh.receiveShadow = true
       // The bench GLBs carry positions and vertex colours only; lighting needs normals.
       if (!mesh.geometry.attributes.normal) mesh.geometry.computeVertexNormals()
       // trimesh writes sRGB vertex colours; three.js expects linear ones (else everything looks washed out).
@@ -165,7 +171,7 @@ function Scene({
       mesh.userData.wire = wireIds.includes(mesh.userData.part as string)
       if (mesh.userData.wire) mesh.add(hitZone(mesh))
     }
-    return { root, meshes }
+    return { root, meshes, box: new THREE.Box3().setFromObject(root) }
   }, [gltf, ids, wireIds])
 
   useEffect(() => {
@@ -186,6 +192,7 @@ function Scene({
       }
     }
   }, [meshes, picked, highlight, look])
+  useEffect(() => onBox(box), [box, onBox])
 
   return (
     <>
@@ -195,6 +202,44 @@ function Scene({
           e.stopPropagation()
           onPick((e.object.userData.part as string | null) ?? null)
         }}
+      />
+    </>
+  )
+}
+
+/** Studio look, as Flatpack lights its room: one warm key light casting soft shadows (its shadow camera
+ * fitted to this model, so a 7 cm breadboard and a 50 cm pendulum both get crisp ones) onto the parts. No floor:
+ * a shadow-catching floor drew a pale arc behind the model. */
+function StudioLight({ box }: { box: THREE.Box3 }) {
+  const light = useRef<THREE.DirectionalLight>(null)
+  const c = box.getCenter(new THREE.Vector3())
+  const size = box.getSize(new THREE.Vector3())
+  const r = Math.max(size.x, size.y, size.z) * 0.75 + 0.01
+  useEffect(() => {
+    const l = light.current
+    if (!l) return
+    l.target.position.copy(c)
+    l.target.updateMatrixWorld()
+    l.shadow.camera.updateProjectionMatrix()
+  })
+  return (
+    <>
+      <directionalLight
+        ref={light}
+        castShadow
+        position={[c.x + r * 0.9, c.y + r * 2.2, c.z + r * 1.3]}
+        intensity={2.6}
+        color="#fff4e8"
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0004}
+        shadow-normalBias={r * 0.002}
+        shadow-radius={4}
+        shadow-camera-left={-r * 1.4}
+        shadow-camera-right={r * 1.4}
+        shadow-camera-top={r * 1.4}
+        shadow-camera-bottom={-r * 1.4}
+        shadow-camera-near={r * 0.1}
+        shadow-camera-far={r * 6}
       />
     </>
   )
@@ -212,6 +257,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const [picked, setPicked] = useState<string | null>(null)
   const [view, setView] = useState({ n: 0, top: false }) // a new n remounts the canvas at that view
   const [look, setLook] = useState<Look>('studio')
+  const [bounds, setBounds] = useState<THREE.Box3 | null>(null)
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
@@ -234,24 +280,33 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           key={view.n}
           camera={{ fov: 35, near: 0.001, far: 50, position: view.top ? [0, 0.34, 0.001] : [0.05, 0.22, 0.24] }}
           dpr={[1, 2]}
+          shadows="soft"
           onPointerMissed={() => setPicked(null)}
         >
-          <color attach="background" args={[look === 'drawing' ? '#ffffff' : '#ece9e4']} />
-          <hemisphereLight args={['#ffffff', '#b9b4ae', 1.7]} />
-          <directionalLight position={[1, 2, 1.5]} intensity={2} />
-          <directionalLight position={[-1.5, 1, -1]} intensity={0.7} />
+          <color attach="background" args={[look === 'drawing' ? '#ffffff' : look === 'studio' ? '#f7f5f1' : '#ece9e4']} />
+          <hemisphereLight args={['#ffffff', '#b9b4ae', look === 'studio' ? 0.6 : 1.7]} />
+          {look !== 'studio' && <directionalLight position={[1, 2, 1.5]} intensity={2} />}
+          <directionalLight position={[-1.5, 1, -1]} intensity={look === 'studio' ? 0.5 : 0.7} />
           {/* A soft studio for metal parts to reflect (built here, nothing downloaded). */}
-          <Environment resolution={128}>
+          <Environment resolution={128} environmentIntensity={look === 'studio' ? 0.7 : 1}>
             <Lightformer intensity={2} position={[0, 4, 0]} rotation-x={Math.PI / 2} scale={[8, 8, 1]} />
             <Lightformer intensity={1} position={[-4, 1, 2]} rotation-y={Math.PI / 2} scale={[6, 3, 1]} />
             <Lightformer intensity={0.6} position={[4, 1, -2]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} />
           </Environment>
           <Suspense fallback={null}>
             <Bounds fit observe margin={1.15}>
-              <Scene model={model} picked={picked} highlight={highlight} look={look} onPick={setPicked} />
+              <Scene model={model} picked={picked} highlight={highlight} look={look} onPick={setPicked} onBox={setBounds} />
             </Bounds>
+            {look === 'studio' && bounds && <StudioLight box={bounds} />}
             {wire && <WireMarkers wire={wire} />}
           </Suspense>
+          {look === 'studio' && (
+            // ambient occlusion darkens corners and the gaps between parts, so shapes read even in shadow
+            <EffectComposer multisampling={4}>
+              <N8AO aoRadius={0.012} distanceFalloff={0.6} intensity={2.2} halfRes />
+              <ToneMapping mode={ToneMappingMode.NEUTRAL} />
+            </EffectComposer>
+          )}
           <OrbitControls makeDefault minDistance={0.01} maxDistance={5} zoomSpeed={0.8} />
         </Canvas>
         <div className="bench-tools">

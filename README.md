@@ -73,6 +73,7 @@ Not covered yet: Pico sketches aren't compiled (the guide says so), and no gener
 
 ## Updates
 
+- **Oct 20, 2026:** Studio lighting like Flatpack's: a warm key light with soft shadows fitted to each model, ambient occlusion (N8AO), neutral tone mapping and a dimmer sky light, for every guide (breadboard and CAD). Guide cards re-rendered.
 - **Oct 20, 2026:** Breadboard guides' 3D models look like the real parts: an Uno with a drawn PCB (silkscreen with the real pin labels, traces, logo), headers at the real pin positions (wires land on the right pin), a DIP chip, metal USB-B, capacitors and ICSP header; bare-metal leads, glossy LEDs, resistors with colour bands for their value, real part colours. The guide cards are re-rendered from these models. Removed the contact shadow and the "checked automatically" line (failed checks and warnings still show).
 - **Oct 20, 2026:** ESP32 and Teensy sketches are compiled too. Hardware/CAD guides get the power and motor-driver checks (stall current vs driver rating, supply peaks). The 3D view has Studio, Even light and Drawing looks, with a soft shadow under the model, and steps show parts and wires placed so far ([ and ] step through the guide). Ideas taken from Flatpack's interactive IKEA-style manuals. Fixed a crash on the Build page in newer Chrome.
 - **Oct 20, 2026:** Power and current checks, with supply voltage, current and driver data on 55 library parts. The breadboard 3D model and step pictures use real column spacing (the e-f gap was drawn 12.7 mm wide instead of 7.62 mm).
