@@ -22,5 +22,6 @@
   "notes": "Anode is the longer leg; the cathode is on the flat side of the flange. A 5 mm lid hole holds the lens and the 5.8 mm flange stops it from pushing through. Needs a 220 ohm series resistor on the anode.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {"vf": {"red": 2.0, "yellow": 2.1, "orange": 2.0, "green": 2.2, "blue": 3.0, "white": 3.0}, "max_ma": 20, "source": "Typical datasheet numbers; not yet measured"}
 }

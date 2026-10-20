@@ -195,6 +195,7 @@ export interface GuideChecks {
   compiled: boolean | null // null: no compiler for this board, so the sketch wasn't compiled
   board: string | null
   problems: string[]
+  warnings?: string[] // true but not fatal, e.g. a servo's stall current can reset the board
 }
 
 /** One board's wired pins: "pin 18 / SDA" -> ["Cart joint encoder SDA", "Left distance sensor SDA"]. */

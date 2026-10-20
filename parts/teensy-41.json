@@ -194,5 +194,17 @@
   "notes": "600 MHz Cortex-M7, 3 I2C buses (Wire 18/19, Wire1 17/16). Powered over USB here; its pins are 3.3 V only. VIN takes 3.6 to 5.5 V.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "logic_v": 3.3,
+    "pin_ma": 4,
+    "pin_abs_ma": 10,
+    "total_pin_ma": 100,
+    "rails_ma": {
+      "5v": 450,
+      "3v3": 250
+    },
+    "five_v_tolerant": false,
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

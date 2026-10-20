@@ -167,5 +167,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      3.0,
+      5.5
+    ],
+    "current_ma": 4,
+    "peak_ma": 4,
+    "signal_v": 3.3,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

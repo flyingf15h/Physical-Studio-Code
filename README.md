@@ -52,6 +52,32 @@ A rejected plan goes back to the model with the reason, so it gets fixed instead
 - **Front end.** React 19 + Vite + React Three Fiber/drei.
 - **Shipping.** One **Vultr** server running Docker Compose behind Caddy for HTTPS at **physicalstudio.work**.
 
+## Guide checks
+
+An AI writes each breadboard guide, so deterministic checks decide whether it's right. Problems go back to the AI for up to two repair rounds; a guide that still fails is shown with a red warning listing what's wrong, never as finished. A guide that passes says so on its Build page.
+
+- **Wiring** (`bench/planner.py`): real holes, no double-booked holes, no part shorted in one strip, every LED traced from a board pin through its resistor to ground, steps and 3D model in agreement.
+- **Footprints** (`bench/sketch.py`): parts sit in holes their legs can reach on a real breadboard (0.1" pitch, 0.3" between e and f). A 12 mm button straddles the gap in columns d and g, a 6 mm one in e and f; pin headers take neighbouring rows of one column; buzzer legs are about three rows apart.
+- **Code vs wiring** (`bench/sketch.py`): every pin the sketch drives or reads has a wire, every wired pin is used by the sketch, and `analogWrite` is only used on PWM pins.
+- **Compiles** (`bench/sketch.py`): every sketch, and every test-as-you-go sketch, is compiled with `arduino-cli` for the plan's board (Uno, Nano, Mega) before the guide is shown. Test sketches that don't compile are dropped. The server image ships the AVR core and common libraries (Servo, LedControl, LiquidCrystal I2C, DHT, NeoPixel, NewPing, Keypad).
+- **Power and current** (`bench/power.py`, from the `electrical` data in [`parts/`](parts)):
+  - LED current through its resistor, against the LED's and the pin's limits;
+  - motors and other heavy loads wired straight to a GPIO pin;
+  - modules on the wrong supply voltage (a 3.3 V-only part on 5V);
+  - 5 V signals into a 3.3 V board, and 3.3 V-only inputs driven at 5 V;
+  - how much the board's 5V and 3V3 pins are asked to supply. Steady draw over budget is a problem; brief peaks (a servo stalling) are a warning shown with the guide.
+
+`tests/test_sketch.py` and `tests/test_power.py` run every check on the ready-made guides and on planted mistakes.
+
+Not covered yet: sketches for ESP32, Teensy and Pico aren't compiled (the guide says so), hardware/CAD guides don't get the power checks, and no generated guide has been built on a real bench yet.
+
+## Updates
+
+- **Oct 20, 2026:** Power and current checks, with supply voltage, current and driver data on 55 library parts. The breadboard 3D model and step pictures use real column spacing (the e-f gap was drawn 12.7 mm wide instead of 7.62 mm).
+- **Oct 20, 2026:** Guide checks for compiling, code pins vs wiring and part footprints. Guides record their check results, and the Build page shows them.
+- **Oct 20, 2026:** The ready-made guide cards show renders of each finished build. The 3D builder draws a real-size Uno and recognisable modules (HC-SR04, 8×8 matrix, joystick, buzzer, button, LDR, thermistor).
+- **Oct 20, 2026:** Ready-made guide fixes. The traffic light's 12 mm button moved to columns d/g so it fits, and the fire alarm no longer marks pin 13 as PWM.
+
 ## Repo layout
 
 | Folder | What's in it |

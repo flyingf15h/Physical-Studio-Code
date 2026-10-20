@@ -64,5 +64,17 @@
     "metallic": 0.0,
     "roughness": 0.3,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "vf": {
+      "red": 2.0,
+      "yellow": 2.1,
+      "orange": 2.0,
+      "green": 2.2,
+      "blue": 3.0,
+      "white": 3.0
+    },
+    "max_ma": 20,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

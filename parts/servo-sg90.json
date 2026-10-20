@@ -97,5 +97,16 @@
     "metallic": 0.0,
     "roughness": 0.5,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      4.8,
+      6.0
+    ],
+    "current_ma": 250,
+    "peak_ma": 650,
+    "needs_driver": false,
+    "note": "stall current",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

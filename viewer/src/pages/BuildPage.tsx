@@ -345,10 +345,23 @@ function ChecksNote({ checks }: { checks?: BuildPlan['checks'] }) {
       </div>
     )
   return (
-    <p className="checks-note checks-passed">
-      Checked automatically: no shorts or double-booked holes, every part fits its holes, the code's pins match the
-      wires{checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'}.
-    </p>
+    <>
+      <p className="checks-note checks-passed">
+        Checked automatically: no shorts or double-booked holes, every part fits its holes, currents and voltages are
+        within each part's limits, the code's pins match the wires
+        {checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'}.
+      </p>
+      {checks.warnings?.length ? (
+        <div className="checks-note checks-warning">
+          <strong>Good to know before you build:</strong>
+          <ul>
+            {checks.warnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </>
   )
 }
 

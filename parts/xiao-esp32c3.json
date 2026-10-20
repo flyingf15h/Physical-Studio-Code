@@ -248,5 +248,17 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "logic_v": 3.3,
+    "pin_ma": 20,
+    "pin_abs_ma": 40,
+    "total_pin_ma": 100,
+    "rails_ma": {
+      "5v": 450,
+      "3v3": 200
+    },
+    "five_v_tolerant": false,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

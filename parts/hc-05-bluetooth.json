@@ -120,5 +120,19 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      3.6,
+      6.0
+    ],
+    "current_ma": 40,
+    "peak_ma": 50,
+    "pin_max_v": {
+      "rxd": 3.3
+    },
+    "signal_v": 3.3,
+    "note": "RXD is 3.3 V: use a divider from a 5 V TX pin",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

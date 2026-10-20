@@ -80,5 +80,16 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      0,
+      5.0
+    ],
+    "current_ma": 300,
+    "peak_ma": 600,
+    "needs_driver": true,
+    "note": "8 ohm: needs a transistor or amplifier",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

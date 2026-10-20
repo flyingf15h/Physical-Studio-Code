@@ -9,7 +9,7 @@ S=12/2.54  # px per mm, so one breadboard pitch (2.54 mm) is 12 px
 HOLE=re.compile(r'([a-j])([1-9]|[1-5][0-9]|6[0-3])')
 RAIL=re.compile(r'rail_(-?1)_(21\.6|24\.14)_([1-9]|[1-5][0-9]|6[0-3])')
 PIN=re.compile(r'pin:([a-z0-9_~]+)')
-COL_MM=dict(zip('abcdefghij',(16.51,13.97,11.43,8.89,6.35,-6.35,-8.89,-11.43,-13.97,-16.51)))  # same offsets as app.py
+COL_MM=dict(zip('abcdefghij',(13.97,11.43,8.89,6.35,3.81,-3.81,-6.35,-8.89,-11.43,-13.97)))  # same offsets as app.py
 HALO='#26c6da'  # the 3D viewer's highlight colour
 UX,UY=36,24  # Arduino top-left (room on the left for the USB-B jack)
 BX,BY=380,30  # breadboard top-left; app.py's 165 x 55 mm template
@@ -75,9 +75,9 @@ def draw_board(board,used):
 def draw_breadboard(rails):
     o=[f'<rect x="{BX}" y="{BY}" width="{BW:.1f}" height="{BH:.1f}" rx="8" fill="#f4f0e6" stroke="#cfc6b4" stroke-width="1.5"/>',
        f'<rect x="{BX}" y="{mm_y(2.4):.1f}" width="{BW:.1f}" height="{4.8*S:.1f}" fill="#e3dccd"/>',
-       f'<pattern id="holes" x="{row_x(1)-6:.2f}" y="{mm_y(16.51)-6:.2f}" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="4.4" y="4.4" width="3.2" height="3.2" fill="#8c8477"/></pattern>']
+       f'<pattern id="holes" x="{row_x(1)-6:.2f}" y="{mm_y(13.97)-6:.2f}" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="4.4" y="4.4" width="3.2" height="3.2" fill="#8c8477"/></pattern>']
     x0,w=row_x(1)-6,63*12
-    for top in (16.51,-6.35):o.append(f'<rect x="{x0:.1f}" y="{mm_y(top)-6:.1f}" width="{w}" height="60" fill="url(#holes)"/>')
+    for top in (13.97,-3.81):o.append(f'<rect x="{x0:.1f}" y="{mm_y(top)-6:.1f}" width="{w}" height="60" fill="url(#holes)"/>')
     for side in (1,-1):
         for y in (21.6,24.14):
             o.append(f'<rect x="{x0:.1f}" y="{mm_y(side*y)-6:.1f}" width="{w}" height="12" fill="url(#holes)"/>')

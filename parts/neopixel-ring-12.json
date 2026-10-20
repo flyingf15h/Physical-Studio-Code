@@ -92,5 +92,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      4.0,
+      6.0
+    ],
+    "current_ma": 100,
+    "peak_ma": 720,
+    "note": "12 LEDs x 60 mA at full white",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

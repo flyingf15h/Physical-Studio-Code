@@ -21,5 +21,6 @@
   "notes": "The firmware drives it with tone(), so it should be a passive piezo; an active buzzer (sealed bottom, sticker on top) only beeps at one pitch. The + pin is usually the longer leg and marked on top.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {"supply_v": [3.0, 24.0], "current_ma": 5, "peak_ma": 5, "source": "Typical datasheet numbers; not yet measured"}
 }

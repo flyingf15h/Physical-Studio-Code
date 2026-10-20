@@ -148,5 +148,10 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "current_ma": 0,
+    "peak_ma": 0,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

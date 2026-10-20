@@ -87,7 +87,7 @@ def build(spec):
     for b in boards:
         x,y,z=centers[b.id];hm={}
         for row in range(1,64):
-            for ch,dy in zip('abcdefghij',[16.51,13.97,11.43,8.89,6.35,-6.35,-8.89,-11.43,-13.97,-16.51]):hm[ch+str(row)]=np.array([x-78.74+(row-1)*2.54,y+dy,8.])
+            for ch,dy in zip('abcdefghij',[13.97,11.43,8.89,6.35,3.81,-3.81,-6.35,-8.89,-11.43,-13.97]):hm[ch+str(row)]=np.array([x-78.74+(row-1)*2.54,y+dy,8.])
             for side in [-1,1]:
                 for rail in [21.6,24.14]:hm[f'rail_{side}_{rail}_{row}']=np.array([x-78.74+(row-1)*2.54,y+side*rail,8.])
         holes[b.id]=hm
@@ -152,8 +152,8 @@ def build(spec):
             recessed_panel(pid,list(holes[pid].values()))
             for xx in [-81.25,81.25]:box(pid,[x+xx,y,7],[2.5,55,2],'#efefe8')
             for yy in [-26.75,26.75]:box(pid,[x,y+yy,7],[165,1.5,2],'#efefe8')
-            for yy in [-3.55,3.55]:box(pid,[x,y+yy,7],[160,4.25,2],'#efefe8')
-            for yy in [-19.05,19.05]:box(pid,[x,y+yy,7],[160,2.54,2],'#efefe8')
+            for yy in [-2.2,2.2]:box(pid,[x,y+yy,7],[160,1.6,2],'#efefe8')  # a real board's e-f gap is 0.3"
+            for yy in [-17.8,17.8]:box(pid,[x,y+yy,7],[160,5.0,2],'#efefe8')
             # rail lines like a real board turned so column a is on top: blue (-) on the outer edge above column a (the
             # planner's ground rail, rail_1_24.14), red (+) inside it; the far edge the other way round
             for yy,col in [(-25.8,'#d94b4b'),(-20.12,'#4b87c8'),(20.12,'#d94b4b'),(25.8,'#4b87c8')]:box(pid,[x,y+yy,8.04],[157,.28,.06],col)

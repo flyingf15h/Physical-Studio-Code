@@ -104,5 +104,16 @@
   },
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "supply_v": [
+      8.0,
+      35.0
+    ],
+    "current_ma": 1500,
+    "peak_ma": 1700,
+    "needs_driver": true,
+    "note": "per phase, through a stepper driver",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

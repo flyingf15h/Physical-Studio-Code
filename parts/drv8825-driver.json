@@ -258,5 +258,15 @@
   },
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "supply_v": [
+      8.2,
+      45.0
+    ],
+    "current_ma": 8,
+    "peak_ma": 8,
+    "note": "VMOT; logic 2.5-5.25 V",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

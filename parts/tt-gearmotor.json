@@ -50,5 +50,15 @@
   },
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "supply_v": [
+      3.0,
+      6.0
+    ],
+    "current_ma": 200,
+    "peak_ma": 1200,
+    "needs_driver": true,
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

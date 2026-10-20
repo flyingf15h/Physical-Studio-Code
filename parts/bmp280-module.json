@@ -120,5 +120,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      1.8,
+      3.6
+    ],
+    "current_ma": 1,
+    "peak_ma": 1,
+    "note": "most BMP280 breakouts have no regulator: 3.3 V only",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

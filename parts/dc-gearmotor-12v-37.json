@@ -57,5 +57,15 @@
         "material": "brass"
       }
     ]
+  },
+  "electrical": {
+    "supply_v": [
+      6.0,
+      12.0
+    ],
+    "current_ma": 300,
+    "peak_ma": 3000,
+    "needs_driver": true,
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

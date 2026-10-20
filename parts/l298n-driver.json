@@ -157,5 +157,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      5.0,
+      35.0
+    ],
+    "current_ma": 36,
+    "peak_ma": 36,
+    "note": "drops about 2 V; 2 A per channel",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

@@ -157,5 +157,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      5.0,
+      12.0
+    ],
+    "current_ma": 0,
+    "peak_ma": 0,
+    "note": "motor current comes from its own + pin",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }

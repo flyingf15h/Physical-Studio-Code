@@ -233,5 +233,15 @@
   "notes": "H-bridge, motor supply 4.5 to 37 V on VIN, 2.1 A continuous. PMODE high = IN/IN (PWM) mode; SLEEP high to run. VM is the reverse-protected motor voltage, an output.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "supply_v": [
+      4.5,
+      37.0
+    ],
+    "current_ma": 3,
+    "peak_ma": 3,
+    "note": "VIN; 2.1 A continuous",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

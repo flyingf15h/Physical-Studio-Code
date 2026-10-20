@@ -181,5 +181,15 @@
   "notes": "12-bit angle sensor, I2C address 0x36 (fixed), so each one needs its own I2C bus. Chip side faces the magnet, 0.5 to 3 mm away.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {
+    "supply_v": [
+      3.0,
+      5.5
+    ],
+    "current_ma": 7,
+    "peak_ma": 7,
+    "signal_v": "supply",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
 }

@@ -146,4 +146,5 @@ form.report-step textarea { width: 100%; box-sizing: border-box; border: 1px sol
 .checks-note { font-size: 13px; line-height: 1.45; margin: 8px 0 0; border-radius: 8px; padding: 8px 12px; }
 .checks-passed { color: #1d6b45; background: #e8f5ee; }
 .checks-failed { color: #8a2a1f; background: #fbeceb; border: 1px solid #f0c2bd; }
-.checks-failed ul { margin: 6px 0; padding-left: 18px; }
+.checks-warning { color: #7a5200; background: #fdf4e3; border: 1px solid #f0dcae; }
+.checks-failed ul, .checks-warning ul { margin: 6px 0; padding-left: 18px; }

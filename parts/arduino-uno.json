@@ -63,5 +63,6 @@
   "notes": "The four mounting holes are unevenly spaced on purpose; h2 is offset from h1 in X, so standoffs must use these exact positions. Through-hole pins stick out about 2 mm under the board, so standoffs need to be at least 3 mm tall. USB-B and barrel jack both face -x. Header keep-outs are the female header housings (pin rows from the KiCad footprint, +/-1.27 mm); an M3 socket head at h2 still touches the digital header housing.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "electrical": {"logic_v": 5.0, "pin_ma": 20, "pin_abs_ma": 40, "total_pin_ma": 200, "rails_ma": {"5v": 450, "3v3": 50}, "five_v_tolerant": true, "source": "Typical datasheet numbers; not yet measured"}
 }

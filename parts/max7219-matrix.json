@@ -176,5 +176,15 @@
     "metallic": 0.1,
     "roughness": 0.6,
     "source": "Typical colour of the common part"
+  },
+  "electrical": {
+    "supply_v": [
+      4.0,
+      5.5
+    ],
+    "current_ma": 60,
+    "peak_ma": 330,
+    "note": "all 64 LEDs at full brightness",
+    "source": "Typical datasheet numbers; not yet measured"
   }
 }
