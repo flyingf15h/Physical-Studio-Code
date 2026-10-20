@@ -179,6 +179,7 @@ export interface BuildPlan {
   code: string
   tests?: TestPoint[]
   safety: string[]
+  checks?: GuideChecks | null // breadboard builds: what the automatic checks found (planner.make_plan)
   parts: { name: string; quantity: number; why: string; user_has_it: boolean; size: string }[]
   part_guide: Record<string, string>
   wires?: Record<string, WireInfo> // hardware builds: wire id -> its two ends
@@ -186,6 +187,14 @@ export interface BuildPlan {
   model: BenchModel | null
   steps: BuildStep[]
   imported?: ImportedProject // builds made with "Import a project"
+}
+
+/** The automatic checks on a generated breadboard guide: wiring, part footprints, code pins vs wires, compiling. */
+export interface GuideChecks {
+  passed: boolean
+  compiled: boolean | null // null: no compiler for this board, so the sketch wasn't compiled
+  board: string | null
+  problems: string[]
 }
 
 /** One board's wired pins: "pin 18 / SDA" -> ["Cart joint encoder SDA", "Left distance sensor SDA"]. */

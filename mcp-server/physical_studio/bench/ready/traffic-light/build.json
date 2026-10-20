@@ -1849,7 +1849,13 @@
     "expect": "Plug in the USB cable and upload this sketch. Only one LED should light at a time: red for one second, yellow for one second, then green for one second, repeating. The button is not connected yet and has no effect. Unplug the USB cable before continuing the build.",
     "if_not": "For green, re-check step 7's LED legs at 30e (long) and 31e (short), step 8's resistor at 31d and 35d, step 15's D9 jumper to 30a, and step 16's ground jumper from 35a to the negative rail next to row 35. If green alone fails, check whether that rail has a break between step 10's GND connection near row 1 and row 35. For red or yellow problems, re-check steps 3\u20134 and 11\u201312, or steps 5\u20136 and 13\u201314, respectively."
    }
-  ]
+  ],
+  "checks": {
+   "passed": true,
+   "compiled": true,
+   "board": "Arduino Uno",
+   "problems": []
+  }
  },
  "commits": [
   {

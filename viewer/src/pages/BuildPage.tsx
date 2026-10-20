@@ -329,11 +329,35 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
   )
 }
 
+/** What the automatic checks found, so nobody builds a guide that still fails them without knowing. */
+function ChecksNote({ checks }: { checks?: BuildPlan['checks'] }) {
+  if (!checks) return null
+  if (!checks.passed)
+    return (
+      <div className="checks-note checks-failed" role="alert">
+        <strong>Some automatic checks still fail on this guide. Don't build it as it is.</strong>
+        <ul>
+          {checks.problems.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+        <span>Try describing the project again, or report the step that looks wrong.</span>
+      </div>
+    )
+  return (
+    <p className="checks-note checks-passed">
+      Checked automatically: no shorts or double-booked holes, every part fits its holes, the code's pins match the
+      wires{checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'}.
+    </p>
+  )
+}
+
 function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
   const start = build.commits.find((c) => c.kind === 'start')
   return (
     <div className="build-section">
       <p className="lede">{plan.summary}</p>
+      <ChecksNote checks={plan.checks} />
       {isHardware(plan) ? null : <h2>Your bench now (commit #0)</h2>}
       {isHardware(plan) ? null : start?.model ? (
         <BenchModel model={start.model} guide={start.guide} />
