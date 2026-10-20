@@ -27,11 +27,16 @@ SLOW = re.compile(r'^esp32:')  # big toolchains: first compile on the server's s
 POWER = re.compile(r'^(gnd\d*|5v|3v3|3\.3v|vin|ioref|aref|reset|rst|v5|vcc)$')
 
 
+def fqbn_of(name):
+    """The compiler's board name for a board called `name` ("Arduino Uno", "Teensy 4.1"), None when we have no core for it."""
+    return next((f for rx, f in FQBN if rx.search(name or '')), None)
+
+
 def board_of(scene):
     """(board part, fqbn) for the plan's development board, fqbn None when we can't compile for it."""
     for p in scene.parts:
         if p.kind == 'development_board':
-            return p, next((f for rx, f in FQBN if rx.search(p.name)), None)
+            return p, fqbn_of(p.name)
     return None, None
 
 

@@ -8,12 +8,21 @@ pytest.importorskip("physical_studio.library")
 
 from test_bench import app, photo  # noqa: E402
 
-from physical_studio.bench import cad_guide, routes  # noqa: E402
+from physical_studio.bench import cad_guide, routes, sketch  # noqa: E402
 
 
 @pytest.fixture(scope="module")
-def ready_dir(tmp_path_factory):
+def monkeypatch_module():
+    with pytest.MonkeyPatch.context() as m:
+        yield m
+
+
+@pytest.fixture(scope="module")
+def ready_dir(tmp_path_factory, monkeypatch_module):
     """The traffic light's CAD design written out as a ready-made hardware build, with sections."""
+    prompts = []
+    monkeypatch_module.setattr(cad_guide, "ask_firmware", lambda prompt: prompts.append(prompt) or "void setup() {}\nvoid loop() {}")
+    monkeypatch_module.setattr(sketch, "compile_result", lambda code, fqbn: ("ok", ""))
     sys.argv = ["traffic_light.py", str(tmp_path_factory.mktemp("export"))]
     studio = runpy.run_path("examples/traffic_light.py", run_name="__main__")["studio"]
     for n, step in enumerate(studio.design.steps, 1):
@@ -149,3 +158,52 @@ def test_every_wire_can_be_clicked_in_the_picture_and_the_3d_model(ready_dir):
     assert drawn and {l["id"] for l in drawn} <= set(wires)
     assert all(len(l["points"]) > 2 and all(-0.5 < c < 1.5 for p in l["points"] for c in p) for l in drawn)
     assert all(s["picture_view"] for s in plan["steps"])
+
+
+def test_the_build_ships_a_compiled_sketch_for_its_board(ready_dir):
+    plan = json.loads((ready_dir / "cad-light" / "build.json").read_text())["plan"]
+    assert plan["code"].startswith("void setup")
+    assert plan["checks"]["compiled"] is True and "Arduino" in plan["checks"]["board"]
+    assert not any("compile" in p for p in plan["checks"]["problems"])
+
+
+PINS = [{"board": "Arduino Uno", "pins": [{"pin": "pin 9", "to": ["Red LED anode"], "colour": "red"}]}]
+
+
+def test_compile_errors_are_fed_back_up_to_two_times(monkeypatch):
+    prompts = []
+    monkeypatch.setattr(sketch, "compile_result", lambda code, fqbn: ("ok", "") if "fixed" in code else ("error", "sketch.ino: 'x' was not declared"))
+
+    def ask(prompt):
+        prompts.append(prompt)
+        return "fixed" if len(prompts) == 3 else "broken"
+
+    code, status, _ = cad_guide.make_firmware("Light", "Blink", "", PINS, "Arduino Uno", "arduino:avr:uno", ask=ask)
+    assert (code, status, len(prompts)) == ("fixed", "ok", 3)
+    assert "pin 9 -> Red LED anode" in prompts[0] and "was not declared" in prompts[1] and "broken" in prompts[1]
+    prompts.clear()
+    code, status, msg = cad_guide.make_firmware("Light", "Blink", "", PINS, "Arduino Uno", "arduino:avr:uno", ask=lambda p: prompts.append(p) or "broken")
+    assert (code, status, len(prompts)) == ("broken", "error", 3) and "not declared" in msg  # gives up after 2 fixes
+
+
+def test_a_sketch_that_never_compiles_is_a_problem_and_a_missing_compiler_is_not_a_pass(tmp_path, monkeypatch):
+    sys.argv = ["traffic_light.py", str(tmp_path / "export")]
+    studio = runpy.run_path("examples/traffic_light.py", run_name="__main__")["studio"]
+    monkeypatch.setattr(cad_guide, "ask_firmware", lambda prompt: "broken")
+    monkeypatch.setattr(sketch, "compile_result", lambda code, fqbn: ("error", "sketch.ino:1: oops"))
+    b = cad_guide.write_build(studio, tmp_path / "bad", "bad", "A light", "s", "2026-10-18T00:00:00+00:00")
+    checks = b["plan"]["checks"]
+    assert b["plan"]["code"] == "broken" and checks["compiled"] is False and not checks["passed"]
+    assert any("doesn't compile" in p and "oops" in p for p in checks["problems"])
+    monkeypatch.setattr(sketch, "compile_result", lambda code, fqbn: ("skipped", "arduino-cli is not installed"))
+    checks = cad_guide.write_build(studio, tmp_path / "skip", "skip", "A light", "s", "2026-10-18T00:00:00+00:00")["plan"]["checks"]
+    assert checks["compiled"] is None and checks["board"]
+
+
+def test_a_model_failure_or_fenced_reply_and_boardless_designs(tmp_path, monkeypatch):
+    def boom(prompt):
+        raise RuntimeError("all models busy")
+
+    assert cad_guide.make_firmware("L", "g", "", PINS, "Arduino Uno", "arduino:avr:uno", ask=boom)[:2] == ("", "skipped")
+    assert cad_guide.fence_free("Here:\n```cpp\nvoid loop() {}\n```") == "void loop() {}"
+    assert sketch.fqbn_of("Teensy 4.1") == "teensy:avr:teensy41" and sketch.fqbn_of("Mystery board") is None
