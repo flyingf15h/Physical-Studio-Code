@@ -1096,7 +1096,22 @@ function StepView({
         <Progress plan={plan} index={index} />
       </div>
       <h2 className="step-title">{s.title}</h2>
-      {s.picture && (
+      {isHardware(plan) && s.model && (
+        // hardware: the live 3D build is the main picture (framed on this step's parts, which drop into place)
+        <BenchModel model={s.model} guide={plan.part_guide} wires={plan.wires} highlight={fresh} height={460} />
+      )}
+      {isHardware(plan) && freshNames.length > 0 && (
+        <ul className="new-parts">
+          {freshNames.map((l) => (
+            <li key={l.id}>
+              <span className="pill">new</span> <strong>{l.name}</strong>
+              {' · '}
+              {plan.part_guide[l.id] || 'placed in this step'}
+            </li>
+          ))}
+        </ul>
+      )}
+      {!isHardware(plan) && s.picture && (
         <StepPicture
           step={s}
           index={index}
@@ -1108,6 +1123,7 @@ function StepView({
           }
         />
       )}
+      {s.why && <p className="step-why">{s.why}</p>}
       <p className="step-text">{s.instruction}</p>
       {!!s.tools?.length && (
         <p className="step-tools">
@@ -1129,7 +1145,13 @@ function StepView({
       <p className="check">
         <span>Camera check</span> {s.check}
       </p>
-      {s.model && (
+      {isHardware(plan) && s.picture && (
+        <details className="step-reference">
+          <summary>The picture the camera check compares your photo with</summary>
+          <StepPicture step={s} index={index} wires={plan.wires ?? {}} caption="The AI compares your photos with this render. Cyan is what you add now." />
+        </details>
+      )}
+      {s.model && !isHardware(plan) && (
         <>
           <h3>Your bench after step {index + 1}</h3>
           <p className="muted">Your starting bench plus everything added so far, with this step's parts highlighted.</p>

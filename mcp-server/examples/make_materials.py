@@ -45,10 +45,10 @@ def ground():  # finer, crossed grinding marks
     return 0.5 * noise(3, 18, 0.8) + 0.3 * noise(4, 0.8, 14) + 0.2 * noise(5, 1.5)
 
 
-def wood():  # growth rings bent by noise, plus fibres
+def wood():  # long, gently bent grain lines like a birch plywood face, plus fine fibres
     y = np.arange(N)[:, None] * np.ones((1, N))
-    rings = np.sin(2 * np.pi * (y / N * 9 + 1.6 * noise(6, 30, 8)))
-    return 0.7 * rings + 0.3 * noise(7, 25, 0.7)
+    rings = np.sin(2 * np.pi * (y / N * 14 + 0.45 * noise(6, 70, 12)))
+    return 0.5 * rings + 0.5 * noise(7, 30, 0.6)
 
 
 def speckle(seed):  # MDF, rubber, anodised: fine grain
@@ -77,7 +77,7 @@ MATERIALS = {
     "gear-steel": (ground, (0.45, 1.0), "#9aa0a6", 0.55, 0.48, 25, "Machined carbon-steel gears and racks"),
     "chrome": (polished, (0.8, 1.0), "#dfe3e6", 0.8, 0.2, 30, "Chrome-plated shafts and bearings"),
     "black-anodised": (lambda: speckle(12), (0.62, 1.0), "#2c2e33", 0.35, 0.45, 20, "Black anodised aluminium, motor cans"),
-    "plywood": (wood, (0.55, 1.0), "#cfa878", 0.0, 0.75, 120, "Birch plywood base plate"),
+    "plywood": (wood, (0.8, 1.0), "#cfa878", 0.0, 0.75, 120, "Birch plywood base plate"),
     "mdf": (lambda: speckle(14), (0.74, 1.0), "#b98d5f", 0.0, 0.85, 40, "MDF board"),
     "pla": (layers, (0.7, 1.0), "#f0f0ec", 0.0, 0.6, 12.8, "3D-printed PLA (tinted by the part's colour)"),
     "rubber": (lambda: speckle(16), (0.8, 1.0), "#232323", 0.0, 0.95, 15, "Rubber or matte black plastic"),

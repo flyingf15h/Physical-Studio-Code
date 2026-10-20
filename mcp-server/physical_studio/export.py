@@ -298,6 +298,8 @@ def steps_document(design: Design, built: BuiltDesign, model_name: str, printing
             entry["check"] = s.check
         if s.section:
             entry["section"] = s.section
+        if s.why:
+            entry["why"] = s.why
         doc_steps.append(entry)
     doc = {
         "format": "physical-studio-steps",

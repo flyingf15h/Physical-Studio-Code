@@ -93,6 +93,7 @@ class Placement(BaseModel):
 class Step(BaseModel):
     number:int=Field(ge=1)
     title:str
+    why:str=Field(default='',description="One short line on what this step achieves in the finished project, in plain words (e.g. 'This LED is the red light; the resistor stops it burning out.'). Not a repeat of the instruction.")
     part_ids:list[str]=Field(description="IDs of the scene parts/wires this step places (for highlighting in the 3D model and the step picture).")
     instruction:str=Field(description="Full, very specific instruction for one physical action: which part, which leg goes into which exact hole, orientation (long leg / flat side / stripe), wire colour and both ends.")
     placements:list[Placement]=Field(description="Every lead or wire end placed in this step, each with its exact hole.")

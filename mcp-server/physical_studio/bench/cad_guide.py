@@ -219,7 +219,7 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
         step = {"number": n, "title": s["title"], "instruction": text, "check": check,
                 "part_ids": new, "placements": [{"what": m[1], "where": m[2], "hole": m[3]} for m in markers],
                 "picture": url(s["picture"]), "picture_view": s.get("picture_view", "iso"),
-                "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "tools": tools,
+                "picture_wires": s.get("picture_wires", []), "picture_close_up": s.get("picture_close_up", False), "markers": markers, "section": s.get("section"), "why": s.get("why"), "tools": tools,
                 **({"picture_frames": {**s["picture_frames"], "src": url(s["picture_frames"]["file"])}} if s.get("picture_frames") else {}),
                 "model": {"glb": url(glb), "labels": [l for l in labels if l["id"] in shown], "new": new}}
         steps.append(step)
@@ -229,7 +229,10 @@ def write_build(studio, folder: Path, bid: str, goal: str, summary: str, created
     write_glb(built, folder / "final.glb", studio.parts_used(), studio.parts_dir, suffix="__mesh")
     title = studio.design.title
     wiring = check_wiring(studio.design, lib)  # shorts, voltages, supply and driver currents (electrical.py)
-    checks = {"passed": not wiring["problems"], "compiled": None, "board": None, "problems": wiring["problems"], "warnings": wiring["tips"]}
+    problems = list(wiring["problems"])
+    if any(lib.get(p.part_id, {}).get("category") == "board" for p in studio.design.placements.values()) and not studio.design.wires:
+        problems.append("The design has a board but no wires: the guide can't say how to connect it.")
+    checks = {"passed": not problems, "compiled": None, "board": None, "problems": problems, "warnings": wiring["tips"]}
     plan = {"kind": "cad", "title": title, "summary": summary,
             "final_result": f"The finished {title.lower()}, every part in place and every wire connected.",
             "code": "", "safety": ["Keep the power supply unplugged until the last wire is in.",

@@ -127,6 +127,7 @@ export interface BuildStep {
   number: number
   title: string
   instruction: string
+  why?: string | null // one line on what the step is for, shown above the instruction
   check: string
   part_ids: string[]
   placements: { what: string; hole: string; where: string }[]

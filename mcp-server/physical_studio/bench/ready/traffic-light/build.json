@@ -227,7 +227,8 @@
       }
      ],
      "new": []
-    }
+    },
+    "why": "The breadboard holds the parts and lets them connect without soldering."
    },
    {
     "number": 2,
@@ -255,7 +256,8 @@
       }
      ],
      "new": []
-    }
+    },
+    "why": "The Uno controls the lights and reads the crossing button."
    },
    {
     "number": 3,
@@ -314,7 +316,8 @@
      "new": [
       "led_red"
      ]
-    }
+    },
+    "why": "The red light tells people when they can cross."
    },
    {
     "number": 4,
@@ -378,7 +381,8 @@
      "new": [
       "res_red"
      ]
-    }
+    },
+    "why": "This resistor limits current to protect the red light."
    },
    {
     "number": 5,
@@ -447,7 +451,8 @@
      "new": [
       "led_yellow"
      ]
-    }
+    },
+    "why": "The yellow light warns that the crossing interval is about to begin."
    },
    {
     "number": 6,
@@ -521,7 +526,8 @@
      "new": [
       "res_yellow"
      ]
-    }
+    },
+    "why": "This resistor limits current to protect the yellow light."
    },
    {
     "number": 7,
@@ -600,7 +606,8 @@
      "new": [
       "led_green"
      ]
-    }
+    },
+    "why": "The green light shows that traffic can move and people should wait."
    },
    {
     "number": 8,
@@ -684,7 +691,8 @@
      "new": [
       "res_green"
      ]
-    }
+    },
+    "why": "This resistor limits current to protect the green light."
    },
    {
     "number": 9,
@@ -795,7 +803,8 @@
      "new": [
       "button"
      ]
-    }
+    },
+    "why": "The button lets people request a crossing interval."
    },
    {
     "number": 10,
@@ -889,7 +898,8 @@
      "new": [
       "wire_ground"
      ]
-    }
+    },
+    "why": "This gives the lights and button a shared connection back to the Uno."
    },
    {
     "number": 11,
@@ -988,7 +998,8 @@
      "new": [
       "wire_red_signal"
      ]
-    }
+    },
+    "why": "This lets the Uno switch the red light on and off."
    },
    {
     "number": 12,
@@ -1092,7 +1103,8 @@
      "new": [
       "wire_red_ground"
      ]
-    }
+    },
+    "why": "This completes the red light\u2019s path back to the Uno."
    },
    {
     "number": 13,
@@ -1201,7 +1213,8 @@
      "new": [
       "wire_yellow_signal"
      ]
-    }
+    },
+    "why": "This lets the Uno switch the yellow light on and off."
    },
    {
     "number": 14,
@@ -1315,7 +1328,8 @@
      "new": [
       "wire_yellow_ground"
      ]
-    }
+    },
+    "why": "This completes the yellow light\u2019s path back to the Uno."
    },
    {
     "number": 15,
@@ -1434,7 +1448,8 @@
      "new": [
       "wire_green_signal"
      ]
-    }
+    },
+    "why": "This lets the Uno switch the green light on and off."
    },
    {
     "number": 16,
@@ -1558,7 +1573,8 @@
      "new": [
       "wire_green_ground"
      ]
-    }
+    },
+    "why": "This completes the green light\u2019s path back to the Uno."
    },
    {
     "number": 17,
@@ -1687,7 +1703,8 @@
      "new": [
       "wire_button_signal"
      ]
-    }
+    },
+    "why": "This lets the Uno detect a crossing request."
    },
    {
     "number": 18,
@@ -1821,7 +1838,8 @@
      "new": [
       "wire_button_ground"
      ]
-    }
+    },
+    "why": "This lets a button press connect the button\u2019s input to ground."
    }
   ],
   "tests": [
@@ -2347,7 +2365,8 @@
      ],
      "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line.",
      "placements": [],
-     "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap."
+     "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap.",
+     "why": "The breadboard holds the parts and lets them connect without soldering."
     },
     {
      "number": 2,
@@ -2357,7 +2376,8 @@
      ],
      "instruction": "Place the disconnected Uno outside the breadboard on the ground-rail side, roughly opposite row twenty, leaving its underside clear of loose metal.",
      "placements": [],
-     "check": "The Uno is outside the breadboard above the top-edge ground rail, near the future LED groups, with no USB cable connected."
+     "check": "The Uno is outside the breadboard above the top-edge ground rail, near the future LED groups, with no USB cable connected.",
+     "why": "The Uno controls the lights and reads the crossing button."
     },
     {
      "number": 3,
@@ -2378,7 +2398,8 @@
        "where": "Row 11, column e (left of the centre gap)."
       }
      ],
-     "check": "The red LED straddles rows 10 and 11 in column e, with its anode at row 10 and flat-side cathode at row 11."
+     "check": "The red LED straddles rows 10 and 11 in column e, with its anode at row 10 and flat-side cathode at row 11.",
+     "why": "The red light tells people when they can cross."
     },
     {
      "number": 4,
@@ -2399,7 +2420,8 @@
        "where": "Row 15, column d (left of the centre gap)."
       }
      ],
-     "check": "A 220 ohm resistor runs along column d from row 11 to row 15, sharing row 11 with the red LED's cathode in column e."
+     "check": "A 220 ohm resistor runs along column d from row 11 to row 15, sharing row 11 with the red LED's cathode in column e.",
+     "why": "This resistor limits current to protect the red light."
     },
     {
      "number": 5,
@@ -2420,7 +2442,8 @@
        "where": "Row 21, column e (left of the centre gap)."
       }
      ],
-     "check": "The yellow LED occupies column e, rows 20 and 21, oriented the same way as the red LED."
+     "check": "The yellow LED occupies column e, rows 20 and 21, oriented the same way as the red LED.",
+     "why": "The yellow light warns that the crossing interval is about to begin."
     },
     {
      "number": 6,
@@ -2441,7 +2464,8 @@
        "where": "Row 25, column d (left of the centre gap)."
       }
      ],
-     "check": "A 220 ohm resistor runs along column d from row 21 to row 25, beside the yellow LED's cathode row."
+     "check": "A 220 ohm resistor runs along column d from row 21 to row 25, beside the yellow LED's cathode row.",
+     "why": "This resistor limits current to protect the yellow light."
     },
     {
      "number": 7,
@@ -2462,7 +2486,8 @@
        "where": "Row 31, column e (left of the centre gap)."
       }
      ],
-     "check": "The green LED occupies column e, rows 30 and 31; all three LEDs line up with identical polarity."
+     "check": "The green LED occupies column e, rows 30 and 31; all three LEDs line up with identical polarity.",
+     "why": "The green light shows that traffic can move and people should wait."
     },
     {
      "number": 8,
@@ -2483,7 +2508,8 @@
        "where": "Row 35, column d (left of the centre gap)."
       }
      ],
-     "check": "A 220 ohm resistor runs along column d from row 31 to row 35; all three resistors span four row intervals."
+     "check": "A 220 ohm resistor runs along column d from row 31 to row 35; all three resistors span four row intervals.",
+     "why": "This resistor limits current to protect the green light."
     },
     {
      "number": 9,
@@ -2514,7 +2540,8 @@
        "where": "Row 46, column g (right of the centre gap)."
       }
      ],
-     "check": "The square button bridges the centre gap with four legs in d44, g44, d46 and g46, beyond the three LED groups."
+     "check": "The square button bridges the centre gap with four legs in d44, g44, d46 and g46, beyond the three LED groups.",
+     "why": "The button lets people request a crossing interval."
     },
     {
      "number": 10,
@@ -2535,7 +2562,8 @@
        "where": "First hole of the ground rail along the top edge, the outer negative (-), blue-line rail next to row 1."
       }
      ],
-     "check": "One black jumper connects the Uno GND header to the outer top-edge ground rail beside row 1."
+     "check": "One black jumper connects the Uno GND header to the outer top-edge ground rail beside row 1.",
+     "why": "This gives the lights and button a shared connection back to the Uno."
     },
     {
      "number": 11,
@@ -2556,7 +2584,8 @@
        "where": "Row 10, column a (left of the centre gap)."
       }
      ],
-     "check": "The red jumper runs from Uno pin 11 to a10, in the same connected row as the red LED's long leg at e10."
+     "check": "The red jumper runs from Uno pin 11 to a10, in the same connected row as the red LED's long leg at e10.",
+     "why": "This lets the Uno switch the red light on and off."
     },
     {
      "number": 12,
@@ -2577,7 +2606,8 @@
        "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 15."
       }
      ],
-     "check": "A black jumper rises from a15 to the outer top-edge ground rail beside row 15; the resistor ends at d15."
+     "check": "A black jumper rises from a15 to the outer top-edge ground rail beside row 15; the resistor ends at d15.",
+     "why": "This completes the red light\u2019s path back to the Uno."
     },
     {
      "number": 13,
@@ -2598,7 +2628,8 @@
        "where": "Row 20, column a (left of the centre gap)."
       }
      ],
-     "check": "The yellow jumper runs from Uno pin 10 to a20, sharing the yellow LED's anode row."
+     "check": "The yellow jumper runs from Uno pin 10 to a20, sharing the yellow LED's anode row.",
+     "why": "This lets the Uno switch the yellow light on and off."
     },
     {
      "number": 14,
@@ -2619,7 +2650,8 @@
        "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 25."
       }
      ],
-     "check": "A black jumper rises from a25 to the outer top-edge ground rail beside row 25; the resistor ends at d25."
+     "check": "A black jumper rises from a25 to the outer top-edge ground rail beside row 25; the resistor ends at d25.",
+     "why": "This completes the yellow light\u2019s path back to the Uno."
     },
     {
      "number": 15,
@@ -2640,7 +2672,8 @@
        "where": "Row 30, column a (left of the centre gap)."
       }
      ],
-     "check": "The green jumper runs from Uno pin 9 to a30, sharing the green LED's anode row."
+     "check": "The green jumper runs from Uno pin 9 to a30, sharing the green LED's anode row.",
+     "why": "This lets the Uno switch the green light on and off."
     },
     {
      "number": 16,
@@ -2661,7 +2694,8 @@
        "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 35."
       }
      ],
-     "check": "A black jumper rises from a35 to the outer top-edge ground rail beside row 35; the resistor ends at d35."
+     "check": "A black jumper rises from a35 to the outer top-edge ground rail beside row 35; the resistor ends at d35.",
+     "why": "This completes the green light\u2019s path back to the Uno."
     },
     {
      "number": 17,
@@ -2682,7 +2716,8 @@
        "where": "Row 44, column a (left of the centre gap)."
       }
      ],
-     "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at d44."
+     "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at d44.",
+     "why": "This lets the Uno detect a crossing request."
     },
     {
      "number": 18,
@@ -2703,7 +2738,8 @@
        "where": "The ground rail along the top edge, outer negative (-), blue-line rail next to row 46."
       }
      ],
-     "check": "A black jumper connects a46 to the outer top-edge ground rail beside row 46. The finished circuit has three LEDs, three resistors, one button and nine jumper wires."
+     "check": "A black jumper connects a46 to the outer top-edge ground rail beside row 46. The finished circuit has three LEDs, three resistors, one button and nine jumper wires.",
+     "why": "This lets a button press connect the button\u2019s input to ground."
     }
    ],
    "final_result": "The LEDs form one evenly spaced line: red at row 10, yellow at row 20 and green at row 30. With row 1 facing upward, they appear in a vertical traffic-light column. Once the sketch is loaded and USB power is present, only green lights initially. A button press gives 2 seconds of yellow, then 5 seconds of red as the crossing cue, then green again. Presses during a cycle are ignored; release and press again after green returns to request another cycle.",

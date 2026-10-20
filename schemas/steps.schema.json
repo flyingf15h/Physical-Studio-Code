@@ -370,6 +370,10 @@
           "type": "string",
           "description": "The group this step belongs to (\"Frame\", \"Cart and drive\", \"Wiring\"). The build page folds the step list by section."
         },
+        "why": {
+          "type": "string",
+          "description": "One short line on what this step is for in the finished build, shown above the instruction."
+        },
         "picture": {
           "type": "string",
           "description": "Reference render of the build after this step (file next to the steps JSON), with the step's new parts highlighted. Photo checks show it to the AI as what a correct result looks like."

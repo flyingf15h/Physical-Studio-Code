@@ -182,7 +182,8 @@ class DesignJob:
         self.parts_seen: dict[str, str] = {}
         self.previews = 0
         self.exported = False
-        self.guide_sent_back = False  # export refused once for guide problems; the next try goes through
+        self.guide_sent_back = 0  # times export was refused for guide or completeness problems (3 at most)
+        self.nudges = 0  # times a text-only reply before export was answered with "carry on"
         self.designer: str | None = None
         self.lock = threading.Lock()
 
@@ -221,6 +222,38 @@ class DesignJob:
 
     # --- tools --------------------------------------------------------------------------------
 
+    def gaps(self) -> list[str]:
+        """What the design still lacks for a guide someone can follow: every part the request names by model
+        (AS5600, A4988, 28BYJ-48, Teensy 4.1...) placed, wires when it has electronics, and a step per part."""
+        s = self.studio
+        lib = s.library()
+        placed = " ".join(f"{p.part_id} {p.name} {lib.get(p.part_id, {}).get('name', '')}" for p in s.design.placements.values())
+        flat = lambda t: re.sub(r"[^a-z0-9]", "", t.lower())
+        have = flat(placed)
+        problems = []
+        named = re.findall(r"\b(?:Teensy|NEMA)\s*\d+(?:\.\d+)?", self.prompt, re.I) + re.findall(
+            r"\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\b", self.prompt)
+        for code in dict.fromkeys(named):
+            if len(flat(code)) >= 4 and flat(code) not in have and not re.fullmatch(r"\d+(mm|v|a|ma|w|g|kg|cm|t)|m\d+x\d+", code.lower()):
+                problems.append(f"The request names {code}, but nothing placed is one. Place it (search_parts), or say in a step note why it's left out.")
+        categories = {lib.get(p.part_id, {}).get("category") for p in s.design.placements.values()}
+        if "board" in categories and categories & {"input", "output"} and not s.design.wires:
+            problems.append("The design has electronics but no wires. Wire every connection the build needs with add_wire, then add wiring steps.")
+        parts = [p for p in s.design.placements.values() if p.kind == "part"]
+        if len(parts) >= 6 and s.design.steps and len(s.design.steps) < len(parts) // 3:
+            problems.append(f"Only {len(s.design.steps)} steps for {len(parts)} parts: give each part (or small group) its own step.")
+        return problems
+
+    def carry_on(self) -> str | None:
+        """A text-only reply ends the design loop; before export, answer it with what's left instead (4 times at most)."""
+        if self.exported or self.nudges >= 4:
+            return None
+        left = self.gaps()
+        if not left:  # nothing missing: run() exports what's there
+            return None
+        self.nudges += 1
+        return "Carry on with the design; don't stop to report progress. " + " ".join(left) + " When everything is placed, wired, checked and has its steps, call export."
+
     def run_tool(self, name: str, args: dict):
         """Runs one tool on this job's Studio. Returns tool_result content."""
         s = self.studio
@@ -235,8 +268,10 @@ class DesignJob:
             return [{"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": base64.b64encode(png).decode()}}]
         if name == "export":
             guide = s.check_guide()
-            if s.design.steps and guide["problems"] and not self.guide_sent_back:  # no steps: export writes default ones
-                self.guide_sent_back = True
+            gaps = self.gaps()  # missing parts or wiring: refused up to 3 times; other guide problems once
+            guide["problems"] = gaps + guide["problems"]
+            if (gaps and self.guide_sent_back < 3) or (s.design.steps and guide["problems"] and not self.guide_sent_back):
+                self.guide_sent_back += 1
                 self.event("guide", f"Fixing {len(guide['problems'])} guide problem{'s' if len(guide['problems']) != 1 else ''} before export")
                 return json.dumps({"exported": False, "why": "The guide isn't ready. Fix these with add_step (or by renaming parts), then export again.",
                                    "problems": guide["problems"], "tips": guide["tips"]})
@@ -308,6 +343,11 @@ class DesignJob:
                     self.run_claude(tools, failure)
                 else:
                     self.run_compatible(tools, providers, failure)
+                gaps = self.gaps() if self.need_steps else []
+                if gaps:  # the designer gave up (usually a part the library doesn't have): say so, don't ship half a guide
+                    said = next((e["text"] for e in reversed(self.events) if e.get("kind") == "note"), "")
+                    return self.fail("A complete guide for this can't be made from the parts library yet. "
+                                     + (said[:400] + " " if said else "") + "Still missing: " + " ".join(gaps[:3]))
                 if not self.exported:
                     self.run_tool("export", {})
                 failure = None
@@ -323,7 +363,7 @@ class DesignJob:
             if attempt < DESIGN_RETRIES:
                 print("[jobs] design", self.id, "failed, trying again:", failure[:300], flush=True)
                 self.event("note", f"The design stopped ({failure}); trying again from where it got to.")
-                self.exported = self.guide_sent_back = False
+                self.exported, self.guide_sent_back = False, 0
         self.fail(failure)
 
     def failure_text(self, e: Exception) -> str:
@@ -428,7 +468,11 @@ class DesignJob:
                 self.event("note", response.output_text.strip())
             calls = [o for o in response.output if o.type == "function_call"]
             if not calls:
-                return
+                nudge = self.carry_on()
+                if nudge is None:
+                    return
+                pending = [{"role": "user", "content": nudge}]
+                continue
             pending = []
             for call in calls:
                 out = self.tool_output(call.name, call.arguments)
@@ -470,7 +514,11 @@ class DesignJob:
                 messages.append({"role": "user", "content": "Continue."})
                 continue
             if not calls:
-                return
+                nudge = self.carry_on()
+                if nudge is None:
+                    return
+                messages.append({"role": "user", "content": nudge})
+                continue
             images = []
             for call in calls:
                 out = self.tool_output(call.function.name, call.function.arguments)
@@ -518,7 +566,11 @@ class DesignJob:
                 continue
             calls = [b for b in response.content if b.type == "tool_use"]
             if not calls:
-                break
+                nudge = self.carry_on()
+                if nudge is None:
+                    break
+                messages.append({"role": "user", "content": nudge})
+                continue
             results = []
             for call in calls:
                 try:

@@ -64,6 +64,7 @@ class Step:
     dimensions: list[dict] = field(default_factory=list)
     check: str | None = None
     section: str | None = None  # groups steps on the build page, e.g. "Cart and drive"
+    why: str | None = None  # one line on what this step is for, shown above the instruction
 
 
 @dataclass

@@ -309,7 +309,8 @@ class BuildStore:
                 if self.cad_build(build, job, imported):
                     return
                 if not imported or needs_cad(build["goal"]):  # hardware: a failed design is an error, never a breadboard guide for a case
-                    self.update(build, status="error", stage="", error=CAD_FAILED)
+                    gap = (job.error or "") if (job.error or "").startswith("A complete guide for this can't be made") else ""
+                    self.update(build, status="error", stage="", error=gap or CAD_FAILED)  # a missing library part is worth saying
                     return
                 self.update(build, status="planning", stage="Planning it as a breadboard circuit instead.")
             result = planner.make_plan(build["goal"], build["have"], build["known"], photos,
@@ -338,7 +339,7 @@ class BuildStore:
             model = None
             if m:
                 model = {"glb": self.write(bid, f"step-{n}.glb", m["glb"]), "labels": m["labels"], "new": m["new"]}
-            steps.append({**{k: s[k] for k in ("number", "title", "instruction", "check", "part_ids", "placements")},
+            steps.append({**{k: s[k] for k in ("number", "title", "instruction", "check", "part_ids", "placements")}, "why": s.get("why") or None,
                           "picture": picture, "markers": [list(x) for x in markers], "model": model})
         return {"title": plan["title"], "summary": plan["summary"], "final_result": plan["final_result"],
                 "code": plan["code"], "tests": plan.get("tests", []), "safety": plan["safety"], "checks": result.get("checks"),

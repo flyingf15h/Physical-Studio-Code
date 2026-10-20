@@ -6,10 +6,11 @@
 // its ends in the model and names the part and pin at each one.
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
+import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
+import { Bounds, Environment, Html, Lightformer, OrbitControls, useBounds, useGLTF } from '@react-three/drei'
 import { EffectComposer, N8AO, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
+import { InkEdgesEffect } from './InkEdges'
 import type { BenchModel as Model, WireInfo } from '../api'
 import './BenchModel.css'
 
@@ -18,24 +19,27 @@ const NEW = new THREE.Color('#0f9fb3')
 // "Even light" (the Build helper's default): unlit colours, so dark parts and wires stay readable.
 const FLAT_PICKED = new THREE.MeshBasicMaterial({ color: PICKED, side: THREE.DoubleSide })
 const FLAT_NEW = new THREE.MeshBasicMaterial({ color: NEW, side: THREE.DoubleSide })
-// "Drawing": an assembly-manual line drawing (like IKEA's, and Flatpack's drawing view). White parts with black
-// edges where faces meet at more than 25°, wires in their own colour, this step's new parts in cyan.
-const INK = new THREE.LineBasicMaterial({ color: '#1d1d1f' })
+// "Drawing": an assembly-manual line drawing (like IKEA's, and Flatpack's drawing view). White parts, inked by
+// InkEdges' screen-space pass, wires in their own colour, this step's new parts in cyan.
 const PAPER = new THREE.MeshLambertMaterial({ color: '#ffffff', side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
 const PAPER_NEW = new THREE.MeshLambertMaterial({ color: '#7fe3f0', side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
 export type Look = 'studio' | 'even' | 'drawing'
+// This step's new parts also show through whatever covers them (a pinion under its cart), faintly, like the
+// dashed hidden lines in an IKEA manual: a see-through copy drawn after everything else, ignoring depth.
+const GHOST = new THREE.MeshBasicMaterial({ color: NEW, transparent: true, opacity: 0.3, depthTest: false, depthWrite: false })
 
-/** The mesh's ink lines, made the first time the drawing view needs them. */
-function inkOf(mesh: THREE.Mesh): THREE.LineSegments {
-  let ink = mesh.userData.ink as THREE.LineSegments | undefined
-  if (!ink) {
-    ink = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, 25), INK)
-    ink.raycast = () => {} // clicks go to the part, not its outline
-    mesh.add(ink)
-    mesh.userData.ink = ink
+function ghostOf(mesh: THREE.Mesh): THREE.Mesh {
+  let ghost = mesh.userData.ghost as THREE.Mesh | undefined
+  if (!ghost) {
+    ghost = new THREE.Mesh(mesh.geometry, GHOST)
+    ghost.renderOrder = 10
+    ghost.raycast = () => {}
+    mesh.add(ghost)
+    mesh.userData.ghost = ghost
   }
-  return ink
+  return ghost
 }
+
 
 // Wires are under a millimetre thick, so clicks on them used to miss: each wire gets an invisible copy
 // pushed out along its normals, about 3 mm across, that catches the click.
@@ -127,6 +131,7 @@ function Scene({
   const gltf = useGLTF(model.glb)
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
   const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
+  const invalidate = useThree((s) => s.invalidate)
   const { root, meshes, box } = useMemo(() => {
     const root = gltf.scene.clone(true)
     root.updateMatrixWorld(true)
@@ -178,8 +183,8 @@ function Scene({
     for (const mesh of meshes) {
       const id = mesh.userData.part as string | null
       const on = id && id === picked ? PICKED : id && highlight.includes(id) ? NEW : null
-      const ink = look === 'drawing' && !mesh.userData.wire ? inkOf(mesh) : (mesh.userData.ink as THREE.LineSegments | undefined)
-      if (ink) ink.visible = look === 'drawing' && !mesh.userData.wire
+      if (on === NEW && !mesh.userData.wire) ghostOf(mesh).visible = true
+      else if (mesh.userData.ghost) (mesh.userData.ghost as THREE.Mesh).visible = false
       if (look === 'drawing') {
         mesh.material = on === PICKED ? FLAT_PICKED : on === NEW ? PAPER_NEW : mesh.userData.wire ? (mesh.userData.flat as THREE.Material) : PAPER
       } else if (look === 'even') {
@@ -191,8 +196,59 @@ function Scene({
         mesh.material = mat
       }
     }
-  }, [meshes, picked, highlight, look])
+    invalidate() // the canvas draws on demand
+  }, [meshes, picked, highlight, look, invalidate])
   useEffect(() => onBox(box), [box, onBox])
+  // Like Flatpack, each step frames what it adds: the camera eases onto this step's new parts, with enough of
+  // the build around them (at least a third of its size) to show where they go. No new parts: the whole build.
+  // ...and its new parts drop into place from above (an IKEA manual's arrow, animated). Wires stay put.
+  const drop = useRef<{ t0: number; items: { mesh: THREE.Mesh; home: THREE.Vector3; off: THREE.Vector3 }[] } | null>(null)
+  const dropping = highlight.join(' ')
+  useEffect(() => {
+    const ids = dropping ? dropping.split(' ') : []
+    const lift = new THREE.Vector3(0, box.getSize(new THREE.Vector3()).length() * 0.18, 0)
+    const items = meshes
+      .filter((m) => ids.includes(m.userData.part as string) && !m.userData.wire && m.parent)
+      .map((mesh) => {
+        const home = ((mesh.userData.home as THREE.Vector3 | undefined) ??= mesh.position.clone())
+        mesh.position.copy(home)
+        const parent = mesh.parent!
+        parent.updateWorldMatrix(true, false)
+        const at = parent.localToWorld(home.clone())
+        const off = parent.worldToLocal(at.clone().add(lift)).sub(home) // world "up" in the parent's frame
+        return { mesh, home, off }
+      })
+    drop.current = items.length ? { t0: performance.now(), items } : null
+    invalidate()
+  }, [dropping, meshes, box, invalidate])
+  useFrame(() => {
+    const d = drop.current
+    if (!d) return
+    const t = Math.min(1, (performance.now() - d.t0) / 900)
+    const ease = 1 - (1 - t) ** 3
+    for (const { mesh, home, off } of d.items) mesh.position.copy(home).addScaledVector(off, 1 - ease)
+    if (t < 1) invalidate()
+    else drop.current = null
+  })
+  const bounds = useBounds()
+  const boundsRef = useRef(bounds) // useBounds() is a new object every render: keep it out of the effect's deps
+  boundsRef.current = bounds
+  const focus = highlight.join(' ')
+  useEffect(() => {
+    const bounds = boundsRef.current
+    const ids = focus ? focus.split(' ') : []
+    const target = new THREE.Box3()
+    for (const mesh of meshes) if (ids.includes(mesh.userData.part as string)) target.expandByObject(mesh)
+    if (target.isEmpty()) {
+      bounds.refresh(box).clip().fit()
+      return
+    }
+    const whole = box.getSize(new THREE.Vector3())
+    const min = Math.max(whole.x, whole.y, whole.z) / 3
+    const c = target.getCenter(new THREE.Vector3())
+    const size = target.getSize(new THREE.Vector3()).max(new THREE.Vector3(min, min, min))
+    bounds.refresh(new THREE.Box3().setFromCenterAndSize(c, size)).clip().fit()
+  }, [focus, meshes, box])
 
   return (
     <>
@@ -258,6 +314,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const [view, setView] = useState({ n: 0, top: false }) // a new n remounts the canvas at that view
   const [look, setLook] = useState<Look>('studio')
   const [bounds, setBounds] = useState<THREE.Box3 | null>(null)
+  const ink = useMemo(() => new InkEdgesEffect(), [])
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
@@ -281,6 +338,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           camera={{ fov: 35, near: 0.001, far: 50, position: view.top ? [0, 0.34, 0.001] : [0.05, 0.22, 0.24] }}
           dpr={[1, 2]}
           shadows="soft"
+          frameloop="demand" // like Flatpack: draw only when the view or a material changes, not 60 times a second
           onPointerMissed={() => setPicked(null)}
         >
           <color attach="background" args={[look === 'drawing' ? '#ffffff' : look === 'studio' ? '#f7f5f1' : '#ece9e4']} />
@@ -300,6 +358,11 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
             {look === 'studio' && bounds && <StudioLight box={bounds} />}
             {wire && <WireMarkers wire={wire} />}
           </Suspense>
+          {look === 'drawing' && (
+            <EffectComposer multisampling={4}>
+              <primitive object={ink} />
+            </EffectComposer>
+          )}
           {look === 'studio' && (
             // ambient occlusion darkens corners and the gaps between parts, so shapes read even in shadow
             <EffectComposer multisampling={4}>

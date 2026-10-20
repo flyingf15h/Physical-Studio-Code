@@ -38,6 +38,8 @@ For an exploded view of the whole design, offset each placement by the `from_off
 
 `section` (optional) groups steps: "Frame", "Cart and drive motor", "Wiring". The build page folds its step list by section, so long builds stay readable.
 
+`why` (optional) is one short line on what the step is for in the finished build ("The rail is what the cart rides on, so it has to be straight."). The build page shows it above the instruction.
+
 ## Print info
 
 `print` (when the design has a case) lists the printed pieces: `size_mm` of the closed case, and per piece its `file` (`design-base.stl`, `design-lid.stl`), `grams` of PLA and estimated `minutes` (a rough 12 g/h, shown as an estimate), plus totals and `step_file`. The Print screen reads it.

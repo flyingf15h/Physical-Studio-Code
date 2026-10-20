@@ -154,3 +154,9 @@ form.report-step textarea { width: 100%; box-sizing: border-box; border: 1px sol
 .step-progress span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
 .step-progress i { font-style: normal; }
 .step-progress b { color: var(--ink); }
+
+.step-why { margin: 0 0 6px; font-size: 15px; color: var(--muted); font-style: italic; }
+
+.step-reference { margin: 4px 0 18px; }
+.step-reference summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.step-reference[open] summary { margin-bottom: 8px; }

@@ -325,6 +325,7 @@ class Studio:
         dimensions: list[dict] | None = None,
         check: str | None = None,
         section: str | None = None,
+        why: str | None = None,
     ) -> dict:
         known = set(self.design.all_ids())
         already = {pid for s in self.design.steps for pid in s.add}
@@ -335,7 +336,7 @@ class Studio:
         if repeated:
             raise ValueError(f"{repeated} were already added in an earlier step")
         self.design.steps.append(
-            Step(title, text, list(add), motion or [], tools or [], callouts or [], dimensions or [], check, section)
+            Step(title, text, list(add), motion or [], tools or [], callouts or [], dimensions or [], check, section, why)
         )
         remaining = [pid for pid in self.design.all_ids() if pid not in already | set(add)]
         return {"index": len(self.design.steps), "not_yet_added": remaining}
@@ -541,15 +542,18 @@ def add_step(
     dimensions: list[dict] | None = None,
     check: str | None = None,
     section: str | None = None,
+    why: str | None = None,
 ) -> dict:
     """Append an assembly step. add: placement ids that appear in this step ("base" and "lid" are the
     enclosure). motion: [{placement, from_offset: [x,y,z], from_rotation?: [rx,ry,rz]}].
     tools: [{name, for}]. callouts: [{text, target, at?}]. dimensions: [{from, to, label}].
     check: what a correct result looks like on camera. section: the group this step belongs to
     ("Frame", "Cart and drive", "Wiring"); builds over about 12 steps should group every step.
+    why: one short line on what this step is for in the finished build, in plain words ("The rail
+    is what the cart rides on, so it has to be straight and square to the base."), not a repeat of text.
     Format: docs/steps-format.md.
     If no steps are added, export generates a default sequence."""
-    return current().add_step(title, text, add, motion, tools, callouts, dimensions, check, section)
+    return current().add_step(title, text, add, motion, tools, callouts, dimensions, check, section, why)
 
 
 @mcp.tool
