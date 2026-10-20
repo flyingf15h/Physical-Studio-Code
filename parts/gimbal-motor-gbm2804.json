@@ -1,0 +1,119 @@
+{
+  "id": "gimbal-motor-gbm2804",
+  "name": "Gimbal BLDC motor 2804 (hollow shaft, 100 KV)",
+  "category": "output",
+  "source": "https://www.ipower-motor.com/ (GBM2804H-100T) and SimpleFOC gimbal motor guides https://docs.simplefoc.com/",
+  "step_file": null,
+  "body": {
+    "size": [
+      34.0,
+      34.0,
+      12.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        23.718,
+        23.718,
+        0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        10.282,
+        23.718,
+        0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        10.282,
+        10.282,
+        0
+      ],
+      "diameter": 2.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        23.718,
+        10.282,
+        0
+      ],
+      "diameter": 2.2
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "pa",
+      "label": "Phase A",
+      "position": [
+        0.0,
+        12.0,
+        4.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "pb",
+      "label": "Phase B",
+      "position": [
+        0.0,
+        17.0,
+        4.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "pc",
+      "label": "Phase C",
+      "position": [
+        0.0,
+        22.0,
+        4.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Brushless 3-phase gimbal motor, 28 mm stator, 14 poles and 12 slots (7 pole pairs), 7.4-12 V, about 12 ohm. Shaft is hollow (cable pass-through, 5 mm); 4 M2 mount holes on 19 mm circle. Needs a FOC driver (SimpleFOC) and a position sensor (AS5600 on the rear). Three phase wires A, B, C. Do not run from a raw GPIO pin.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2c2e33",
+    "metallic": 0.35,
+    "roughness": 0.45,
+    "source": "black anodised can",
+    "material": "black-anodised"
+  },
+  "electrical": {
+    "supply_v": [
+      7.4,
+      12.0
+    ],
+    "current_ma": 500,
+    "peak_ma": 1500,
+    "needs_driver": true,
+    "note": "per phase, through a FOC driver",
+    "source": "Typical GBM2804 datasheet numbers; not yet measured"
+  }
+}

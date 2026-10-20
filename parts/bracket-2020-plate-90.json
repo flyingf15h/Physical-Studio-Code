@@ -1,0 +1,64 @@
+{
+  "id": "bracket-2020-plate-90",
+  "name": "2020 flat tee plate (90 deg corner)",
+  "category": "fastener",
+  "source": "https://www.openbuilds.com/ (corner/tee plates for 2020 V-slot)",
+  "step_file": null,
+  "body": {
+    "size": [
+      40.0,
+      40.0,
+      3.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        10.0,
+        10.0,
+        0
+      ],
+      "diameter": 5.5
+    },
+    {
+      "id": "h2",
+      "position": [
+        30.0,
+        10.0,
+        0
+      ],
+      "diameter": 5.5
+    },
+    {
+      "id": "h3",
+      "position": [
+        10.0,
+        30.0,
+        0
+      ],
+      "diameter": 5.5
+    },
+    {
+      "id": "h4",
+      "position": [
+        30.0,
+        30.0,
+        0
+      ],
+      "diameter": 5.5
+    }
+  ],
+  "connectors": [],
+  "notes": "Flat 40 x 40 x 3 mm plate with four 5.5 mm holes on a 20 mm square for M5 screws into T-nuts: ties two perpendicular 2020 extrusions together.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#9aa0a6",
+    "metallic": 0.8,
+    "roughness": 0.4,
+    "source": "typical zinc-plated steel",
+    "material": "ground-steel"
+  }
+}

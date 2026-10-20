@@ -1,0 +1,64 @@
+{
+  "id": "mount-28byj48",
+  "name": "28BYJ-48 stepper mount (L bracket)",
+  "category": "fastener",
+  "source": "28BYJ-48 datasheet (35 mm ear spacing, 4.2 mm slots) via https://components101.com/motors/28byj-48-stepper-motor",
+  "step_file": null,
+  "body": {
+    "size": [
+      44.0,
+      33.0,
+      12.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        4.5,
+        18.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "m2",
+      "position": [
+        39.5,
+        18.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "foot1",
+      "position": [
+        10.0,
+        0,
+        6.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "foot2",
+      "position": [
+        34.0,
+        0,
+        6.0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Flat plate 3 mm thick with a 12 mm tall back wall (y 0-3). The 28BYJ-48's two ears (35 mm apart) bolt to m1/m2 with M4 screws; place the stepper at (8, 4, 3) so its ear holes line up. Wall holes foot1/foot2 point along Y (z=6) for M3 screws into a panel.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#e8e8e8",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "source": "3D-printed PLA mount",
+    "material": "pla"
+  }
+}

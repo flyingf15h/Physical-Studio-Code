@@ -1,0 +1,64 @@
+{
+  "id": "mgn12h-carriage",
+  "name": "MGN12H carriage block",
+  "category": "misc",
+  "source": "https://www.hiwin.com/ MGN12H (L 45.4, W 27, H 13 mm, 4 M3 holes at 20 x 20 mm)",
+  "step_file": null,
+  "body": {
+    "size": [
+      45.4,
+      27.0,
+      13.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "t1",
+      "position": [
+        12.7,
+        3.5,
+        13.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "t2",
+      "position": [
+        32.7,
+        3.5,
+        13.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "t3",
+      "position": [
+        12.7,
+        23.5,
+        13.0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "t4",
+      "position": [
+        32.7,
+        23.5,
+        13.0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "notes": "Flanged block for the MGN12 rail: 45.4 x 27 x 13 mm overall, four M3 tapped holes on a 20 mm (x) by 20 mm (y) pattern on top. The rail runs along X through the block. Slide on from the end of the rail.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b4b9bf",
+    "metallic": 0.6,
+    "roughness": 0.38,
+    "source": "ground steel block",
+    "material": "ground-steel"
+  }
+}

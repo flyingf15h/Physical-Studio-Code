@@ -1,0 +1,82 @@
+{
+  "id": "base-plate-arm-200",
+  "name": "Robot arm base plate 200 x 200 x 10",
+  "category": "misc",
+  "source": "Typical 10 mm MDF base for a hobby servo arm; dimensions chosen for this library",
+  "step_file": null,
+  "body": {
+    "size": [
+      200.0,
+      200.0,
+      10.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        20.0,
+        20.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        180.0,
+        20.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        20.0,
+        180.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        180.0,
+        180.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "c1",
+      "position": [
+        80.0,
+        100.0,
+        0
+      ],
+      "diameter": 4.2
+    },
+    {
+      "id": "c2",
+      "position": [
+        120.0,
+        100.0,
+        0
+      ],
+      "diameter": 4.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Flat 200 x 200 x 10 mm plate. The first part of a 3-DOF arm. Holes (M4) for servo bracket feet and a central bearing seat: h1-h4 on a 160 mm square, c1-c2 on a 40 mm line through the centre.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b88a58",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "MDF",
+    "material": "mdf"
+  }
+}

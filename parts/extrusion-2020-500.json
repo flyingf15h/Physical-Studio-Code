@@ -1,0 +1,27 @@
+{
+  "id": "extrusion-2020-500",
+  "name": "2020 aluminium extrusion, 500 mm",
+  "category": "misc",
+  "source": "https://www.misumi-ec.com/ HFS5-2020 profile (20 x 20 mm, 6 mm slot, 4.2 mm centre bore)",
+  "step_file": null,
+  "body": {
+    "size": [
+      500.0,
+      20.0,
+      20.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "T-slot 2020 profile, 500 mm long along X, a slot on each of the four faces (6 mm opening). Same section as extrusion-2020-300.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#c3c8cd",
+    "metallic": 0.55,
+    "roughness": 0.45,
+    "source": "anodised aluminium",
+    "material": "brushed-aluminium"
+  }
+}

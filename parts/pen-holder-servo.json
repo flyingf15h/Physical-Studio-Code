@@ -1,0 +1,58 @@
+{
+  "id": "pen-holder-servo",
+  "name": "Pen holder with servo lift (pen-up / pen-down)",
+  "category": "misc",
+  "source": "Typical printed plotter pen holder with an SG90 lifting arm; dimensions typical, not measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      40.0,
+      34.0,
+      60.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      40.0,
+      34.0,
+      60.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        5.0,
+        17.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        35.0,
+        17.0,
+        0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Carriage-mounted holder: a 14 mm clip holds a marker (use pen-marker-whiteboard) vertically; an SG90 at the side swings a lever to lift it 5 mm. Two M3 holes in the back plate (30 mm apart, along Y) bolt it to the XY carriage. SG90 screws: 2 pilot holes on a 27.5 mm line.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.0,
+    "roughness": 0.6,
+    "source": "printed PLA",
+    "material": "pla"
+  }
+}

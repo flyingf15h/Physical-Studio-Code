@@ -1,0 +1,46 @@
+{
+  "id": "belt-clamp-gt2",
+  "name": "GT2 belt clamp (printed)",
+  "category": "misc",
+  "source": "Typical printed GT2 belt clamp, two M3 screws; dimensions typical, not measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      20.0,
+      12.0,
+      8.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.0,
+        6.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        17.0,
+        6.0,
+        0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Holds the end of a 6 mm GT2 belt to a carriage: belt goes in the 6.2 mm slot (y 3 to 9.2), teeth against the comb, two M3 screws through the holes 14 mm apart.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.0,
+    "roughness": 0.6,
+    "source": "printed PLA",
+    "material": "pla"
+  }
+}

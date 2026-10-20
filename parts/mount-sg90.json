@@ -1,0 +1,64 @@
+{
+  "id": "mount-sg90",
+  "name": "SG90 micro servo mount (L bracket)",
+  "category": "fastener",
+  "source": "SG90 datasheet (ears 27.5 mm apart, 2 mm pilot holes) http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf",
+  "step_file": null,
+  "body": {
+    "size": [
+      36.8,
+      19.0,
+      12.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        4.65,
+        11.0,
+        0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "m2",
+      "position": [
+        32.15,
+        11.0,
+        0
+      ],
+      "diameter": 2.0
+    },
+    {
+      "id": "foot1",
+      "position": [
+        6.0,
+        0,
+        6.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "foot2",
+      "position": [
+        30.8,
+        0,
+        6.0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Small flat plate 3 mm thick with a back wall 12 mm tall (y 0-3). The SG90's ear holes sit 27.5 mm apart: place the servo at (7, 5, 3) so its ears line up with m1/m2 (2 mm pilot holes for the supplied self-tapping screws). Wall holes foot1/foot2 point along Y (z=6).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#e8e8e8",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "source": "3D-printed PLA mount",
+    "material": "pla"
+  }
+}

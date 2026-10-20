@@ -1,0 +1,27 @@
+{
+  "id": "belt-gt2-6mm-1m",
+  "name": "GT2 timing belt, 6 mm wide, 1 m",
+  "category": "misc",
+  "source": "https://www.reprap.org/wiki/GT2_belt and Gates PowerGrip GT2 profile (2 mm pitch, 6 mm wide, 1.38 mm thick)",
+  "step_file": null,
+  "body": {
+    "size": [
+      1000.0,
+      6.0,
+      1.38
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "Open-ended GT2 belt, 2 mm pitch, 6 mm wide, 1 m long, laid straight along X (teeth facing -z). One axis of a small pen plotter.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.8,
+    "source": "typical black rubber belt with glass fibre core",
+    "material": "rubber"
+  }
+}

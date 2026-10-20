@@ -1,0 +1,63 @@
+{
+  "id": "psu-5v-10a",
+  "name": "5 V 10 A power supply (enclosed)",
+  "category": "misc",
+  "source": "Typical enclosed 5 V 10 A (50 W) switching supply, e.g. Mean Well LRS-50-5 datasheet",
+  "step_file": null,
+  "body": {
+    "size": [
+      110.0,
+      78.0,
+      36.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "v5",
+      "label": "+5 V",
+      "position": [
+        110.0,
+        25.0,
+        18.0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        110.0,
+        53.0,
+        18.0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Mains in on a 3-way screw block at one end, 5 V out on the other (V+, V- screw terminals). Feeds a servo driver for the 3-DOF arm. Keep mains side covered.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b5b9bd",
+    "metallic": 0.7,
+    "roughness": 0.4,
+    "source": "perforated steel case",
+    "material": "brushed-aluminium"
+  },
+  "electrical": {
+    "output_v": 5.0,
+    "output_ma": 10000,
+    "output_pin": "v5",
+    "source": "Typical datasheet numbers; not yet measured"
+  }
+}

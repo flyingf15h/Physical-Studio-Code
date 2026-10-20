@@ -1,0 +1,37 @@
+{
+  "id": "tnut-2020-m5",
+  "name": "T-nut M5 for 2020 slot (drop-in)",
+  "category": "fastener",
+  "source": "https://www.openbuilds.com/ (V-slot 2020 hardware) and Misumi HNTT5-5: slot 6 mm wide, M5 thread",
+  "step_file": null,
+  "body": {
+    "size": [
+      10.0,
+      10.0,
+      5.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "thread",
+      "position": [
+        5.0,
+        5.0,
+        0
+      ],
+      "diameter": 5.0
+    }
+  ],
+  "connectors": [],
+  "notes": "Drop-in T-nut for 2020 extrusion, 10 x 10 x 5 mm (z 0-5 in the slot, +z toward the screw), M5 thread at the centre. Slide it in, tighten an M5 x 10 screw until the nut turns and bites the slot lips.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#9aa0a6",
+    "metallic": 0.8,
+    "roughness": 0.4,
+    "source": "typical zinc-plated steel",
+    "material": "ground-steel"
+  }
+}

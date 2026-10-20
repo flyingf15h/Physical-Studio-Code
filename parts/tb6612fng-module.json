@@ -1,0 +1,281 @@
+{
+  "id": "tb6612fng-module",
+  "name": "Motor driver TB6612FNG module (dual, 1.2 A)",
+  "category": "board",
+  "source": "https://www.sparkfun.com/products/14450 and Toshiba TB6612FNG datasheet https://toshiba.semicon-storage.com/info/TB6612FNG_datasheet_en_20141001.pdf",
+  "step_file": null,
+  "body": {
+    "size": [
+      20.3,
+      20.3,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -2.5
+    ],
+    "max": [
+      20.3,
+      20.3,
+      4.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.5,
+        2.5,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        17.8,
+        2.5,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vm",
+      "label": "VM",
+      "position": [
+        1.27,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        3.81,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        6.35,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ao1",
+      "label": "AO1",
+      "position": [
+        8.89,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ao2",
+      "label": "AO2",
+      "position": [
+        11.43,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "bo2",
+      "label": "BO2",
+      "position": [
+        13.97,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "bo1",
+      "label": "BO1",
+      "position": [
+        16.51,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd2",
+      "label": "GND",
+      "position": [
+        19.05,
+        18.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "pwma",
+      "label": "PWMA",
+      "position": [
+        1.27,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ain2",
+      "label": "AIN2",
+      "position": [
+        3.81,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ain1",
+      "label": "AIN1",
+      "position": [
+        6.35,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "stby",
+      "label": "STBY",
+      "position": [
+        8.89,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "bin1",
+      "label": "BIN1",
+      "position": [
+        11.43,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "bin2",
+      "label": "BIN2",
+      "position": [
+        13.97,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "pwmb",
+      "label": "PWMB",
+      "position": [
+        16.51,
+        1.8,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "Dual H-bridge, 4.5-13.5 V motor supply (VM), 1.2 A per channel (3.2 A peak), logic 2.7-5.5 V. PWMA/PWMB set speed, AIN1/AIN2 and BIN1/BIN2 the direction, STBY HIGH enables. Motor A on AO1/AO2, motor B on BO1/BO2. Two M3 holes. Pins left row: VM, VCC, GND, AO1, AO2, BO2, BO1, GND; right row: PWMA, AIN2, AIN1, STBY, BIN1, BIN2, PWMB.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#c0392b",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "https://www.sparkfun.com/products/14450 (red board)",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      4.5,
+      13.5
+    ],
+    "current_ma": 10,
+    "peak_ma": 10,
+    "note": "1.2 A per channel, 3.2 A peak; motor current comes from VM",
+    "source": "Toshiba TB6612FNG datasheet; not yet measured",
+    "drive_ma": 1200
+  }
+}

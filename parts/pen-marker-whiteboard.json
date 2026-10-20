@@ -1,0 +1,26 @@
+{
+  "id": "pen-marker-whiteboard",
+  "name": "Whiteboard marker (12 mm)",
+  "category": "misc",
+  "source": "Typical whiteboard marker, 12 mm barrel, 140 mm long",
+  "step_file": null,
+  "body": {
+    "size": [
+      12.0,
+      12.0,
+      140.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "The plotter's pen, 12 mm barrel, axis along z, tip at z=0. Clamp it in pen-holder-servo.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2f6fb5",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "source": "typical marker"
+  }
+}

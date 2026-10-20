@@ -1,0 +1,94 @@
+{
+  "id": "battery-holder-18650-2s",
+  "name": "Battery holder 2x 18650 (2S, 7.4 V)",
+  "category": "misc",
+  "source": "Typical 2-cell side-by-side 18650 holder with wire leads, as sold by Keystone/shop listings; dimensions not measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      77.0,
+      39.0,
+      20.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      77.0,
+      39.0,
+      20.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        6.0,
+        19.5,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        71.0,
+        19.5,
+        0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+ (red wire)",
+      "position": [
+        0.0,
+        12.0,
+        10.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "- (black wire)",
+      "position": [
+        0.0,
+        27.0,
+        10.0
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "Two 18650 cells in series: 7.4 V nominal (6.0-8.4 V). Red lead = +, black = -, 100 mm leads out of the -x end. Cells are side by side: the + end of one cell and the - end of the other are joined inside. Use protected cells (or a 2S BMS) and never short the leads. Charge the cells outside the holder.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "typical black plastic holder",
+    "material": "rubber"
+  },
+  "electrical": {
+    "output_v": 7.4,
+    "output_ma": 3000,
+    "source": "18650 cells at 7.4 V, 3 A continuous for protected 2600 mAh cells; typical, not yet measured",
+    "output_pin": "plus"
+  }
+}

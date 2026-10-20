@@ -1,0 +1,27 @@
+{
+  "id": "m5-screw-8mm",
+  "name": "M5 x 8 mm button head screw",
+  "category": "fastener",
+  "source": "ISO 7380 M5 x 8 button head (head 9.5 dia, 3 mm tall)",
+  "step_file": null,
+  "body": {
+    "size": [
+      9.5,
+      9.5,
+      12.5
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "Origin is the centre of the underside of the head; the shaft runs along -Z and the head sits from z=0 to z=3. Length is measured under the head. For T-nuts in 2020 extrusion.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.4,
+    "roughness": 0.4,
+    "source": "black oxide steel",
+    "material": "black-anodised"
+  }
+}

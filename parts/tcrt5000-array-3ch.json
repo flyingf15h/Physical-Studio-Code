@@ -1,0 +1,179 @@
+{
+  "id": "tcrt5000-array-3ch",
+  "name": "3-channel IR line tracking sensor (3x TCRT5000)",
+  "category": "input",
+  "source": "https://www.vishay.com/docs/83760/tcrt5000.pdf (sensor); 3-channel tracking board as sold for line-following cars, measured from shop listings, not calipers",
+  "step_file": null,
+  "body": {
+    "size": [
+      58.0,
+      18.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -7.0
+    ],
+    "max": [
+      58.0,
+      18.0,
+      9.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        4.0,
+        9.0,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        54.0,
+        9.0,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        21.0,
+        15.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        23.54,
+        15.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out1",
+      "label": "OUT1 (left)",
+      "position": [
+        26.08,
+        15.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out2",
+      "label": "OUT2 (centre)",
+      "position": [
+        28.62,
+        15.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out3",
+      "label": "OUT3 (right)",
+      "position": [
+        31.16,
+        15.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "keep_out": [
+    {
+      "min": [
+        4.0,
+        4.0,
+        -7.0
+      ],
+      "max": [
+        14.2,
+        10.0,
+        0
+      ]
+    },
+    {
+      "min": [
+        24.0,
+        4.0,
+        -7.0
+      ],
+      "max": [
+        34.2,
+        10.0,
+        0
+      ]
+    },
+    {
+      "min": [
+        43.8,
+        4.0,
+        -7.0
+      ],
+      "max": [
+        54.0,
+        10.0,
+        0
+      ]
+    }
+  ],
+  "notes": "Three TCRT5000 sensors in a row, left / centre / right, about 20 mm apart on the underside, each with an LM393 comparator and its own trim pot. OUT1 = left, OUT2 = centre, OUT3 = right; each goes LOW over white and HIGH over black (some boards are reversed: test). Mount 2-5 mm above the floor, facing down, at the front of the chassis. Two M3 holes at the ends. Powers from 3.3-5 V.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "https://www.vishay.com/docs/83760/tcrt5000.pdf and typical blue breakout",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      3.3,
+      5.0
+    ],
+    "current_ma": 75,
+    "peak_ma": 90,
+    "signal_v": "supply",
+    "note": "three IR LEDs at about 15 mA plus comparators",
+    "source": "Vishay TCRT5000 datasheet (IR LED 60 mA max, typ 15 mA) + LM393 module; not yet measured"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "wheel-90mm-6mm-d",
+  "name": "90 mm wheel for 37 mm gearmotor (6 mm D shaft)",
+  "category": "misc",
+  "source": "https://www.pololu.com/product/1436 (90 x 10 mm wheel)",
+  "step_file": null,
+  "body": {
+    "size": [
+      90.0,
+      90.0,
+      10.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "bore",
+      "position": [
+        45.0,
+        45.0,
+        0
+      ],
+      "diameter": 6.0
+    }
+  ],
+  "connectors": [],
+  "notes": "Rubber tyre on a plastic hub, 90 mm diameter, 10 mm wide, hub bore a 6 mm D hole (grub screw on the flat). Fits dc-gearmotor-12v-37's 6 mm shaft. Axis along z.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "typical black tyre",
+    "material": "rubber"
+  }
+}

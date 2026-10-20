@@ -1,0 +1,150 @@
+{
+  "id": "esp32-cam",
+  "name": "ESP32-CAM (OV2640 camera)",
+  "category": "board",
+  "source": "https://docs.ai-thinker.com/_media/esp32/docs/esp32-cam_product_specification.pdf",
+  "step_file": null,
+  "body": {
+    "size": [
+      40.0,
+      27.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -3.0
+    ],
+    "max": [
+      40.0,
+      27.0,
+      14.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "v5",
+      "label": "5V",
+      "position": [
+        2.54,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        5.08,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "u0t",
+      "label": "U0T",
+      "position": [
+        7.62,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "u0r",
+      "label": "U0R",
+      "position": [
+        10.16,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "io0",
+      "label": "IO0",
+      "position": [
+        12.7,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "io12",
+      "label": "IO12",
+      "position": [
+        15.24,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "io13",
+      "label": "IO13",
+      "position": [
+        17.78,
+        1.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "ESP32 + OV2640 camera, microSD slot, no USB (program it with an FTDI adapter on U0R/U0T, IO0 to GND while flashing). 5 V supply, 180-310 mA while streaming. 2x8 header. The camera looks along +z out of the board's front (top) face. Payload for the camera gimbal.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "https://docs.ai-thinker.com/esp32-cam (black PCB)",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      4.5,
+      5.5
+    ],
+    "current_ma": 180,
+    "peak_ma": 310,
+    "logic_v": 3.3,
+    "note": "needs a solid 5 V supply (brownouts when streaming)",
+    "source": "AI-Thinker ESP32-CAM spec; not yet measured"
+  }
+}

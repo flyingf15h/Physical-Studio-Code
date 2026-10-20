@@ -1,0 +1,82 @@
+{
+  "id": "bracket-mg996r",
+  "name": "MG996R servo mount bracket",
+  "category": "fastener",
+  "source": "MG996R servo drawing (40.7 x 19.7 mm body, ear holes 48.7 x 9.9 mm) http://www.towerpro.com.tw/product/mg996r/",
+  "step_file": null,
+  "body": {
+    "size": [
+      56.7,
+      23.7,
+      16.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        4.0,
+        8.4,
+        0
+      ],
+      "diameter": 4.5
+    },
+    {
+      "id": "m2",
+      "position": [
+        4.0,
+        18.3,
+        0
+      ],
+      "diameter": 4.5
+    },
+    {
+      "id": "m3",
+      "position": [
+        52.7,
+        8.4,
+        0
+      ],
+      "diameter": 4.5
+    },
+    {
+      "id": "m4",
+      "position": [
+        52.7,
+        18.3,
+        0
+      ],
+      "diameter": 4.5
+    },
+    {
+      "id": "foot1",
+      "position": [
+        12.0,
+        0,
+        8.0
+      ],
+      "diameter": 4.0
+    },
+    {
+      "id": "foot2",
+      "position": [
+        44.7,
+        0,
+        8.0
+      ],
+      "diameter": 4.0
+    }
+  ],
+  "connectors": [],
+  "notes": "Flat servo seat 3 mm thick with a 16 mm back wall (y 0-3). Place the MG996R at (8, 3.5, 3) so its four ear holes line up with m1-m4. Wall holes foot1/foot2 point along Y (z=8) for M4 screws into a base or 2020 extrusion.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b5b9bd",
+    "metallic": 0.6,
+    "roughness": 0.45,
+    "source": "typical aluminium servo bracket",
+    "material": "brushed-aluminium"
+  }
+}

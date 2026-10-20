@@ -1,0 +1,27 @@
+{
+  "id": "belt-gt2-6mm-2m",
+  "name": "GT2 timing belt, 6 mm wide, 2 m",
+  "category": "misc",
+  "source": "https://www.reprap.org/wiki/GT2_belt and Gates PowerGrip GT2 profile (2 mm pitch, 6 mm wide, 1.38 mm thick)",
+  "step_file": null,
+  "body": {
+    "size": [
+      2000.0,
+      6.0,
+      1.38
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "Open-ended GT2 belt, 2 mm pitch, 6 mm wide, teeth on one side, laid straight along X (teeth facing -z). Cut to length: 20T pulley = 40 mm of belt per turn. Fits gt2-pulley-20t-5mm and gt2-idler-20t-5mm. CoreXY / plotter: clamp both ends to the carriage.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.8,
+    "source": "typical black rubber belt with glass fibre core",
+    "material": "rubber"
+  }
+}

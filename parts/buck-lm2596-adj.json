@@ -1,0 +1,117 @@
+{
+  "id": "buck-lm2596-adj",
+  "name": "LM2596 adjustable buck converter module",
+  "category": "board",
+  "source": "Typical LM2596 DC-DC step-down module (TI LM2596 datasheet https://www.ti.com/lit/ds/symlink/lm2596.pdf); module dimensions from shop listings",
+  "step_file": null,
+  "body": {
+    "size": [
+      43.0,
+      21.0,
+      14.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        2.5,
+        2.5,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        40.5,
+        18.5,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "in_p",
+      "label": "IN+",
+      "position": [
+        2.0,
+        18.0,
+        14.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "in_n",
+      "label": "IN-",
+      "position": [
+        2.0,
+        3.0,
+        14.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out_p",
+      "label": "OUT+",
+      "position": [
+        41.0,
+        18.0,
+        14.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "out_n",
+      "label": "OUT-",
+      "position": [
+        41.0,
+        3.0,
+        14.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "Step-down module, 4.5-40 V in, 1.25-37 V out, 2 A (3 A peak with heatsinking). Turn the blue multi-turn pot to set the output with a multimeter BEFORE connecting a board; set to 5.0 V for servos / logic. Holes are 38 mm apart on the long edge.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "typical blue module",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      4.5,
+      40.0
+    ],
+    "output_v": 5.0,
+    "output_ma": 2000,
+    "efficiency": 0.85,
+    "output_pin": "out_p",
+    "input_pin": "in_p",
+    "note": "adjustable; set the output before connecting loads",
+    "source": "TI LM2596 datasheet; not yet measured"
+  }
+}

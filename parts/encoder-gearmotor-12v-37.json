@@ -1,0 +1,191 @@
+{
+  "id": "encoder-gearmotor-12v-37",
+  "name": "12 V 37 mm gearmotor with Hall encoder (6 pins)",
+  "category": "output",
+  "source": "https://www.pololu.com/product/4753 (37D metal gearmotor with 64 CPR encoder) and https://www.dfrobot.com/ (JGB37-520 type)",
+  "step_file": null,
+  "body": {
+    "size": [
+      37.0,
+      37.0,
+      72.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      37.0,
+      37.0,
+      72.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        31.923,
+        26.25,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "m2",
+      "position": [
+        18.5,
+        34.0,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "m3",
+      "position": [
+        5.077,
+        26.25,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "m4",
+      "position": [
+        5.077,
+        10.75,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "m5",
+      "position": [
+        18.5,
+        3.0,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "m6",
+      "position": [
+        31.923,
+        10.75,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "m_pos",
+      "label": "Motor + (M1)",
+      "position": [
+        12.0,
+        18.5,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "m_neg",
+      "label": "Motor - (M2)",
+      "position": [
+        25.0,
+        18.5,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "enc_gnd",
+      "label": "Encoder GND",
+      "position": [
+        8.0,
+        10.0,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "enc_vcc",
+      "label": "Encoder VCC (3.3-5 V)",
+      "position": [
+        11.0,
+        10.0,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "enc_a",
+      "label": "Encoder A",
+      "position": [
+        14.0,
+        10.0,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "enc_b",
+      "label": "Encoder B",
+      "position": [
+        17.0,
+        10.0,
+        72.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "37 mm gearmotor with a two-channel Hall encoder on the rear shaft (about 11 pulses per motor turn per channel, times the gear ratio). Output shaft 6 mm D, 17 mm, pointing down (-z), face at z=0 like dc-gearmotor-12v-37. 6-pin cable: M1 / M2 motor, then encoder GND, 3.3-5 V, A, B. Needs a driver: never a GPIO pin. Encoder outputs swing to the encoder supply (3.3 V from the board).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2c2e33",
+    "metallic": 0.35,
+    "roughness": 0.45,
+    "source": "black anodised can with silver gearbox",
+    "material": "black-anodised"
+  },
+  "electrical": {
+    "supply_v": [
+      6.0,
+      12.0
+    ],
+    "current_ma": 300,
+    "peak_ma": 3000,
+    "needs_driver": true,
+    "note": "stall current at 12 V; encoder adds about 10 mA",
+    "source": "Pololu 37D gearmotor datasheet; not yet measured"
+  }
+}

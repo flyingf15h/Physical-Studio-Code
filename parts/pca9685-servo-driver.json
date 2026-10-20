@@ -1,0 +1,397 @@
+{
+  "id": "pca9685-servo-driver",
+  "name": "PCA9685 16-channel servo driver",
+  "category": "board",
+  "source": "https://www.adafruit.com/product/815 and NXP PCA9685 datasheet https://www.nxp.com/docs/en/data-sheet/PCA9685.pdf",
+  "step_file": null,
+  "body": {
+    "size": [
+      62.5,
+      25.4,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -2.0
+    ],
+    "max": [
+      62.5,
+      25.4,
+      12.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.0,
+        3.0,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h2",
+      "position": [
+        59.5,
+        3.0,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h3",
+      "position": [
+        3.0,
+        22.4,
+        0
+      ],
+      "diameter": 3.0
+    },
+    {
+      "id": "h4",
+      "position": [
+        59.5,
+        22.4,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        4.0,
+        12.7,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "oe",
+      "label": "OE",
+      "position": [
+        6.54,
+        12.7,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "scl",
+      "label": "SCL",
+      "position": [
+        9.08,
+        12.7,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "sda",
+      "label": "SDA",
+      "position": [
+        11.62,
+        12.7,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        14.16,
+        12.7,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "v_plus",
+      "label": "V+ (servo power screw terminal)",
+      "position": [
+        58.0,
+        12.7,
+        9.0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "ch0",
+      "label": "Servo 0 signal",
+      "position": [
+        6.34,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch1",
+      "label": "Servo 1 signal",
+      "position": [
+        13.96,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch2",
+      "label": "Servo 2 signal",
+      "position": [
+        21.58,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch3",
+      "label": "Servo 3 signal",
+      "position": [
+        29.2,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch4",
+      "label": "Servo 4 signal",
+      "position": [
+        36.82,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch5",
+      "label": "Servo 5 signal",
+      "position": [
+        44.44,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch6",
+      "label": "Servo 6 signal",
+      "position": [
+        52.06,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch7",
+      "label": "Servo 7 signal",
+      "position": [
+        59.68,
+        21.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch8",
+      "label": "Servo 8 signal",
+      "position": [
+        6.34,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch9",
+      "label": "Servo 9 signal",
+      "position": [
+        13.96,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch10",
+      "label": "Servo 10 signal",
+      "position": [
+        21.58,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch11",
+      "label": "Servo 11 signal",
+      "position": [
+        29.2,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch12",
+      "label": "Servo 12 signal",
+      "position": [
+        36.82,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch13",
+      "label": "Servo 13 signal",
+      "position": [
+        44.44,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch14",
+      "label": "Servo 14 signal",
+      "position": [
+        52.06,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ch15",
+      "label": "Servo 15 signal",
+      "position": [
+        59.68,
+        4.0,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": "16 servo outputs over I2C (address 0x40, 0x40-0x7F with solder jumpers), 12-bit PWM, 40-1000 Hz (use 50 Hz for servos). V+ screw terminal feeds the servos (5-6 V, not through the logic pin); VCC is logic only (3.3-5 V). Each of the 16 outputs is a 3-pin header: GND, V+, PWM.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "https://www.adafruit.com/product/815 (blue board)",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      3.0,
+      5.5
+    ],
+    "current_ma": 10,
+    "peak_ma": 10,
+    "signal_v": 3.3,
+    "note": "servo current comes from the separate V+ terminal (up to 6 V)",
+    "source": "NXP PCA9685 datasheet; not yet measured"
+  }
+}

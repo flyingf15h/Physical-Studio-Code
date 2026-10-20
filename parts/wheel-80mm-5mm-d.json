@@ -1,0 +1,37 @@
+{
+  "id": "wheel-80mm-5mm-d",
+  "name": "80 mm wheel for NEMA 17 (5 mm D shaft)",
+  "category": "misc",
+  "source": "Typical 80 mm rubber robot wheel with a 5 mm D-bore aluminium hub (NEMA 17 shaft)",
+  "step_file": null,
+  "body": {
+    "size": [
+      80.0,
+      80.0,
+      30.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "bore",
+      "position": [
+        40.0,
+        40.0,
+        0
+      ],
+      "diameter": 5.0
+    }
+  ],
+  "connectors": [],
+  "notes": "Rubber tyre, 80 mm diameter, 30 mm wide, aluminium hub with a 5 mm D bore and an M3 grub screw. Pushes onto a NEMA 17's 5 mm shaft (flat against the grub screw). Axis along z.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1d1f22",
+    "metallic": 0.0,
+    "roughness": 0.7,
+    "source": "typical black tyre",
+    "material": "rubber"
+  }
+}

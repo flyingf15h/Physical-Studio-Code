@@ -1,0 +1,74 @@
+{
+  "id": "lipo-3s-1300",
+  "name": "LiPo battery 3S 11.1 V 1300 mAh",
+  "category": "misc",
+  "source": "Typical 3S 1300 mAh 20C pack, XT60 plug (shop datasheets e.g. https://hobbyking.com/); dimensions not measured",
+  "step_file": null,
+  "body": {
+    "size": [
+      75.0,
+      35.0,
+      25.0
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      0
+    ],
+    "max": [
+      75.0,
+      35.0,
+      25.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "plus",
+      "label": "+ (red, XT60)",
+      "position": [
+        0.0,
+        12.0,
+        12.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "minus",
+      "label": "- (black, XT60)",
+      "position": [
+        0.0,
+        23.0,
+        12.5
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "notes": "11.1 V nominal (9.0-12.6 V), 1300 mAh, about 20C (26 A burst). XT60 plug on a short lead out of the -x end; red = +, black = -. Charge only on a balance charger, never below 9 V, never puncture. Strap it down; foam under it.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2f4f8f",
+    "metallic": 0.0,
+    "roughness": 0.5,
+    "source": "typical blue LiPo pouch in shrink wrap"
+  },
+  "electrical": {
+    "output_v": 11.1,
+    "output_ma": 5000,
+    "source": "3S 1300 mAh 20C pack; typical, not yet measured",
+    "output_pin": "plus"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "bearing-thrust-51104",
+  "name": "Thrust bearing 51104 (20 x 35 x 10)",
+  "category": "misc",
+  "source": "ISO 104 / SKF 51104 dimensions (bore 20 mm, OD 35 mm, 10 mm thick)",
+  "step_file": null,
+  "body": {
+    "size": [
+      35.0,
+      35.0,
+      10.0
+    ]
+  },
+  "mounting_holes": [],
+  "connectors": [],
+  "notes": "Axial (thrust) ball bearing, 20 mm bore, 35 mm outside diameter, 10 mm tall, axis along z. Carries the weight of the arm's turntable on a base plate; the servo horn spins above it.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#dfe3e6",
+    "metallic": 0.8,
+    "roughness": 0.2,
+    "source": "chrome bearing",
+    "material": "chrome"
+  }
+}

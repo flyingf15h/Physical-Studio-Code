@@ -1,0 +1,132 @@
+{
+  "id": "tcrt5000-module-single",
+  "name": "IR line sensor module TCRT5000 (single, LM393)",
+  "category": "input",
+  "source": "https://www.vishay.com/docs/83760/tcrt5000.pdf (sensor); board is the common LM393 breakout, measured from shop listings, not calipers",
+  "step_file": null,
+  "body": {
+    "size": [
+      31.0,
+      14.0,
+      1.6
+    ]
+  },
+  "envelope": {
+    "min": [
+      0,
+      0,
+      -7.0
+    ],
+    "max": [
+      31.0,
+      14.0,
+      9.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        3.0,
+        7.0,
+        0
+      ],
+      "diameter": 3.0
+    }
+  ],
+  "connectors": [],
+  "pins": [
+    {
+      "id": "vcc",
+      "label": "VCC",
+      "position": [
+        27.0,
+        2.5,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "gnd",
+      "label": "GND",
+      "position": [
+        27.0,
+        5.04,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "do",
+      "label": "DO",
+      "position": [
+        27.0,
+        7.58,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "ao",
+      "label": "AO",
+      "position": [
+        27.0,
+        10.12,
+        1.6
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "keep_out": [
+    {
+      "min": [
+        0,
+        3.5,
+        -7.0
+      ],
+      "max": [
+        10.2,
+        10.5,
+        0
+      ]
+    }
+  ],
+  "notes": "One reflective IR sensor with an LM393 comparator. The TCRT5000 looks DOWN from the underside of the board at the line (best gap 2.5 mm, works 1-8 mm); a blue trim pot sets the switching level (turn until the DO LED flips between white and black). DO is HIGH over black, LOW over white (reversed on some boards, test it). AO is the raw analogue level. Keep the sensor 2-5 mm above the floor; the sensor body hangs 7 mm below the board.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#1f5fa8",
+    "metallic": 0.1,
+    "roughness": 0.6,
+    "source": "https://www.vishay.com/docs/83760/tcrt5000.pdf and typical blue breakout",
+    "material": "pcb"
+  },
+  "electrical": {
+    "supply_v": [
+      3.3,
+      5.0
+    ],
+    "current_ma": 25,
+    "peak_ma": 30,
+    "signal_v": "supply",
+    "note": "IR LED draws about 15 mA per channel plus the LM393; digital output swings to its supply",
+    "source": "Vishay TCRT5000 datasheet (IR LED 60 mA max, typ 15 mA) + LM393 module; not yet measured"
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "id": "chassis-plate-200x120",
+  "name": "Chassis plate 200 x 120 x 4 (acrylic)",
+  "category": "misc",
+  "source": "Typical laser-cut 4 mm acrylic robot chassis; hole grid chosen for this library, not from a product",
+  "step_file": null,
+  "body": {
+    "size": [
+      200.0,
+      120.0,
+      4.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "h1",
+      "position": [
+        20.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h2",
+      "position": [
+        20.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h3",
+      "position": [
+        20.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h4",
+      "position": [
+        20.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h5",
+      "position": [
+        20.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h7",
+      "position": [
+        40.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h8",
+      "position": [
+        40.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h9",
+      "position": [
+        40.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h10",
+      "position": [
+        40.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h11",
+      "position": [
+        40.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h13",
+      "position": [
+        60.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h14",
+      "position": [
+        60.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h15",
+      "position": [
+        60.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h16",
+      "position": [
+        60.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h17",
+      "position": [
+        60.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h19",
+      "position": [
+        80.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h20",
+      "position": [
+        80.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h21",
+      "position": [
+        80.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h22",
+      "position": [
+        80.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h23",
+      "position": [
+        80.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h25",
+      "position": [
+        100.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h26",
+      "position": [
+        100.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h27",
+      "position": [
+        100.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h28",
+      "position": [
+        100.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h29",
+      "position": [
+        100.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h31",
+      "position": [
+        120.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h32",
+      "position": [
+        120.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h33",
+      "position": [
+        120.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h34",
+      "position": [
+        120.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h35",
+      "position": [
+        120.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h37",
+      "position": [
+        140.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h38",
+      "position": [
+        140.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h39",
+      "position": [
+        140.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h40",
+      "position": [
+        140.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h41",
+      "position": [
+        140.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h43",
+      "position": [
+        160.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h44",
+      "position": [
+        160.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h45",
+      "position": [
+        160.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h46",
+      "position": [
+        160.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h47",
+      "position": [
+        160.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h49",
+      "position": [
+        180.0,
+        20.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h50",
+      "position": [
+        180.0,
+        40.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h51",
+      "position": [
+        180.0,
+        60.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h52",
+      "position": [
+        180.0,
+        80.0,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "h53",
+      "position": [
+        180.0,
+        100.0,
+        0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "Flat 200 x 120 mm, 4 mm acrylic plate with a 20 mm grid of 3.2 mm holes (9 x 5, from x=20 to 180 and y=20 to 100) for M3 screws, standoffs and brackets.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#2b2d30",
+    "metallic": 0.0,
+    "roughness": 0.3,
+    "source": "black cast acrylic"
+  }
+}

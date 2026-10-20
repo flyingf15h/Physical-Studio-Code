@@ -1,0 +1,109 @@
+{
+  "id": "bracket-gearmotor-37",
+  "name": "37 mm gearmotor bracket (aluminium L)",
+  "category": "fastener",
+  "source": "https://www.pololu.com/product/1084 (37D mm metal gearmotor bracket pair) and the 37D gearmotor drawing",
+  "step_file": null,
+  "body": {
+    "size": [
+      47.0,
+      43.0,
+      40.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        36.923,
+        30.75,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "m2",
+      "position": [
+        23.5,
+        38.5,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "m3",
+      "position": [
+        10.077,
+        30.75,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "m4",
+      "position": [
+        10.077,
+        15.25,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "m5",
+      "position": [
+        23.5,
+        7.5,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "m6",
+      "position": [
+        36.923,
+        15.25,
+        0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "boss",
+      "position": [
+        23.5,
+        23.0,
+        0
+      ],
+      "diameter": 12.5
+    },
+    {
+      "id": "foot1",
+      "position": [
+        10.0,
+        0,
+        20.0
+      ],
+      "diameter": 3.2
+    },
+    {
+      "id": "foot2",
+      "position": [
+        37.0,
+        0,
+        20.0
+      ],
+      "diameter": 3.2
+    }
+  ],
+  "connectors": [],
+  "notes": "L-bracket for a 37 mm (37D) gearmotor. The motor's gearbox face sits on top of the plate (z=3) with its shaft going DOWN through the 12.5 mm boss hole; six M3 screws on the 31 mm circle hold it. Place dc-gearmotor-12v-37 at (2, 4.5, 3) so its centre (18.5, 18.5) is on the boss hole. The wall (y 0-3, 40 mm tall) bolts to a chassis with two M3 screws (foot1/foot2 point along Y at z=20). Holes m1-m6 and boss are on the bottom face.",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#b5b9bd",
+    "metallic": 0.6,
+    "roughness": 0.45,
+    "source": "typical natural aluminium bracket",
+    "material": "brushed-aluminium"
+  }
+}

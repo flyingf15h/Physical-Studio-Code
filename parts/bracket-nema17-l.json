@@ -1,0 +1,91 @@
+{
+  "id": "bracket-nema17-l",
+  "name": "NEMA 17 L-bracket (steel, 3 mm)",
+  "category": "fastener",
+  "source": "https://www.openbuilds.com/ (NEMA 17 motor mount) and NEMA ICS 16 face standard (31 mm hole square, 22 mm pilot)",
+  "step_file": null,
+  "body": {
+    "size": [
+      42.3,
+      45.3,
+      43.0
+    ]
+  },
+  "mounting_holes": [
+    {
+      "id": "m1",
+      "position": [
+        5.65,
+        8.65,
+        40.0
+      ],
+      "diameter": 3.4
+    },
+    {
+      "id": "m2",
+      "position": [
+        36.65,
+        8.65,
+        40.0
+      ],
+      "diameter": 3.4
+    },
+    {
+      "id": "m3",
+      "position": [
+        5.65,
+        39.65,
+        40.0
+      ],
+      "diameter": 3.4
+    },
+    {
+      "id": "m4",
+      "position": [
+        36.65,
+        39.65,
+        40.0
+      ],
+      "diameter": 3.4
+    },
+    {
+      "id": "shaft",
+      "position": [
+        21.15,
+        24.15,
+        40.0
+      ],
+      "diameter": 22.5
+    },
+    {
+      "id": "foot1",
+      "position": [
+        8.0,
+        0,
+        20.0
+      ],
+      "diameter": 5.5
+    },
+    {
+      "id": "foot2",
+      "position": [
+        34.3,
+        0,
+        20.0
+      ],
+      "diameter": 5.5
+    }
+  ],
+  "connectors": [],
+  "notes": "L-bracket for a NEMA 17. The motor's shaft end (face with the 4 tapped holes) bolts to the underside of the top plate with four M3 screws on a 31 mm square; the 22.5 mm hole takes the 22 mm boss, and the shaft sticks up through it. Place the NEMA 17 at (0, 3, 0) so its 40 mm body hangs below the plate and its face meets z=40. The vertical wall (y 0-3) has two 5.5 mm holes for M5 screws into 2020 extrusion (foot1/foot2: they point along Y, hole centres 20 mm above the bottom). Holes m1-m4 and shaft are on the plate's underside (z=40).",
+  "verified": false,
+  "verified_by": null,
+  "verified_on": null,
+  "appearance": {
+    "color": "#8a8f95",
+    "metallic": 0.7,
+    "roughness": 0.5,
+    "source": "typical zinc-plated steel bracket",
+    "material": "ground-steel"
+  }
+}

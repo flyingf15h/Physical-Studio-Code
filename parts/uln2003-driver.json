@@ -2,7 +2,7 @@
   "id": "uln2003-driver",
   "name": "Stepper driver board ULN2003",
   "category": "board",
-  "source": "Typical datasheet/standard numbers for this part or its most common breakout; not yet measured",
+  "source": "ULN2003 stepper driver board for the 28BYJ-48 (TI ULN2003A datasheet https://www.ti.com/lit/ds/symlink/uln2003a.pdf; blue board layout from shop listings); not yet measured",
   "step_file": null,
   "body": {
     "size": [
@@ -69,12 +69,12 @@
       "position": [
         1.5,
         12.19,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
       ]
     },
     {
@@ -83,12 +83,12 @@
       "position": [
         1.5,
         14.73,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
       ]
     },
     {
@@ -97,12 +97,12 @@
       "position": [
         1.5,
         17.27,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
       ]
     },
     {
@@ -111,12 +111,12 @@
       "position": [
         1.5,
         19.81,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
       ]
     },
     {
@@ -125,12 +125,12 @@
       "position": [
         30.0,
         14.73,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
       ]
     },
     {
@@ -139,16 +139,86 @@
       "position": [
         30.0,
         17.27,
-        -8.5
+        9.0
       ],
       "direction": [
         0,
         0,
-        -1
+        1
+      ]
+    },
+    {
+      "id": "motor1",
+      "label": "Motor socket pin 1 (blue)",
+      "position": [
+        12.42,
+        27.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "motor2",
+      "label": "Motor socket pin 2 (pink)",
+      "position": [
+        14.96,
+        27.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "motor3",
+      "label": "Motor socket pin 3 (yellow)",
+      "position": [
+        17.5,
+        27.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "motor4",
+      "label": "Motor socket pin 4 (orange)",
+      "position": [
+        20.04,
+        27.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "motor5",
+      "label": "Motor socket pin 5 (red, 5 V)",
+      "position": [
+        22.58,
+        27.0,
+        9.0
+      ],
+      "direction": [
+        0,
+        0,
+        1
       ]
     }
   ],
-  "notes": "IN1-IN4 to four digital pins; + to 5 V, - to GND. The white socket takes the 28BYJ-48's plug.",
+  "notes": "IN1-IN4 to four digital pins; + to 5 V, - to GND. The white 5-pin socket on the +y edge (motor1-motor5, 2.54 mm pitch, keyed) takes the 28BYJ-48's plug: blue, pink, yellow, orange, red (red is the common 5 V). The four LEDs light with the coils. The motor draws up to about 240 mA from the + pin, so use a separate 5 V supply with shared GND for anything larger.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,
