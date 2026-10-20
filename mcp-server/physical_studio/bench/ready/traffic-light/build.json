@@ -689,31 +689,31 @@
    {
     "number": 9,
     "title": "Insert the crosswalk button",
-    "instruction": "Place the button across the centre gap with one across-body, permanently connected leg pair in row forty-four, columns e and f, and the other across-body, permanently connected leg pair in row forty-six, columns e and f. The two legs on each side of the gap must be the normally open pair that connects only when pressed; do not force a button with a different footprint.",
-    "check": "The square button bridges the centre gap with four legs in e44, f44, e46 and f46, beyond the three LED groups.",
+    "instruction": "Place the 12 mm button across the centre gap, two rows apart: its legs go in row forty-four, columns d and g, and row forty-six, columns d and g (its legs are 12.5 mm apart, so one hole is left free on each side of the gap). Turn it so the legs facing each other across the gap are the always-connected pairs; the two legs on the same side, in rows 44 and 46, only connect when you press it. Don't force it: if the legs only reach e and f, you have a 6 mm button.",
+    "check": "The square button bridges the centre gap with four legs in d44, g44, d46 and g46, beyond the three LED groups.",
     "part_ids": [
      "button"
     ],
     "placements": [
      {
       "what": "Button first connected-pair left leg",
-      "hole": "e44",
-      "where": "Row 44, column e (left of the centre gap)."
+      "hole": "d44",
+      "where": "Row 44, column d (left of the centre gap)."
      },
      {
       "what": "Button first connected-pair right leg",
-      "hole": "f44",
-      "where": "Row 44, column f (right of the centre gap)."
+      "hole": "g44",
+      "where": "Row 44, column g (right of the centre gap)."
      },
      {
       "what": "Button second connected-pair left leg",
-      "hole": "e46",
-      "where": "Row 46, column e (left of the centre gap)."
+      "hole": "d46",
+      "where": "Row 46, column d (left of the centre gap)."
      },
      {
       "what": "Button second connected-pair right leg",
-      "hole": "f46",
-      "where": "Row 46, column f (right of the centre gap)."
+      "hole": "g46",
+      "where": "Row 46, column g (right of the centre gap)."
      }
     ],
     "picture": "/out/build-traffic-light/step-9.svg",
@@ -721,26 +721,26 @@
      [
       1,
       "Button first connected-pair left leg",
-      "Row 44, column e (left of the centre gap).",
-      "e44"
+      "Row 44, column d (left of the centre gap).",
+      "d44"
      ],
      [
       2,
       "Button first connected-pair right leg",
-      "Row 44, column f (right of the centre gap).",
-      "f44"
+      "Row 44, column g (right of the centre gap).",
+      "g44"
      ],
      [
       3,
       "Button second connected-pair left leg",
-      "Row 46, column e (left of the centre gap).",
-      "e46"
+      "Row 46, column d (left of the centre gap).",
+      "d46"
      ],
      [
       4,
       "Button second connected-pair right leg",
-      "Row 46, column f (right of the centre gap).",
-      "f46"
+      "Row 46, column g (right of the centre gap).",
+      "g46"
      ]
     ],
     "model": {
@@ -1564,7 +1564,7 @@
     "number": 17,
     "title": "Connect the button to D2",
     "instruction": "Connect a blue jumper from the Uno digital header pin labelled 2 to row forty-four, column a, left of the centre gap.",
-    "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at e44.",
+    "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at d44.",
     "part_ids": [
      "wire_button_signal"
     ],
@@ -2143,10 +2143,10 @@
       ],
       "mount_board": "breadboard",
       "mount_holes": [
-       "e44",
-       "f44",
-       "e46",
-       "f46"
+       "d44",
+       "g44",
+       "d46",
+       "g46"
       ],
       "terminals": [],
       "evidence": "User-supplied four-leg button; across-body connected pairs span the gap in rows 44 and 46, and pressing joins those pairs."
@@ -2484,30 +2484,30 @@
      "part_ids": [
       "button"
      ],
-     "instruction": "Place the button across the centre gap with one across-body, permanently connected leg pair in row forty-four, columns e and f, and the other across-body, permanently connected leg pair in row forty-six, columns e and f. The two legs on each side of the gap must be the normally open pair that connects only when pressed; do not force a button with a different footprint.",
+     "instruction": "Place the 12 mm button across the centre gap, two rows apart: its legs go in row forty-four, columns d and g, and row forty-six, columns d and g (its legs are 12.5 mm apart, so one hole is left free on each side of the gap). Turn it so the legs facing each other across the gap are the always-connected pairs; the two legs on the same side, in rows 44 and 46, only connect when you press it. Don't force it: if the legs only reach e and f, you have a 6 mm button.",
      "placements": [
       {
        "what": "Button first connected-pair left leg",
-       "hole": "e44",
-       "where": "Row 44, column e (left of the centre gap)."
+       "hole": "d44",
+       "where": "Row 44, column d (left of the centre gap)."
       },
       {
        "what": "Button first connected-pair right leg",
-       "hole": "f44",
-       "where": "Row 44, column f (right of the centre gap)."
+       "hole": "g44",
+       "where": "Row 44, column g (right of the centre gap)."
       },
       {
        "what": "Button second connected-pair left leg",
-       "hole": "e46",
-       "where": "Row 46, column e (left of the centre gap)."
+       "hole": "d46",
+       "where": "Row 46, column d (left of the centre gap)."
       },
       {
        "what": "Button second connected-pair right leg",
-       "hole": "f46",
-       "where": "Row 46, column f (right of the centre gap)."
+       "hole": "g46",
+       "where": "Row 46, column g (right of the centre gap)."
       }
      ],
-     "check": "The square button bridges the centre gap with four legs in e44, f44, e46 and f46, beyond the three LED groups."
+     "check": "The square button bridges the centre gap with four legs in d44, g44, d46 and g46, beyond the three LED groups."
     },
     {
      "number": 10,
@@ -2675,7 +2675,7 @@
        "where": "Row 44, column a (left of the centre gap)."
       }
      ],
-     "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at e44."
+     "check": "A blue jumper connects Uno pin 2 to a44, sharing row 44 with the button leg at d44."
     },
     {
      "number": 18,

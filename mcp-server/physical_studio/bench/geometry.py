@@ -19,7 +19,8 @@ _FIXED = {
     '#323a40':PALETTE['slate'], '#bca568':PALETTE['brown'], '#c2b58d':PALETTE['brown'],
     '#c2b888':PALETTE['metal'], '#bbc1c5':PALETTE['metal'], '#b3bbc1':PALETTE['metal'],
     '#bdc5cc':PALETTE['metal'], '#aab1b7':PALETTE['metal'], '#cbb78b':PALETTE['brown'],
-    '#79644c':PALETTE['slate'], '#8c7561':PALETTE['brown'], '#b7a16b':PALETTE['yellow']
+    '#79644c':PALETTE['slate'], '#8c7561':PALETTE['brown'], '#b7a16b':PALETTE['yellow'],
+    '#1f7f86':'#4f979d', '#d6d9dc':'#d6d9dc', '#b85a50':'#c4736b'
 }
 def muted_color(value):
     import colorsys
@@ -100,6 +101,49 @@ def build(spec):
         if h is not None and (p.mount_board in holes or np.linalg.norm(h[:2]-c[:2])<25):
             if p.kind=='led':c[:2]=h[:2]+[1.27,0];c[2]=14.5
             else:c[:2]=h[:2]+[5.08,0];c[2]=10
+    def legs(pid,p,top):
+        hm=holes.get(p.mount_board) or {}
+        pts=[hm[h.lower()] for h in p.mount_holes if h.lower() in hm]
+        for v in pts:rod(pid,v,[v[0],v[1],top],.25,'#bbc1c5',6)
+        return pts
+    def generic(pid,p,x,y,z,s):
+        """A recognisable shape for the common modules (by name), else a box of the part's size."""
+        name=p.name.lower()
+        if re.search(r'hc-?sr04|ultrasonic',name):  # stands upright on its 4 pins, the two transducers facing out
+            pts=legs(pid,p,10.5);hx,hy=(np.mean(pts,0)[:2] if pts else (x,y))
+            box(pid,[hx,hy,20.5],[45,1.6,20],p.color)
+            for dx in (-13,13):
+                rod(pid,[hx+dx,hy-.8,20.5],[hx+dx,hy-12.8,20.5],8,'#bdc5cc',32)
+                rod(pid,[hx+dx,hy-12.8,20.5],[hx+dx,hy-13,20.5],6.5,'#5f6670',32)
+            box(pid,[hx,hy+1.2,26],[6,1,3],'#bdc5cc')  # crystal on the back
+        elif re.search(r'matrix|max7219',name):
+            box(pid,[x,y,z],s,'#1f7f86' if re.search(r'#0*2[0-9a-f]{5}',p.color.lower()) else p.color)
+            m=min(s[0],s[1])-1;top=z+s[2]/2
+            box(pid,[x,y,top+3],[m,m,6],'#1b2228')
+            for i in range(8):
+                for j in range(8):
+                    cx=x-m/2+m/16+i*m/8;cy=y-m/2+m/16+j*m/8
+                    rod(pid,[cx,cy,top+6],[cx,cy,top+6.15],m/20,'#b85a50',10)
+        elif re.search(r'joystick|ky-?023',name):
+            box(pid,[x,y,z],s,p.color);top=z+s[2]/2
+            box(pid,[x+3,y,top+5],[16,16,10],'#1b2228')
+            rod(pid,[x+3,y,top+10],[x+3,y,top+17],2,'#1b2228',16)
+            rod(pid,[x+3,y,top+17],[x+3,y,top+22],7,'#30383d',32)
+        elif re.search(r'buzzer|piezo',name):
+            pts=legs(pid,p,8.5);hx,hy=(np.mean(pts,0)[:2] if pts else (x,y))
+            rod(pid,[hx,hy,8.5],[hx,hy,8.5+s[2]],s[0]/2,'#1b2228',40)
+            rod(pid,[hx,hy,8.5+s[2]],[hx,hy,8.6+s[2]],1.2,'#5f6670',16)
+        elif re.search(r'button|switch',name):
+            pts=legs(pid,p,8.5);hx,hy=(np.mean(pts,0)[:2] if pts else (x,y))
+            box(pid,[hx,hy,10.3],[s[0],s[1],3.6],'#1b2228');box(pid,[hx,hy,12.25],[s[0]-.4,s[1]-.4,.3],'#bdc5cc')
+            rod(pid,[hx,hy,12.4],[hx,hy,8.5+s[2]],3.5,'#30383d',32)
+        elif re.search(r'photo|ldr|light.dependent',name):
+            pts=legs(pid,p,12);hx,hy=(np.mean(pts,0)[:2] if pts else (x,y))
+            rod(pid,[hx,hy,12],[hx,hy,14],2.6,'#d6d9dc',32);rod(pid,[hx,hy,14],[hx,hy,14.05],2.2,'#b85a50',32)
+        elif re.search(r'thermistor|ntc',name):
+            pts=legs(pid,p,13);hx,hy=(np.mean(pts,0)[:2] if pts else (x,y))
+            bead=trimesh.creation.uv_sphere(radius=1.6,count=[10,14]);bead.apply_translation([hx,hy,14]);add(bead,pid,'#1b2228')
+        else:box(pid,[x,y,z],s,p.color)
     for p in spec.parts:
         pid=p.id;x,y,z=centers[pid];anchors[pid]={};labels.append({'id':pid,'name':p.name,'kind':p.kind})
         if p.kind=='breadboard':
@@ -114,6 +158,18 @@ def build(spec):
             # planner's ground rail, rail_1_24.14), red (+) inside it; the far edge the other way round
             for yy,col in [(-25.8,'#d94b4b'),(-20.12,'#4b87c8'),(20.12,'#d94b4b'),(25.8,'#4b87c8')]:box(pid,[x,y+yy,8.04],[157,.28,.06],col)
             anchors[pid]=holes[pid]
+        elif p.kind=='development_board' and re.search(r'\buno\b',p.name,re.I):
+            box(pid,[x,y,5],[68.6,53.4,1.6],'#1f7f86')
+            box(pid,[x-30,y+13,10.3],[16,12,11],'#bdc5cc')  # USB-B socket
+            box(pid,[x-29,y-17,10.3],[14,9,11],'#1b2228')  # barrel jack
+            box(pid,[x+9,y-9,7.6],[35,8,3.5],'#1b2228')  # ATmega328P
+            box(pid,[x-14,y-4,6.6],[4,10,1.6],'#bdc5cc')  # crystal
+            pinpoints=[]
+            for side in [-1,1]:
+                box(pid,[x+3,y+side*24.1,8.1],[49,2.5,8.5],'#1b2228')
+                for i in range(19):pinpoints.append(np.array([x-22.86+3+i*2.54,y+side*24.1,12.5]))
+            anchors[pid]={f'pin{i+1}':v for i,v in enumerate(pinpoints)}
+            for t in p.terminals:anchors[pid][t.name.lower()]=pinpoints[t.pin_index-1]
         elif p.kind=='development_board':
             box(pid,[x,y,5],[55,28,1.6],'#293139')
             box(pid,[x-7,y,7.3],[22,17,3],'#b3bbc1')
@@ -156,7 +212,7 @@ def build(spec):
             for off,col in [(-1.7,'#79644c'),(-.6,'#8c7561'),(.5,'#79644c'),(2.,'#b7a16b')]:rod(pid,mid+direction*off,mid+direction*(off+.3),1.18,col)
             anchors[pid]={'1':a,'2':b,'input':a,'output':b}
         else:
-            s=np.array(p.size_mm,float);box(pid,[x,y,z],s,p.color)
+            s=np.array(p.size_mm,float);generic(pid,p,x,y,z,s)
             anchors[pid]={'1':np.array([x-s[0]/2,y,z]),'2':np.array([x+s[0]/2,y,z])}
     for w in spec.wires:
         def endpoint(pid,name):

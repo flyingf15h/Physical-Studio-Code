@@ -29,7 +29,7 @@ const FIRE_STEPS = 19
 export const READY_MADE: Project[] = [
   {
     design: 'build/traffic-light',
-    thumb: '/guides/traffic-light.svg',
+    thumb: '/guides/traffic-light.jpg',
     level: 'Beginner',
     minutes: 30,
     title: 'Traffic light',
@@ -38,7 +38,7 @@ export const READY_MADE: Project[] = [
   },
   {
     design: 'build/blink',
-    thumb: '/guides/blink.svg',
+    thumb: '/guides/blink.jpg',
     level: 'Beginner',
     minutes: 10,
     title: 'Blink',
@@ -47,7 +47,7 @@ export const READY_MADE: Project[] = [
   },
   {
     design: 'build/night-light',
-    thumb: '/guides/night-light.svg',
+    thumb: '/guides/night-light.jpg',
     level: 'Beginner',
     minutes: 20,
     title: 'Night light',
@@ -56,7 +56,7 @@ export const READY_MADE: Project[] = [
   },
   {
     design: 'build/distance-alarm',
-    thumb: '/guides/distance-alarm.svg',
+    thumb: '/guides/distance-alarm.jpg',
     level: 'Intermediate',
     minutes: 30,
     title: 'Distance alarm',
@@ -65,7 +65,7 @@ export const READY_MADE: Project[] = [
   },
   {
     design: 'build/snake-game',
-    thumb: '/guides/snake-game.svg',
+    thumb: '/guides/snake-game.jpg',
     level: 'Intermediate',
     minutes: 40,
     title: 'Snake game',
@@ -74,7 +74,7 @@ export const READY_MADE: Project[] = [
   },
   {
     design: 'build/fire-alarm',
-    thumb: '/guides/fire-alarm.svg',
+    thumb: '/guides/fire-alarm.jpg',
     level: 'Intermediate',
     minutes: 30,
     title: 'Fire alarm',
