@@ -330,7 +330,7 @@ function CommitBox({ build, step, onCommit }: { build: Build; step: number; onCo
 }
 
 /** What the automatic checks found, so nobody builds a guide that still fails them without knowing. */
-function ChecksNote({ checks, hardware }: { checks?: BuildPlan['checks']; hardware?: boolean }) {
+function ChecksNote({ checks }: { checks?: BuildPlan['checks'] }) {
   if (!checks) return null
   if (!checks.passed)
     return (
@@ -346,17 +346,6 @@ function ChecksNote({ checks, hardware }: { checks?: BuildPlan['checks']; hardwa
     )
   return (
     <>
-      <p className="checks-note checks-passed">
-        {hardware
-          ? `Checked automatically: no shorts or mixed voltages in the wiring, every part gets a voltage it takes, and ${
-              checks.warnings?.length
-                ? 'every supply covers what its parts draw in normal use (see the notes below for peaks).'
-                : 'every supply, regulator and motor driver can deliver what its parts draw.'
-            }`
-          : `Checked automatically: no shorts or double-booked holes, every part fits its holes, currents and voltages are within each part's limits, the code's pins match the wires${
-              checks.compiled ? `, and the sketch compiles for the ${checks.board ?? 'board'}` : ' (the sketch was not compiled for this board)'
-            }.`}
-      </p>
       {checks.warnings?.length ? (
         <div className="checks-note checks-warning">
           <strong>Good to know before you build:</strong>
@@ -376,7 +365,7 @@ function Overview({ build, plan }: { build: Build; plan: BuildPlan }) {
   return (
     <div className="build-section">
       <p className="lede">{plan.summary}</p>
-      <ChecksNote checks={plan.checks} hardware={isHardware(plan)} />
+      <ChecksNote checks={plan.checks} />
       {isHardware(plan) ? null : <h2>Your bench now (commit #0)</h2>}
       {isHardware(plan) ? null : start?.model ? (
         <BenchModel model={start.model} guide={start.guide} />

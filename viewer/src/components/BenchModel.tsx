@@ -7,7 +7,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { Bounds, ContactShadows, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
+import { Bounds, Environment, Html, Lightformer, OrbitControls, useGLTF } from '@react-three/drei'
 import type { BenchModel as Model, WireInfo } from '../api'
 import './BenchModel.css'
 
@@ -122,7 +122,7 @@ function Scene({
   const gltf = useGLTF(model.glb)
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
   const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
-  const { root, meshes, box } = useMemo(() => {
+  const { root, meshes } = useMemo(() => {
     const root = gltf.scene.clone(true)
     root.updateMatrixWorld(true)
     const meshes: THREE.Mesh[] = []
@@ -165,8 +165,7 @@ function Scene({
       mesh.userData.wire = wireIds.includes(mesh.userData.part as string)
       if (mesh.userData.wire) mesh.add(hitZone(mesh))
     }
-    const box = new THREE.Box3().setFromObject(root)
-    return { root, meshes, box }
+    return { root, meshes }
   }, [gltf, ids, wireIds])
 
   useEffect(() => {
@@ -188,8 +187,6 @@ function Scene({
     }
   }, [meshes, picked, highlight, look])
 
-  const size = box.getSize(new THREE.Vector3())
-  const centre = box.getCenter(new THREE.Vector3())
   return (
     <>
       <primitive
@@ -199,17 +196,6 @@ function Scene({
           onPick((e.object.userData.part as string | null) ?? null)
         }}
       />
-      {/* A soft shadow on the table under the model, so it sits on something instead of floating. */}
-      {look === 'studio' && (
-        <ContactShadows
-          position={[centre.x, box.min.y - 0.0004, centre.z]}
-          scale={Math.max(size.x, size.z) * 1.6}
-          far={Math.max(size.y, 0.02) * 1.5}
-          blur={2.4}
-          opacity={0.42}
-          resolution={512}
-        />
-      )}
     </>
   )
 }
