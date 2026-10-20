@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2
 # arduino-cli + the AVR core and common libraries: every generated sketch is compiled before the guide
 # is shown (bench/sketch.py). Keep the library list in step with the ones the planner may use.
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
-    && curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/1.2.2/install.sh | BINDIR=/usr/local/bin sh -s 1.2.2 \
+    && curl -fsSL https://downloads.arduino.cc/arduino-cli/arduino-cli_1.2.2_Linux_64bit.tar.gz | tar -xz -C /usr/local/bin arduino-cli \
     && arduino-cli core update-index && arduino-cli core install arduino:avr@1.8.8 \
     && arduino-cli lib install LedControl Servo "LiquidCrystal I2C" "DHT sensor library" "Adafruit Unified Sensor" \
        "Adafruit NeoPixel" NewPing Keypad \
