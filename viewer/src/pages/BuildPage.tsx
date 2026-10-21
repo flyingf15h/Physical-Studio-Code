@@ -527,12 +527,12 @@ function CopyBuild({ build }: { build: Build }) {
 const PIC_W = 640
 const PIC_H = 480
 
-// The step picture's on-screen width: small by default, resized with the handle in its corner, remembered
-// per browser.
+// The step picture's on-screen width: the full step column by default (it is the step's main picture, as in
+// an assembly manual), made smaller with the handle in its corner, remembered per browser.
 const PIC_SIZE_KEY = 'ps.stepPictureWidth'
-const PIC_DEFAULT = 460
 const PIC_MIN = 240
 const PIC_MAX = 900
+const PIC_DEFAULT = PIC_MAX
 const clampWidth = (w: number) => Math.round(Math.min(PIC_MAX, Math.max(PIC_MIN, w)))
 
 function loadPictureWidth(): number {
@@ -1486,6 +1486,11 @@ export function BuildPage({ buildId }: { buildId: string }) {
   const [open, setOpen] = useState<Record<number, boolean>>({}) // sections the builder opened or closed
   const steps = build?.plan?.steps.length ?? 0
   useEffect(() => {
+    // A new step starts at its top (Next is in the bar at the bottom), and the sidebar keeps it in view.
+    document.querySelector('.build-main')?.scrollTo({ top: 0 })
+    document.querySelector('.sidebar .steps button.active')?.scrollIntoView({ block: 'nearest' })
+  }, [at])
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null
       if (tab !== 'guide' || e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return
@@ -1611,6 +1616,12 @@ export function BuildPage({ buildId }: { buildId: string }) {
               onSaved={(summary) => setBuild((b) => (b?.plan ? { ...b, plan: { ...b.plan, summary } } : b))}
             />
             <ShareButton />
+            <div className="build-progress" role="progressbar" aria-valuemin={0} aria-valuemax={n} aria-valuenow={Math.max(0, Math.min(at, n))}>
+              <i style={{ width: `${(Math.max(0, Math.min(at, n)) / n) * 100}%` }} />
+            </div>
+            <div className="build-progress-label">
+              {at >= n ? 'All steps done' : at < 0 ? `${n} steps` : `Step ${at + 1} of ${n}`}
+            </div>
           </header>
           <ol className="steps">
             {item(-1, isHardware(plan) ? 'Parts list' : 'Your bench and parts')}

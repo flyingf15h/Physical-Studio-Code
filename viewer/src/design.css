@@ -1,0 +1,89 @@
+/* Physical Studio design system. One set of tokens and primitives shared by every screen of the app;
+   the landing site (landing/site.css) uses the same values. Page CSS files only add layout. */
+:root {
+  /* colour */
+  --bg: #f5f6f4;
+  --panel: #ffffff;
+  --panel-2: #fafaf8;
+  --ink: #14202b;
+  --ink-2: #384553;
+  --muted: #667382;
+  --line: #e3e6e2;
+  --line-strong: #cfd5d1;
+  --accent: #0b8a9c;
+  --accent-strong: #08707f;
+  --accent-soft: #dcf3f6;
+  --accent-ink: #06454f;
+  --warn: #e8693a;
+  --ok: #1d7a4a;
+  --ok-soft: #e6f5ec;
+  --bad: #a52a2a;
+  --bad-soft: #fcebea;
+  --caution-soft: #fff6e0;
+  --code-bg: #121c26;
+  /* shape */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+  /* depth */
+  --shadow-sm: 0 1px 2px rgba(20, 32, 43, .05), 0 2px 8px rgba(20, 32, 43, .04);
+  --shadow-md: 0 4px 14px rgba(20, 32, 43, .08), 0 12px 32px rgba(20, 32, 43, .06);
+  --shadow-lg: 0 10px 30px rgba(20, 32, 43, .12), 0 30px 70px rgba(20, 32, 43, .10);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+  /* type */
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --t-xs: 12px;
+  --t-sm: 13.5px;
+  --t-md: 15px;
+  --t-lg: 18px;
+  --t-xl: 24px;
+  --t-2xl: 32px;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 { letter-spacing: -0.015em; line-height: 1.2; }
+a { color: var(--accent-strong); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: var(--accent-soft); color: var(--accent-ink); }
+
+/* ---- buttons: .btn plus a variant; the app's older .tool / .primary / .pill-button map onto these ---- */
+.btn, button.tool, a.tool, button.primary, button.pill-button, .describe-go, .describe-tool {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: inherit; font-size: var(--t-sm); font-weight: 600; line-height: 1.1;
+  padding: 9px 16px; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+  background: var(--panel); color: var(--ink); cursor: pointer; text-decoration: none;
+  transition: background .15s var(--ease), border-color .15s var(--ease), box-shadow .15s var(--ease), transform .15s var(--ease);
+}
+.btn:hover:not(:disabled), button.tool:hover:not(:disabled), a.tool:hover { border-color: var(--accent); color: var(--accent-strong); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled, button.tool:disabled, button.primary:disabled { opacity: .45; cursor: default; }
+.btn-primary, button.primary, button.pill-button, .describe-go {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset, 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled), button.pill-button:hover, .describe-go:hover:not(:disabled) {
+  background: var(--accent-strong); border-color: var(--accent-strong); color: #fff;
+}
+.btn-lg { padding: 13px 22px; font-size: var(--t-md); border-radius: var(--r-md); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
+
+/* ---- surfaces and small parts ---- */
+.surface { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-sm); }
+.badge, .pill {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  padding: 2px 8px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-ink);
+}
+.eyebrow { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+input, textarea, select { color: var(--ink); }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent) !important; box-shadow: var(--ring); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

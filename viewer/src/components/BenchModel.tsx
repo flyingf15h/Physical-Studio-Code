@@ -301,6 +301,27 @@ function StudioLight({ box }: { box: THREE.Box3 }) {
   )
 }
 
+// Every step mounts a new canvas, which used to start the camera at the same default pose each time and swoop
+// in from there. Like Flatpack, each step's camera now starts where the previous step's left off (per guide) and
+// eases onto the new parts, so moving through the steps reads as one continuous shot.
+type View = { position: [number, number, number]; rotation: [number, number, number]; target: [number, number, number] }
+const lastView = new Map<string, View>()
+
+function RememberView({ guide }: { guide: string }) {
+  // Saved on every drawn frame, not on unmount: the next step's canvas reads it while rendering, which React
+  // does before the old canvas unmounts.
+  useFrame(({ camera, controls }) => {
+    const target = (controls as unknown as { target?: THREE.Vector3 } | null)?.target
+    if (!target) return
+    lastView.set(guide, {
+      position: camera.position.toArray(),
+      rotation: [camera.rotation.x, camera.rotation.y, camera.rotation.z],
+      target: target.toArray(),
+    })
+  })
+  return null
+}
+
 interface Props {
   model: Model
   guide?: Record<string, string> // part id -> "what it is" note
@@ -315,6 +336,10 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const [look, setLook] = useState<Look>('studio')
   const [bounds, setBounds] = useState<THREE.Box3 | null>(null)
   const ink = useMemo(() => new InkEdgesEffect(), [])
+  const guideKey = model.glb.replace(/[^/]*$/, '') // the guide's folder: its steps share one camera
+  // Reset view / Top view start from their own pose; otherwise carry on from the last step's camera.
+  const [saved] = useState(() => lastView.get(guideKey))
+  const start = view.n === 0 ? saved : undefined
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
@@ -335,7 +360,11 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
       <div className="bench-canvas" style={{ height }} ref={box}>
         <Canvas
           key={view.n}
-          camera={{ fov: 35, near: 0.001, far: 50, position: view.top ? [0, 0.34, 0.001] : [0.05, 0.22, 0.24] }}
+          camera={
+            start
+              ? { fov: 35, near: 0.001, far: 50, position: start.position, rotation: start.rotation }
+              : { fov: 35, near: 0.001, far: 50, position: view.top ? [0, 0.34, 0.001] : [0.05, 0.22, 0.24] }
+          }
           dpr={[1, 2]}
           shadows="soft"
           frameloop="demand" // like Flatpack: draw only when the view or a material changes, not 60 times a second
@@ -352,7 +381,9 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
             <Lightformer intensity={0.6} position={[4, 1, -2]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} />
           </Environment>
           <Suspense fallback={null}>
-            <Bounds fit observe margin={1.15}>
+            {/* With no camera to carry on from (a guide's first view, Reset or Top view) the framing snaps into
+                place instead of swooping in from the default pose. */}
+            <Bounds fit observe margin={1.15} maxDuration={start ? 1 : 0.001}>
               <Scene model={model} picked={picked} highlight={highlight} look={look} onPick={setPicked} onBox={setBounds} />
             </Bounds>
             {look === 'studio' && bounds && <StudioLight box={bounds} />}
@@ -370,7 +401,8 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
               <ToneMapping mode={ToneMappingMode.NEUTRAL} />
             </EffectComposer>
           )}
-          <OrbitControls makeDefault minDistance={0.01} maxDistance={5} zoomSpeed={0.8} />
+          <OrbitControls makeDefault {...(start && { target: start.target })} minDistance={0.01} maxDistance={5} zoomSpeed={0.8} />
+          <RememberView guide={guideKey} />
         </Canvas>
         <div className="bench-tools">
           <span>Drag to rotate · scroll to zoom · click a part or wire</span>

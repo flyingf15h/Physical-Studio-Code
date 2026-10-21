@@ -1,24 +1,11 @@
-:root {
-  --bg: #f6f4f1;
-  --panel: #ffffff;
-  --ink: #1f2933;
-  --muted: #6b7480;
-  --line: #e2ded8;
-  --accent: #0f9fb3;
-  --accent-soft: #d8f3f6;
-  --warn: #ff7a45;
-  --shadow-sm: 0 1px 2px rgba(31, 41, 51, .05), 0 2px 8px rgba(31, 41, 51, .04);
-  --shadow-md: 0 4px 14px rgba(31, 41, 51, .08), 0 12px 32px rgba(31, 41, 51, .06);
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color: var(--ink);
-  background: var(--bg);
-}
+@import './design.css';
 /* A product feel rather than a blueprint: a warm page with a faint teal glow, soft cards. */
 body {
   background:
-    radial-gradient(1100px 520px at 8% -8%, #e2f5f7 0%, transparent 60%),
-    radial-gradient(900px 480px at 100% 0%, #fbefe4 0%, transparent 55%),
+    radial-gradient(1100px 520px at 8% -8%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, color-mix(in srgb, var(--warn) 6%, transparent) 0%, transparent 55%),
     var(--bg);
+  color: var(--ink);
 }
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; }

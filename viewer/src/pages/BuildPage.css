@@ -160,3 +160,38 @@ form.report-step textarea { width: 100%; box-sizing: border-box; border: 1px sol
 .step-reference { margin: 4px 0 18px; }
 .step-reference summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .step-reference[open] summary { margin-bottom: 8px; }
+
+/* ---- Polish pass (design system): calmer sidebar with a progress bar, a readable step column, and the
+   Back / Next bar pinned to the bottom so the next step is always one tap away. The big step number stays. ---- */
+.sidebar { background: var(--panel-2); }
+.sidebar header { padding: 22px 20px 16px; border-bottom: 1px solid var(--line); }
+.sidebar h1 { font-size: 19px; letter-spacing: -0.02em; }
+.build-progress { height: 4px; border-radius: var(--r-pill); background: var(--line); overflow: hidden; margin: 14px 0 4px; }
+.build-progress > i { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width .4s var(--ease); }
+.build-progress-label { font-size: var(--t-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.steps { padding: 8px 12px; }
+.steps .num { font-variant-numeric: tabular-nums; }
+
+.build-main { padding: 28px clamp(20px, 4vw, 56px) 0; gap: 18px; }
+.build-section { max-width: 900px; }
+.step-title { font-size: 28px !important; letter-spacing: -0.025em; line-height: 1.15; text-wrap: balance; }
+.step-why { font-size: 16px; color: var(--ink-2); }
+.step-text { font-size: 16px; line-height: 1.6; }
+.markers li { align-items: center; }
+p.check { background: var(--accent-soft); color: var(--accent-ink); border-radius: var(--r-sm); padding: 10px 14px; margin: 4px 0 !important; font-size: var(--t-sm) !important; line-height: 1.5; }
+p.check span { color: var(--accent-strong); }
+.verdict.ok { background: var(--ok-soft); }
+.verdict.bad { background: var(--bad-soft); }
+.build-fold pre, .code-block pre { background: var(--code-bg); font-family: var(--mono); }
+
+.build-nav { position: sticky; bottom: 0; z-index: 3; width: auto; max-width: none; align-items: center; margin: auto calc(-1 * clamp(20px, 4vw, 56px)) 0; padding: 12px calc(clamp(20px, 4vw, 56px) + max(0px, (100% - 900px) / 2)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .sidebar { max-height: 30vh; }
+  .sidebar header { padding: 12px 16px 10px; }
+  .sidebar .summary, .sidebar .share-button { display: none; }
+  .build-main { padding: 18px 16px 0; }
+  .build-nav { margin: auto -16px 0; padding: 10px 16px; }
+  .step-title { font-size: 23px !important; }
+}

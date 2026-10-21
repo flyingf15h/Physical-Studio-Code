@@ -1,4 +1,4 @@
-.app { display: grid; grid-template-columns: 300px 1fr; flex: 1; min-height: 0; }
+.app { display: grid; grid-template-columns: 320px 1fr; flex: 1; min-height: 0; }
 
 .sidebar { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
 .sidebar header { padding: 20px 20px 12px; }
@@ -7,11 +7,12 @@
 .prompt { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
 
 .steps { list-style: none; margin: 0; padding: 4px 10px; overflow-y: auto; flex: 1; }
-.steps button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 9px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; font-size: 14px; }
+.steps button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 8px 10px; border: 0; border-radius: var(--r-sm); color: var(--ink-2); background: none; cursor: pointer; font-size: 14px; }
 .steps button:hover { background: var(--bg); }
 .steps .num { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; border: 1.5px solid var(--line); color: var(--muted); }
-.steps button.done .num { background: var(--line); border-color: var(--line); color: var(--ink); }
-.steps button.active { background: var(--accent-soft); font-weight: 600; }
+.steps button.done .num { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+.steps button.done { color: var(--muted); }
+.steps button.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
 .steps button.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
 .hint { padding: 12px 20px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
 
