@@ -92,5 +92,10 @@
   "electrical": {
     "drive_ma": 5000,
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.infineon.com/dgdl/irlz44npbf.pdf?fileId=5546d462533600a40153567217c32725",
+    "checked": "logic level: 0.025 ohm at 5 V gate, threshold 1-2 V, G-D-S"
   }
 }

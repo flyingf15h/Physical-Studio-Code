@@ -530,3 +530,42 @@ def test_test_checkpoints_keep_only_real_steps_before_the_end(monkeypatch):
     tests = planner.write_tests({"title": "Blink", "summary": "", "steps": steps, "code": "void setup(){}"})
     assert [t["title"] for t in tests] == ["Test the LED"]
     assert planner.write_tests({"title": "No sketch", "steps": steps, "code": ""}) == []
+
+
+def ready_plan(name):
+    return json.loads((REPO / "mcp-server" / "physical_studio" / "bench" / "ready" / name / "build.json").read_text())["internal"]["plan"]
+
+
+def test_a_module_wired_with_its_power_backwards_is_caught():
+    raw = ready_plan("distance-alarm")
+    assert planner.check_module_power(PlanModel.model_validate(raw)) == []
+    for w in raw["scene"]["wires"]:  # swap the HC-SR04's 5V and ground wires
+        if w["from_terminal"] == "5v":
+            w["to_terminal"] = "a27"
+        elif w["to_terminal"] == "rail_1_24.14_27":
+            w["from_terminal"] = "a24"
+    problems = planner.check_module_power(PlanModel.model_validate(raw))
+    assert any("power pin (e24) is wired to GND" in p for p in problems)
+    assert any("GND pin (e27) is wired to the board's power pin" in p for p in problems)
+
+
+def test_an_unpowered_module_is_caught():
+    raw = ready_plan("snake-game")
+    raw["scene"]["wires"] = [w for w in raw["scene"]["wires"] if w["to_terminal"] != "f41"]  # joystick +5V wire gone
+    assert any("power pin (j41) never reaches" in p for p in planner.check_module_power(PlanModel.model_validate(raw)))
+
+
+def test_rails_used_on_both_halves_get_the_split_rail_note():
+    for name, note in (("distance-alarm", True), ("snake-game", True), ("blink", False), ("night-light", False)):
+        raw = ready_plan(name)
+        assert any(planner.RAIL_GAP_NOTE in s["instruction"] for s in raw["steps"]) == note, name
+        again = planner.add_rail_gap_note(copy.deepcopy(raw))
+        assert sum(planner.RAIL_GAP_NOTE in s["instruction"] for s in again["steps"]) == int(note), name
+
+
+def test_the_6mm_button_legs_across_the_gap_are_the_connected_pair():
+    part = json.loads((REPO / "parts" / "push-button-6mm.json").read_text())
+    pins = {p["id"]: p["position"] for p in part["pins"]}
+    assert abs(pins["1b"][0] - pins["1a"][0]) == 6.5 and pins["1b"][1] == pins["1a"][1]  # Omron B3F: 1-2 joined, 6.5 mm apart
+    assert abs(pins["2a"][1] - pins["1a"][1]) == 4.5
+    assert "across the gap" in part["notes"] and "always connected" in part["notes"]

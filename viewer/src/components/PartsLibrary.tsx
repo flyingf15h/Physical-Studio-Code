@@ -155,11 +155,17 @@ export function PartsLibrary({ onPick }: { onPick?: (part: PartSummary) => void 
                   </span>
                 ) : (
                   <span
-                    className={`parts-badge${part.verified ? ' measured' : ''}`}
-                    title={`${part.verified ? 'Measured' : 'Datasheet'}${part.source ? `: ${part.source}` : ''}`}
-                    aria-label={part.verified ? 'Measured' : 'Datasheet'}
+                    className={`parts-badge${part.verified ? ' measured' : part.datasheet ? ' checked' : ''}`}
+                    title={
+                      part.verified
+                        ? `Measured${part.source ? `: ${part.source}` : ''}`
+                        : part.datasheet
+                          ? `Pins and power checked against the datasheet: ${part.datasheet}`
+                          : `Datasheet${part.source ? `: ${part.source}` : ''}`
+                    }
+                    aria-label={part.verified ? 'Measured' : part.datasheet ? 'Checked against the datasheet' : 'Datasheet'}
                   >
-                    {part.verified ? 'M' : 'DS'}
+                    {part.verified ? 'M' : part.datasheet ? 'DS ✓' : 'DS'}
                   </span>
                 )}
                 <span className="parts-size">{part.body_size.map(fmt).join(' × ')} mm</span>

@@ -176,5 +176,10 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://components101.com/displays/7-segment-display-pinout-working-datasheet",
+    "checked": "pins 1 e, 2 d, 3 com, 4 c, 5 dp, 6 b, 7 a, 8 com, 9 f, 10 g"
   }
 }

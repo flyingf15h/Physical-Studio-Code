@@ -238,5 +238,10 @@
     "note": "motor current comes from its own + pin",
     "source": "Typical datasheet numbers; not yet measured",
     "drive_ma": 500
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.ti.com/lit/ds/symlink/uln2003a.pdf",
+    "checked": "500 mA per channel"
   }
 }

@@ -21,6 +21,7 @@
 .parts-name { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .parts-badge { font-size: 10px; font-weight: 700; line-height: 1; border-radius: 999px; padding: 2px 5px; background: #fff1e8; color: #a8461b; }
 .parts-badge.measured { background: var(--accent-soft); color: #0b6f7d; }
+.parts-badge.checked { background: #e7f6ec; color: #1d6b3a; white-space: nowrap; }
 .parts-badge.mine { background: #efe8fd; color: #5b2bb5; white-space: nowrap; }
 .parts-upload { margin-left: auto; align-self: center; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
 .parts-upload:hover, .parts-upload.active { border-color: var(--accent); background: var(--accent-soft); color: #0b6f7d; }

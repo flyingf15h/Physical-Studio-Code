@@ -122,5 +122,10 @@
     "signal_v": "supply",
     "note": "heater",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.pololu.com/file/0J309/MQ2.pdf",
+    "checked": "heater 5.0 V +/- 0.2 V, 31 ohm (about 160 mA)"
   }
 }

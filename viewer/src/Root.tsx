@@ -6,6 +6,7 @@ import { AccountPage } from './pages/AccountPage'
 import { BuildPage } from './pages/BuildPage'
 import { DescribePage } from './pages/DescribePage'
 import { DesignPage } from './pages/DesignPage'
+import { HandoutPage } from './pages/HandoutPage'
 import { LegalPage, NotFoundPage } from './pages/LegalPage'
 import { PrintPage } from './pages/PrintPage'
 import { ProjectsPage } from './pages/ProjectsPage'
@@ -24,6 +25,7 @@ const TITLES: Record<Route['page'], string> = {
   describe: 'Physical Studio · step-by-step Arduino build guides',
   projects: 'Your projects · Physical Studio',
   build: 'Build guide · Physical Studio',
+  handout: 'Handout · Physical Studio',
   design: 'Designing · Physical Studio',
   guide: 'Guide · Physical Studio',
   print: 'Print and share · Physical Studio',
@@ -43,6 +45,8 @@ function Page() {
       return <DescribePage />
     case 'build':
       return <BuildPage key={route.buildId} buildId={route.buildId} />
+    case 'handout':
+      return <HandoutPage key={route.buildId} buildId={route.buildId} />
     case 'projects':
       return <ProjectsPage />
     case 'design':

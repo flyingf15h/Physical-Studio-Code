@@ -2,6 +2,7 @@
 //   /                         Dashboard (1 Describe)
 //   /projects                 Your projects
 //   /build/<build id>         a breadboard build from bench photos (2 Design, 3 Guide, 4 Build)
+//   /build/<build id>/handout the same guide as a printable handout (HandoutPage)
 //   /design/<job id>          2 the AI designs it
 //   /guide?design=out/<id>    3 Guide + 4 Build (the tracker panel); /?design=... still works
 //   /print?design=out/<id>    5 Print and share
@@ -14,6 +15,7 @@ export type Route =
   | { page: 'describe' }
   | { page: 'projects' }
   | { page: 'build'; buildId: string }
+  | { page: 'handout'; buildId: string }
   | { page: 'design'; jobId: string }
   | { page: 'guide' }
   | { page: 'print' }
@@ -24,6 +26,8 @@ export type Route =
 export type LegalDoc = 'safety' | 'terms' | 'privacy'
 
 export function parseRoute(path = location.pathname, search = location.search): Route {
+  const handout = path.match(/^\/build\/([\w-]+)\/handout\/?$/)
+  if (handout) return { page: 'handout', buildId: handout[1] }
   const build = path.match(/^\/build\/([\w-]+)\/?$/)
   if (build) return { page: 'build', buildId: build[1] }
   const job = path.match(/^\/design\/([\w-]+)\/?$/)

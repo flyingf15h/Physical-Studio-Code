@@ -83,7 +83,7 @@
       ]
     }
   ],
-  "notes": "One-wire style data pin: add a 10 kΩ pull-up from DATA to VCC (modules on a small board already have it).",
+  "notes": "One-wire style data pin: add a 10 kΩ pull-up from DATA to VCC (modules on a small board already have it). 3-pin DHT11 module boards vary (S, +, - or +, OUT, -): wire by the labels printed on the board, not by position.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,

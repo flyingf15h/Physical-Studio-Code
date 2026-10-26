@@ -130,5 +130,10 @@
     "peak_ma": 1,
     "note": "most BMP280 breakouts have no regulator: 3.3 V only",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp280-ds001.pdf",
+    "checked": "chip supply 1.71-3.6 V (3.3 V only without a regulator)"
   }
 }

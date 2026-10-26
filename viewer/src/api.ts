@@ -11,6 +11,7 @@ export interface PartSummary {
   category: 'board' | 'input' | 'output' | 'fastener' | 'misc'
   body_size: [number, number, number]
   verified: boolean
+  datasheet?: string | null // the datasheet its pins and power numbers were checked against
   source?: string
   mine?: boolean // from the signed-in user's BOM
 }

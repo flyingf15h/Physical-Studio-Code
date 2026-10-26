@@ -155,5 +155,10 @@
     "peak_ma": 15,
     "signal_v": "supply",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf",
+    "checked": "pin order VCC, Trig, Echo, GND; 5 V, 15 mA; 2-400 cm; 45 x 20 mm board"
   }
 }

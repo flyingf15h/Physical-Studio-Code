@@ -106,7 +106,7 @@
       ]
     }
   ],
-  "notes": "IN from a digital pin switches the relay. Only switch low voltages unless you know mains wiring.",
+  "notes": "IN from a digital pin switches the relay. Only switch low voltages unless you know mains wiring. Pin order and names vary by seller (VCC/GND/IN, DC+/DC-/IN, or S/+/-): wire by the labels printed on your board.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,

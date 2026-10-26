@@ -1504,6 +1504,9 @@ export function BuildPage({ buildId }: { buildId: string }) {
               onSaved={(summary) => setBuild((b) => (b?.plan ? { ...b, plan: { ...b.plan, summary } } : b))}
             />
             <ShareButton />
+            <a className="share-button handout-link" href={`/build/${buildId}/handout`} title="A printable copy for class: parts checklist, every step with its picture, tests and the sketch">
+              Print handout
+            </a>
             <div className="build-progress" role="progressbar" aria-valuemin={0} aria-valuemax={n} aria-valuenow={Math.max(0, Math.min(at, n))}>
               <i style={{ width: `${(Math.max(0, Math.min(at, n)) / n) * 100}%` }} />
             </div>

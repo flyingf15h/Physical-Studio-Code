@@ -120,7 +120,7 @@
       ]
     }
   ],
-  "notes": "I2C at 0x3C. VCC 3.3-5 V. Use the Adafruit SSD1306 or U8g2 library.",
+  "notes": "I2C at 0x3C. VCC 3.3-5 V. Use the Adafruit SSD1306 or U8g2 library. Some sellers' boards swap VCC and GND (VCC, GND, SCL, SDA): always wire by the labels printed on your board.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,

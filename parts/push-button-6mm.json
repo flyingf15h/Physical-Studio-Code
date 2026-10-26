@@ -30,8 +30,8 @@
       "id": "1a",
       "label": "1",
       "position": [
+        -0.25,
         0.75,
-        0.0,
         -3.5
       ],
       "direction": [
@@ -44,8 +44,8 @@
       "id": "1b",
       "label": "1",
       "position": [
-        5.25,
-        0.0,
+        6.25,
+        0.75,
         -3.5
       ],
       "direction": [
@@ -58,8 +58,8 @@
       "id": "2a",
       "label": "2",
       "position": [
-        0.75,
-        6.0,
+        -0.25,
+        5.25,
         -3.5
       ],
       "direction": [
@@ -72,8 +72,8 @@
       "id": "2b",
       "label": "2",
       "position": [
+        6.25,
         5.25,
-        6.0,
         -3.5
       ],
       "direction": [
@@ -83,7 +83,7 @@
       ]
     }
   ],
-  "notes": "Straddle the breadboard's centre gap. The two legs on the same side are always connected; pressing joins the two sides. Read it with INPUT_PULLUP and wire the other side to GND.",
+  "notes": "Straddle the breadboard's centre gap in columns e and f, two rows apart (e.g. e20, f20, e22, f22). The legs facing each other across the gap (6.5 mm apart, pins 1a/1b and 2a/2b) are always connected; pressing joins the two rows. Wire the two rows on one side of the gap: one to the input pin (INPUT_PULLUP), the other to GND.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,
@@ -92,5 +92,10 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-b3f.pdf",
+    "checked": "Omron B3F 6x6: legs on a 6.5 x 4.5 mm grid; the legs 6.5 mm apart are joined inside, pressing joins the two pairs"
   }
 }

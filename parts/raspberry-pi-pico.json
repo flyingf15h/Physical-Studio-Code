@@ -661,5 +661,10 @@
     },
     "five_v_tolerant": false,
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf",
+    "checked": "VSYS 1.8-5.5 V, 3.3 V logic, pin order"
   }
 }

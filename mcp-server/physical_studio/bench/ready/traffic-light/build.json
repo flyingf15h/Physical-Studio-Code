@@ -204,7 +204,7 @@
    {
     "number": 1,
     "title": "Place the breadboard",
-    "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line.",
+    "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line. Some full-size breadboards break each power rail halfway along: look for a gap in the red and blue lines in the middle. If yours has one, bridge each rail this build uses across the gap with a short jumper wire, or the parts past the gap get no power.",
     "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap.",
     "part_ids": [
      "breadboard"
@@ -2363,7 +2363,7 @@
      "part_ids": [
       "breadboard"
      ],
-     "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line.",
+     "instruction": "Place the breadboard flat with its long side running left to right, row one at the left, and column a above the centre gap. The outer ground rail along the top edge is the negative (-) rail, normally marked with a blue line. Some full-size breadboards break each power rail halfway along: look for a gap in the red and blue lines in the middle. If yours has one, bridge each rail this build uses across the gap with a short jumper wire, or the parts past the gap get no power.",
      "placements": [],
      "check": "A top-down photo shows the empty breadboard with row 1 on the left and column a above the centre gap.",
      "why": "The breadboard holds the parts and lets them connect without soldering."

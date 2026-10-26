@@ -88,5 +88,10 @@
     "peak_ma": 2,
     "signal_v": "supply",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.elecrow.com/download/Infrared%20receiver%20vs1838b.pdf",
+    "checked": "2.7-5.5 V supply, 1.5 mA max, 38 kHz"
   }
 }

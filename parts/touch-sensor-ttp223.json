@@ -69,7 +69,7 @@
       ]
     }
   ],
-  "notes": "SIG goes high while the pad is touched. 2-5.5 V.",
+  "notes": "SIG goes high while the pad is touched. 2-5.5 V. Pin order varies by seller: wire by the labels printed on the board.",
   "verified": false,
   "verified_by": null,
   "verified_on": null,
@@ -88,5 +88,10 @@
     "peak_ma": 2,
     "signal_v": "supply",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://files.seeedstudio.com/wiki/Grove-Touch_Sensor/res/TTP223.pdf",
+    "checked": "TTP223 chip: 2.0-5.5 V"
   }
 }

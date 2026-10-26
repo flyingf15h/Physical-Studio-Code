@@ -112,9 +112,11 @@ PARTS_LIST = [
          "Rows 1-30; holes a-e in one row are connected, f-j likewise. Two power rails along each long edge.", WHITE),
     # ---- inputs ----
     part("push-button-6mm", "Tactile push button 6x6 mm", "input", [6.0, 6.0, 5.0],
-         [{"id": "1a", "label": "1", "position": [0.75, 0.0, -3.5], "direction": [0, 0, -1]}, {"id": "1b", "label": "1", "position": [5.25, 0.0, -3.5], "direction": [0, 0, -1]},
-          {"id": "2a", "label": "2", "position": [0.75, 6.0, -3.5], "direction": [0, 0, -1]}, {"id": "2b", "label": "2", "position": [5.25, 6.0, -3.5], "direction": [0, 0, -1]}],
-         "Straddle the breadboard's centre gap. The two legs on the same side are always connected; pressing joins the two sides. Read it with INPUT_PULLUP and wire the other side to GND.",
+         [{"id": "1a", "label": "1", "position": [-0.25, 0.75, -3.5], "direction": [0, 0, -1]}, {"id": "1b", "label": "1", "position": [6.25, 0.75, -3.5], "direction": [0, 0, -1]},
+          {"id": "2a", "label": "2", "position": [-0.25, 5.25, -3.5], "direction": [0, 0, -1]}, {"id": "2b", "label": "2", "position": [6.25, 5.25, -3.5], "direction": [0, 0, -1]}],
+         "Straddle the breadboard's centre gap in columns e and f, two rows apart (e.g. e20, f20, e22, f22). The legs facing each other across the gap "
+         "(6.5 mm apart, pins 1a/1b and 2a/2b) are always connected; pressing joins the two rows. Wire the two rows on one side of the gap: one to the "
+         "input pin (INPUT_PULLUP), the other to GND.",
          BLACK, below=3.5),
     part("potentiometer-10k", "Potentiometer 10 kΩ (rotary, 16 mm)", "input", [16.0, 18.0, 10.0], legs(["1", "wiper", "3"], 3.0, 9.0, 5.0, 5.0),
          "Outer legs to 5 V (or 3.3 V) and GND, the middle leg (wiper) to an analog pin. Turning it changes the voltage on the wiper.",

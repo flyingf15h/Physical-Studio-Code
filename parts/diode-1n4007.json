@@ -64,5 +64,10 @@
     "metallic": 0.0,
     "roughness": 0.7,
     "source": "Typical colour of the common part"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://www.vishay.com/docs/88503/1n4001.pdf",
+    "checked": "colour band marks the cathode; 1 A"
   }
 }

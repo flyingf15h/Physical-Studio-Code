@@ -135,5 +135,10 @@
     "peak_ma": 1,
     "signal_v": "supply",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://sensorkit.joy-it.net/en/sensors/ky-040",
+    "checked": "pin labels CLK, DT, SW, +, GND; 3.3 or 5 V"
   }
 }

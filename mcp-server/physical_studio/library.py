@@ -58,6 +58,7 @@ def summary(part: dict) -> dict:
         "category": part["category"],
         "body_size": part["body"]["size"],
         "verified": bool(part.get("verified", False)),
+        "datasheet": (part.get("datasheet_checked") or {}).get("source"),
     }
 
 

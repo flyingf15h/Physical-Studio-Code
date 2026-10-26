@@ -22,5 +22,10 @@
   "notes": "Legs 12.5 mm apart (across the body) are always connected; the two legs on the same side, 5 mm apart, are the switch. Pins a and b are that normally-open pair. If the button has a snap-on colored cap, the cap adds height and needs a bigger lid hole; measure it.",
   "verified": false,
   "verified_by": null,
-  "verified_on": null
+  "verified_on": null,
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-b3f.pdf",
+    "checked": "Omron B3F 12x12: legs on a 12.5 x 5 mm grid; the legs 12.5 mm apart are joined inside, pressing joins the two pairs"
+  }
 }

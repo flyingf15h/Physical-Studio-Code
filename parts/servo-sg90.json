@@ -108,5 +108,10 @@
     "needs_driver": false,
     "note": "stall current",
     "source": "Typical datasheet numbers; not yet measured"
+  },
+  "datasheet_checked": {
+    "on": "2026-10-26",
+    "source": "https://components101.com/motors/servo-motor-basics-pinout-datasheet",
+    "checked": "wires: orange signal, red V+, brown GND; about 5 V"
   }
 }
