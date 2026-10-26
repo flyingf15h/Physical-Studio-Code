@@ -1338,8 +1338,9 @@ export function BuildPage({ buildId }: { buildId: string }) {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null
       if (tab !== 'guide' || e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return
-      if (e.key === ']') setAt((a) => Math.min(steps, a + 1))
-      else if (e.key === '[') setAt((a) => Math.max(-1, a - 1))
+      const arrow = (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && t?.getAttribute('role') !== 'slider' // like Flatpack: arrows step too
+      if (e.key === ']' || (arrow && e.key === 'ArrowRight')) setAt((a) => Math.min(steps, a + 1))
+      else if (e.key === '[' || (arrow && e.key === 'ArrowLeft')) setAt((a) => Math.max(-1, a - 1))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
