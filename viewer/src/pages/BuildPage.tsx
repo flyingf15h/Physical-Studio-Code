@@ -1113,6 +1113,7 @@ function StepView({
       )}
       {!isHardware(plan) && s.picture && (
         <StepPicture
+          key={index}
           step={s}
           index={index}
           wires={plan.wires ?? {}}
@@ -1148,7 +1149,7 @@ function StepView({
       {isHardware(plan) && s.picture && (
         <details className="step-reference">
           <summary>The picture the camera check compares your photo with</summary>
-          <StepPicture step={s} index={index} wires={plan.wires ?? {}} caption="The AI compares your photos with this render. Cyan is what you add now." />
+          <StepPicture key={index} step={s} index={index} wires={plan.wires ?? {}} caption="The AI compares your photos with this render. Cyan is what you add now." />
         </details>
       )}
       {s.model && !isHardware(plan) && (
@@ -1177,7 +1178,7 @@ function StepView({
           Only the person who started it can commit photos to it.
         </p>
       ) : (
-        <CommitBox build={build} step={index} onCommit={onCommit} />
+        <CommitBox key={index} build={build} step={index} onCommit={onCommit} />
       )}
       {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} hardware={isHardware(plan)} />}
       {last?.verdict?.status === 'done' && (
@@ -1679,8 +1680,9 @@ export function BuildPage({ buildId }: { buildId: string }) {
           ) : at >= n ? (
             <Finished plan={plan} />
           ) : (
+            // Not keyed by step: the 3D model stays mounted from step to step and swaps in the next step's model
+            // instead of going blank; the per-step parts (commit box, pictures, report) are keyed by step inside.
             <StepView
-              key={at}
               build={build!}
               plan={plan}
               index={at}

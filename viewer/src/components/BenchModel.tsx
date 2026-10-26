@@ -322,6 +322,13 @@ function RememberView({ guide }: { guide: string }) {
   return null
 }
 
+// Loads the next step's model off-screen; the canvas keeps drawing the current one until it is ready.
+function LoadModel({ glb, onLoad }: { glb: string; onLoad: (glb: string) => void }) {
+  useGLTF(glb)
+  useEffect(() => onLoad(glb), [glb, onLoad])
+  return null
+}
+
 interface Props {
   model: Model
   guide?: Record<string, string> // part id -> "what it is" note
@@ -340,6 +347,15 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   // Reset view / Top view start from their own pose; otherwise carry on from the last step's camera.
   const [saved] = useState(() => lastView.get(guideKey))
   const start = view.n === 0 ? saved : undefined
+  // The canvas stays mounted from step to step. A new step's model loads behind the current one, which stays
+  // on screen (with its highlight) until the new one is ready, so the view never goes blank between steps.
+  const [loaded, setLoaded] = useState(model.glb)
+  const shownRef = useRef({ model, highlight })
+  if (loaded === model.glb) shownRef.current = { model, highlight }
+  const shown = shownRef.current
+  // The framing snaps into place only for the first model a fresh view shows; later steps ease onto their parts.
+  const [snapGlb, setSnapGlb] = useState<string | null>(saved ? null : model.glb)
+  useEffect(() => setPicked(null), [model.glb])
   const label = model.labels.find((l) => l.id === picked)
   const wire = picked ? wires[picked] : undefined
   const parts = model.labels.filter((l) => l.kind !== 'wire')
@@ -360,6 +376,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
       <div className="bench-canvas" style={{ height }} ref={box}>
         <Canvas
           key={view.n}
+          onCreated={() => setSnapGlb(view.n === 0 && saved ? null : shownRef.current.model.glb)}
           camera={
             start
               ? { fov: 35, near: 0.001, far: 50, position: start.position, rotation: start.rotation }
@@ -383,12 +400,17 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           <Suspense fallback={null}>
             {/* With no camera to carry on from (a guide's first view, Reset or Top view) the framing snaps into
                 place instead of swooping in from the default pose. */}
-            <Bounds fit observe margin={1.15} maxDuration={start ? 1 : 0.001}>
-              <Scene model={model} picked={picked} highlight={highlight} look={look} onPick={setPicked} onBox={setBounds} />
+            <Bounds fit observe margin={1.15} maxDuration={shown.model.glb === snapGlb ? 0.001 : 1}>
+              <Scene model={shown.model} picked={picked} highlight={shown.highlight} look={look} onPick={setPicked} onBox={setBounds} />
             </Bounds>
             {look === 'studio' && bounds && <StudioLight box={bounds} />}
             {wire && <WireMarkers wire={wire} />}
           </Suspense>
+          {loaded !== model.glb && (
+            <Suspense fallback={null}>
+              <LoadModel glb={model.glb} onLoad={setLoaded} />
+            </Suspense>
+          )}
           {look === 'drawing' && (
             <EffectComposer multisampling={4}>
               <primitive object={ink} />
