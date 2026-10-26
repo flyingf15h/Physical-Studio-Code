@@ -118,6 +118,7 @@ function Scene({
   picked,
   highlight,
   look,
+  labels,
   onPick,
   onBox,
 }: {
@@ -125,6 +126,7 @@ function Scene({
   picked: string | null
   highlight: string[]
   look: Look
+  labels: boolean // every part's name floating over it (Flatpack's part labels)
   onPick: (id: string | null) => void
   onBox: (box: THREE.Box3) => void // the studio light sits outside <Bounds>, or its floor would be framed too
 }) {
@@ -132,7 +134,7 @@ function Scene({
   const ids = useMemo(() => model.labels.map((l) => l.id), [model.labels])
   const wireIds = useMemo(() => model.labels.filter((l) => l.kind === 'wire').map((l) => l.id), [model.labels])
   const invalidate = useThree((s) => s.invalidate)
-  const { root, meshes, box } = useMemo(() => {
+  const { root, meshes, anchors, box } = useMemo(() => {
     const root = gltf.scene.clone(true)
     root.updateMatrixWorld(true)
     const meshes: THREE.Mesh[] = []
@@ -172,11 +174,22 @@ function Scene({
       mesh.userData.part = partOf(mesh, ids)
       meshes.push(mesh)
     })
+    const parts = new Map<string, THREE.Box3>()
     for (const mesh of meshes) {
       mesh.userData.wire = wireIds.includes(mesh.userData.part as string)
       if (mesh.userData.wire) mesh.add(hitZone(mesh))
+      else if (mesh.userData.part) {
+        const id = mesh.userData.part as string
+        parts.set(id, (parts.get(id) ?? new THREE.Box3()).expandByObject(mesh))
+      }
     }
-    return { root, meshes, box: new THREE.Box3().setFromObject(root) }
+    // Where each part's label sits: just above the middle of its top.
+    const anchors = [...parts].map(([id, b]) => ({
+      id,
+      at: new THREE.Vector3((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2),
+      size: b.getSize(new THREE.Vector3()).length(),
+    }))
+    return { root, meshes, anchors, box: new THREE.Box3().setFromObject(root) }
   }, [gltf, ids, wireIds])
 
   useEffect(() => {
@@ -230,6 +243,35 @@ function Scene({
     if (t < 1) invalidate()
     else drop.current = null
   })
+  // Labels never pile up: each drawn frame, a label that would overlap one already placed is hidden. The picked
+  // part goes first, then this step's new parts, then bigger parts before smaller ones.
+  const labelEls = useRef(new Map<string, HTMLElement>())
+  const order = useMemo(
+    () => [...anchors].sort((a, b) => rank(b.id) - rank(a.id) || b.size - a.size),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [anchors, picked, highlight.join(' ')],
+  )
+  function rank(id: string) {
+    return id === picked ? 2 : highlight.includes(id) ? 1 : 0
+  }
+  useFrame(({ camera, size }) => {
+    if (!labels) return
+    const placed: [number, number, number, number][] = []
+    const v = new THREE.Vector3()
+    for (const { id, at } of order) {
+      const el = labelEls.current.get(id)
+      if (!el) continue
+      v.copy(at).project(camera)
+      const w = el.offsetWidth + 6
+      const h = el.offsetHeight + 4
+      const x = ((v.x + 1) / 2) * size.width - w / 2
+      const y = ((1 - v.y) / 2) * size.height - h - 6
+      const free = v.z < 1 && x >= 0 && y >= 0 && x + w <= size.width && !placed.some(([px, py, pw, ph]) => x < px + pw && px < x + w && y < py + ph && py < y + h)
+      el.style.visibility = free ? '' : 'hidden'
+      if (free) placed.push([x, y, w, h])
+    }
+  })
+  useEffect(() => invalidate(), [labels, order, invalidate]) // place them now, not on the next camera move
   const bounds = useBounds()
   const boundsRef = useRef(bounds) // useBounds() is a new object every render: keep it out of the effect's deps
   boundsRef.current = bounds
@@ -259,6 +301,23 @@ function Scene({
           onPick((e.object.userData.part as string | null) ?? null)
         }}
       />
+      {labels &&
+        anchors.map(({ id, at }) => (
+          <Html key={id} position={at} zIndexRange={[6, 0]} style={{ pointerEvents: 'none' }}>
+            <button
+              ref={(el) => {
+                if (el) labelEls.current.set(id, el)
+                else labelEls.current.delete(id)
+              }}
+              style={{ visibility: 'hidden' }}
+              type="button"
+              className={['part-label', highlight.includes(id) ? 'new' : '', id === picked ? 'picked' : ''].join(' ')}
+              onClick={() => onPick(id === picked ? null : id)}
+            >
+              {model.labels.find((l) => l.id === id)?.name ?? id}
+            </button>
+          </Html>
+        ))}
     </>
   )
 }
@@ -306,6 +365,7 @@ function StudioLight({ box }: { box: THREE.Box3 }) {
 // eases onto the new parts, so moving through the steps reads as one continuous shot.
 type View = { position: [number, number, number]; rotation: [number, number, number]; target: [number, number, number] }
 const lastView = new Map<string, View>()
+let labelsOn = false // the labels toggle carries over between steps and models
 
 function RememberView({ guide }: { guide: string }) {
   // Saved on every drawn frame, not on unmount: the next step's canvas reads it while rendering, which React
@@ -341,6 +401,8 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
   const [picked, setPicked] = useState<string | null>(null)
   const [view, setView] = useState({ n: 0, top: false }) // a new n remounts the canvas at that view
   const [look, setLook] = useState<Look>('studio')
+  const [labels, setLabels] = useState(labelsOn)
+  const toggleLabels = () => setLabels((on) => (labelsOn = !on))
   const [bounds, setBounds] = useState<THREE.Box3 | null>(null)
   const ink = useMemo(() => new InkEdgesEffect(), [])
   const guideKey = model.glb.replace(/[^/]*$/, '') // the guide's folder: its steps share one camera
@@ -369,6 +431,16 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
     const stop = (e: WheelEvent) => e.preventDefault()
     el.addEventListener('wheel', stop, { passive: false })
     return () => el.removeEventListener('wheel', stop)
+  }, [])
+  // N shows or hides the part labels, like Flatpack's.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return
+      if (e.key === 'n' || e.key === 'N') setLabels((on) => (labelsOn = !on))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   return (
@@ -401,7 +473,7 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
             {/* With no camera to carry on from (a guide's first view, Reset or Top view) the framing snaps into
                 place instead of swooping in from the default pose. */}
             <Bounds fit observe margin={1.15} maxDuration={shown.model.glb === snapGlb ? 0.001 : 1}>
-              <Scene model={shown.model} picked={picked} highlight={shown.highlight} look={look} onPick={setPicked} onBox={setBounds} />
+              <Scene model={shown.model} picked={picked} highlight={shown.highlight} look={look} labels={labels} onPick={setPicked} onBox={setBounds} />
             </Bounds>
             {look === 'studio' && bounds && <StudioLight box={bounds} />}
             {wire && <WireMarkers wire={wire} />}
@@ -426,15 +498,31 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
           <OrbitControls makeDefault {...(start && { target: start.target })} minDistance={0.01} maxDistance={5} zoomSpeed={0.8} />
           <RememberView guide={guideKey} />
         </Canvas>
+        <p className="bench-hint">Drag to rotate · scroll to zoom · click a part or wire</p>
         <div className="bench-tools">
-          <span>Drag to rotate · scroll to zoom · click a part or wire</span>
-          <button type="button" onClick={() => setView((v) => ({ n: v.n + 1, top: false }))}>
-            Reset view
-          </button>
-          <button type="button" onClick={() => setView((v) => ({ n: v.n + 1, top: true }))}>
-            Top view
-          </button>
-          <span className="bench-looks" role="group" aria-label="How the model is drawn">
+          <span className="bench-group">
+            <button type="button" title="Back to the starting view" onClick={() => setView((v) => ({ n: v.n + 1, top: false }))}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v2.8h2.8" />
+              </svg>
+              Reset
+            </button>
+            <button type="button" title="Look straight down" onClick={() => setView((v) => ({ n: v.n + 1, top: true }))}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="3" y="3" width="10" height="10" rx="1.5" />
+                <path d="M8 6v4M6 8h4" />
+              </svg>
+              Top
+            </button>
+            <button type="button" aria-pressed={labels} title="Show every part's name (N)" onClick={toggleLabels}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M2.5 3.5h6l5 4.5-5 4.5h-6z" />
+                <circle cx="5.5" cy="8" r="1" />
+              </svg>
+              Labels
+            </button>
+          </span>
+          <span className="bench-group bench-looks" role="group" aria-label="How the model is drawn">
             {(
               [
                 ['studio', 'Studio', 'Studio lighting with shadows'],
@@ -447,9 +535,13 @@ export function BenchModel({ model, guide = {}, wires = {}, highlight = [], heig
               </button>
             ))}
           </span>
-          <a href={model.glb} download title="Download this 3D model (GLB)">
-            Download
-          </a>
+          <span className="bench-group">
+            <a href={model.glb} download title="Download this 3D model (GLB)" aria-label="Download this 3D model">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10" />
+              </svg>
+            </a>
+          </span>
         </div>
       </div>
       <p className="bench-info" aria-live="polite">

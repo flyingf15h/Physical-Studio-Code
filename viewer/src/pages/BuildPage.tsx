@@ -42,6 +42,8 @@ function isHardware(plan: BuildPlan | null) {
 }
 
 /** Consecutive steps with the same section, or null when the plan has no sections (breadboard builds). */
+const PLAY_MS = 3200 // Play build: how long each step shows (the camera eases and the new parts drop in first)
+
 function sectionsOf(steps: BuildStep[]) {
   if (!steps.some((s) => s.section)) return null
   const groups: { name: string; start: number; end: number }[] = []
@@ -956,7 +958,7 @@ function StepView({
       )}
       {!isHardware(plan) && s.picture && (
         <StepPicture
-          key={index}
+          key={`picture-${index}`}
           step={s}
           index={index}
           wires={plan.wires ?? {}}
@@ -992,7 +994,7 @@ function StepView({
       {isHardware(plan) && s.picture && (
         <details className="step-reference">
           <summary>The picture the camera check compares your photo with</summary>
-          <StepPicture key={index} step={s} index={index} wires={plan.wires ?? {}} caption="The AI compares your photos with this render. Cyan is what you add now." />
+          <StepPicture key={`picture-${index}`} step={s} index={index} wires={plan.wires ?? {}} caption="The AI compares your photos with this render. Cyan is what you add now." />
         </details>
       )}
       {s.model && !isHardware(plan) && (
@@ -1021,7 +1023,7 @@ function StepView({
           Only the person who started it can commit photos to it.
         </p>
       ) : (
-        <CommitBox key={index} build={build} step={index} onCommit={onCommit} />
+        <CommitBox key={`commit-${index}`} build={build} step={index} onCommit={onCommit} />
       )}
       {last?.verdict && <VerdictCard verdict={last.verdict} image={last.images[0]} hardware={isHardware(plan)} />}
       {last?.verdict?.status === 'done' && (
@@ -1341,10 +1343,51 @@ export function BuildPage({ buildId }: { buildId: string }) {
       const arrow = (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && t?.getAttribute('role') !== 'slider' // like Flatpack: arrows step too
       if (e.key === ']' || (arrow && e.key === 'ArrowRight')) setAt((a) => Math.min(steps, a + 1))
       else if (e.key === '[' || (arrow && e.key === 'ArrowLeft')) setAt((a) => Math.max(-1, a - 1))
+      else if (e.key === ' ') {
+        e.preventDefault() // Space plays, even with a button focused: not the page scroll, not a click
+        if (!e.repeat) togglePlay.current()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [tab, steps])
+  // Play build (Flatpack's play): the guide walks itself through every step, the 3D model carrying on from one
+  // step to the next. Moving to a step yourself, or leaving the guide, stops it.
+  const [playing, setPlaying] = useState(false)
+  const autoAt = useRef(at) // the step the player last moved to
+  const togglePlay = useRef(() => {})
+  togglePlay.current = () => {
+    if (playing) return setPlaying(false)
+    const from = at < 0 || at >= steps - 1 ? 0 : at
+    autoAt.current = from
+    setAt(from)
+    setPlaying(steps > 0)
+  }
+  useEffect(() => {
+    if (playing && (at !== autoAt.current || tab !== 'guide')) setPlaying(false)
+  }, [at, tab, playing])
+  useEffect(() => {
+    // While playing, keep the 3D model on screen (breadboard steps have it below the text), again once the
+    // step's picture has loaded and pushed it down.
+    if (!playing) return
+    const show = () => document.querySelector('.build-main .bench-model')?.scrollIntoView({ block: 'center' })
+    show()
+    const imgs = [...document.querySelectorAll<HTMLImageElement>('.build-main .step-picture')].filter((i) => !i.complete)
+    imgs.forEach((i) => i.addEventListener('load', show, { once: true }))
+    return () => imgs.forEach((i) => i.removeEventListener('load', show))
+  }, [at, playing])
+  useEffect(() => {
+    if (!playing || at !== autoAt.current) return
+    if (at >= steps - 1) {
+      const id = window.setTimeout(() => setPlaying(false), PLAY_MS)
+      return () => clearTimeout(id)
+    }
+    const id = window.setTimeout(() => {
+      autoAt.current = at + 1
+      setAt(at + 1)
+    }, PLAY_MS)
+    return () => clearTimeout(id)
+  }, [playing, at, steps])
 
   useEffect(() => {
     let stop = false
@@ -1539,6 +1582,34 @@ export function BuildPage({ buildId }: { buildId: string }) {
               <button type="button" className="tool" disabled={at < 0} onClick={() => setAt(at - 1)}>
                 ← Back
               </button>
+              {n > 1 && (
+                <button
+                  type="button"
+                  className={`tool play-build${playing ? ' on' : ''}`}
+                  aria-pressed={playing}
+                  title={playing ? 'Pause (Space)' : 'Play every step in turn (Space)'}
+                  onClick={() => togglePlay.current()}
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">{playing ? <path d="M5 3.5v9M11 3.5v9" /> : <path d="M5 3.2v9.6L12.8 8z" />}</svg>
+                  {playing ? 'Pause' : 'Play build'}
+                </button>
+              )}
+              <div className="step-timeline" role="group" aria-label="Steps">
+                {plan.steps.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={[i === at ? 'active' : i < at ? 'done' : '', groups?.some((g) => g.start === i && i > 0) ? 'section-start' : ''].join(' ')}
+                    title={`Step ${i + 1}: ${s.title}`}
+                    aria-label={`Step ${i + 1}: ${s.title}`}
+                    aria-current={i === at ? 'step' : undefined}
+                    onClick={() => setAt(i)}
+                  >
+                    {playing && i === at && <i style={{ animationDuration: `${PLAY_MS}ms` }} />}
+                  </button>
+                ))}
+              </div>
+              <span className="step-count">{at < 0 ? `${n} steps` : at >= n ? 'Done' : `${at + 1} / ${n}`}</span>
               <button type="button" className="primary" disabled={at >= n} onClick={() => setAt(at + 1)}>
                 {at < 0 ? 'Start step 1 →' : at === n - 1 ? 'Finish →' : 'Next step →'}
               </button>
