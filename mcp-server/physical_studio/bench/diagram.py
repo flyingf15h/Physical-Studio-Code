@@ -1,9 +1,12 @@
-# Ported from circuit-studio/diagram.py at 21a4f23; this step's parts, wires and markers are now tagged
-# (ps-new, ps-marks) for the build page's step animation.
+# Ported from circuit-studio/diagram.py at 21a4f23; this step's parts, wires and markers are tagged
+# (ps-new, ps-marks).
 # IKEA-style picture of one build step, drawn as SVG (no extra packages): the breadboard and the
 # Arduino Uno to scale (the Uno's outline, headers and pin positions come from parts/arduino-uno.json),
 # everything placed in earlier steps faded, this step's parts in colour with a cyan halo, resistor
-# values written on the resistor, and a numbered marker on every hole or pin this step uses.
+# values written on the resistor, and a numbered marker on every hole or pin this step uses. So nobody
+# has to count holes, each hole this step uses is tied to its row number and column letter (both
+# highlighted) by dotted guide lines, and the numbered badges sit in the free lanes of the board, spread
+# out so they never cover each other or the part.
 # Works on a builder.py plan dict: plan['scene'] (app.py's Spec) and plan['steps'].
 import html, math, re
 
@@ -53,7 +56,7 @@ class Board:
         pid=self.resolve(name)
         return self.pins[pid]['label'] if pid else name.strip().upper().removeprefix('PIN:')
 
-def draw_board(board,used):
+def draw_board(board,used,now=frozenset()):
     W,H=board.w*S,board.h*S;out=[f'<rect x="{UX}" y="{UY}" width="{W:.1f}" height="{H:.1f}" rx="7" fill="#1d7a8c" stroke="#0f4c57" stroke-width="2"/>']
     for c in (board.uno or {}).get('connectors',[]):  # USB-B and barrel jack poke out of the -x edge
         cy=UY+(board.h-c['center'][1])*S;h=c['size'][0]*S;x0=UX-c.get('protrusion',0)*S
@@ -66,15 +69,24 @@ def draw_board(board,used):
     for pid in board.pins:
         x,y=board.xy(pid);out.append(f'<rect x="{x-2:.1f}" y="{y-2:.1f}" width="4" height="4" fill="#9a9a9a"/>')
     out.append(f'<text x="{UX+W/2:.1f}" y="{UY+H/2+6:.1f}" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff" opacity=".55">ARDUINO UNO</text>')
-    for name in sorted(used):  # labels only for the pins this build uses
-        x,y=board.xy(name);top=y<UY+H/2;ty=y+16 if top else y-9
-        out.append(f'<text x="{x:.1f}" y="{ty:.1f}" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">{esc(board.label(name))}</text>')
+    # Labels only for the pins this build uses; neighbouring pins' labels take turns on two lines so they
+    # never run into each other. This step's pins get a cyan pill.
+    now={board.resolve(n) or n for n in now};last={}
+    for name in sorted({board.resolve(n) or n for n in used},key=lambda n:board.xy(n)[0]):
+        x,y=board.xy(name);top=y<UY+H/2;lane=0
+        if top in last and x-last[top][0]<26:lane=1-last[top][1]
+        last[top]=(x,lane)
+        ty=y+17+lane*13 if top else y-10-lane*13;label=esc(board.label(name))
+        if name in now:
+            w=len(label)*6.4+10
+            out.append(f'<rect x="{x-w/2:.1f}" y="{ty-10:.1f}" width="{w:.1f}" height="14" rx="7" fill="{HALO}"/><text x="{x:.1f}" y="{ty+1:.1f}" text-anchor="middle" font-size="10" font-weight="700" fill="#06343a">{label}</text>')
+        else:out.append(f'<text x="{x:.1f}" y="{ty:.1f}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff" opacity=".85">{label}</text>')
     dy=UY+H+18  # dimension line: the size comes from the parts library, not from the model
     out.append(f'<path d="M{UX} {dy-5}v10M{UX+W:.1f} {dy-5}v10M{UX} {dy}H{UX+W:.1f}" stroke="#666" fill="none"/>')
     out.append(f'<text x="{UX+W/2:.1f}" y="{dy+14}" text-anchor="middle" font-size="10" fill="#555">{board.w:g} mm × {board.h:g} mm (parts library)</text>')
     return ''.join(out)
 
-def draw_breadboard(rails):
+def draw_breadboard(rails,rows=frozenset(),cols=frozenset()):
     o=[f'<rect x="{BX}" y="{BY}" width="{BW:.1f}" height="{BH:.1f}" rx="8" fill="#f4f0e6" stroke="#cfc6b4" stroke-width="1.5"/>',
        f'<rect x="{BX}" y="{mm_y(2.4):.1f}" width="{BW:.1f}" height="{4.8*S:.1f}" fill="#e3dccd"/>',
        f'<pattern id="holes" x="{row_x(1)-6:.2f}" y="{mm_y(13.97)-6:.2f}" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="4.4" y="4.4" width="3.2" height="3.2" fill="#8c8477"/></pattern>']
@@ -87,8 +99,10 @@ def draw_breadboard(rails):
             ly=mm_y(side*(y+1.6 if y>22 else y-1.6))
             o.append(f'<line x1="{x0:.1f}" y1="{ly:.1f}" x2="{x0+w:.1f}" y2="{ly:.1f}" stroke="{color}" stroke-width="2"/>')
             if sign:o.append(f'<text x="{BX+7}" y="{mm_y(side*y)+4:.1f}" font-size="12" font-weight="700" fill="{color}">{sign}</text>')
-    for r in (1,*range(5,61,5),63):o.append(f'<text x="{row_x(r):.1f}" y="{mm_y(0)+3:.1f}" text-anchor="middle" font-size="8" fill="#7a7266">{r}</text>')
-    for c,y in COL_MM.items():o.append(f'<text x="{BX+7}" y="{mm_y(y)+3:.1f}" font-size="8" fill="#7a7266">{c}</text>')
+    for r in (1,*range(5,61,5),63):
+        if not any(abs(r-q)<3 for q in rows):o.append(f'<text x="{row_x(r):.1f}" y="{mm_y(0)+3.5:.1f}" text-anchor="middle" font-size="9.5" fill="#7a7266">{r}</text>')
+    for c,y in COL_MM.items():
+        if c not in cols:o.append(f'<text x="{BX+9}" y="{mm_y(y)+3.5:.1f}" text-anchor="middle" font-size="9.5" fill="#7a7266">{c}</text>')
     return ''.join(o)
 
 def ohms(name):
@@ -130,6 +144,65 @@ def draw_wire(w,a,b,new):
     d=f'M{a[0]:.1f} {a[1]:.1f}C{a[0]:.1f} {c1y:.1f} {b[0]:.1f} {c2y:.1f} {b[0]:.1f} {b[1]:.1f}'
     o=[f'<path d="{d}" stroke="{HALO}" stroke-width="10" fill="none" stroke-linecap="round" opacity=".5"/>'] if new else []
     o.append(f'<path d="{d}" stroke="#0005" stroke-width="5.5" fill="none" stroke-linecap="round"/><path d="{d}" stroke="{w["color"]}" stroke-width="3.6" fill="none" stroke-linecap="round"/>')
+    return ''.join(o)
+
+def hole_parts(key):
+    """(row, column letter or None, rail side or None) of a breadboard hole or rail key."""
+    key=key.strip().lower()
+    if m:=HOLE.fullmatch(key):return int(m[2]),m[1],None
+    if m:=RAIL.fullmatch(key):return int(m[3]),None,int(m[1])
+    return None
+
+def draw_guides(keys):
+    """This step's holes tied to the board's coordinates: a dotted line from each hole to its row number on
+    the centre strip and another to its column letter, both shown as cyan pills. Returns the lines (drawn
+    under the parts) and the pills (drawn over them, so no wire hides a row number)."""
+    o=[];p=[];rows=set();cols=set()
+    for key in keys:
+        hp=hole_parts(key);xy=hole_xy(key)
+        if not hp or not xy:continue
+        row,col,_=hp;x,y=xy;rows.add(row)
+        sy=mm_y(2.4) if y<mm_y(0) else mm_y(-2.4)  # the near edge of the centre strip
+        o.append(f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{x:.1f}" y2="{sy:.1f}" stroke="{HALO}" stroke-width="1.6" stroke-dasharray="2 3" opacity=".9"/>')
+        if col:
+            cols.add(col)
+            o.append(f'<line x1="{BX+16}" y1="{y:.1f}" x2="{x-7:.1f}" y2="{y:.1f}" stroke="{HALO}" stroke-width="1.4" stroke-dasharray="2 3" opacity=".7"/>')
+    runs=[]  # nearby rows share one pill ("10–11", "44 · 46"): separate pills a hole or two apart would collide
+    for row in sorted(rows):
+        if runs and row-runs[-1][-1]<3:runs[-1].append(row)
+        else:runs.append([row])
+    for run in runs:
+        x=(row_x(run[0])+row_x(run[-1]))/2
+        text=str(run[0]) if len(run)==1 else f'{run[0]}–{run[-1]}' if run[-1]-run[0]==len(run)-1 else ' · '.join(map(str,run))
+        w=max(8+6.2*len(text),row_x(run[-1])-row_x(run[0])+18)
+        p.append(f'<rect x="{x-w/2:.1f}" y="{mm_y(0)-8:.1f}" width="{w:.1f}" height="16" rx="8" fill="{HALO}" stroke="#fff" stroke-width="1.5"/><text x="{x:.1f}" y="{mm_y(0)+4:.1f}" text-anchor="middle" font-size="11" font-weight="700" fill="#06343a">{text}</text>')
+    for col in sorted(cols):
+        y=mm_y(COL_MM[col])
+        p.append(f'<circle cx="{BX+9}" cy="{y:.1f}" r="7" fill="{HALO}"/><text x="{BX+9}" y="{y+3.8:.1f}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#06343a">{col}</text>')
+    return ''.join(o),''.join(p),rows,cols
+
+def lane_of(key,xy):
+    """The free strip a hole's numbered badge goes in: between the top rails and column a, between column j
+    and the bottom rails, or outside the breadboard for rail holes and board pins."""
+    hp=hole_parts(key)
+    if hp and hp[2] is not None:return BY-14 if hp[2]>0 else BY+BH+14
+    if hp:return mm_y(17.8) if hp[1] in 'abcde' else mm_y(-17.8)
+    return xy[1]-24 if xy[1]<UY+60 else xy[1]+24  # board pins: just off the header
+
+def draw_marks(spots):
+    """spots: [(n, (x, y), lane_y)]. Each hole gets a ring; its badge sits in its lane, at least 22 px from
+    the next one, joined to the hole by a short leader."""
+    o=[];by_lane={}
+    for n,(x,y),ly in spots:by_lane.setdefault(round(ly),[]).append([x,n,x,y,ly])
+    for group in by_lane.values():
+        group.sort()
+        for k in range(1,len(group)):group[k][0]=max(group[k][0],group[k-1][0]+22)
+        shift=(sum(g[2] for g in group)-sum(g[0] for g in group))/len(group)  # keep the group centred on its holes
+        for g in group:g[0]+=shift
+        for bx,n,x,y,ly in group:
+            o.append(f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{bx:.1f}" y2="{ly:.1f}" stroke="{HALO}" stroke-width="2"/>')
+            o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="6.5" fill="#fff" fill-opacity=".55" stroke="{HALO}" stroke-width="3"/>')
+            o.append(f'<circle cx="{bx:.1f}" cy="{ly:.1f}" r="9" fill="{HALO}" stroke="#fff" stroke-width="2"/><text x="{bx:.1f}" y="{ly+4:.1f}" text-anchor="middle" font-size="11" font-weight="700" fill="#06343a">{n}</text>')
     return ''.join(o)
 
 def step_svg(plan,i,uno=None):
@@ -188,17 +261,17 @@ def step_svg(plan,i,uno=None):
         if it['kind']=='led' and len(holes)>=2:out.append(('p',tag('part',draw_led(it,holes[:2],is_new))))
         elif it['kind']=='resistor' and len(holes)>=2:out.append(('p',tag('part',draw_resistor(it,holes[:2],is_new))))
         elif holes:out.append(('p',tag('part',draw_generic(it,holes,is_new))))
-    markers=[];marks=[]
+    markers=[];spots=[];now=set();holes_now=[]
     for n,pl in enumerate(steps[i]['placements'] if i<len(steps) else [],1):
         h=pl['hole'].strip().lower();m=PIN.fullmatch(h)
-        if m:used.add(m[1])
+        if m:used.add(m[1]);now.add(m[1])
+        else:holes_now.append(h)
         xy=board.xy(m[1]) if m else hole_xy(h)
         markers.append((n,pl['what'],pl['where'],pl['hole']))
-        if xy:
-            x,y=xy;mx,my=x+11,y-13
-            marks.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5" fill="none" stroke="{HALO}" stroke-width="2.5"/><line x1="{x+3:.1f}" y1="{y-4:.1f}" x2="{mx:.1f}" y2="{my:.1f}" stroke="{HALO}" stroke-width="2"/><circle cx="{mx:.1f}" cy="{my:.1f}" r="8" fill="{HALO}" stroke="#fff" stroke-width="1.5"/><text x="{mx:.1f}" y="{my+3.5:.1f}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">{n}</text>')
+        if xy:spots.append((n,xy,lane_of(h,xy)))
+    guides,pills,rows,cols=draw_guides(holes_now)
     layer=lambda xs,kind:''.join(s for k,s in xs if k==kind)
-    body=(draw_board(board,used) if boards else '')+draw_breadboard(rails)+f'<g class="ps-old" opacity=".35">{layer(old,"p")}{layer(old,"w")}</g>'+layer(new,'p')+layer(new,'w')+f'<g class="ps-marks">{"".join(marks)}</g>'
+    body=(draw_board(board,used,now) if boards else '')+draw_breadboard(rails,rows,cols)+guides+f'<g class="ps-old" opacity=".35">{layer(old,"p")}{layer(old,"w")}</g>'+layer(new,'p')+layer(new,'w')+pills+f'<g class="ps-marks">{draw_marks(spots)}</g>'
     svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" font-family="system-ui,-apple-system,Segoe UI,sans-serif">{body}</svg>'
     page=f'<!doctype html><html><head><style>html,body{{margin:0;background:#fff}}svg{{display:block;width:100%;height:auto}}</style></head><body>{svg}</body></html>'
     return page,markers

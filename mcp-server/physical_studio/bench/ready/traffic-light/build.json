@@ -86,24 +86,24 @@
    }
   ],
   "part_guide": {
-   "breadboard": "The white board with numbered rows holds the circuit without solder. Holes a through e in one row connect together; f through j form a separate group.",
-   "uno": "The Arduino Uno is the controller board with USB and labelled headers. It runs the traffic-light timing and reads the button.",
-   "led_red": "The red round LED shows stop during the crossing interval. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
-   "res_red": "This small banded 220 ohm resistor limits the red LED's current. A common four-band marking is red-red-brown-gold; either end can go first.",
-   "led_yellow": "The yellow round LED warns before red. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
-   "res_yellow": "This banded 220 ohm resistor limits the yellow LED's current. It has no positive or negative end.",
-   "led_green": "The green round LED shows the normal traffic-go state. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-).",
-   "res_green": "This banded 220 ohm resistor limits the green LED's current. It has no positive or negative end.",
-   "button": "The square 12 mm button has four metal legs and a central plunger. Pressing it connects D2 to ground; the Arduino's internal pull-up keeps D2 HIGH when released.",
-   "wire_ground": "The black wire from an Uno GND header to the first top-edge ground-rail hole establishes shared ground.",
-   "wire_red_signal": "The red wire connects the Uno header labelled 11 to the red LED's anode row.",
-   "wire_red_ground": "This black wire runs from row 15 up to the ground rail, completing the red LED's path through its resistor.",
-   "wire_yellow_signal": "The yellow wire connects the Uno header labelled 10 to the yellow LED's anode row.",
-   "wire_yellow_ground": "This black wire runs from row 25 up to the ground rail, completing the yellow LED's path through its resistor.",
-   "wire_green_signal": "The green wire connects the Uno header labelled 9 to the green LED's anode row.",
-   "wire_green_ground": "This black wire runs from row 35 up to the ground rail, completing the green LED's path through its resistor.",
-   "wire_button_signal": "The blue wire connects the Uno header labelled 2 to the button's row 44 contact.",
-   "wire_button_ground": "This black wire grounds the button's row 46 contact, so a press sends a LOW signal to D2."
+   "breadboard": "A breadboard is a reusable board for building circuits without soldering: you push part legs and wires into its holes, and metal strips hidden inside connect them. In each numbered row, the five holes on one side of the middle groove are joined, and the long lines of holes along the edges (the rails) share power or ground with the whole board.",
+   "uno": "An Arduino Uno is a small programmable board: you load a program onto it from your computer over USB, and it turns its pins on and off or reads sensors. Here it runs the traffic light's timing and notices when the crossing button is pressed. Its pins are the black sockets along the edges, each with a printed label.",
+   "led_red": "An LED is a small light. This red one is the stop light. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212.",
+   "res_red": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the red LED from too much current, which would burn it out. It works either way round; a 220 \u03a9 one has red, red, brown bands.",
+   "led_yellow": "An LED is a small light. This yellow one is the warning light before red. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212.",
+   "res_yellow": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the yellow LED from too much current. It works either way round; a 220 \u03a9 one has red, red, brown bands.",
+   "led_green": "An LED is a small light. This green one is the go light. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212.",
+   "res_green": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the green LED from too much current. It works either way round; a 220 \u03a9 one has red, red, brown bands.",
+   "button": "A push button: a small square switch with four metal legs and a round plunger on top. It is the crosswalk request button: pressing it tells the Uno someone wants to cross. It sits across the middle groove of the breadboard.",
+   "wire_ground": "The black wire joins the Uno's GND pin (ground: the 0 V side every part returns its current to) to the ground rail along the top edge, which all the parts share.",
+   "wire_red_signal": "The red wire carries the on/off signal from the Uno's pin 11 to the red LED's longer leg.",
+   "wire_red_ground": "The black wire runs from the red LED's resistor up to the ground rail, completing the red LED's loop.",
+   "wire_yellow_signal": "The yellow wire carries the on/off signal from the Uno's pin 10 to the yellow LED's longer leg.",
+   "wire_yellow_ground": "The black wire runs from the yellow LED's resistor up to the ground rail, completing its loop.",
+   "wire_green_signal": "The green wire carries the on/off signal from the Uno's pin 9 to the green LED's longer leg.",
+   "wire_green_ground": "The black wire runs from the green LED's resistor up to the ground rail, completing its loop.",
+   "wire_button_signal": "The blue wire joins the Uno's pin 2 to one side of the button, so the Uno can tell when it is pressed.",
+   "wire_button_ground": "The black wire joins the button's other side to the ground rail: pressing the button connects pin 2 to ground, which the Uno reads as a press."
   },
   "model": {
    "glb": "/out/build-traffic-light/final.glb",
@@ -2285,75 +2285,75 @@
    "part_guide": [
     {
      "id": "breadboard",
-     "what_it_is": "The white board with numbered rows holds the circuit without solder. Holes a through e in one row connect together; f through j form a separate group."
+     "what_it_is": "A breadboard is a reusable board for building circuits without soldering: you push part legs and wires into its holes, and metal strips hidden inside connect them. In each numbered row, the five holes on one side of the middle groove are joined, and the long lines of holes along the edges (the rails) share power or ground with the whole board."
     },
     {
      "id": "uno",
-     "what_it_is": "The Arduino Uno is the controller board with USB and labelled headers. It runs the traffic-light timing and reads the button."
+     "what_it_is": "An Arduino Uno is a small programmable board: you load a program onto it from your computer over USB, and it turns its pins on and off or reads sensors. Here it runs the traffic light's timing and notices when the crossing button is pressed. Its pins are the black sockets along the edges, each with a printed label."
     },
     {
      "id": "led_red",
-     "what_it_is": "The red round LED shows stop during the crossing interval. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+     "what_it_is": "An LED is a small light. This red one is the stop light. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212."
     },
     {
      "id": "res_red",
-     "what_it_is": "This small banded 220 ohm resistor limits the red LED's current. A common four-band marking is red-red-brown-gold; either end can go first."
+     "what_it_is": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the red LED from too much current, which would burn it out. It works either way round; a 220 \u03a9 one has red, red, brown bands."
     },
     {
      "id": "led_yellow",
-     "what_it_is": "The yellow round LED warns before red. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+     "what_it_is": "An LED is a small light. This yellow one is the warning light before red. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212."
     },
     {
      "id": "res_yellow",
-     "what_it_is": "This banded 220 ohm resistor limits the yellow LED's current. It has no positive or negative end."
+     "what_it_is": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the yellow LED from too much current. It works either way round; a 220 \u03a9 one has red, red, brown bands."
     },
     {
      "id": "led_green",
-     "what_it_is": "The green round LED shows the normal traffic-go state. Its long leg is the anode (+); its short leg beside the flat rim is the cathode (-)."
+     "what_it_is": "An LED is a small light. This green one is the go light. It only works one way round: the longer leg goes to + and the shorter leg, beside the flat edge of its rim, goes to \u2212."
     },
     {
      "id": "res_green",
-     "what_it_is": "This banded 220 ohm resistor limits the green LED's current. It has no positive or negative end."
+     "what_it_is": "A resistor is a tiny striped part that limits how much electricity flows. This one protects the green LED from too much current. It works either way round; a 220 \u03a9 one has red, red, brown bands."
     },
     {
      "id": "button",
-     "what_it_is": "The square 12 mm button has four metal legs and a central plunger. Pressing it connects D2 to ground; the Arduino's internal pull-up keeps D2 HIGH when released."
+     "what_it_is": "A push button: a small square switch with four metal legs and a round plunger on top. It is the crosswalk request button: pressing it tells the Uno someone wants to cross. It sits across the middle groove of the breadboard."
     },
     {
      "id": "wire_ground",
-     "what_it_is": "The black wire from an Uno GND header to the first top-edge ground-rail hole establishes shared ground."
+     "what_it_is": "The black wire joins the Uno's GND pin (ground: the 0 V side every part returns its current to) to the ground rail along the top edge, which all the parts share."
     },
     {
      "id": "wire_red_signal",
-     "what_it_is": "The red wire connects the Uno header labelled 11 to the red LED's anode row."
+     "what_it_is": "The red wire carries the on/off signal from the Uno's pin 11 to the red LED's longer leg."
     },
     {
      "id": "wire_red_ground",
-     "what_it_is": "This black wire runs from row 15 up to the ground rail, completing the red LED's path through its resistor."
+     "what_it_is": "The black wire runs from the red LED's resistor up to the ground rail, completing the red LED's loop."
     },
     {
      "id": "wire_yellow_signal",
-     "what_it_is": "The yellow wire connects the Uno header labelled 10 to the yellow LED's anode row."
+     "what_it_is": "The yellow wire carries the on/off signal from the Uno's pin 10 to the yellow LED's longer leg."
     },
     {
      "id": "wire_yellow_ground",
-     "what_it_is": "This black wire runs from row 25 up to the ground rail, completing the yellow LED's path through its resistor."
+     "what_it_is": "The black wire runs from the yellow LED's resistor up to the ground rail, completing its loop."
     },
     {
      "id": "wire_green_signal",
-     "what_it_is": "The green wire connects the Uno header labelled 9 to the green LED's anode row."
+     "what_it_is": "The green wire carries the on/off signal from the Uno's pin 9 to the green LED's longer leg."
     },
     {
      "id": "wire_green_ground",
-     "what_it_is": "This black wire runs from row 35 up to the ground rail, completing the green LED's path through its resistor."
+     "what_it_is": "The black wire runs from the green LED's resistor up to the ground rail, completing its loop."
     },
     {
      "id": "wire_button_signal",
-     "what_it_is": "The blue wire connects the Uno header labelled 2 to the button's row 44 contact."
+     "what_it_is": "The blue wire joins the Uno's pin 2 to one side of the button, so the Uno can tell when it is pressed."
     },
     {
      "id": "wire_button_ground",
-     "what_it_is": "This black wire grounds the button's row 46 contact, so a press sends a LOW signal to D2."
+     "what_it_is": "The black wire joins the button's other side to the ground rail: pressing the button connects pin 2 to ground, which the Uno reads as a press."
     }
    ],
    "steps": [
