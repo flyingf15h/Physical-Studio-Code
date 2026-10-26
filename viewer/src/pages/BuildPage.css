@@ -107,8 +107,6 @@
 .picture-resize:hover, .picture-resize:focus-visible { color: var(--accent); background: var(--accent-soft); outline: none; }
 /* Step animation: the breadboard SVG drawn inline, the hardware motion frames laid exactly over the step
    picture (inside its 1px border, so nothing shifts or scales), and Replay + scrub below. */
-.step-svg { line-height: 0; }
-.step-svg svg.step-picture { display: block; overflow: hidden; }
 .step-frame { position: absolute; inset: 1px; border-radius: 9px; background-repeat: no-repeat; pointer-events: none; }
 .wire-draw { pointer-events: none; }
 .wire-draw polyline { fill: none; stroke-linecap: round; stroke-linejoin: round; }
